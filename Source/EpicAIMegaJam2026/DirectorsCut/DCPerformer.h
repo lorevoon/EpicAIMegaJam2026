@@ -37,6 +37,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Performer")
 	bool bHasProp = false;
 
+	/** Anything with this ticked (zombies) ruins the shot whenever the live camera can see it. */
+	UPROPERTY(EditAnywhere, Category = "Performer")
+	bool bRuinsShot = false;
+
 	/** Collects this performer's waypoints into keyframes. Call once before Evaluate. */
 	void BuildKeys();
 

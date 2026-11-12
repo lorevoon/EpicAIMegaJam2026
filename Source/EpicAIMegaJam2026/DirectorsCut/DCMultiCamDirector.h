@@ -15,7 +15,17 @@ class ADCClapperboard;
 class ADCMultiCam;
 class ADCPerformer;
 class ADCMultiCamCharacter;
+class ADCRail;
 class APlayerController;
+
+/** Which kind of camera the next placement builds. */
+UENUM()
+enum class EDCCamTool : uint8
+{
+	Static,
+	Dolly,
+	Crane
+};
 
 /** Runtime state of one hidden beat. */
 struct FDCMultiCamBeat
@@ -50,9 +60,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut", meta = (ClampMin = "0", Units = "s"))
 	float CountdownDuration = 3.f;
 
-	/** How many cameras the player may place (1-9 are selectable with the number keys). */
-	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "1", ClampMax = "9"))
+	/** How many cameras the player may place; 0 = unlimited. Keys 1-9 pick the first nine, [ and ] step through all. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0"))
 	int32 MaxCameras = 4;
+
+	/** Lets the player build dolly (rail) and crane cameras as well as static ones. T cycles the camera type. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras")
+	bool bAllowMovingRigs = false;
 
 	/** How far from a wall or ceiling a mounted camera sits. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (Units = "cm"))
@@ -71,9 +85,18 @@ public:
 	// Player commands. Look/zoom return true when they were applied to a camera instead of the walking view.
 	void HandlePrimaryPressed();
 	void HandleSecondaryPressed();
-	void HandleInteract();
-	void HandleStartTake();
-	void HandleRestart();
+	virtual void HandleInteract();
+	virtual void HandleStartTake();
+	virtual void HandleRestart();
+	/** W/S while looking through a dolly or crane camera: travel along the rail / raise and lower the boom. */
+	void HandleRigMove(float Axis, float DeltaSeconds);
+	void HandleCycleTool();
+	void HandleFinishRail();
+	void HandleCycleCamera(int32 Direction);
+	/** Scrub the scene clock while planning (later prototypes). */
+	virtual void HandleScrub(float DeltaSeconds) {}
+	/** Re-watch the rehearsal (later prototypes). */
+	virtual void HandleRehearsal() {}
 	void HandleClearCameras();
 	void HandleSelectCamera(int32 Number);
 	bool HandleLook(float DeltaYaw, float DeltaPitch);
@@ -86,6 +109,10 @@ public:
 	const TArray<FDCMultiCamBeat>& GetBeats() const { return Beats; }
 	ADCMultiCam* GetCameraSlot(int32 Index) const { return Cameras.IsValidIndex(Index) ? Cameras[Index].Get() : nullptr; }
 	int32 GetCameraCount() const;
+	int32 GetSlotCount() const { return Cameras.Num(); }
+	bool IsUnlimited() const { return MaxCameras <= 0; }
+	EDCCamTool GetTool() const { return Tool; }
+	int32 GetPendingRailPoints() const;
 	/** 0-based slot being looked through, or INDEX_NONE while walking. */
 	int32 GetViewingSlot() const { return ViewingSlot; }
 	bool IsViewingCamera() const { return ViewingSlot != INDEX_NONE; }
@@ -105,13 +132,13 @@ public:
 
 	bool bShowNotebook = true;
 
-private:
+protected:
 	void GatherScene();
 	void BeginFilming();
-	void EvaluateBeats(float PrevTime, float NowTime);
+	virtual void EvaluateBeats(float PrevTime, float NowTime);
 	bool IsFramed(const FDCMultiCamBeat& State, const ADCMultiCam* Cam) const;
-	void EndTake();
-	void ResetScene();
+	virtual void EndTake();
+	virtual void ResetScene();
 	void UpdatePrepPreview();
 	void ViewCamera(int32 Slot);
 	void ViewWalking();
@@ -121,6 +148,19 @@ private:
 
 	ADCMultiCamCharacter* GetPlayer() const;
 	APlayerController* GetPC() const;
+
+	/** First empty camera slot; grows the list when cameras are unlimited. INDEX_NONE when the budget is spent. */
+	int32 FindFreeSlot();
+	bool HasCameraBudget() const;
+	ADCMultiCam* SpawnCamera(const FVector& Location);
+	void FinishPendingRail(bool bQuiet);
+
+	/** Rail being laid for the next dolly camera. */
+	UPROPERTY()
+	TObjectPtr<ADCRail> PendingRail;
+
+	EDCCamTool Tool = EDCCamTool::Static;
+	bool bPreviewFloor = false;
 
 	UPROPERTY()
 	TArray<TObjectPtr<ADCPerformer>> Performers;

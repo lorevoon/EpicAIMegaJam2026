@@ -53,6 +53,11 @@ private:
 	void OnRestart();
 	void OnClearCameras();
 	void OnSelectCamera(int32 Number);
+	void OnScrub(const FInputActionValue& Value);
+	void OnRehearsal();
+	void OnCycleTool();
+	void OnFinishRail();
+	void OnCycleCamera(int32 Direction);
 	void OnToggleNotebook();
 	void OnTogglePause();
 

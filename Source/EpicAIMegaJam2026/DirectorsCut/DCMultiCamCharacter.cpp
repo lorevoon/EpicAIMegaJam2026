@@ -93,6 +93,17 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Input->BindAction(MapButton(EKeys::Tab), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnToggleNotebook);
 	Input->BindAction(MapButton(EKeys::P, true), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTogglePause);
 
+	UInputAction* Scrub = MakeAction(EInputActionValueType::Axis1D);
+	Mapping->MapKey(Scrub, EKeys::Right);
+	FEnhancedActionKeyMapping& ScrubBack = Mapping->MapKey(Scrub, EKeys::Left);
+	ScrubBack.Modifiers.Add(NewObject<UInputModifierNegate>(this));
+	Input->BindAction(Scrub, ETriggerEvent::Triggered, this, &ADCMultiCamCharacter::OnScrub);
+	Input->BindAction(MapButton(EKeys::V), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRehearsal);
+	Input->BindAction(MapButton(EKeys::T), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleTool);
+	Input->BindAction(MapButton(EKeys::F), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnFinishRail);
+	Input->BindAction(MapButton(EKeys::LeftBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, -1);
+	Input->BindAction(MapButton(EKeys::RightBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, 1);
+
 	const FKey NumberKeys[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine };
 	for (int32 i = 0; i < UE_ARRAY_COUNT(NumberKeys); ++i)
 	{
@@ -151,11 +162,16 @@ void ADCMultiCamCharacter::ResetToStart(const FTransform& Start)
 
 void ADCMultiCamCharacter::OnMove(const FInputActionValue& Value)
 {
+	const FVector2D Axis = Value.Get<FVector2D>();
 	if (IsLockedToCamera())
 	{
+		// W/S drive the dolly or crane of the camera being looked through.
+		if (ADCMultiCamDirector* D = GetDirector())
+		{
+			D->HandleRigMove(Axis.Y, GetWorld()->GetDeltaSeconds());
+		}
 		return;
 	}
-	const FVector2D Axis = Value.Get<FVector2D>();
 	AddMovementInput(GetActorForwardVector(), Axis.Y);
 	AddMovementInput(GetActorRightVector(), Axis.X);
 }
@@ -243,6 +259,47 @@ void ADCMultiCamCharacter::OnSelectCamera(int32 Number)
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleSelectCamera(Number);
+	}
+}
+
+void ADCMultiCamCharacter::OnScrub(const FInputActionValue& Value)
+{
+	if (ADCMultiCamDirector* D = GetDirector())
+	{
+		// Holding an arrow key scrubs the scene at 8x speed.
+		D->HandleScrub(Value.Get<float>() * GetWorld()->GetDeltaSeconds() * 8.f);
+	}
+}
+
+void ADCMultiCamCharacter::OnCycleTool()
+{
+	if (ADCMultiCamDirector* D = GetDirector())
+	{
+		D->HandleCycleTool();
+	}
+}
+
+void ADCMultiCamCharacter::OnFinishRail()
+{
+	if (ADCMultiCamDirector* D = GetDirector())
+	{
+		D->HandleFinishRail();
+	}
+}
+
+void ADCMultiCamCharacter::OnCycleCamera(int32 Direction)
+{
+	if (ADCMultiCamDirector* D = GetDirector())
+	{
+		D->HandleCycleCamera(Direction);
+	}
+}
+
+void ADCMultiCamCharacter::OnRehearsal()
+{
+	if (ADCMultiCamDirector* D = GetDirector())
+	{
+		D->HandleRehearsal();
 	}
 }
 

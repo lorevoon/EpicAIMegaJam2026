@@ -1,6 +1,7 @@
 // Director's Cut prototype 3 - fixed camera.
 
 #include "DCMultiCam.h"
+#include "DCRail.h"
 #include "DCVisuals.h"
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -70,8 +71,46 @@ ADCMultiCam::ADCMultiCam()
 void ADCMultiCam::Setup(int32 InNumber, const FVector& Surface)
 {
 	Number = InNumber;
-	Label->SetText(FText::FromString(Number > 0 ? FString::Printf(TEXT("CAM %d"), Number) : FString()));
+	Rig = EDCCamRig::Static;
+	SetNumberLabel();
+	UpdateMount(Surface);
+	SetTint(FLinearColor(0.08f, 0.08f, 0.09f));
+	SetLive(false);
+}
 
+void ADCMultiCam::SetupDolly(int32 InNumber, ADCRail* InRail)
+{
+	Number = InNumber;
+	Rig = EDCCamRig::Dolly;
+	Rail = InRail;
+	RailDistance = HomeRailDistance = 0.f;
+	SetNumberLabel();
+	Mount->SetVisibility(false);
+	ApplyRigPosition();
+	SetTint(FLinearColor(0.1f, 0.06f, 0.02f));
+	SetLive(false);
+}
+
+void ADCMultiCam::SetupCrane(int32 InNumber, const FVector& Floor, float Height)
+{
+	Number = InNumber;
+	Rig = EDCCamRig::Crane;
+	CraneBase = Floor;
+	CraneHeight = HomeCraneHeight = FMath::Clamp(Height, CraneMinHeight, CraneMaxHeight);
+	SetNumberLabel();
+	ApplyRigPosition();
+	SetTint(FLinearColor(0.02f, 0.06f, 0.1f));
+	SetLive(false);
+}
+
+void ADCMultiCam::SetNumberLabel()
+{
+	const TCHAR* Kind = Rig == EDCCamRig::Dolly ? TEXT(" DOLLY") : Rig == EDCCamRig::Crane ? TEXT(" CRANE") : TEXT("");
+	Label->SetText(FText::FromString(Number > 0 ? FString::Printf(TEXT("CAM %d%s"), Number, Kind) : FString()));
+}
+
+void ADCMultiCam::UpdateMount(const FVector& Surface)
+{
 	// Mount: a stand down to the floor or a bracket back to the wall/ceiling it is bolted to.
 	const FVector ToSurface = Surface - GetActorLocation();
 	const float Length = ToSurface.Size();
@@ -81,9 +120,47 @@ void ADCMultiCam::Setup(int32 InNumber, const FVector& Surface)
 		Mount->SetWorldLocationAndRotation(GetActorLocation() + ToSurface * 0.5f, FRotationMatrix::MakeFromX(ToSurface).Rotator());
 		Mount->SetWorldScale3D(FVector(Length / 100.f, 0.05f, 0.05f));
 	}
+}
 
-	SetTint(FLinearColor(0.08f, 0.08f, 0.09f));
-	SetLive(false);
+void ADCMultiCam::ApplyRigPosition()
+{
+	if (Rig == EDCCamRig::Dolly && Rail)
+	{
+		SetActorLocation(Rail->GetFloorLocationAtDistance(RailDistance));
+	}
+	else if (Rig == EDCCamRig::Crane)
+	{
+		SetActorLocation(CraneBase + FVector(0.f, 0.f, CraneHeight));
+		UpdateMount(CraneBase);
+	}
+}
+
+void ADCMultiCam::MoveRig(float Axis, float DeltaSeconds)
+{
+	if (Rig == EDCCamRig::Dolly && Rail)
+	{
+		RailDistance = FMath::Clamp(RailDistance + Axis * DollySpeed * DeltaSeconds, 0.f, Rail->GetLength());
+	}
+	else if (Rig == EDCCamRig::Crane)
+	{
+		CraneHeight = FMath::Clamp(CraneHeight + Axis * CraneSpeed * DeltaSeconds, CraneMinHeight, CraneMaxHeight);
+	}
+	ApplyRigPosition();
+}
+
+void ADCMultiCam::Destroyed()
+{
+	if (Rail)
+	{
+		Rail->Destroy();
+		Rail = nullptr;
+	}
+	Super::Destroyed();
+}
+
+float ADCMultiCam::GetRailProgress() const
+{
+	return Rail && Rail->GetLength() > 0.f ? RailDistance / Rail->GetLength() : 0.f;
 }
 
 void ADCMultiCam::SetAim(const FRotator& NewAim)
@@ -106,12 +183,17 @@ void ADCMultiCam::SaveHome()
 {
 	HomeAim = Aim;
 	HomeFOV = GetFOV();
+	HomeRailDistance = RailDistance;
+	HomeCraneHeight = CraneHeight;
 }
 
 void ADCMultiCam::RestoreHome()
 {
 	SetAim(HomeAim);
 	SetFOV(HomeFOV);
+	RailDistance = HomeRailDistance;
+	CraneHeight = HomeCraneHeight;
+	ApplyRigPosition();
 }
 
 void ADCMultiCam::SetLive(bool bLive)

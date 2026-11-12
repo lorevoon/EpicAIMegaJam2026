@@ -42,7 +42,11 @@ enum class EDCPhase : uint8
 	Filming,
 	Results,
 	/** Prototype 4: watching the reference film before preparing. */
-	Watching
+	Watching,
+	/** Prototype 5: reading the storyboard. */
+	Storyboard,
+	/** Prototype 5: watching the rehearsal on foot. */
+	Rehearsal
 };
 
 /** Why a shot is not currently capturing, in GDD priority order. */
