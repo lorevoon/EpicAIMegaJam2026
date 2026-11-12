@@ -128,7 +128,7 @@ int32 ADCReplicaDirector::GetShotIndexAt(float Time) const
 	return Index;
 }
 
-bool ADCReplicaDirector::GetReferencePose(float Time, FVector& OutLocation, FRotator& OutRotation) const
+bool ADCReplicaDirector::GetReferencePose(float Time, FVector& OutLocation, FRotator& OutRotation, float& OutFov) const
 {
 	const int32 Index = GetShotIndexAt(Time);
 	if (Index == INDEX_NONE)
@@ -151,10 +151,11 @@ bool ADCReplicaDirector::GetReferencePose(float Time, FVector& OutLocation, FRot
 	const float Alpha = Span > KINDA_SMALL_NUMBER ? FMath::Clamp((Time - A->Time) / Span, 0.f, 1.f) : 0.f;
 	OutLocation = FMath::Lerp(A->GetActorLocation(), B->GetActorLocation(), Alpha);
 	OutRotation = FQuat::Slerp(A->GetActorQuat(), B->GetActorQuat(), Alpha).Rotator();
+	OutFov = FMath::Lerp(A->FieldOfView, B->FieldOfView, Alpha);
 	return true;
 }
 
-bool ADCReplicaDirector::GetTakePose(float Time, FVector& OutLocation, FRotator& OutRotation) const
+bool ADCReplicaDirector::GetTakePose(float Time, FVector& OutLocation, FRotator& OutRotation, float& OutFov) const
 {
 	if (Recording.Num() == 0)
 	{
@@ -171,6 +172,7 @@ bool ADCReplicaDirector::GetTakePose(float Time, FVector& OutLocation, FRotator&
 	const float Alpha = Span > KINDA_SMALL_NUMBER ? FMath::Clamp((Time - A.Time) / Span, 0.f, 1.f) : 0.f;
 	OutLocation = FMath::Lerp(A.Location, B.Location, Alpha);
 	OutRotation = FQuat::Slerp(A.Rotation.Quaternion(), B.Rotation.Quaternion(), Alpha).Rotator();
+	OutFov = FMath::Lerp(A.Fov, B.Fov, Alpha);
 	return true;
 }
 
@@ -269,10 +271,12 @@ void ADCReplicaDirector::TickFilm(float DeltaSeconds)
 
 	FVector Loc;
 	FRotator Rot;
-	const bool bPose = Replay == EDCReplay::Take ? GetTakePose(SceneTime, Loc, Rot) : GetReferencePose(SceneTime, Loc, Rot);
+	float Fov = CameraFOV;
+	const bool bPose = Replay == EDCReplay::Take ? GetTakePose(SceneTime, Loc, Rot, Fov) : GetReferencePose(SceneTime, Loc, Rot, Fov);
 	if (bPose)
 	{
 		FilmCamera->SetActorLocationAndRotation(Loc, Rot);
+		FilmCamera->GetCameraComponent()->SetFieldOfView(Fov);
 	}
 
 	if (SceneTime >= TakeDuration)
@@ -298,7 +302,7 @@ float ADCReplicaDirector::GetAspect() const
 	return 16.f / 9.f;
 }
 
-float ADCReplicaDirector::ScoreSample(const FDCRefShot& Shot, const FVector& RefLoc, const FRotator& RefRot, const FVector& Loc, const FRotator& Rot,
+float ADCReplicaDirector::ScoreSample(const FDCRefShot& Shot, const FVector& RefLoc, const FRotator& RefRot, float RefFov, const FVector& Loc, const FRotator& Rot, float Fov,
 	float& OutFraming, float& OutPositionError, float& OutAngleError) const
 {
 	OutPositionError = FVector::Dist(RefLoc, Loc);
@@ -307,7 +311,9 @@ float ADCReplicaDirector::ScoreSample(const FDCRefShot& Shot, const FVector& Ref
 	const float AngleScore = FMath::Clamp(1.f - OutAngleError / AngleTolerance, 0.f, 1.f);
 
 	// Framing: where each subject sits on screen and how big it appears, compared to the reference frame.
-	const float HalfTan = FMath::Tan(FMath::DegreesToRadians(CameraFOV * 0.5f));
+	// Each camera projects with its own lens, so a longer lens from further back can match a close-up's framing.
+	const float RefHalfTan = FMath::Tan(FMath::DegreesToRadians(RefFov * 0.5f));
+	const float HalfTan = FMath::Tan(FMath::DegreesToRadians(Fov * 0.5f));
 	const float Aspect = GetAspect();
 	float Sum = 0.f;
 	int32 Count = 0;
@@ -316,7 +322,7 @@ float ADCReplicaDirector::ScoreSample(const FDCRefShot& Shot, const FVector& Ref
 		const FVector P = A.Component->GetComponentLocation();
 		FVector2D RefNdc, Ndc;
 		float RefDepth = 0.f, Depth = 0.f;
-		if (!ProjectNdc(RefLoc, RefRot, P, HalfTan, Aspect, RefNdc, RefDepth) || !OnScreen(RefNdc))
+		if (!ProjectNdc(RefLoc, RefRot, P, RefHalfTan, Aspect, RefNdc, RefDepth) || !OnScreen(RefNdc))
 		{
 			continue; // not in the reference frame at this moment, so it doesn't count
 		}
@@ -326,7 +332,10 @@ float ADCReplicaDirector::ScoreSample(const FDCRefShot& Shot, const FVector& Ref
 			continue; // in the reference but out of the player's frame: scores zero
 		}
 		const float Placement = FMath::Clamp(1.f - (RefNdc - Ndc).Size() / FramingTolerance, 0.f, 1.f);
-		const float SizeMatch = FMath::Min(RefDepth, Depth) / FMath::Max(RefDepth, Depth);
+		// Apparent size scales with 1 / (depth * tan(fov/2)).
+		const float RefSize = 1.f / (RefDepth * RefHalfTan);
+		const float Size = 1.f / (Depth * HalfTan);
+		const float SizeMatch = FMath::Min(RefSize, Size) / FMath::Max(RefSize, Size);
 		Sum += 0.7f * Placement + 0.3f * SizeMatch;
 	}
 	OutFraming = Count > 0 ? Sum / Count : AngleScore;
@@ -341,6 +350,8 @@ void ADCReplicaDirector::EvaluateBeats(float PrevTime, float NowTime)
 	{
 		const FVector Loc = Player->GetCamera()->GetComponentLocation();
 		const FRotator Rot = Player->GetCamera()->GetComponentRotation();
+		const float Fov = Player->GetCameraFOV();
+		const bool bBlind = Player->IsViewObstructed();
 		const float Step = 1.f / SampleRate;
 		while (NextSampleTime <= NowTime + KINDA_SMALL_NUMBER)
 		{
@@ -348,16 +359,24 @@ void ADCReplicaDirector::EvaluateBeats(float PrevTime, float NowTime)
 			Sample.Time = NextSampleTime;
 			Sample.Location = Loc;
 			Sample.Rotation = Rot;
+			Sample.Fov = Fov;
 			Recording.Add(Sample);
 
 			const int32 Index = GetShotIndexAt(NextSampleTime);
 			FVector RefLoc;
 			FRotator RefRot;
-			if (Index != INDEX_NONE && GetReferencePose(NextSampleTime, RefLoc, RefRot))
+			float RefFov = CameraFOV;
+			if (Index != INDEX_NONE && GetReferencePose(NextSampleTime, RefLoc, RefRot, RefFov))
 			{
 				FDCRefShot& Shot = Shots[Index];
 				float Framing = 0.f, PosErr = 0.f, AngErr = 0.f;
-				const float Score01 = ScoreSample(Shot, RefLoc, RefRot, Loc, Rot, Framing, PosErr, AngErr);
+				float Score01 = ScoreSample(Shot, RefLoc, RefRot, RefFov, Loc, Rot, Fov, Framing, PosErr, AngErr);
+				if (bBlind)
+				{
+					Score01 = Framing = 0.f; // nothing usable was recorded
+				}
+				Shot.SumFov += Fov;
+				Shot.SumRefFov += RefFov;
 				++Shot.Samples;
 				Shot.SumScore += Score01;
 				Shot.SumFraming += Framing;

@@ -21,7 +21,7 @@ class ADCFreeCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	ADCFreeCharacter();
+	ADCFreeCharacter(const FObjectInitializer& ObjectInitializer);
 
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
@@ -39,26 +39,33 @@ public:
 	float LookSensitivity = 1.f;
 
 	UCameraComponent* GetCamera() const { return Camera; }
-	bool IsOnRig() const { return MountedRail.IsValid() || MountedTripod.IsValid(); }
+	virtual bool IsOnRig() const { return MountedRail.IsValid() || MountedTripod.IsValid(); }
+	ADCRail* GetMountedRail() const { return MountedRail.Get(); }
+	/** Horizontal field of view the camera is filming with (prototype 5 lenses change it). */
+	virtual float GetCameraFOV() const;
+	/** True while the image is unusable, e.g. during a lens change. Such samples score zero. */
+	virtual bool IsViewObstructed() const { return false; }
 	ADCTripod* GetMountedTripod() const { return MountedTripod.Get(); }
 	float GetRailProgress() const;
 
 	void MountRail(ADCRail* Rail, float Distance);
 	void MountTripod(ADCTripod* Tripod);
-	void Dismount();
+	virtual void Dismount();
 	void ResetToStart(const FTransform& Start);
-	void ReleaseInputs();
+	virtual void ReleaseInputs();
 
-private:
+protected:
 	ADCFreeDirector* GetDirector();
 	UInputAction* MakeAction(EInputActionValueType Type, bool bWhenPaused = false);
 	void PlaceCameraAt(const FVector& CameraLocation);
 	void BeginRig();
+	/** Moves the camera with whichever rig is mounted. */
+	virtual void TickRig(float DeltaSeconds);
 
-	void OnMove(const FInputActionValue& Value);
-	void OnMoveReleased(const FInputActionValue& Value) { RailInput = 0.f; }
-	void OnLook(const FInputActionValue& Value);
-	void OnHeight(const FInputActionValue& Value);
+	virtual void OnMove(const FInputActionValue& Value);
+	virtual void OnMoveReleased(const FInputActionValue& Value) { RailInput = 0.f; }
+	virtual void OnLook(const FInputActionValue& Value);
+	virtual void OnHeight(const FInputActionValue& Value);
 	void OnSprintPressed() { bSprintHeld = true; }
 	void OnSprintReleased() { bSprintHeld = false; }
 	void OnPrimary();
@@ -91,4 +98,6 @@ private:
 	float RailDistance = 0.f;
 	float RailInput = 0.f;
 	bool bSprintHeld = false;
+	/** Camera position relative to the capsule centre (eye height). */
+	FVector CameraOffset = FVector(0.f, 0.f, 64.f);
 };

@@ -21,6 +21,7 @@ public class EpicAIMegaJam2026 : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
+			"CinematicCamera",
 			"Slate"
 		});
 

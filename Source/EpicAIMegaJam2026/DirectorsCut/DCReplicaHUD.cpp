@@ -220,6 +220,14 @@ void ADCReplicaHUD::DrawHeader(ADCReplicaDirector* D)
 
 	if (D->GetPhase() == EDCPhase::Preparation)
 	{
+		DrawToolStrip(D);
+		Label(D->GetBrief(), Canvas->ClipX * 0.5f, 100.f * S, FLinearColor::White, 0.75f, true);
+	}
+}
+
+void ADCReplicaHUD::DrawToolStrip(ADCReplicaDirector* D)
+{
+	{
 		const EDCRigTool Tool = D->GetTool();
 		const float X = Canvas->ClipX - 720.f * S;
 		Label(FString::Printf(TEXT("[1] RAIL %d/%d (%d/%d pts)"), D->GetRailsUsed(), D->MaxRails, D->GetActiveRailPoints(), D->MaxPointsPerRail),
@@ -230,7 +238,6 @@ void ADCReplicaHUD::DrawHeader(ADCReplicaDirector* D)
 			X + 500.f * S, 14.f * S, Tool == EDCRigTool::Spray ? FLinearColor::White : Spray, 0.65f);
 		const float Under = Tool == EDCRigTool::Rail ? 0.f : Tool == EDCRigTool::Tripod ? 250.f : 500.f;
 		DrawRect(FLinearColor::White, X + Under * S, 42.f * S, 180.f * S, 3.f);
-		Label(D->GetBrief(), Canvas->ClipX * 0.5f, 100.f * S, FLinearColor::White, 0.75f, true);
 	}
 }
 

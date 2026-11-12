@@ -16,12 +16,14 @@ class ADCReplicaHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 
-private:
+protected:
 	void DrawFilmOverlay(ADCReplicaDirector* D);
 	void DrawHeader(ADCReplicaDirector* D);
+	/** Rig tool selector in the header during preparation. */
+	virtual void DrawToolStrip(ADCReplicaDirector* D);
 	void DrawStoryboard(ADCReplicaDirector* D);
 	void DrawFilming(ADCReplicaDirector* D);
-	void DrawHelp(ADCReplicaDirector* D);
+	virtual void DrawHelp(ADCReplicaDirector* D);
 	void DrawResults(ADCReplicaDirector* D);
 	void DrawShotStrip(ADCReplicaDirector* D, float Y);
 

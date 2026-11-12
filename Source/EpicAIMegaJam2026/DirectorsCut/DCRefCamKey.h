@@ -30,6 +30,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Reference Film", meta = (ClampMin = "0", Units = "s"))
 	float Time = 0.f;
 
+	/** Horizontal field of view of the reference camera at this key (75 = a 24 mm lens on a full-frame sensor). */
+	UPROPERTY(EditAnywhere, Category = "Reference Film", meta = (ClampMin = "5", ClampMax = "170", Units = "deg"))
+	float FieldOfView = 75.f;
+
 	/** Shown during the reference film and on the results screen. Only needed on one key per shot. */
 	UPROPERTY(EditAnywhere, Category = "Reference Film")
 	FString ShotTitle;

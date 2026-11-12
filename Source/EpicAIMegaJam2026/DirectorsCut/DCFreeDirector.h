@@ -22,7 +22,9 @@ enum class EDCRigTool : uint8
 	Rail,
 	Tripod,
 	/** Prototype 4: numbered spray marks. */
-	Spray
+	Spray,
+	/** Prototype 5: a jib arm that swings the camera in arcs. */
+	Jib
 };
 
 /** Runtime state of one hidden beat. */
@@ -116,7 +118,7 @@ public:
 	ADCClapperboard* GetClapperboard() const { return Clapperboard; }
 	FVector GetStartLocation() const { return StartTransform.GetLocation(); }
 	bool IsNearClapper() const;
-	FString GetInteractHint() const;
+	virtual FString GetInteractHint() const;
 	int32 GetSpottedCount() const;
 	bool IsAnyBeatRolling() const;
 

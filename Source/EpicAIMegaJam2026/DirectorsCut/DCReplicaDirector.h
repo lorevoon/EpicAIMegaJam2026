@@ -32,16 +32,20 @@ struct FDCRefShot
 	float SumFraming = 0.f;
 	float SumPositionError = 0.f;
 	float SumAngleError = 0.f;
+	float SumFov = 0.f;
+	float SumRefFov = 0.f;
 
 	void ResetEvaluation()
 	{
 		Samples = 0;
-		SumScore = SumFraming = SumPositionError = SumAngleError = 0.f;
+		SumScore = SumFraming = SumPositionError = SumAngleError = SumFov = SumRefFov = 0.f;
 	}
 	float GetScore() const { return Samples > 0 ? SumScore / Samples : 0.f; }
 	float GetFraming() const { return Samples > 0 ? SumFraming / Samples : 0.f; }
 	float GetPositionError() const { return Samples > 0 ? SumPositionError / Samples : 0.f; }
 	float GetAngleError() const { return Samples > 0 ? SumAngleError / Samples : 0.f; }
+	float GetFov() const { return Samples > 0 ? SumFov / Samples : 75.f; }
+	float GetRefFov() const { return Samples > 0 ? SumRefFov / Samples : 75.f; }
 };
 
 /** A recorded sample of the player's camera. */
@@ -50,6 +54,7 @@ struct FDCCamSample
 	float Time = 0.f;
 	FVector Location = FVector::ZeroVector;
 	FRotator Rotation = FRotator::ZeroRotator;
+	float Fov = 75.f;
 };
 
 UENUM()
@@ -130,7 +135,7 @@ public:
 	int32 GetSprayCount() const { return SprayMarks.Num(); }
 	bool HasRecording() const { return Recording.Num() > 1; }
 	static FString GradeFor(float Score);
-	FString GetShotTip(const FDCRefShot& Shot) const;
+	virtual FString GetShotTip(const FDCRefShot& Shot) const;
 
 protected:
 	virtual bool UsesBeats() const override { return false; }
@@ -142,12 +147,12 @@ protected:
 
 private:
 	void GatherReference();
-	bool GetReferencePose(float Time, FVector& OutLocation, FRotator& OutRotation) const;
-	bool GetTakePose(float Time, FVector& OutLocation, FRotator& OutRotation) const;
+	bool GetReferencePose(float Time, FVector& OutLocation, FRotator& OutRotation, float& OutFov) const;
+	bool GetTakePose(float Time, FVector& OutLocation, FRotator& OutRotation, float& OutFov) const;
 	void StartFilm(EDCReplay Mode);
 	void StopFilm();
 	void TickFilm(float DeltaSeconds);
-	float ScoreSample(const FDCRefShot& Shot, const FVector& RefLoc, const FRotator& RefRot, const FVector& Loc, const FRotator& Rot,
+	float ScoreSample(const FDCRefShot& Shot, const FVector& RefLoc, const FRotator& RefRot, float RefFov, const FVector& Loc, const FRotator& Rot, float Fov,
 		float& OutFraming, float& OutPositionError, float& OutAngleError) const;
 	float GetAspect() const;
 

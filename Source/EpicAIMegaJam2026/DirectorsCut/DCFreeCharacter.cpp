@@ -16,7 +16,8 @@
 #include "InputModifiers.h"
 #include "Kismet/GameplayStatics.h"
 
-ADCFreeCharacter::ADCFreeCharacter()
+ADCFreeCharacter::ADCFreeCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -24,7 +25,7 @@ ADCFreeCharacter::ADCFreeCharacter()
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(GetCapsuleComponent());
-	Camera->SetRelativeLocation(FVector(0.f, 0.f, 64.f));
+	Camera->SetRelativeLocation(CameraOffset);
 	Camera->bUsePawnControlRotation = true;
 	// Fixed horizontal FOV so framing checks are predictable.
 	Camera->SetFieldOfView(75.f);
@@ -118,7 +119,11 @@ void ADCFreeCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	GetCharacterMovement()->MaxWalkSpeed = bSprintHeld ? SprintSpeed : WalkSpeed;
+	TickRig(DeltaSeconds);
+}
 
+void ADCFreeCharacter::TickRig(float DeltaSeconds)
+{
 	if (ADCTripod* Tripod = MountedTripod.Get())
 	{
 		PlaceCameraAt(Tripod->GetCameraLocation());
@@ -132,7 +137,12 @@ void ADCFreeCharacter::Tick(float DeltaSeconds)
 
 void ADCFreeCharacter::PlaceCameraAt(const FVector& CameraLocation)
 {
-	SetActorLocation(CameraLocation - Camera->GetRelativeLocation());
+	SetActorLocation(CameraLocation - CameraOffset);
+}
+
+float ADCFreeCharacter::GetCameraFOV() const
+{
+	return Camera->FieldOfView;
 }
 
 ADCFreeDirector* ADCFreeCharacter::GetDirector()
