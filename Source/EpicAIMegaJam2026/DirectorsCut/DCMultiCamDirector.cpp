@@ -238,8 +238,8 @@ void ADCMultiCamDirector::HandleStartTake()
 	CountdownRemaining = CountdownDuration;
 	CutCount = 0;
 
-	// Go live on the lowest-numbered camera.
-	SetLabelsVisible(false);
+	// From Action! until back in preparation, rigs are ghosted inside every shot. Go live on the lowest-numbered camera.
+	SetRigsFrameMasked(true);
 	for (int32 i = 0; i < Cameras.Num(); ++i)
 	{
 		if (Cameras[i])
@@ -291,7 +291,7 @@ void ADCMultiCamDirector::ResetScene()
 		}
 	}
 	ViewWalking();
-	SetLabelsVisible(true);
+	SetRigsFrameMasked(false);
 	if (ADCMultiCamCharacter* Player = GetPlayer())
 	{
 		Player->ResetToStart(StartTransform);
@@ -503,13 +503,13 @@ void ADCMultiCamDirector::ViewWalking()
 	}
 }
 
-void ADCMultiCamDirector::SetLabelsVisible(bool bVisible)
+void ADCMultiCamDirector::SetRigsFrameMasked(bool bMasked)
 {
 	for (ADCMultiCam* Cam : Cameras)
 	{
 		if (Cam)
 		{
-			Cam->SetLabelVisible(bVisible);
+			Cam->SetFrameMasked(bMasked);
 		}
 	}
 }

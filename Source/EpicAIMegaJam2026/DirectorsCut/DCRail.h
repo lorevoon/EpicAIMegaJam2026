@@ -32,6 +32,9 @@ public:
 
 	void Clear();
 
+	/** Fades the rail inside the capture frame while shooting (see DCVisuals::RigMaterialPath). */
+	void SetFrameMasked(bool bMasked);
+
 	/** Ghost post that previews where the next point would go. */
 	void SetPreview(bool bVisible, const FVector& Location, bool bValid, float ZOffset = 30.f);
 

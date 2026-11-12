@@ -41,6 +41,38 @@ namespace DCVisuals
 		Mesh->SetMaterial(0, MakeColor(Mesh, Color));
 	}
 
+	void PaintWith(UStaticMeshComponent* Mesh, UMaterialInterface* Base, const FLinearColor& Color)
+	{
+		if (!Mesh || !Base)
+		{
+			return;
+		}
+		UMaterialInstanceDynamic* MID = Cast<UMaterialInstanceDynamic>(Mesh->GetMaterial(0));
+		if (!MID || MID->Parent != Base)
+		{
+			MID = UMaterialInstanceDynamic::Create(Base, Mesh);
+			MID->SetFlags(RF_Transient);
+			Mesh->SetMaterial(0, MID);
+		}
+		MID->SetVectorParameterValue(TEXT("Color"), Color);
+	}
+
+	void SetFrameMask(UMaterialInterface* Material, bool bMasked)
+	{
+		if (UMaterialInstanceDynamic* MID = Cast<UMaterialInstanceDynamic>(Material))
+		{
+			MID->SetScalarParameterValue(TEXT("FrameMask"), bMasked ? 1.f : 0.f);
+		}
+	}
+
+	void SetFrameMask(UStaticMeshComponent* Mesh, bool bMasked)
+	{
+		if (Mesh)
+		{
+			SetFrameMask(Mesh->GetMaterial(0), bMasked);
+		}
+	}
+
 	void SetupLabel(UTextRenderComponent* Label, const FColor& Color, float Size)
 	{
 		Label->SetHiddenInGame(true);

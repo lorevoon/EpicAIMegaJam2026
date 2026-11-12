@@ -12,6 +12,9 @@
 namespace
 {
 	const float RailSpeedScales[] = { 0.25f, 0.5f, 1.f, 2.f };
+
+	/** How far above its rail a dolly camera's lens sits. */
+	constexpr float DollyLift = 100.f;
 }
 
 ADCMultiCam::ADCMultiCam()
@@ -21,6 +24,9 @@ ADCMultiCam::ADCMultiCam()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CylinderMesh(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> RigMat(DCVisuals::RigMaterialPath);
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BasicMat(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	RigMaterial = RigMat.Succeeded() ? RigMat.Object : BasicMat.Object;
 
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
@@ -90,7 +96,6 @@ void ADCMultiCam::SetupDolly(int32 InNumber, ADCRail* InRail)
 	Rail = InRail;
 	RailDistance = HomeRailDistance = 0.f;
 	SetNumberLabel();
-	Mount->SetVisibility(false);
 	ApplyRigPosition();
 	SetTint(FLinearColor(0.1f, 0.06f, 0.02f));
 	SetLive(false);
@@ -131,7 +136,10 @@ void ADCMultiCam::ApplyRigPosition()
 {
 	if (Rig == EDCCamRig::Dolly && Rail)
 	{
-		SetActorLocation(Rail->GetFloorLocationAtDistance(RailDistance));
+		// Ride above the rail on a short post, so the rail sits below the lens instead of running through the shot.
+		const FVector OnRail = Rail->GetFloorLocationAtDistance(RailDistance);
+		SetActorLocation(OnRail + FVector(0.f, 0.f, DollyLift));
+		UpdateMount(OnRail);
 	}
 	else if (Rig == EDCCamRig::Crane)
 	{
@@ -224,17 +232,25 @@ void ADCMultiCam::RestoreHome()
 
 void ADCMultiCam::SetLive(bool bLive)
 {
-	DCVisuals::Paint(Tally, bLive ? FLinearColor(1.f, 0.05f, 0.05f) : FLinearColor(0.15f, 0.02f, 0.02f));
+	DCVisuals::PaintWith(Tally, RigMaterial, bLive ? FLinearColor(1.f, 0.05f, 0.05f) : FLinearColor(0.15f, 0.02f, 0.02f));
 }
 
-void ADCMultiCam::SetLabelVisible(bool bVisible)
+void ADCMultiCam::SetFrameMasked(bool bMasked)
 {
-	Label->SetVisibility(bVisible);
+	for (UStaticMeshComponent* Part : { Body.Get(), Lens.Get(), Tally.Get(), Mount.Get() })
+	{
+		DCVisuals::SetFrameMask(Part, bMasked);
+	}
+	Label->SetVisibility(!bMasked);
+	if (Rail)
+	{
+		Rail->SetFrameMasked(bMasked);
+	}
 }
 
 void ADCMultiCam::SetTint(const FLinearColor& Color)
 {
-	DCVisuals::Paint(Body, Color);
-	DCVisuals::Paint(Lens, Color * 0.5f);
-	DCVisuals::Paint(Mount, Color * 1.5f);
+	DCVisuals::PaintWith(Body, RigMaterial, Color);
+	DCVisuals::PaintWith(Lens, RigMaterial, Color * 0.5f);
+	DCVisuals::PaintWith(Mount, RigMaterial, Color * 1.5f);
 }

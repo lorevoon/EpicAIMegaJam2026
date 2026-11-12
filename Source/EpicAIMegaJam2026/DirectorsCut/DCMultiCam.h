@@ -8,6 +8,7 @@
 #include "DCMultiCam.generated.h"
 
 class ADCRail;
+class UMaterialInterface;
 class UCameraComponent;
 class UStaticMeshComponent;
 class UTextRenderComponent;
@@ -78,8 +79,11 @@ public:
 	/** Red tally light when this camera is the live feed. */
 	void SetLive(bool bLive);
 
-	/** Shows or hides the floating "CAM n" label (hidden while filming so other cameras don't see it). */
-	void SetLabelVisible(bool bVisible);
+	/**
+	 * While shooting, fades the rig (camera, mount, and a dolly's rail) to a ghost wherever it falls inside the
+	 * capture frame; it stays solid in the dimmed margin. Also hides the "CAM n" label.
+	 */
+	void SetFrameMasked(bool bMasked);
 
 	/** Tints the whole camera (used for the placement ghost). */
 	void SetTint(const FLinearColor& Color);
@@ -114,6 +118,10 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<ADCRail> Rail;
+
+	/** Rig material (falls back to the basic shape material if the asset is missing). */
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> RigMaterial;
 
 	void UpdateMount(const FVector& Surface);
 	void ApplyRigPosition();

@@ -150,7 +150,8 @@ protected:
 	void ViewWalking();
 	/** Keeps the view on a placed camera from Action! to the results. False (and back to planning) if none exist. */
 	bool EnsureLiveCamera();
-	void SetLabelsVisible(bool bVisible);
+	/** Fades every camera rig (and its rail) inside the capture frame during the take; off again in preparation. */
+	void SetRigsFrameMasked(bool bMasked);
 	void Flash(const FString& Text, float Seconds = 2.5f);
 	FCollisionQueryParams MakeTraceParams(const FName& Tag) const;
 

@@ -98,6 +98,20 @@ void ADCZombieHUD::DrawHUD()
 		}
 	}
 
+	// While shooting, dim everything outside the capture frame (the 70% safe area that scenes must sit in).
+	// Drawn first so the HUD panels stay readable on top of it.
+	if ((D->GetPhase() == EDCPhase::Countdown || D->GetPhase() == EDCPhase::Filming) && D->IsViewingCamera())
+	{
+		const float W = Canvas->ClipX;
+		const float H = Canvas->ClipY;
+		const float L = W * 0.15f, R = W * 0.85f, T = H * 0.15f, B = H * 0.85f;
+		const FLinearColor Mask(0.f, 0.f, 0.f, 0.5f);
+		DrawRect(Mask, 0.f, 0.f, W, T);
+		DrawRect(Mask, 0.f, B, W, H - B);
+		DrawRect(Mask, 0.f, T, L, B - T);
+		DrawRect(Mask, R, T, W - R, B - T);
+	}
+
 	DrawHeader(D);
 	if (D->bShowNotebook && D->GetPhase() != EDCPhase::Results)
 	{

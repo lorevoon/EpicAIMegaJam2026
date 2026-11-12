@@ -1,6 +1,7 @@
 // Director's Cut - dolly rail placement, validation, and visuals.
 
 #include "DCRail.h"
+#include "DCVisuals.h"
 #include "Components/SplineComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -23,9 +24,10 @@ ADCRail::ADCRail()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> Material(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> RigMat(DCVisuals::RigMaterialPath);
 	CubeMesh = Cube.Object;
 	CylinderMesh = Cylinder.Object;
-	BaseMaterial = Material.Object;
+	BaseMaterial = RigMat.Succeeded() ? RigMat.Object : Material.Object;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
@@ -120,6 +122,14 @@ void ADCRail::Clear()
 	SurfacePoints.Reset();
 	RebuildSpline(Points);
 	RebuildVisuals();
+}
+
+void ADCRail::SetFrameMasked(bool bMasked)
+{
+	// Every piece shares one of these three instances, so this is three parameter writes.
+	DCVisuals::SetFrameMask(RailMaterial, bMasked);
+	DCVisuals::SetFrameMask(TieMaterial, bMasked);
+	DCVisuals::SetFrameMask(PostMaterial, bMasked);
 }
 
 void ADCRail::SetPreview(bool bVisible, const FVector& Location, bool bValid, float ZOffset)
