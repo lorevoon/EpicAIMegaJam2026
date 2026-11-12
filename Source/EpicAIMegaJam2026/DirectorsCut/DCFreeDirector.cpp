@@ -97,6 +97,10 @@ void ADCFreeDirector::GatherScene()
 				State.Anchors.Add(A);
 			}
 		}
+		if (!UsesBeats())
+		{
+			break;
+		}
 		if (State.Anchors.Num() == 0)
 		{
 			Problems.Add(FString::Printf(TEXT("Beat %s has no anchors"), *Beat->BeatId));
@@ -112,7 +116,11 @@ void ADCFreeDirector::GatherScene()
 	}
 	Beats.StableSort([](const FDCBeatState& A, const FDCBeatState& B) { return A.Beat->WindowStart < B.Beat->WindowStart; });
 
-	if (Beats.Num() == 0 && Problems.Num() == 0)
+	if (!UsesBeats())
+	{
+		Beats.Reset();
+	}
+	else if (Beats.Num() == 0 && Problems.Num() == 0)
 	{
 		Problems.Add(TEXT("No DCBeat actors in this level - select a DCFreeDirector and click Build Castle Scene"));
 	}
@@ -156,7 +164,7 @@ void ADCFreeDirector::Tick(float DeltaSeconds)
 		break;
 	}
 
-	case EDCPhase::Results:
+	default:
 		break;
 	}
 }
@@ -167,7 +175,7 @@ void ADCFreeDirector::HandleStartTake()
 	{
 		return;
 	}
-	if (Beats.Num() == 0)
+	if (UsesBeats() && Beats.Num() == 0)
 	{
 		Flash(TEXT("No valid beats in this level - see the setup warning"));
 		return;
@@ -405,6 +413,7 @@ void ADCFreeDirector::UpdatePrepPreview()
 	{
 		bPreviewHit = true;
 		PreviewSurface = Hit.ImpactPoint;
+		PreviewNormal = Hit.ImpactNormal;
 		const bool bFloor = Hit.ImpactNormal.Z > 0.7f;
 		if (Tool == EDCRigTool::Rail)
 		{
@@ -416,10 +425,15 @@ void ADCFreeDirector::UpdatePrepPreview()
 			const bool bBudget = Active ? Active->NumPoints() < MaxPointsPerRail : GetRailsUsed() < MaxRails;
 			bPreviewValid = bRoom && bBudget;
 		}
-		else
+		else if (Tool == EDCRigTool::Tripod)
 		{
 			PreviewPoint = Hit.ImpactPoint;
 			bPreviewValid = bFloor && Tripods.Num() < MaxTripods;
+		}
+		else
+		{
+			PreviewPoint = Hit.ImpactPoint;
+			bPreviewValid = true;
 		}
 	}
 
@@ -427,6 +441,11 @@ void ADCFreeDirector::UpdatePrepPreview()
 	{
 		TripodGhost->SetActorHiddenInGame(true);
 		RailGhost->SetPreview(bPreviewHit, PreviewPoint, bPreviewValid, 0.f);
+	}
+	else if (Tool != EDCRigTool::Tripod)
+	{
+		RailGhost->SetPreview(false, FVector::ZeroVector, false);
+		TripodGhost->SetActorHiddenInGame(true);
 	}
 	else
 	{
@@ -606,7 +625,7 @@ void ADCFreeDirector::HandleClearRigs()
 
 void ADCFreeDirector::HandleSelectTool(EDCRigTool NewTool)
 {
-	if (Phase == EDCPhase::Preparation)
+	if (Phase == EDCPhase::Preparation && SupportsTool(NewTool))
 	{
 		Tool = NewTool;
 	}

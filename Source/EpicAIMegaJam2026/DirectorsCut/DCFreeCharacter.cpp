@@ -97,6 +97,9 @@ void ADCFreeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Input->BindAction(MapButton(EKeys::F), ETriggerEvent::Started, this, &ADCFreeCharacter::OnFinishRail);
 	Input->BindAction(MapButton(EKeys::One), ETriggerEvent::Started, this, &ADCFreeCharacter::OnRailTool);
 	Input->BindAction(MapButton(EKeys::Two), ETriggerEvent::Started, this, &ADCFreeCharacter::OnTripodTool);
+	Input->BindAction(MapButton(EKeys::Three), ETriggerEvent::Started, this, &ADCFreeCharacter::OnSprayTool);
+	Input->BindAction(MapButton(EKeys::V), ETriggerEvent::Started, this, &ADCFreeCharacter::OnWatchReference);
+	Input->BindAction(MapButton(EKeys::T), ETriggerEvent::Started, this, &ADCFreeCharacter::OnWatchTake);
 	Input->BindAction(MapButton(EKeys::Tab), ETriggerEvent::Started, this, &ADCFreeCharacter::OnToggleNotebook);
 	Input->BindAction(MapButton(EKeys::P, true), ETriggerEvent::Started, this, &ADCFreeCharacter::OnTogglePause);
 
@@ -322,6 +325,30 @@ void ADCFreeCharacter::OnTripodTool()
 	if (ADCFreeDirector* D = GetDirector())
 	{
 		D->HandleSelectTool(EDCRigTool::Tripod);
+	}
+}
+
+void ADCFreeCharacter::OnSprayTool()
+{
+	if (ADCFreeDirector* D = GetDirector())
+	{
+		D->HandleSelectTool(EDCRigTool::Spray);
+	}
+}
+
+void ADCFreeCharacter::OnWatchReference()
+{
+	if (ADCFreeDirector* D = GetDirector())
+	{
+		D->HandleWatchReference();
+	}
+}
+
+void ADCFreeCharacter::OnWatchTake()
+{
+	if (ADCFreeDirector* D = GetDirector())
+	{
+		D->HandleWatchTake();
 	}
 }
 

@@ -70,6 +70,9 @@ private:
 	void OnFinishRail();
 	void OnRailTool();
 	void OnTripodTool();
+	void OnSprayTool();
+	void OnWatchReference();
+	void OnWatchTake();
 	void OnToggleNotebook();
 	void OnTogglePause();
 

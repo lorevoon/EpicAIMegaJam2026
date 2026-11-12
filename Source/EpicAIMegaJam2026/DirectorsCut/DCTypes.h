@@ -40,7 +40,9 @@ enum class EDCPhase : uint8
 	Preparation,
 	Countdown,
 	Filming,
-	Results
+	Results,
+	/** Prototype 4: watching the reference film before preparing. */
+	Watching
 };
 
 /** Why a shot is not currently capturing, in GDD priority order. */

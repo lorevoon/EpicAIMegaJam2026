@@ -20,7 +20,9 @@ UENUM()
 enum class EDCRigTool : uint8
 {
 	Rail,
-	Tripod
+	Tripod,
+	/** Prototype 4: numbered spray marks. */
+	Spray
 };
 
 /** Runtime state of one hidden beat. */
@@ -81,13 +83,15 @@ public:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
-	// Player commands
-	void HandlePrimaryPressed();
-	void HandleSecondaryPressed();
-	void HandleInteract();
-	void HandleStartTake();
-	void HandleRestart();
-	void HandleClearRigs();
+	// Player commands (virtual so later prototypes can extend the rigging flow)
+	virtual void HandlePrimaryPressed();
+	virtual void HandleSecondaryPressed();
+	virtual void HandleInteract();
+	virtual void HandleStartTake();
+	virtual void HandleRestart();
+	virtual void HandleClearRigs();
+	virtual void HandleWatchReference() {}
+	virtual void HandleWatchTake() {}
 	void HandleFinishRail();
 	void HandleSelectTool(EDCRigTool Tool);
 	void HandleHeightInput(float Delta);
@@ -107,7 +111,7 @@ public:
 	int32 GetBestScore() const { return BestScore; }
 	FString GetCutName() const;
 	FString GetMessage() const;
-	FString GetBrief() const;
+	virtual FString GetBrief() const;
 	const FString& GetSetupProblem() const { return SetupProblem; }
 	ADCClapperboard* GetClapperboard() const { return Clapperboard; }
 	FVector GetStartLocation() const { return StartTransform.GetLocation(); }
@@ -118,14 +122,18 @@ public:
 
 	bool bShowNotebook = true;
 
-private:
+protected:
+	/** False for directors that don't use hidden DCBeat actors. */
+	virtual bool UsesBeats() const { return true; }
+	virtual bool SupportsTool(EDCRigTool InTool) const { return InTool != EDCRigTool::Spray; }
+
 	void GatherScene();
 	void BeginFilming();
-	void EvaluateBeats(float PrevTime, float NowTime);
+	virtual void EvaluateBeats(float PrevTime, float NowTime);
 	bool IsFramed(const FDCBeatState& State) const;
-	void EndTake();
-	void ResetScene();
-	void UpdatePrepPreview();
+	virtual void EndTake();
+	virtual void ResetScene();
+	virtual void UpdatePrepPreview();
 	void Flash(const FString& Text, float Seconds = 2.5f);
 	ADCRail* GetOrStartActiveRail();
 	ADCRail* SpawnRail();
@@ -171,6 +179,7 @@ private:
 
 	FVector PreviewPoint = FVector::ZeroVector;
 	FVector PreviewSurface = FVector::ZeroVector;
+	FVector PreviewNormal = FVector::UpVector;
 	bool bPreviewHit = false;
 	bool bPreviewValid = false;
 

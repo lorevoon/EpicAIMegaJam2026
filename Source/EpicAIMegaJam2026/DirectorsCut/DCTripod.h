@@ -17,7 +17,8 @@ public:
 	ADCTripod();
 
 	static constexpr float MinHeight = 40.f;
-	static constexpr float MaxHeight = 320.f;
+	/** Tall enough to double as a camera crane for high and bird's-eye angles. */
+	static constexpr float MaxHeight = 800.f;
 
 	void SetHeadHeight(float Height);
 	float GetHeadHeight() const { return HeadHeight; }
