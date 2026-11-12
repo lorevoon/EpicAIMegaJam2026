@@ -153,7 +153,6 @@ void ADCZombieHUD::DrawHUD()
 	}
 	else
 	{
-		if (D->GetPhase() != EDCPhase::Rehearsal)
 		{
 			DrawSwitcher(D);
 		}
@@ -193,7 +192,7 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 	Y += 30.f * S;
 	Label(FString::Printf(TEXT("Zombies on camera cost %d points per second."), D->ZombiePenaltyPerSecond), CX, Y, ZombieGreen, 0.8f, true);
 	Y += 60.f * S;
-	Label(TEXT("Press Enter to watch the rehearsal"), CX, Y, FLinearColor::White, 1.f, true);
+	Label(TEXT("Press Enter to start preparing - the rehearsal plays while you place cameras"), CX, Y, FLinearColor::White, 1.f, true);
 }
 
 void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
@@ -204,8 +203,7 @@ void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
 	FLinearColor PhaseColor = FLinearColor::White;
 	switch (D->GetPhase())
 	{
-	case EDCPhase::Rehearsal:   PhaseText = TEXT("REHEARSAL");  PhaseColor = Rose; break;
-	case EDCPhase::Preparation: PhaseText = TEXT("PLANNING");   PhaseColor = Gold; break;
+	case EDCPhase::Preparation: PhaseText = TEXT("PREPARATION"); PhaseColor = Gold; break;
 	case EDCPhase::Countdown:   PhaseText = TEXT("STAND BY");   PhaseColor = Gold; break;
 	case EDCPhase::Filming:     PhaseText = TEXT("SHOOTING");   PhaseColor = Bad;  break;
 	case EDCPhase::Results:     PhaseText = TEXT("PREMIERE");   PhaseColor = Rose; break;
@@ -217,7 +215,7 @@ void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
 	if (D->GetPhase() == EDCPhase::Preparation)
 	{
 		const EDCCamTool Tool = D->GetTool();
-		FString ToolText = Tool == EDCCamTool::Dolly ? FString::Printf(TEXT("DOLLY (%d rail pts, F to mount)"), D->GetPendingRailPoints())
+		FString ToolText = Tool == EDCCamTool::Dolly ? FString::Printf(TEXT("DOLLY (%d rail pts, F = new rail)"), D->GetPendingRailPoints())
 			: Tool == EDCCamTool::Crane ? FString::Printf(TEXT("CRANE @%.0fcm"), D->GetPendingHeight())
 			: FString::Printf(TEXT("STATIC @%.0fcm"), D->GetPendingHeight());
 		Label(FString::Printf(TEXT("Cameras %d   [T] %s"), D->GetCameraCount(), *ToolText),
@@ -272,7 +270,9 @@ void ADCZombieHUD::DrawFraming(ADCZombieDirector* D)
 
 	if (const ADCMultiCam* Cam = D->GetCameraSlot(D->GetViewingSlot()))
 	{
-		Label(FString::Printf(TEXT("CAM %d   %.0fmm"), Cam->GetNumber(), 18.f / FMath::Tan(FMath::DegreesToRadians(Cam->GetFOV() * 0.5f))),
+		FString Rig = Cam->GetRig() == EDCCamRig::Dolly ? FString::Printf(TEXT("   DOLLY x%.2g (Z/X)"), Cam->GetRailSpeedScale())
+			: Cam->GetRig() == EDCCamRig::Crane ? FString::Printf(TEXT("   CRANE %.0fcm"), Cam->GetCraneHeight()) : FString();
+		Label(FString::Printf(TEXT("CAM %d   %.0fmm%s"), Cam->GetNumber(), 18.f / FMath::Tan(FMath::DegreesToRadians(Cam->GetFOV() * 0.5f)), *Rig),
 			L, T - 34.f * S, D->GetPhase() == EDCPhase::Filming ? Bad : FLinearColor::White, 0.8f);
 	}
 }
@@ -281,7 +281,8 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 {
 	const float CX = Canvas->ClipX * 0.5f;
 	float Y = Canvas->ClipY * 0.62f;
-	Label(FString::Printf(TEXT("<  scene preview %.1fs  >"), D->GetSceneTime()), CX, Y, Gold, 0.8f, true);
+	Label(FString::Printf(TEXT("REHEARSAL  %s %gx   %.1fs   (Space play/pause   , . speed   Left/Right scrub)"),
+		D->IsRehearsalPlaying() ? TEXT("PLAYING") : TEXT("PAUSED"), D->GetRehearsalSpeed(), D->GetSceneTime()), CX, Y, Gold, 0.75f, true);
 	if (!D->IsViewingCamera())
 	{
 		return;
@@ -393,14 +394,10 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 	TArray<FString> Lines;
 	switch (D->GetPhase())
 	{
-	case EDCPhase::Rehearsal:
-		Lines.Add(TEXT("Walk around and watch where each scene happens - and where the zombies wander."));
-		Lines.Add(TEXT("R restart rehearsal   Enter skip to planning   Tab storyboard   Shift sprint"));
-		break;
 	case EDCPhase::Preparation:
 		if (D->IsViewingCamera())
 		{
-			Lines.Add(TEXT("AIMING: mouse to turn, wheel to zoom, W/S move dolly or crane, Left/Right scrub the scene"));
+			Lines.Add(TEXT("AIMING: mouse to turn, wheel to zoom, W/S move dolly or crane, Z/X dolly speed"));
 			Lines.Add(TEXT("This is where the camera starts every take.   [ / ] other cameras   E or the same number to step back"));
 		}
 		else
@@ -409,14 +406,13 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 			{
 				Lines.Add(TEXT("E: hit the clapperboard and call ACTION!"));
 			}
-			Lines.Add(TEXT("T camera type   LMB place (dolly: rail point, F mount)   RMB remove   Wheel height   1-9 or [ ] look through   C clear"));
-			Lines.Add(TEXT("Left/Right scrub the scene to preview any moment"));
-			Lines.Add(TEXT("V rewatch rehearsal   Enter / clapperboard: Action!   Tab storyboard   Shift sprint"));
+			Lines.Add(TEXT("T camera type   LMB place (dolly: rail points, F new rail)   RMB remove   Wheel height   1-9 or [ ] look through   C clear"));
+			Lines.Add(TEXT("V rehearsal from the top   Enter / clapperboard: Action!   Tab storyboard   Shift sprint"));
 		}
 		break;
 	case EDCPhase::Countdown:
 	case EDCPhase::Filming:
-		Lines.Add(TEXT("1-9 or [ ] cut camera   Mouse aims   W/S dolly or crane   Wheel zooms   R restart   P pause"));
+		Lines.Add(TEXT("1-9 or [ ] cut camera   Mouse aims   W/S dolly or crane   Z/X dolly speed   Wheel zooms   R restart   P pause"));
 		break;
 	default:
 		break;

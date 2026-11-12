@@ -2,8 +2,8 @@
 // Built on the multi-camera director, with unlimited static, dolly, and crane cameras.
 //
 //   Storyboard  the scenes are listed in order (from the DCBeat display names) - no times, no places
-//   Rehearsal   the whole scene plays while the player walks the set and watches
-//   Planning    place and aim as many static / dolly / crane cameras as you like; arrow keys scrub the scene
+//   Preparation the rehearsal plays (Space play/pause, , . speed, arrows scrub) while the player walks the set
+//               and places as many static / dolly / crane cameras as they like
 //   Shooting    cut between cameras; storyboard beats on the live camera score, zombies on it cost points
 
 #pragma once
@@ -54,8 +54,13 @@ public:
 	virtual void HandleRestart() override;
 	virtual void HandleScrub(float DeltaSeconds) override;
 	virtual void HandleRehearsal() override;
+	virtual void HandleTransportToggle() override;
+	virtual void HandleTransportSpeed(int32 Direction) override;
+
 
 	// HUD
+	bool IsRehearsalPlaying() const { return bRehearsalPlaying; }
+	float GetRehearsalSpeed() const;
 	bool IsZombieInShot() const { return bZombieInShot; }
 	const FString& GetZombieInShotName() const { return ZombieInShotName; }
 	float GetZombieSeconds() const { return ZombieSeconds; }
@@ -72,8 +77,7 @@ protected:
 	virtual void ResetScene() override;
 
 private:
-	void StartRehearsal();
-	void EnterPlanning();
+	void EnterPreparation(bool bPlayRehearsal);
 	bool IsZombieVisible(const ADCMultiCam* Cam, FString* OutName) const;
 	float GetAspect() const;
 
@@ -85,4 +89,6 @@ private:
 	FString ZombieInShotName;
 	int32 NetScore = 0;
 	int32 BestNet = 0;
+	bool bRehearsalPlaying = false;
+	int32 RehearsalSpeedIndex = 1;
 };

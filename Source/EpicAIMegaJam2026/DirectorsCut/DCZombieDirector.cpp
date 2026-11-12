@@ -8,6 +8,11 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 
+namespace
+{
+	const float RehearsalSpeeds[] = { 0.5f, 1.f, 2.f, 4.f };
+}
+
 ADCZombieDirector::ADCZombieDirector()
 {
 	TakeDuration = 60.f;
@@ -40,75 +45,55 @@ void ADCZombieDirector::Tick(float DeltaSeconds)
 		AActor::Tick(DeltaSeconds);
 		return;
 	}
-	if (Phase == EDCPhase::Rehearsal)
+	// The rehearsal runs inside preparation: the scene plays while the player walks the set and rigs it.
+	if (Phase == EDCPhase::Preparation && bRehearsalPlaying)
 	{
-		AActor::Tick(DeltaSeconds);
-		SceneTime = FMath::Min(SceneTime + DeltaSeconds, TakeDuration);
+		SceneTime = FMath::Min(SceneTime + DeltaSeconds * GetRehearsalSpeed(), TakeDuration);
+		bRehearsalPlaying = SceneTime < TakeDuration;
 		for (ADCPerformer* Performer : Performers)
 		{
 			Performer->Evaluate(SceneTime);
 		}
-		if (SceneTime >= TakeDuration)
-		{
-			EnterPlanning();
-		}
-		return;
 	}
 	Super::Tick(DeltaSeconds);
 }
 
 // ---------------------------------------------------------------------------------------------
-// Phase flow: storyboard -> rehearsal -> planning -> shooting
+// Phase flow: storyboard -> preparation (with rehearsal) -> shooting -> evaluation
 
-void ADCZombieDirector::StartRehearsal()
+void ADCZombieDirector::EnterPreparation(bool bPlayRehearsal)
 {
 	ResetScene();
-	Phase = EDCPhase::Rehearsal;
-	SceneTime = 0.f;
-	Flash(TEXT("REHEARSAL - walk the set and watch. Learn where each scene happens... and where the zombies go."), 6.f);
-}
-
-void ADCZombieDirector::EnterPlanning()
-{
-	ResetScene();
-	Flash(TEXT("Plan your coverage: place as many cameras as you like (T: static / dolly / crane). Hold Left/Right to scrub the scene."), 7.f);
+	bRehearsalPlaying = bPlayRehearsal;
+	if (bPlayRehearsal)
+	{
+		Flash(TEXT("The rehearsal is playing. Watch where each scene happens - and where the zombies go - while you place cameras."), 7.f);
+	}
 }
 
 void ADCZombieDirector::HandleStartTake()
 {
-	switch (Phase)
+	if (Phase == EDCPhase::Storyboard)
 	{
-	case EDCPhase::Storyboard:
-		StartRehearsal();
-		break;
-	case EDCPhase::Rehearsal:
-		EnterPlanning(); // Enter skips the rest of the rehearsal
-		break;
-	default:
-		Super::HandleStartTake();
-		break;
+		EnterPreparation(true);
+		return;
 	}
+	Super::HandleStartTake();
 }
 
 void ADCZombieDirector::HandleInteract()
 {
 	if (Phase == EDCPhase::Storyboard)
 	{
-		StartRehearsal();
+		EnterPreparation(true);
+		return;
 	}
-	else if (Phase != EDCPhase::Rehearsal)
-	{
-		Super::HandleInteract();
-	}
+	Super::HandleInteract();
 }
 
 void ADCZombieDirector::HandleRestart()
 {
-	if (Phase == EDCPhase::Rehearsal)
-	{
-		StartRehearsal();
-	}
-	else if (Phase != EDCPhase::Storyboard)
+	if (Phase != EDCPhase::Storyboard)
 	{
 		Super::HandleRestart();
 	}
@@ -116,9 +101,36 @@ void ADCZombieDirector::HandleRestart()
 
 void ADCZombieDirector::HandleRehearsal()
 {
+	// V: watch the rehearsal again from the top.
 	if (Phase == EDCPhase::Preparation || Phase == EDCPhase::Results)
 	{
-		StartRehearsal();
+		EnterPreparation(true);
+	}
+}
+
+float ADCZombieDirector::GetRehearsalSpeed() const
+{
+	return RehearsalSpeeds[RehearsalSpeedIndex];
+}
+
+void ADCZombieDirector::HandleTransportToggle()
+{
+	if (Phase != EDCPhase::Preparation)
+	{
+		return;
+	}
+	if (!bRehearsalPlaying && SceneTime >= TakeDuration)
+	{
+		SceneTime = 0.f; // play again from the top
+	}
+	bRehearsalPlaying = !bRehearsalPlaying;
+}
+
+void ADCZombieDirector::HandleTransportSpeed(int32 Direction)
+{
+	if (Phase == EDCPhase::Preparation)
+	{
+		RehearsalSpeedIndex = FMath::Clamp(RehearsalSpeedIndex + Direction, 0, int32(UE_ARRAY_COUNT(RehearsalSpeeds)) - 1);
 	}
 }
 
@@ -138,6 +150,7 @@ void ADCZombieDirector::HandleScrub(float DeltaSeconds)
 void ADCZombieDirector::ResetScene()
 {
 	Super::ResetScene();
+	bRehearsalPlaying = false;
 	ZombieSeconds = 0.f;
 	bZombieInShot = false;
 	ZombieInShotName.Reset();

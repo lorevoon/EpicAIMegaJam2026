@@ -103,6 +103,11 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Input->BindAction(MapButton(EKeys::F), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnFinishRail);
 	Input->BindAction(MapButton(EKeys::LeftBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, -1);
 	Input->BindAction(MapButton(EKeys::RightBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, 1);
+	Input->BindAction(MapButton(EKeys::SpaceBar), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTransportToggle);
+	Input->BindAction(MapButton(EKeys::Comma), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTransportSpeed, -1);
+	Input->BindAction(MapButton(EKeys::Period), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTransportSpeed, 1);
+	Input->BindAction(MapButton(EKeys::Z), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRailSpeed, -1);
+	Input->BindAction(MapButton(EKeys::X), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRailSpeed, 1);
 
 	const FKey NumberKeys[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine };
 	for (int32 i = 0; i < UE_ARRAY_COUNT(NumberKeys); ++i)
@@ -292,6 +297,30 @@ void ADCMultiCamCharacter::OnCycleCamera(int32 Direction)
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleCycleCamera(Direction);
+	}
+}
+
+void ADCMultiCamCharacter::OnTransportToggle()
+{
+	if (ADCMultiCamDirector* D = GetDirector())
+	{
+		D->HandleTransportToggle();
+	}
+}
+
+void ADCMultiCamCharacter::OnTransportSpeed(int32 Direction)
+{
+	if (ADCMultiCamDirector* D = GetDirector())
+	{
+		D->HandleTransportSpeed(Direction);
+	}
+}
+
+void ADCMultiCamCharacter::OnRailSpeed(int32 Direction)
+{
+	if (ADCMultiCamDirector* D = GetDirector())
+	{
+		D->HandleRailSpeed(Direction);
 	}
 }
 

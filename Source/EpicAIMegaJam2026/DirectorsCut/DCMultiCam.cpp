@@ -9,6 +9,11 @@
 #include "Engine/StaticMesh.h"
 #include "UObject/ConstructorHelpers.h"
 
+namespace
+{
+	const float RailSpeedScales[] = { 0.25f, 0.5f, 1.f, 2.f };
+}
+
 ADCMultiCam::ADCMultiCam()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -139,7 +144,7 @@ void ADCMultiCam::MoveRig(float Axis, float DeltaSeconds)
 {
 	if (Rig == EDCCamRig::Dolly && Rail)
 	{
-		RailDistance = FMath::Clamp(RailDistance + Axis * DollySpeed * DeltaSeconds, 0.f, Rail->GetLength());
+		RailDistance = FMath::Clamp(RailDistance + Axis * DollySpeed * GetRailSpeedScale() * DeltaSeconds, 0.f, Rail->GetLength());
 	}
 	else if (Rig == EDCCamRig::Crane)
 	{
@@ -176,13 +181,33 @@ float ADCMultiCam::GetFOV() const
 
 void ADCMultiCam::SetFOV(float NewFOV)
 {
-	Camera->SetFieldOfView(FMath::Clamp(NewFOV, MinFOV, MaxFOV));
+	TargetFOV = FMath::Clamp(NewFOV, MinFOV, MaxFOV);
+}
+
+void ADCMultiCam::UpdateZoom(float DeltaSeconds)
+{
+	// Ease toward the target so wheel zooms read as a smooth push in / pull out.
+	const float Current = Camera->FieldOfView;
+	if (!FMath::IsNearlyEqual(Current, TargetFOV, 0.01f))
+	{
+		Camera->SetFieldOfView(FMath::FInterpTo(Current, TargetFOV, DeltaSeconds, 6.f));
+	}
+}
+
+float ADCMultiCam::GetRailSpeedScale() const
+{
+	return RailSpeedScales[RailSpeedIndex];
+}
+
+void ADCMultiCam::AdjustRailSpeed(int32 Direction)
+{
+	RailSpeedIndex = FMath::Clamp(RailSpeedIndex + Direction, 0, int32(UE_ARRAY_COUNT(RailSpeedScales)) - 1);
 }
 
 void ADCMultiCam::SaveHome()
 {
 	HomeAim = Aim;
-	HomeFOV = GetFOV();
+	HomeFOV = TargetFOV;
 	HomeRailDistance = RailDistance;
 	HomeCraneHeight = CraneHeight;
 }
@@ -190,7 +215,8 @@ void ADCMultiCam::SaveHome()
 void ADCMultiCam::RestoreHome()
 {
 	SetAim(HomeAim);
-	SetFOV(HomeFOV);
+	TargetFOV = HomeFOV;
+	Camera->SetFieldOfView(HomeFOV);
 	RailDistance = HomeRailDistance;
 	CraneHeight = HomeCraneHeight;
 	ApplyRigPosition();

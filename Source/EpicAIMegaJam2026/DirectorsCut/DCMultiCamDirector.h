@@ -95,6 +95,12 @@ public:
 	void HandleCycleCamera(int32 Direction);
 	/** Scrub the scene clock while planning (overridden by the zombie director). */
 	virtual void HandleScrub(float DeltaSeconds) {}
+	/** Space: play or pause the rehearsal (overridden by the zombie director). */
+	virtual void HandleTransportToggle() {}
+	/** , and .: rehearsal speed down / up (overridden by the zombie director). */
+	virtual void HandleTransportSpeed(int32 Direction) {}
+	/** Z / X: slower / faster dolly travel for the camera being looked through. */
+	void HandleRailSpeed(int32 Direction);
 	/** Re-watch the rehearsal (overridden by the zombie director). */
 	virtual void HandleRehearsal() {}
 	void HandleClearCameras();
@@ -142,6 +148,8 @@ protected:
 	void UpdatePrepPreview();
 	void ViewCamera(int32 Slot);
 	void ViewWalking();
+	/** Keeps the view on a placed camera from Action! to the results. False (and back to planning) if none exist. */
+	bool EnsureLiveCamera();
 	void SetLabelsVisible(bool bVisible);
 	void Flash(const FString& Text, float Seconds = 2.5f);
 	FCollisionQueryParams MakeTraceParams(const FName& Tag) const;

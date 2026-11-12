@@ -150,8 +150,8 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
     <thead><tr><th>Phase</th><th>What the player does</th><th>Status</th></tr></thead>
     <tbody>
       <tr><td class="k">1 · Storyboard</td><td>Read the scenes in order: a sketch panel, a suggested angle and a one-line description for each. The required scene (the kiss) is marked. No times, no places.</td><td><span class="pill p-done">Text built</span> <span class="pill p-todo">Sketches + angles</span></td></tr>
-      <tr><td class="k">2 · Preparation</td><td>Walk the set freely while the rehearsal plays. Pause, play, change speed (0.5× to 4×) and scrub to any moment. Place static, dolly and crane cameras, aim them, and set where each starts. Optionally spray numbered markers.</td><td><span class="pill p-done">Cameras + scrub built</span> <span class="pill p-todo">Merge rehearsal with transport</span> <span class="pill p-nice">Markers</span></td></tr>
-      <tr><td class="k">3 · Shooting</td><td>Hit the clapperboard. Cut between cameras live; aim, smoothly zoom, drive dollies (with adjustable rail speed) and raise or lower cranes. The REC overlay and film look sell the shoot.</td><td><span class="pill p-done">Multi-cam cutting built</span> <span class="pill p-todo">Smooth zoom, rail speed, recording effect</span></td></tr>
+      <tr><td class="k">2 · Preparation</td><td>Walk the set freely while the rehearsal plays. Pause, play, change speed (0.5× to 4×) and scrub to any moment. Place static, dolly and crane cameras, aim them, and set where each starts. Optionally spray numbered markers.</td><td><span class="pill p-done">Cameras + rehearsal transport built</span> <span class="pill p-nice">Markers</span></td></tr>
+      <tr><td class="k">3 · Shooting</td><td>Hit the clapperboard. Cut between cameras live; aim, smoothly zoom, drive dollies (with adjustable rail speed) and raise or lower cranes. The REC overlay and film look sell the shoot.</td><td><span class="pill p-done">Multi-cam cutting, smooth zoom, rail speed built</span> <span class="pill p-todo">Recording effect</span></td></tr>
       <tr><td class="k">4 · Evaluation</td><td>Watch the replay of your edited film, then see the grade: scenes captured, zombie screen time, score and letter grade. Return to preparation with every camera kept.</td><td><span class="pill p-done">Results built</span> <span class="pill p-todo">Replay + letter grade</span></td></tr>
     </tbody>
   </table></div>
@@ -171,8 +171,8 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
       <tr><td class="k mono">Wheel</td><td>Stand or crane height; zoom while looking through a camera</td><td>Smooth zoom</td></tr>
       <tr><td class="k mono">1–9 · [ ]</td><td>Look through a camera to aim it</td><td>Cut to a camera</td></tr>
       <tr><td class="k mono">← / →</td><td>Scrub the rehearsal</td><td>–</td></tr>
-      <tr><td class="k mono">Space · , .</td><td><span class="pill p-todo">New</span> Play/pause rehearsal · slower / faster</td><td>–</td></tr>
-      <tr><td class="k mono">Q / E</td><td>E: clapperboard / leave camera view</td><td><span class="pill p-todo">New</span> Rail speed down / up (proposal)</td></tr>
+      <tr><td class="k mono">Space · , .</td><td>Play/pause rehearsal · slower / faster (0.5×–4×)</td><td>–</td></tr>
+      <tr><td class="k mono">E · Z / X</td><td>E: clapperboard / leave camera view · Z/X: dolly speed</td><td>Z/X: dolly speed down / up (0.25×–2×)</td></tr>
       <tr><td class="k mono">Enter · R · P · Tab</td><td>Action! · reset · pause · storyboard</td><td>– · restart take · pause · storyboard</td></tr>
     </tbody>
   </table></div>
@@ -374,7 +374,7 @@ Final score   = max(0, Scene points − Zombie cost)   if the kiss was captured
   <ul>
     <li><b>Story:</b> keep Sam and Ellie's seven scenes, or rewrite? Edits are level work only.</li>
     <li><b>Shooting optimisation:</b> performance (frame rate), or making shooting easier to control? The schedule assumes performance.</li>
-    <li><b>Rail speed:</b> one speed per rail set in preparation, or adjustable live with Q/E? The table assumes live.</li>
+    <li><b>Rail speed:</b> built as a per-dolly setting changed with Z/X, in preparation or live during the take.</li>
     <li><b>Camera count:</b> unlimited today. Add a budget (for example, a cost per camera) if playtests show players simply cover everything.</li>
     <li><b>Owners:</b> who takes each of the four lanes.</li>
   </ul>

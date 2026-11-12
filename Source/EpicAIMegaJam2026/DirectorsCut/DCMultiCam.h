@@ -61,8 +61,15 @@ public:
 	void SetAim(const FRotator& NewAim);
 	void AddAim(float DeltaYaw, float DeltaPitch) { SetAim(Aim + FRotator(DeltaPitch, DeltaYaw, 0.f)); }
 
+	/** Current (eased) field of view. */
 	float GetFOV() const;
+	/** Where the zoom is heading; the lens eases toward it every frame. */
+	float GetTargetFOV() const { return TargetFOV; }
 	void SetFOV(float NewFOV);
+	void UpdateZoom(float DeltaSeconds);
+
+	float GetRailSpeedScale() const;
+	void AdjustRailSpeed(int32 Direction);
 
 	/** The aim and zoom set during preparation; every take starts from them. */
 	void SaveHome();
@@ -122,4 +129,6 @@ private:
 	FRotator Aim = FRotator::ZeroRotator;
 	FRotator HomeAim = FRotator::ZeroRotator;
 	float HomeFOV = DefaultFOV;
+	float TargetFOV = DefaultFOV;
+	int32 RailSpeedIndex = 2;
 };

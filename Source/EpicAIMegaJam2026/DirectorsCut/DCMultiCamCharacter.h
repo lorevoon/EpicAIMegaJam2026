@@ -58,6 +58,9 @@ private:
 	void OnCycleTool();
 	void OnFinishRail();
 	void OnCycleCamera(int32 Direction);
+	void OnTransportToggle();
+	void OnTransportSpeed(int32 Direction);
+	void OnRailSpeed(int32 Direction);
 	void OnToggleNotebook();
 	void OnTogglePause();
 
