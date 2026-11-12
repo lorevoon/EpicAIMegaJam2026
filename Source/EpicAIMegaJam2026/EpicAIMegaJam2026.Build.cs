@@ -8,6 +8,9 @@ public class EpicAIMegaJam2026 : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+		// The Director's Cut prototypes keep file-local helpers in anonymous namespaces; unity builds would merge them.
+		bUseUnity = false;
+
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core",
 			"CoreUObject",
