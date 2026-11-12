@@ -3,6 +3,7 @@
 #include "DCHUD.h"
 #include "DCCharacter.h"
 #include "DCRail.h"
+#include "DCSceneMarks.h"
 #include "DCTakeDirector.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Engine/Canvas.h"
@@ -126,6 +127,18 @@ void ADCHUD::DrawHUD()
 		Label(Message, CX, Canvas->ClipY * 0.22f, FLinearColor::White, 1.1f, true);
 	}
 
+	if (!D->GetSetupProblem().IsEmpty())
+	{
+		TArray<FString> Lines;
+		D->GetSetupProblem().ParseIntoArrayLines(Lines);
+		float Y = 120.f * S;
+		for (const FString& Line : Lines)
+		{
+			Label(TEXT("SETUP: ") + Line, 24.f * S, Y, Bad, 0.7f);
+			Y += 26.f * S;
+		}
+	}
+
 	if (D->GetPhase() == EDCPhase::Results)
 	{
 		DrawResults(D);
@@ -224,7 +237,7 @@ void ADCHUD::DrawWorldLabels(ADCTakeDirector* D)
 	}
 	if (D->GetPhase() == EDCPhase::Preparation)
 	{
-		if (ProjectVisible(D->GetClapperLocation() + FVector(0.f, 0.f, 170.f), P))
+		if (D->GetClapperboard() && ProjectVisible(D->GetClapperboard()->GetActorLocation() + FVector(0.f, 0.f, 170.f), P))
 		{
 			Label(TEXT("CLAPPERBOARD - E to call Action!"), P.X, P.Y, FLinearColor::White, 0.7f, true);
 		}

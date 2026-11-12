@@ -1,9 +1,13 @@
 // Director's Cut prototype - performer playback.
 
 #include "DCPerformer.h"
+#include "DCVisuals.h"
+#include "DCWaypoint.h"
+#include "Components/SplineComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
-#include "Materials/MaterialInstanceDynamic.h"
+#include "Engine/World.h"
+#include "EngineUtils.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace
@@ -21,8 +25,6 @@ ADCPerformer::ADCPerformer()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ConeMesh(TEXT("/Engine/BasicShapes/Cone.Cone"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> Material(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
-	BaseMaterial = Material.Object;
 
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
@@ -49,6 +51,15 @@ ADCPerformer::ADCPerformer()
 	Prop->SetRelativeLocation(PropLowered);
 	Prop->SetRelativeScale3D(FVector(0.02f, 0.22f, 0.3f));
 	Prop->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// Editor-only preview of the blocking; points are in world space.
+	Path = CreateDefaultSubobject<USplineComponent>(TEXT("Path"));
+	Path->SetupAttachment(Root);
+	Path->SetUsingAbsoluteLocation(true);
+	Path->SetUsingAbsoluteRotation(true);
+	Path->SetUsingAbsoluteScale(true);
+	Path->SetHiddenInGame(true);
+	Path->ClearSplinePoints();
 }
 
 UStaticMeshComponent* ADCPerformer::MakePart(FName Name, UStaticMesh* Mesh, USceneComponent* Parent)
@@ -64,36 +75,93 @@ UStaticMeshComponent* ADCPerformer::MakePart(FName Name, UStaticMesh* Mesh, USce
 	return Part;
 }
 
-void ADCPerformer::Paint(UStaticMeshComponent* Part, const FLinearColor& Color)
+void ADCPerformer::OnConstruction(const FTransform& Transform)
 {
-	UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(BaseMaterial, this);
-	MID->SetVectorParameterValue(TEXT("Color"), Color);
-	Part->SetMaterial(0, MID);
+	Super::OnConstruction(Transform);
+
+	DCVisuals::Paint(Body, BodyColor);
+	DCVisuals::Paint(Head, HeadColor);
+	DCVisuals::Paint(Nose, HeadColor * 0.7f);
+	DCVisuals::Paint(Cape, FLinearColor(0.35f, 0.01f, 0.02f));
+	DCVisuals::Paint(Prop, FLinearColor(0.95f, 0.9f, 0.7f));
+	Cape->SetVisibility(bHasCape);
+	Cape->SetCollisionEnabled(bHasCape ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+	Prop->SetVisibility(bHasProp);
+
+	RefreshPath();
 }
 
-void ADCPerformer::Setup(const FLinearColor& BodyColor, const FLinearColor& HeadColor, bool bWithCape, bool bWithProp, TArray<FDCKey> InKeys)
+TArray<FDCKey> ADCPerformer::CollectKeys() const
 {
-	Keys = MoveTemp(InKeys);
-	Keys.Sort([](const FDCKey& A, const FDCKey& B) { return A.Time < B.Time; });
+	TArray<FDCKey> Result;
 
-	Paint(Body, BodyColor);
-	Paint(Head, HeadColor);
-	Paint(Nose, HeadColor * 0.7f);
-	Paint(Cape, FLinearColor(0.35f, 0.01f, 0.02f));
-	Paint(Prop, FLinearColor(0.95f, 0.9f, 0.7f));
-	Cape->SetVisibility(bWithCape);
-	Cape->SetCollisionEnabled(bWithCape ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
-	Prop->SetVisibility(bWithProp);
+	FDCKey Start;
+	Start.Time = 0.f;
+	Start.Location = FVector2D(GetActorLocation());
+	Start.Yaw = GetActorRotation().Yaw;
+	Result.Add(Start);
 
-	Evaluate(0.f);
+	if (UWorld* World = GetWorld())
+	{
+		for (TActorIterator<ADCWaypoint> It(World); It; ++It)
+		{
+			if (It->Performer != this || It->Time <= 0.f)
+			{
+				continue;
+			}
+			FDCKey Key;
+			Key.Time = It->Time;
+			Key.Location = FVector2D(It->GetActorLocation());
+			Key.Yaw = It->GetActorRotation().Yaw;
+			Key.Lean = It->Lean;
+			Key.PropRaise = It->PropRaise;
+			Result.Add(Key);
+		}
+	}
+
+	Result.StableSort([](const FDCKey& A, const FDCKey& B) { return A.Time < B.Time; });
+	return Result;
+}
+
+void ADCPerformer::BuildKeys()
+{
+	// The start pose is read from the placement, so only build before the first Evaluate moves the actor.
+	if (!bKeysBuilt)
+	{
+		Keys = CollectKeys();
+		bKeysBuilt = true;
+	}
+}
+
+void ADCPerformer::RefreshPath()
+{
+	UWorld* World = GetWorld();
+	if (!World || World->IsGameWorld() || !IsValid(this))
+	{
+		return;
+	}
+
+	Path->ClearSplinePoints(false);
+	for (const FDCKey& Key : CollectKeys())
+	{
+		Path->AddSplinePoint(FVector(Key.Location, 15.f), ESplineCoordinateSpace::World, false);
+	}
+	for (int32 i = 0; i < Path->GetNumberOfSplinePoints(); ++i)
+	{
+		Path->SetSplinePointType(i, ESplinePointType::Linear, false);
+	}
+	Path->UpdateSpline();
+	Path->MarkRenderStateDirty();
+}
+
+USceneComponent* ADCPerformer::GetAnchor(EDCAnchorPart Part) const
+{
+	return Part == EDCAnchorPart::Prop ? Prop.Get() : Head.Get();
 }
 
 void ADCPerformer::Evaluate(float SceneTime)
 {
-	if (Keys.Num() == 0)
-	{
-		return;
-	}
+	BuildKeys();
 
 	FDCKey Pose = Keys.Last();
 	for (int32 i = 0; i + 1 < Keys.Num(); ++i)
@@ -112,7 +180,8 @@ void ADCPerformer::Evaluate(float SceneTime)
 		}
 	}
 
-	SetActorLocationAndRotation(FVector(Pose.Location, 0.f), FRotator(0.f, Pose.Yaw, 0.f));
+	// Keep the authored floor height so the set can be raised or lowered freely.
+	SetActorLocationAndRotation(FVector(Pose.Location, GetActorLocation().Z), FRotator(0.f, Pose.Yaw, 0.f));
 	Head->SetRelativeLocation(HeadRest + FVector(Pose.Lean, 0.f, -FMath::Abs(Pose.Lean) * 0.5f));
 	Prop->SetRelativeLocation(FMath::Lerp(PropLowered, PropRaised, Pose.PropRaise));
 }

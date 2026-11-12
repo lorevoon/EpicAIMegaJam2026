@@ -1,4 +1,5 @@
-// Director's Cut prototype - owns the set, the single scene clock, the shot list, and the take phases.
+// Director's Cut prototype - owns the single scene clock, the shot list, and the take phases.
+// The scene itself (set pieces, performers, waypoints, shot markers, start mark, clapperboard) is placed in the level.
 
 #pragma once
 
@@ -8,11 +9,10 @@
 #include "DCTakeDirector.generated.h"
 
 class ADCCharacter;
+class ADCClapperboard;
 class ADCPerformer;
 class ADCRail;
-class UStaticMeshComponent;
-class UMaterialInterface;
-class UMaterialInstanceDynamic;
+class ADCStartMark;
 
 UCLASS()
 class ADCTakeDirector : public AActor
@@ -25,15 +25,25 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
-	/** Spawn the moonlight, sky and practical lamps. Turn off when dropping the set into a lit level. */
-	UPROPERTY(EditAnywhere, Category = "Directors Cut")
-	bool bSpawnLighting = true;
-
-	UPROPERTY(EditAnywhere, Category = "Directors Cut")
+	UPROPERTY(EditAnywhere, Category = "Directors Cut", meta = (ClampMin = "1", Units = "s"))
 	float TakeDuration = 45.f;
 
-	UPROPERTY(EditAnywhere, Category = "Directors Cut")
+	UPROPERTY(EditAnywhere, Category = "Directors Cut", meta = (ClampMin = "0", Units = "s"))
 	float CountdownDuration = 3.f;
+
+#if WITH_EDITORONLY_DATA
+	/** Tick to place the default Dracula scene into this level (same as the Build Default Scene button). */
+	UPROPERTY(EditAnywhere, Transient, Category = "Directors Cut|Editor")
+	bool bBuildDefaultScene = false;
+#endif
+
+#if WITH_EDITOR
+	/** Places the default "Midnight Visit" set, cast, blocking, shots, and lights into this level as editable actors. */
+	UFUNCTION(CallInEditor, Category = "Directors Cut|Editor")
+	void BuildDefaultScene();
+
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 
 	// Player commands
 	void HandlePrimaryPressed();
@@ -55,28 +65,22 @@ public:
 	int32 GetCapturedBonusCount() const;
 	FString GetCutName() const;
 	FString GetMessage() const;
+	const FString& GetSetupProblem() const { return SetupProblem; }
 	ADCRail* GetRail() const { return Rail; }
-	FVector GetClapperLocation() const { return ClapperLocation; }
+	ADCClapperboard* GetClapperboard() const { return Clapperboard; }
 	FVector GetStartLocation() const { return StartTransform.GetLocation(); }
 	bool IsNearClapper() const;
 	bool CanMountRail() const;
 
 	bool bShowShotList = true;
 
-	const FTransform& GetStartTransform() const { return StartTransform; }
+	/** Where the player starts every take: the level's ADCStartMark, or a default spot. */
+	static FTransform FindStartTransform(UWorld* World);
 
 	static FString DescribeFail(EDCFail Fail);
 
 private:
-	void BuildSet();
-	void BuildLighting();
-	void SpawnCast();
-	void DefineShots();
-
-	UStaticMeshComponent* AddBlock(const FVector& Center, const FVector& Size, const FLinearColor& Color, bool bCollide = true);
-	UStaticMeshComponent* AddDisc(const FVector& Center, float Radius, const FLinearColor& Color);
-	UMaterialInstanceDynamic* MakeMaterial(const FLinearColor& Color);
-
+	void GatherScene();
 	void BeginFilming();
 	void EvaluateShots(float PrevTime, float NowTime);
 	EDCFail CheckShot(const FDCShot& Shot, bool bInWindow) const;
@@ -89,30 +93,16 @@ private:
 	ADCCharacter* GetPlayer() const;
 
 	UPROPERTY()
-	TObjectPtr<USceneComponent> Root;
+	TArray<TObjectPtr<ADCPerformer>> Performers;
 
 	UPROPERTY()
-	TObjectPtr<UStaticMesh> CubeMesh;
-
-	UPROPERTY()
-	TObjectPtr<UStaticMesh> CylinderMesh;
-
-	UPROPERTY()
-	TObjectPtr<UMaterialInterface> BaseMaterial;
-
-	UPROPERTY()
-	TObjectPtr<ADCPerformer> Dracula;
-
-	UPROPERTY()
-	TObjectPtr<ADCPerformer> Victim;
+	TObjectPtr<ADCClapperboard> Clapperboard;
 
 	UPROPERTY()
 	TObjectPtr<ADCRail> Rail;
 
-	UPROPERTY()
-	TArray<TObjectPtr<UMaterialInstanceDynamic>> MarkerMaterials;
-
 	TArray<FDCShot> Shots;
+	FString SetupProblem;
 
 	EDCPhase Phase = EDCPhase::Preparation;
 	float SceneTime = 0.f;
@@ -122,7 +112,6 @@ private:
 	int32 BestScore = 0;
 
 	FTransform StartTransform;
-	FVector ClapperLocation;
 
 	FVector PreviewPoint = FVector::ZeroVector;
 	bool bPreviewHit = false;

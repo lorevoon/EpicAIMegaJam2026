@@ -4,34 +4,22 @@
 #include "DCCharacter.h"
 #include "DCPerformer.h"
 #include "DCRail.h"
+#include "DCSceneMarks.h"
+#include "DCShotMarker.h"
 #include "Camera/CameraComponent.h"
-#include "Components/DirectionalLightComponent.h"
-#include "Components/ExponentialHeightFogComponent.h"
-#include "Components/PointLightComponent.h"
-#include "Components/SkyAtmosphereComponent.h"
-#include "Components/SkyLightComponent.h"
-#include "Components/StaticMeshComponent.h"
-#include "Engine/CollisionProfile.h"
-#include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
-#include "Materials/MaterialInstanceDynamic.h"
-#include "UObject/ConstructorHelpers.h"
 
 namespace
 {
-	const FLinearColor MandatoryColor(1.f, 0.65f, 0.1f);
-	const FLinearColor BonusColor(0.1f, 0.75f, 1.f);
-	const FLinearColor CapturedColor(0.2f, 1.f, 0.3f);
-	const FLinearColor MissedColor(0.25f, 0.25f, 0.25f);
-
 	constexpr float SafeFrameFraction = 0.70f;
 	constexpr float VerticalTolerance = 200.f;
 	constexpr float PlaceRange = 800.f;
-	constexpr float ClapperRange = 300.f;
 	constexpr float MountRange = 250.f;
 	constexpr int32 AllBonusReward = 250;
+	constexpr float StandHeight = 100.f;
 }
 
 ADCTakeDirector::ADCTakeDirector()
@@ -40,275 +28,130 @@ ADCTakeDirector::ADCTakeDirector()
 	// Evaluate after the player has moved and aimed this frame.
 	PrimaryActorTick.TickGroup = TG_PostUpdateWork;
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> Material(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
-	CubeMesh = Cube.Object;
-	CylinderMesh = Cylinder.Object;
-	BaseMaterial = Material.Object;
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+}
 
-	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	RootComponent = Root;
-
-	StartTransform = FTransform(FRotator(0.f, 0.f, 0.f), FVector(-1000.f, 0.f, 100.f));
-	ClapperLocation = FVector(-1050.f, -200.f, 0.f);
+FTransform ADCTakeDirector::FindStartTransform(UWorld* World)
+{
+	if (World)
+	{
+		for (TActorIterator<ADCStartMark> It(World); It; ++It)
+		{
+			return FTransform(FRotator(0.f, It->GetActorRotation().Yaw, 0.f), It->GetActorLocation() + FVector(0.f, 0.f, StandHeight));
+		}
+	}
+	return FTransform(FRotator::ZeroRotator, FVector(-1000.f, 0.f, StandHeight));
 }
 
 void ADCTakeDirector::BeginPlay()
 {
 	Super::BeginPlay();
 
-	BuildSet();
-	if (bSpawnLighting)
-	{
-		BuildLighting();
-	}
-	SpawnCast();
-	DefineShots();
+	GatherScene();
 
 	FActorSpawnParameters Params;
 	Params.Owner = this;
 	Rail = GetWorld()->SpawnActor<ADCRail>(ADCRail::StaticClass(), FTransform::Identity, Params);
-	Rail->IgnoredActors.Add(Dracula.Get());
-	Rail->IgnoredActors.Add(Victim.Get());
+	for (ADCPerformer* Performer : Performers)
+	{
+		Rail->IgnoredActors.Add(Performer);
+	}
 
 	ResetScene();
 	Flash(TEXT("Lay a camera rail, then hit the clapperboard (E) or press Enter to call Action!"), 6.f);
 }
 
-// ---------------------------------------------------------------------------------------------
-// Set construction (placeholder blockout of "Dracula: The Midnight Visit")
-
-UMaterialInstanceDynamic* ADCTakeDirector::MakeMaterial(const FLinearColor& Color)
+void ADCTakeDirector::GatherScene()
 {
-	UMaterialInstanceDynamic* MID = UMaterialInstanceDynamic::Create(BaseMaterial, this);
-	MID->SetVectorParameterValue(TEXT("Color"), Color);
-	return MID;
-}
+	UWorld* World = GetWorld();
+	TArray<FString> Problems;
 
-UStaticMeshComponent* ADCTakeDirector::AddBlock(const FVector& Center, const FVector& Size, const FLinearColor& Color, bool bCollide)
-{
-	UStaticMeshComponent* Block = NewObject<UStaticMeshComponent>(this);
-	Block->SetStaticMesh(CubeMesh);
-	Block->SetupAttachment(Root);
-	Block->SetCollisionProfileName(bCollide ? UCollisionProfile::BlockAll_ProfileName : UCollisionProfile::NoCollision_ProfileName);
-	Block->RegisterComponent();
-	Block->SetWorldLocation(Center);
-	Block->SetWorldScale3D(Size / 100.f);
-	Block->SetMaterial(0, MakeMaterial(Color));
-	return Block;
-}
-
-UStaticMeshComponent* ADCTakeDirector::AddDisc(const FVector& Center, float Radius, const FLinearColor& Color)
-{
-	UStaticMeshComponent* Disc = NewObject<UStaticMeshComponent>(this);
-	Disc->SetStaticMesh(CylinderMesh);
-	Disc->SetupAttachment(Root);
-	Disc->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
-	Disc->SetCastShadow(false);
-	Disc->RegisterComponent();
-	Disc->SetWorldLocation(Center + FVector(0.f, 0.f, 1.f));
-	Disc->SetWorldScale3D(FVector(Radius / 50.f, Radius / 50.f, 0.02f));
-	UMaterialInstanceDynamic* MID = MakeMaterial(Color);
-	Disc->SetMaterial(0, MID);
-	MarkerMaterials.Add(MID);
-	return Disc;
-}
-
-void ADCTakeDirector::BuildSet()
-{
-	const FLinearColor Wood(0.16f, 0.09f, 0.05f);
-	const FLinearColor Stone(0.32f, 0.3f, 0.36f);
-	const FLinearColor DarkStone(0.15f, 0.14f, 0.17f);
-	const FLinearColor Velvet(0.4f, 0.03f, 0.06f);
-	const FLinearColor Concrete(0.12f, 0.12f, 0.13f);
-	constexpr float WallH = 450.f;
-
-	// Floors: castle bedroom plus the backstage area behind the entry arch.
-	AddBlock(FVector(0, 0, -10), FVector(2400, 1800, 20), Wood);
-	AddBlock(FVector(-600, -1110, -10), FVector(820, 420, 20), Concrete);
-
-	// Perimeter walls with the entry arch gap in the south wall (x -700..-500).
-	AddBlock(FVector(0, 910, WallH / 2), FVector(2440, 20, WallH), Stone);
-	AddBlock(FVector(1210, 0, WallH / 2), FVector(20, 1840, WallH), Stone);
-	AddBlock(FVector(-1210, 0, WallH / 2), FVector(20, 1840, WallH), Stone);
-	AddBlock(FVector(-950, -910, WallH / 2), FVector(500, 20, WallH), Stone);
-	AddBlock(FVector(350, -910, WallH / 2), FVector(1700, 20, WallH), Stone);
-	AddBlock(FVector(-600, -910, 375), FVector(200, 20, 150), DarkStone);
-	AddBlock(FVector(-720, -910, 150), FVector(40, 60, 300), DarkStone);
-	AddBlock(FVector(-480, -910, 150), FVector(40, 60, 300), DarkStone);
-
-	// Backstage walls.
-	AddBlock(FVector(-1020, -1110, WallH / 2), FVector(20, 420, WallH), Concrete);
-	AddBlock(FVector(-180, -1110, WallH / 2), FVector(20, 420, WallH), Concrete);
-	AddBlock(FVector(-600, -1330, WallH / 2), FVector(860, 20, WallH), Concrete);
-
-	// Set dressing.
-	AddBlock(FVector(-300, 800, 37.5f), FVector(180, 90, 75), Wood);                       // writing desk
-	AddBlock(FVector(800, 650, 27.5f), FVector(260, 260, 55), Velvet);                     // bed
-	AddBlock(FVector(800, 790, 90), FVector(280, 20, 180), Wood);                          // headboard
-	AddBlock(FVector(150, -775, 200), FVector(20, 250, 400), Velvet);                      // curtain
-	AddBlock(FVector(-750, 350, 60), FVector(150, 100, 120), Wood);                        // trunk
-	AddBlock(FVector(950, -300, 110), FVector(120, 200, 220), Wood);                       // wardrobe
-	AddBlock(FVector(1190, 150, 150), FVector(10, 120, 200), FLinearColor(0.7f, 0.75f, 0.8f)); // mirror
-
-	// Clapperboard on a stand next to the start mark.
-	AddBlock(ClapperLocation + FVector(0, 0, 50), FVector(30, 30, 100), DarkStone);
-	AddBlock(ClapperLocation + FVector(0, 0, 118), FVector(8, 60, 36), FLinearColor(0.02f, 0.02f, 0.02f));
-	AddBlock(ClapperLocation + FVector(0, 0, 140), FVector(8, 60, 8), FLinearColor(0.9f, 0.9f, 0.9f));
-
-	// Start mark (the player always begins the take here).
-	AddDisc(FVector(StartTransform.GetLocation().X, StartTransform.GetLocation().Y, 0.f), 60.f, FLinearColor(0.9f, 0.9f, 0.9f));
-	MarkerMaterials.Reset(); // the start disc is not a shot marker
-}
-
-void ADCTakeDirector::BuildLighting()
-{
-	UDirectionalLightComponent* Moon = NewObject<UDirectionalLightComponent>(this);
-	Moon->SetupAttachment(Root);
-	Moon->SetMobility(EComponentMobility::Movable);
-	Moon->RegisterComponent();
-	Moon->SetWorldRotation(FRotator(-35.f, 40.f, 0.f));
-	Moon->SetIntensity(2.5f);
-	Moon->SetLightColor(FLinearColor(0.6f, 0.7f, 1.f));
-	Moon->SetAtmosphereSunLight(true);
-
-	USkyAtmosphereComponent* Sky = NewObject<USkyAtmosphereComponent>(this);
-	Sky->SetupAttachment(Root);
-	Sky->RegisterComponent();
-
-	USkyLightComponent* SkyLight = NewObject<USkyLightComponent>(this);
-	SkyLight->SetupAttachment(Root);
-	SkyLight->SetMobility(EComponentMobility::Movable);
-	SkyLight->bRealTimeCapture = true;
-	SkyLight->RegisterComponent();
-	SkyLight->SetIntensity(0.6f);
-
-	UExponentialHeightFogComponent* Fog = NewObject<UExponentialHeightFogComponent>(this);
-	Fog->SetupAttachment(Root);
-	Fog->RegisterComponent();
-	Fog->SetFogDensity(0.01f);
-
-	auto AddLamp = [this](const FVector& Location, const FLinearColor& Color, float Intensity)
+	Performers.Reset();
+	for (TActorIterator<ADCPerformer> It(World); It; ++It)
 	{
-		UPointLightComponent* Lamp = NewObject<UPointLightComponent>(this);
-		Lamp->SetupAttachment(Root);
-		Lamp->SetMobility(EComponentMobility::Movable);
-		Lamp->RegisterComponent();
-		Lamp->SetWorldLocation(Location);
-		Lamp->SetIntensity(Intensity);
-		Lamp->SetLightColor(Color);
-		Lamp->SetAttenuationRadius(1400.f);
-	};
-	const FLinearColor Warm(1.f, 0.65f, 0.35f);
-	AddLamp(FVector(-300, 700, 250), Warm, 6000.f);
-	AddLamp(FVector(800, 500, 250), Warm, 6000.f);
-	AddLamp(FVector(0, -300, 380), FLinearColor(0.5f, 0.6f, 1.f), 4000.f);
-	AddLamp(FVector(-600, -1100, 300), FLinearColor(0.9f, 0.9f, 1.f), 2500.f);
-	AddLamp(FVector(-1000, 0, 350), FLinearColor::White, 3000.f);
-}
+		It->BuildKeys();
+		Performers.Add(*It);
+	}
 
-void ADCTakeDirector::SpawnCast()
-{
-	FActorSpawnParameters Params;
-	Params.Owner = this;
-
-	auto Key = [](float T, float X, float Y, float Yaw, float Lean = 0.f, float Raise = 0.f)
+	Clapperboard = nullptr;
+	for (TActorIterator<ADCClapperboard> It(World); It; ++It)
 	{
-		FDCKey K;
-		K.Time = T;
-		K.Location = FVector2D(X, Y);
-		K.Yaw = Yaw;
-		K.Lean = Lean;
-		K.PropRaise = Raise;
-		return K;
-	};
+		Clapperboard = *It;
+		break;
+	}
 
-	// Authored performance, one shared clock (see GDD section 05).
-	Victim = GetWorld()->SpawnActor<ADCPerformer>(ADCPerformer::StaticClass(), FTransform::Identity, Params);
-	Victim->Setup(FLinearColor(0.85f, 0.85f, 0.9f), FLinearColor(0.9f, 0.72f, 0.6f), false, true, {
-		Key(0.f, -300, 620, -90),
-		Key(5.5f, -300, 620, -90, 0, 0),
-		Key(6.5f, -300, 620, -90, 0, 1),   // letter reveal
-		Key(12.f, -300, 620, -90, 0, 1),
-		Key(13.f, -300, 620, -90, 0, 0),
-		Key(14.f, -300, 620, -90),
-		Key(21.f, 560, 420, -135),         // waits by the bed
-		Key(45.f, 560, 420, -135),
-	});
-
-	Dracula = GetWorld()->SpawnActor<ADCPerformer>(ADCPerformer::StaticClass(), FTransform::Identity, Params);
-	Dracula->Setup(FLinearColor(0.04f, 0.03f, 0.04f), FLinearColor(0.85f, 0.88f, 0.85f), true, false, {
-		Key(0.f, -600, -1150, 90),
-		Key(2.f, -600, -1150, 90),
-		Key(6.f, -600, -700, 77),          // entrance through the arch
-		Key(12.f, -600, -700, 77),
-		Key(16.f, -150, -250, 43),         // approach
-		Key(17.f, -150, -250, 43, -14),    // hesitation recoil
-		Key(21.f, -150, -250, 43, -14),
-		Key(22.f, -150, -250, 43, 0),
-		Key(26.f, 480, 340, 45),           // reaches the victim
-		Key(27.f, 480, 340, 45, 32),       // bite
-		Key(32.f, 480, 340, 45, 32),
-		Key(33.f, 480, 340, 45, 0),
-		Key(37.f, 350, -600, -98),         // retreat to the curtain
-		Key(38.5f, 350, -600, 78),         // looks back
-		Key(45.f, 350, -600, 78),
-	});
-}
-
-void ADCTakeDirector::DefineShots()
-{
-	auto Anchor = [](USceneComponent* Component, AActor* AnchorOwner)
-	{
-		FDCAnchor A;
-		A.Component = Component;
-		A.Owner = AnchorOwner;
-		return A;
-	};
-
-	auto MakeShot = [](const TCHAR* Id, const TCHAR* Name, const TCHAR* Caption, bool bMandatory, float Start, float End, float Hold,
-		FVector2D Mark, float MinD, float MaxD, int32 Points)
-	{
-		FDCShot S;
-		S.Id = Id;
-		S.Name = Name;
-		S.Caption = Caption;
-		S.bMandatory = bMandatory;
-		S.WindowStart = Start;
-		S.WindowEnd = End;
-		S.RequiredHold = Hold;
-		S.MarkLocation = FVector(Mark, 0.f);
-		S.MinDistance = MinD;
-		S.MaxDistance = MaxD;
-		S.Points = Points;
-		return S;
-	};
+	StartTransform = FindStartTransform(World);
 
 	Shots.Reset();
-
-	FDCShot B01 = MakeShot(TEXT("B01"), TEXT("The invitation"), TEXT("She was expecting a visitor."), false, 6.f, 12.f, 1.5f, FVector2D(-300, 200), 150.f, 500.f, 250);
-	B01.Anchors.Add(Anchor(Victim->GetProp(), Victim));
-	Shots.Add(B01);
-
-	FDCShot B02 = MakeShot(TEXT("B02"), TEXT("A moment of doubt"), TEXT("The monster hesitates before the attack."), false, 16.f, 22.f, 1.5f, FVector2D(-550, -350), 200.f, 650.f, 250);
-	B02.Anchors.Add(Anchor(Dracula->GetHead(), Dracula));
-	Shots.Add(B02);
-
-	FDCShot M01 = MakeShot(TEXT("M01"), TEXT("The bite"), TEXT("The studio's essential story beat."), true, 26.f, 33.f, 2.f, FVector2D(650, 50), 200.f, 600.f, 1000);
-	M01.Anchors.Add(Anchor(Dracula->GetHead(), Dracula));
-	M01.Anchors.Add(Anchor(Victim->GetHead(), Victim));
-	Shots.Add(M01);
-
-	FDCShot B03 = MakeShot(TEXT("B03"), TEXT("The aftermath"), TEXT("He looks back - a hint of remorse."), false, 37.f, 43.f, 1.5f, FVector2D(-50, -450), 200.f, 650.f, 250);
-	B03.Anchors.Add(Anchor(Dracula->GetHead(), Dracula));
-	Shots.Add(B03);
-
-	for (const FDCShot& Shot : Shots)
+	TSet<FString> SeenIds;
+	bool bHasMandatory = false;
+	for (TActorIterator<ADCShotMarker> It(World); It; ++It)
 	{
-		check(Shot.WindowStart < Shot.WindowEnd && Shot.WindowEnd <= TakeDuration && Shot.RequiredHold <= Shot.WindowEnd - Shot.WindowStart);
-		AddDisc(Shot.MarkLocation, Shot.Radius, Shot.bMandatory ? MandatoryColor : BonusColor);
+		ADCShotMarker* M = *It;
+		FDCShot S;
+		S.Marker = M;
+		S.Id = M->ShotId;
+		S.Name = M->DisplayName;
+		S.Caption = M->Caption;
+		S.bMandatory = M->bMandatory;
+		S.WindowStart = M->WindowStart;
+		S.WindowEnd = FMath::Min(M->WindowEnd, TakeDuration);
+		S.RequiredHold = M->RequiredHold;
+		S.MarkLocation = M->GetActorLocation();
+		S.Radius = M->Radius;
+		S.MinDistance = M->MinDistance;
+		S.MaxDistance = M->MaxDistance;
+		S.Points = M->Points;
+		for (const FDCAnchorRef& Ref : M->Anchors)
+		{
+			if (Ref.Performer)
+			{
+				FDCAnchor A;
+				A.Component = Ref.Performer->GetAnchor(Ref.Part);
+				A.Owner = Ref.Performer;
+				S.Anchors.Add(A);
+			}
+		}
+
+		// Validate per the GDD data contract; problems are shown on the HUD instead of crashing.
+		if (SeenIds.Contains(S.Id))
+		{
+			Problems.Add(FString::Printf(TEXT("Duplicate shot id %s"), *S.Id));
+		}
+		SeenIds.Add(S.Id);
+		if (S.Anchors.Num() == 0)
+		{
+			Problems.Add(FString::Printf(TEXT("%s has no anchors (pick a performer in its Anchors list)"), *S.Id));
+			continue;
+		}
+		if (S.WindowStart >= S.WindowEnd || S.RequiredHold > S.WindowEnd - S.WindowStart)
+		{
+			Problems.Add(FString::Printf(TEXT("%s window is shorter than its hold time"), *S.Id));
+			continue;
+		}
+		if (S.MinDistance >= S.MaxDistance)
+		{
+			Problems.Add(FString::Printf(TEXT("%s min distance must be below max distance"), *S.Id));
+			continue;
+		}
+		bHasMandatory |= S.bMandatory;
+		Shots.Add(S);
 	}
+	Shots.StableSort([](const FDCShot& A, const FDCShot& B) { return A.WindowStart < B.WindowStart; });
+
+	if (Shots.Num() == 0 && Problems.Num() == 0)
+	{
+		Problems.Add(TEXT("No shot markers in this level - select a DCTakeDirector and click Build Default Scene, or place DCShotMarker actors"));
+	}
+	else if (!bHasMandatory)
+	{
+		Problems.Add(TEXT("No mandatory shot - tick Mandatory on at least one DCShotMarker"));
+	}
+	if (!Clapperboard)
+	{
+		Problems.Add(TEXT("No DCClapperboard placed - press Enter to start takes"));
+	}
+	SetupProblem = FString::Join(Problems, TEXT("\n"));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -336,8 +179,10 @@ void ADCTakeDirector::Tick(float DeltaSeconds)
 	{
 		const float Prev = SceneTime;
 		SceneTime = FMath::Min(SceneTime + DeltaSeconds, TakeDuration);
-		Dracula->Evaluate(SceneTime);
-		Victim->Evaluate(SceneTime);
+		for (ADCPerformer* Performer : Performers)
+		{
+			Performer->Evaluate(SceneTime);
+		}
 		EvaluateShots(Prev, SceneTime);
 		break;
 	}
@@ -351,6 +196,11 @@ void ADCTakeDirector::HandleStartTake()
 {
 	if (Phase != EDCPhase::Preparation)
 	{
+		return;
+	}
+	if (Shots.Num() == 0)
+	{
+		Flash(TEXT("No valid shots in this level - see the setup warning"));
 		return;
 	}
 	ResetScene();
@@ -384,8 +234,10 @@ void ADCTakeDirector::ResetScene()
 	{
 		Shot.ResetRuntime();
 	}
-	Dracula->Evaluate(0.f);
-	Victim->Evaluate(0.f);
+	for (ADCPerformer* Performer : Performers)
+	{
+		Performer->Evaluate(0.f);
+	}
 	RefreshMarkerColors();
 
 	if (ADCCharacter* Player = GetPlayer())
@@ -592,8 +444,10 @@ void ADCTakeDirector::UpdatePrepPreview()
 	const FVector End = CamLoc + Player->GetCamera()->GetForwardVector() * PlaceRange;
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(DCRailPreview), false, Player);
 	Params.AddIgnoredActor(Rail);
-	Params.AddIgnoredActor(Dracula);
-	Params.AddIgnoredActor(Victim);
+	for (ADCPerformer* Performer : Performers)
+	{
+		Params.AddIgnoredActor(Performer);
+	}
 
 	FHitResult Hit;
 	if (GetWorld()->LineTraceSingleByChannel(Hit, CamLoc, End, ECC_Visibility, Params))
@@ -652,7 +506,7 @@ void ADCTakeDirector::HandleClearRail()
 bool ADCTakeDirector::IsNearClapper() const
 {
 	ADCCharacter* Player = GetPlayer();
-	return Player && FVector::Dist2D(Player->GetActorLocation(), ClapperLocation) < ClapperRange;
+	return Player && Clapperboard && FVector::Dist2D(Player->GetActorLocation(), Clapperboard->GetActorLocation()) < Clapperboard->InteractRange;
 }
 
 bool ADCTakeDirector::CanMountRail() const
@@ -766,19 +620,12 @@ void ADCTakeDirector::Flash(const FString& Text, float Seconds)
 
 void ADCTakeDirector::RefreshMarkerColors()
 {
-	for (int32 i = 0; i < Shots.Num() && i < MarkerMaterials.Num(); ++i)
+	for (const FDCShot& Shot : Shots)
 	{
-		const FDCShot& Shot = Shots[i];
-		FLinearColor Color = Shot.bMandatory ? MandatoryColor : BonusColor;
-		if (Shot.Status == EDCShotStatus::Captured)
+		if (Shot.Marker)
 		{
-			Color = CapturedColor;
+			Shot.Marker->ShowStatus(Shot.Status);
 		}
-		else if (Shot.Status == EDCShotStatus::Missed)
-		{
-			Color = MissedColor;
-		}
-		MarkerMaterials[i]->SetVectorParameterValue(TEXT("Color"), Color);
 	}
 }
 

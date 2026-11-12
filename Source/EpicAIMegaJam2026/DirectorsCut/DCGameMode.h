@@ -1,12 +1,10 @@
-// Director's Cut prototype - game mode. Set as the GameMode Override on an empty level and press Play.
+// Director's Cut prototype - game mode. Set as the GameMode Override on a level that contains the scene actors.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "DCGameMode.generated.h"
-
-class ADCTakeDirector;
 
 UCLASS()
 class ADCGameMode : public AGameModeBase
@@ -18,10 +16,6 @@ public:
 
 	virtual void StartPlay() override;
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
-
-	/** Set false when the level already has its own lights and sky. */
-	UPROPERTY(EditAnywhere, Category = "Directors Cut")
-	bool bSpawnLighting = true;
 
 private:
 	UPROPERTY()

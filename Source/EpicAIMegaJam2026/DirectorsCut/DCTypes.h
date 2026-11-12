@@ -6,6 +6,28 @@
 #include "DCTypes.generated.h"
 
 class USceneComponent;
+class ADCPerformer;
+class ADCShotMarker;
+
+UENUM()
+enum class EDCAnchorPart : uint8
+{
+	Head,
+	Prop
+};
+
+/** Level-editable reference to a part of a performer that a shot must frame. */
+USTRUCT()
+struct FDCAnchorRef
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Shot")
+	TObjectPtr<ADCPerformer> Performer;
+
+	UPROPERTY(EditAnywhere, Category = "Shot")
+	EDCAnchorPart Part = EDCAnchorPart::Head;
+};
 
 UENUM()
 enum class EDCPhase : uint8
@@ -46,10 +68,11 @@ struct FDCAnchor
 	AActor* Owner = nullptr;
 };
 
-/** Authored shot definition plus its runtime state (kept separate per the GDD's reset contract). */
+/** Shot definition copied from a placed ADCShotMarker, plus its runtime state (kept separate per the GDD's reset contract). */
 struct FDCShot
 {
 	// Definition
+	ADCShotMarker* Marker = nullptr;
 	FString Id;
 	FString Name;
 	FString Caption;

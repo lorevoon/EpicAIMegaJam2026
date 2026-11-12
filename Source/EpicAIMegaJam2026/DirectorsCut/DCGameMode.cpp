@@ -18,7 +18,7 @@ ADCGameMode::ADCGameMode()
 
 void ADCGameMode::StartPlay()
 {
-	// Reuse a director placed in the level, otherwise build the whole set at runtime.
+	// Use the director placed in the level, or add one; either way it reads the scene from the level.
 	bool bHasDirector = false;
 	for (TActorIterator<ADCTakeDirector> It(GetWorld()); It; ++It)
 	{
@@ -26,11 +26,7 @@ void ADCGameMode::StartPlay()
 	}
 	if (!bHasDirector)
 	{
-		FActorSpawnParameters Params;
-		Params.bDeferConstruction = true;
-		ADCTakeDirector* Director = GetWorld()->SpawnActor<ADCTakeDirector>(ADCTakeDirector::StaticClass(), FTransform::Identity, Params);
-		Director->bSpawnLighting = bSpawnLighting;
-		Director->FinishSpawning(FTransform::Identity);
+		GetWorld()->SpawnActor<ADCTakeDirector>(ADCTakeDirector::StaticClass(), FTransform::Identity);
 	}
 
 	Super::StartPlay();
@@ -38,13 +34,12 @@ void ADCGameMode::StartPlay()
 
 AActor* ADCGameMode::ChoosePlayerStart_Implementation(AController* Player)
 {
-	// The take always starts from the director's fixed start mark.
+	// The take always starts from the level's DCStartMark.
 	if (!StartSpot)
 	{
-		const FTransform Start = GetDefault<ADCTakeDirector>()->GetStartTransform();
 		FActorSpawnParameters Params;
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		StartSpot = GetWorld()->SpawnActor<APlayerStart>(APlayerStart::StaticClass(), Start, Params);
+		StartSpot = GetWorld()->SpawnActor<APlayerStart>(APlayerStart::StaticClass(), ADCTakeDirector::FindStartTransform(GetWorld()), Params);
 	}
 	return StartSpot;
 }
