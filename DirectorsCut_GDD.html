@@ -2,191 +2,385 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Director’s Cut — Game Design Document</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Director's Cut GDD</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-:root{--bg:#10151b;--panel:#19212b;--ink:#edf0ed;--muted:#b5c1cb;--accent:#e9bd78;--line:#34414f}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 system-ui,sans-serif}header,main,footer{max-width:1120px;margin:auto;padding:48px 36px}header{padding-top:80px;border-bottom:1px solid var(--line)}.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:700}h1{font-size:clamp(44px,7vw,80px);line-height:1.05;letter-spacing:-.05em;margin:20px 0}h2{font-size:30px;margin:0 0 18px;letter-spacing:-.025em}h3{font-size:19px;color:var(--accent);margin-top:26px}.lead{font-size:22px;max-width:850px}.muted,small{color:var(--muted)}.tags{display:flex;gap:10px;flex-wrap:wrap}.tags span{border:1px solid var(--line);border-radius:30px;padding:5px 14px;font-size:13px}nav{display:flex;flex-wrap:wrap;gap:8px 22px;margin:28px 0}a{color:var(--accent)}section{padding:38px 0;border-bottom:1px solid var(--line);scroll-margin-top:20px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card,.callout{background:var(--panel);padding:22px;border:1px solid var(--line);border-radius:10px}.card h3{margin-top:0}.callout{border-left:4px solid var(--accent);margin:22px 0}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px;margin:20px 0}th,td{text-align:left;vertical-align:top;padding:13px;border-bottom:1px solid var(--line)}th{color:var(--accent);background:var(--panel)}code,pre{font-family:Consolas,monospace}code{font-size:.9em}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0b1016;border:1px solid var(--line);padding:22px;font-size:13px;line-height:1.6;border-radius:8px}li{margin:7px 0}.flow{font-size:20px;color:var(--accent);padding:22px 0}.number{color:var(--accent);font-size:13px;display:block;letter-spacing:.12em}footer{font-size:13px;color:var(--muted)}@media(max-width:750px){header,main,footer{padding:28px 20px}.grid{grid-template-columns:1fr}h2{font-size:25px}}@media print{body{background:white;color:#17202a;font-size:10pt}header,main,footer{padding:15px;max-width:none}header{padding-top:0}h1{font-size:40pt}h2{font-size:20pt}h3,a,.eyebrow,.number,th,.flow{color:#75501c}.muted,small,footer{color:#475460}.card,.callout,th,pre{background:#f3f4f5;color:#17202a;border-color:#ccc}section{padding:20px 0}nav{display:none}tr,.card{break-inside:avoid}pre{font-size:9pt}a{overflow-wrap:anywhere}}
+/* Layout: one production-document column, slate-style section heads, wide tables scroll in place. */
+:root {
+  --bg: #eef0f3;
+  --panel: #ffffff;
+  --ink: #16181d;
+  --muted: #59616d;
+  --line: #d3d8de;
+  --rose: #b4235a;
+  --rose-soft: #f6dde7;
+  --gold: #9a6510;
+  --gold-soft: #f6ead2;
+  --zombie: #4d7a1f;
+  --zombie-soft: #e2efd3;
+  --slate: #16181d;
+  --slate-ink: #f3f4f6;
+  --slate-accent: #ff86ad;
+  --font-display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121418; --panel: #1b1e24; --ink: #e8eaee; --muted: #9aa3ae; --line: #2d323b;
+    --rose: #ff7aa6; --rose-soft: #3a1f2a; --gold: #e3b45a; --gold-soft: #33291a;
+    --zombie: #9ad362; --zombie-soft: #223019; --slate: #050608; --slate-ink: #e8eaee;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121418; --panel: #1b1e24; --ink: #e8eaee; --muted: #9aa3ae; --line: #2d323b;
+  --rose: #ff7aa6; --rose-soft: #3a1f2a; --gold: #e3b45a; --gold-soft: #33291a;
+  --zombie: #9ad362; --zombie-soft: #223019; --slate: #050608; --slate-ink: #e8eaee;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 16px/1.62 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.6rem, 7vw, 4.4rem); font-stretch: 75%; font-weight: 800; line-height: .98; letter-spacing: -.01em; }
+h2 { font-size: clamp(1.6rem, 3.6vw, 2.1rem); font-stretch: 80%; font-weight: 750; line-height: 1.1; }
+h3 { font-size: 1.12rem; font-stretch: 90%; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--rose); }
+a:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+.mono, code, .tc { font-family: var(--font-mono); }
+code { font-size: .88em; background: var(--panel); border: 1px solid var(--line); padding: 1px 5px; border-radius: 4px; }
+.tc { font-variant-numeric: tabular-nums; font-size: .9em; white-space: nowrap; }
+
+/* Slate header */
+.slate { margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); background: var(--slate); color: var(--slate-ink); }
+.slate-in { max-width: 980px; margin: 0 auto; padding-block: 48px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; }
+.stripes { height: 14px; background: repeating-linear-gradient(-45deg, var(--slate-ink) 0 18px, var(--slate) 18px 36px); opacity: .9; }
+.slate-fields { display: flex; flex-wrap: wrap; gap: 10px 28px; font-family: var(--font-mono); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; opacity: .82; }
+.slate .lead { font-size: 1.2rem; max-width: 60ch; opacity: .92; }
+.slate h1 span { color: var(--slate-accent); }
+
+section { display: grid; gap: 18px; }
+.eyebrow { font-family: var(--font-mono); font-size: .76rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.cols > * { min-width: 0; }
+.note { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; display: grid; gap: 8px; align-content: start; }
+.note p { font-size: .95rem; }
+.flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-family: var(--font-display); font-stretch: 85%; font-weight: 700; font-size: 1.05rem; }
+.flow span.step { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; }
+.flow span.arrow { color: var(--muted); }
+
+ul, ol { margin: 0; padding-left: 1.25em; display: grid; gap: 6px; max-width: 72ch; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; white-space: nowrap; }
+td.k { font-weight: 600; white-space: nowrap; }
+
+.pill { display: inline-block; font-family: var(--font-mono); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.p-done { background: var(--zombie-soft); color: var(--zombie); }
+.p-todo { background: var(--rose-soft); color: var(--rose); }
+.p-nice { background: var(--gold-soft); color: var(--gold); }
+.req { color: var(--gold); font-weight: 600; }
+.zed { color: var(--zombie); font-weight: 600; }
+
+pre { margin: 0; overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; font: .86rem/1.6 var(--font-mono); }
+
+/* Schedule */
+.days { display: grid; gap: 14px; }
+.day { display: grid; grid-template-columns: 150px 1fr; gap: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; }
+.day > * { min-width: 0; }
+.day h3 { font-size: 1.25rem; }
+.day .date { display: grid; gap: 4px; align-content: start; }
+.day .date .mono { font-size: .8rem; color: var(--muted); }
+.day .gate { margin-top: 10px; font-size: .92rem; border-top: 1px dashed var(--line); padding-top: 10px; }
+.day .gate b { font-family: var(--font-mono); font-size: .76rem; letter-spacing: .1em; text-transform: uppercase; color: var(--rose); margin-right: 6px; }
+.day.freeze { border-color: var(--gold); }
+.day.deadline { border-color: var(--rose); }
+.lane { display: grid; gap: 4px; }
+.lane + .lane { margin-top: 10px; }
+.lane b { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 640px) { .day { grid-template-columns: 1fr; gap: 8px; } }
+
+footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 16px; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
 </head>
 <body>
-<header>
-<div class="eyebrow">2026 Epic AI MegaJam · Design specification v1.0</div>
-<h1>Director’s Cut</h1>
-<p class="lead">Plan the route. Call “Action!” Capture the essential scene—and risk everything to film the version only you could make.</p>
-<div class="tags"><span>First-person filmmaking</span><span>Route-planning time trial</span><span>Single player</span><span>Unreal Engine · Windows</span></div>
-<p class="muted">Working title · Prepared 12 November 2026 · Intended readers: game team and Unreal Engine MCP implementation agent.</p>
+<header class="slate">
+  <div class="stripes" aria-hidden="true"></div>
+  <div class="slate-in">
+    <div class="slate-fields"><span>Prod. Director's Cut</span><span>Scene 01 · Love in the Ruins</span><span>Take 60 s</span><span>2026 Epic AI MegaJam</span></div>
+    <h1>Director's Cut: <span>Love in the Ruins</span></h1>
+    <p class="lead">You are directing a romance film in the middle of a zombie apocalypse. Read the storyboard, study the rehearsal, rig the set with as many cameras as you need, then cut the take live. Capture every scene of the love story, and keep every zombie out of the movie.</p>
+    <div class="slate-fields"><span>GDD v2.0</span><span>Updated 12 Nov 2026</span><span>Unreal Engine 5.8 · Windows</span><span>Deadline Mon 16 Nov 10:00 HKT</span></div>
+  </div>
 </header>
-<main>
-<nav aria-label="Document sections"><a href="#vision">01 Vision</a><a href="#scope">02 Scope</a><a href="#loop">03 Game loop</a><a href="#capture">04 Capture rules</a><a href="#level">05 First set</a><a href="#score">06 Scoring</a><a href="#presentation">07 Presentation</a><a href="#unreal">08 Unreal specification</a><a href="#build">09 Build order</a><a href="#qa">10 Acceptance tests</a><a href="#handoff">11 MCP handoff</a></nav>
 
-<section id="vision"><span class="number">01 / VISION</span><h2>A film set becomes a timed route puzzle</h2>
-<p>You are a director operating the camera on a stylized classic-horror soundstage. Before a take, explore the set, learn the actors’ cues, and mark your route. Once you call “Action!”, the cast and environment perform a fixed sequence. Reach shooting positions and frame the action before each moment disappears.</p>
-<p>The studio needs one essential shot to approve the scene. Optional footage reveals additional character, setup, and aftermath: your <strong>Director’s Cut</strong>. A safe route delivers the assignment; a demanding route creates a richer version of the story.</p>
-<div class="grid"><div class="card"><h3>Plan with knowledge</h3><p>Shot windows and target positions are visible before the take. Failure should teach a better route, not reveal a hidden rule.</p></div><div class="card"><h3>Execute under pressure</h3><p>Movement, timing, and framing compete for attention. The scene continues even when the camera misses it.</p></div><div class="card"><h3>Choose your intention</h3><p>Bonus shots add narrative meaning. Success is possible without them; mastery captures the complete story.</p></div></div>
-<div class="callout"><strong>Design provenance.</strong> The player-director premise, classic-horror scenes, preparation phase, spray markings, possible rails, timed shooting spots, required and bonus footage, and predetermined performances come from the supplied concept. First-person controls, one-set scope, all values, scoring, shot timings, and architecture below are proposed implementation defaults. “Director’s Cut” is the game’s creative interpretation of the supplied theme; an extended runtime alone is not its definition.</div>
-<p><strong>Reference:</strong> Teardown inspires the preparation → committed timed execution rhythm. Destruction, theft, and simulation-heavy physics are outside this design.</p></section>
+<main class="wrap">
 
-<section id="scope"><span class="number">02 / SCOPE</span><h2>One excellent take for the jam</h2>
-<div class="table-wrap"><table><thead><tr><th>Priority</th><th>Deliverable</th></tr></thead><tbody>
-<tr><td>P0 · Required</td><td>One Dracula-inspired soundstage; first-person walking and sprinting; unlimited preparation; floor route markers; a 45-second scripted take; one mandatory and three optional shots; framing feedback; results; fast retry; packaged Windows build.</td></tr>
-<tr><td>P1 · After P0 passes</td><td>One configurable dolly rail, rehearsal playback, captured-shot thumbnails, saved best score, additional audio and visual polish.</td></tr>
-<tr><td>P2 · Stretch</td><td>Frankenstein-inspired second set, alternate shot lists, camera-path replay, more expressive bonus-shot combinations.</td></tr>
-<tr><td>Excluded from jam MVP</td><td>Actual video encoding, nonlinear editing, procedural actors, dialogue AI, multiplayer, destructible environments, freeform railway construction, asset marketplace or production-economy systems.</td></tr>
-</tbody></table></div>
-<p><strong>Session target:</strong> 5–10 minutes to learn, clear, and improve the first scene. A take lasts 45 seconds; preparation is untimed. The MVP ends with a completion screen after an approved take and offers replay. A “next scene” button appears only when another playable scene exists.</p>
-<p><strong>Platform defaults:</strong> desktop Windows, keyboard and mouse, Unreal Engine version already installed and supported by the team’s MCP connection. Do not change engine versions just for this document. Target 60 FPS at 1080p on the team’s declared test PC; record its hardware when testing.</p></section>
+<section id="vision">
+  <div class="eyebrow">Vision</div>
+  <h2>A love story, framed around the end of the world</h2>
+  <p>The studio wants a romance. The location is crawling with zombies. Your job is to find the angles that tell the love story and hide the apocalypse. Teardown inspires the rhythm: unlimited, calm preparation, then one committed, unforgiving take where the plan meets reality.</p>
+  <div class="cols">
+    <div class="note"><h3>Learn the scene</h3><p>The storyboard says what happens and in what order, never where or when. The rehearsal shows you the rest, at your own pace.</p></div>
+    <div class="note"><h3>Frame out the dead</h3><p>Every second a zombie is visible on the live camera costs points. Walls, a burned-out bus and a kiosk are your best friends.</p></div>
+    <div class="note"><h3>Cut it live</h3><p>Only the live camera records. With scenes overlapping, choosing when to cut is the core decision of the game.</p></div>
+  </div>
+</section>
 
-<section id="loop"><span class="number">03 / GAME LOOP</span><h2>Prepare → perform → review → improve</h2>
-<p class="flow" aria-label="Game flow">Briefing → Preparation → Countdown → Filming → Results ↻</p>
-<ol><li><strong>Briefing:</strong> read the required beat, optional story beats, and their time windows. A short instruction explains that position alone does not capture a shot.</li><li><strong>Preparation:</strong> walk the entire set with the cast at starting marks. Inspect shot markers and the timeline. Place or remove up to 24 floor spray markers. No score or clock pressure.</li><li><strong>Countdown:</strong> interact with the clapperboard. Return the player to the fixed starting mark, lock route editing, and display a three-second countdown. Explicitly show this start position during preparation.</li><li><strong>Filming:</strong> start the shared scene clock. Actors, props, lighting cues, shot windows, and HUD all use this clock. Move between positions and hold Record while aiming correctly.</li><li><strong>Results:</strong> finish at 45 seconds, or end early if a mandatory window closes uncaptured. Show approval status, footage captured, missed-shot reasons, score, and retry.</li><li><strong>Retry:</strong> reset actors, clock, props, effects, shot progress, and player position. Preserve floor markers and optional rail configuration. Return to preparation without reloading the map.</li></ol>
-<p><strong>Pause:</strong> freezes the scene clock, actor performance, and capture accumulation together. Restart during a take returns to preparation and discards that attempt. No lives, retry cost, or permanent failure.</p>
-<h3>Controls</h3><table><thead><tr><th>Input</th><th>Action</th></tr></thead><tbody><tr><td>WASD / Mouse</td><td>Move / look</td></tr><tr><td>Shift (hold)</td><td>Sprint; cannot record while sprinting</td></tr><tr><td>Left mouse (hold)</td><td>Record during filming; place floor marker during preparation</td></tr><tr><td>Right mouse</td><td>Remove the aimed-at floor marker during preparation</td></tr><tr><td>E</td><td>Interact with clapperboard; mount or dismount dolly if implemented</td></tr><tr><td>Tab</td><td>Toggle shot list; does not pause the take</td></tr><tr><td>R / Esc</td><td>Restart attempt / pause menu</td></tr></tbody></table>
-<p>Movement defaults: walk 450 cm/s, sprint 700 cm/s, no stamina, no required jumping. Fix the recording camera’s horizontal field of view at 75° for predictable scoring. Mouse sensitivity is adjustable; disable head bob and motion blur by default.</p>
-<h3>Optional dolly rail</h3><p>In preparation, choose one of two authored, collision-checked rail routes connecting bonus positions. During filming, mount at an endpoint and ride at 900 cm/s; aiming remains manual and recording is allowed. Dismount at endpoints only. No placement through scenery, moving actors, or mandatory capture zones. A rail improves the route but is never required for base completion. Freeform spline editing is deferred.</p></section>
+<section id="loop">
+  <div class="eyebrow">Game loop</div>
+  <h2>Four phases, then try again</h2>
+  <div class="flow" aria-label="Phase order"><span class="step">Storyboard</span><span class="arrow">→</span><span class="step">Preparation</span><span class="arrow">→</span><span class="step">Shooting</span><span class="arrow">→</span><span class="step">Evaluation</span><span class="arrow">↻</span></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Phase</th><th>What the player does</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td class="k">1 · Storyboard</td><td>Read the scenes in order: a sketch panel, a suggested angle and a one-line description for each. The required scene (the kiss) is marked. No times, no places.</td><td><span class="pill p-done">Text built</span> <span class="pill p-todo">Sketches + angles</span></td></tr>
+      <tr><td class="k">2 · Preparation</td><td>Walk the set freely while the rehearsal plays. Pause, play, change speed (0.5× to 4×) and scrub to any moment. Place static, dolly and crane cameras, aim them, and set where each starts. Optionally spray numbered markers.</td><td><span class="pill p-done">Cameras + scrub built</span> <span class="pill p-todo">Merge rehearsal with transport</span> <span class="pill p-nice">Markers</span></td></tr>
+      <tr><td class="k">3 · Shooting</td><td>Hit the clapperboard. Cut between cameras live; aim, smoothly zoom, drive dollies (with adjustable rail speed) and raise or lower cranes. The REC overlay and film look sell the shoot.</td><td><span class="pill p-done">Multi-cam cutting built</span> <span class="pill p-todo">Smooth zoom, rail speed, recording effect</span></td></tr>
+      <tr><td class="k">4 · Evaluation</td><td>Watch the replay of your edited film, then see the grade: scenes captured, zombie screen time, score and letter grade. Return to preparation with every camera kept.</td><td><span class="pill p-done">Results built</span> <span class="pill p-todo">Replay + letter grade</span></td></tr>
+    </tbody>
+  </table></div>
+  <p>Retry never reloads the map. Cameras, rails and markers persist between takes; actors, zombies, clock and scores reset.</p>
+</section>
 
-<section id="capture"><span class="number">04 / CAPTURE CONTRACT</span><h2>Be there, frame it, hold the shot</h2>
-<p>A shot captures only when <strong>all</strong> conditions hold continuously for its required duration. Entering the marker is necessary but insufficient.</p>
-<ol><li>The game is in Filming, and scene time is inside the shot’s inclusive start/end window.</li><li>The player’s ground-projected position is inside the assigned capture volume: initial default radius 150 cm with 200 cm vertical tolerance.</li><li>Record is held and sprint is inactive.</li><li>Every required framing anchor projects inside the central 70% of viewport width and height, is in front of the camera, and is between that shot’s minimum and maximum distance.</li><li>Each required anchor has a clear visibility trace from the camera. Ignore the player and cosmetic effects; the intended target actor is an acceptable trace hit. Walls, set dressing, and other actors can block the shot.</li></ol>
-<p>If any condition fails before capture, reset that shot’s continuous-hold timer to zero and show the highest-priority reason: wrong time → wrong position → not recording/sprinting → framing/distance → blocked. Completed shots stay captured and cannot award points twice. Evaluate every frame using scene-time delta; a paused frame adds nothing. Clamp accumulation to the portion of the frame inside the shot window, process capture first, then process window closure.</p>
-<p>Each shot has explicit framing anchors on its subjects. The bite requires both Dracula’s head and the victim’s head; single-subject bonus shots use one head or prop anchor. These anchors and distance ranges approximate composition for the MVP. They do not claim to judge cinematic quality or the visibility of an entire character.</p>
-<pre>For each uncaptured shot:
-  eligibleDelta = overlap(previousSceneTime, currentSceneTime, windowStart, windowEnd)
-  if all capture conditions pass and eligibleDelta > 0:
-    holdSeconds += eligibleDelta
-  else:
-    holdSeconds = 0
-  if holdSeconds >= requiredHoldSeconds:
-    mark Captured; emit ShotCaptured exactly once
-After evaluation:
-  if mandatory window has ended and shot is not Captured: end take as Failed
-  else if sceneTime >= takeDuration: evaluate required shots; show Results</pre>
-<p><strong>Forgiveness:</strong> begin with generous capture volumes and long shot windows. Tune position, framing, and timing separately. Avoid invisible accuracy bonuses, RNG, or penalties for aim motion.</p></section>
+<section id="controls">
+  <div class="eyebrow">Controls</div>
+  <h2>Keyboard and mouse</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Input</th><th>Preparation</th><th>Shooting</th></tr></thead>
+    <tbody>
+      <tr><td class="k mono">WASD / Mouse</td><td>Walk and look. While looking through a camera: mouse aims, W/S moves a dolly or crane.</td><td>Mouse aims the live camera; W/S drives its dolly or crane</td></tr>
+      <tr><td class="k mono">T</td><td>Cycle camera type: static, dolly, crane</td><td>–</td></tr>
+      <tr><td class="k mono">LMB / RMB</td><td>Place camera or rail point / remove camera or last rail point</td><td>–</td></tr>
+      <tr><td class="k mono">F</td><td>Finish rail and mount the dolly camera</td><td>–</td></tr>
+      <tr><td class="k mono">Wheel</td><td>Stand or crane height; zoom while looking through a camera</td><td>Smooth zoom</td></tr>
+      <tr><td class="k mono">1–9 · [ ]</td><td>Look through a camera to aim it</td><td>Cut to a camera</td></tr>
+      <tr><td class="k mono">← / →</td><td>Scrub the rehearsal</td><td>–</td></tr>
+      <tr><td class="k mono">Space · , .</td><td><span class="pill p-todo">New</span> Play/pause rehearsal · slower / faster</td><td>–</td></tr>
+      <tr><td class="k mono">Q / E</td><td>E: clapperboard / leave camera view</td><td><span class="pill p-todo">New</span> Rail speed down / up (proposal)</td></tr>
+      <tr><td class="k mono">Enter · R · P · Tab</td><td>Action! · reset · pause · storyboard</td><td>– · restart take · pause · storyboard</td></tr>
+    </tbody>
+  </table></div>
+</section>
 
-<section id="level"><span class="number">05 / PLAYABLE SCENE</span><h2>Dracula: The Midnight Visit</h2>
-<p>A theatrical castle bedroom sits inside a visible soundstage. Dracula enters, approaches a waiting victim, bites, and retreats. Optional footage turns the basic monster attack into a story of anticipation and remorse. Use original character designs and staging rather than reproducing a specific film adaptation.</p>
-<p><strong>Layout:</strong> a roughly 24 × 18 m navigable floor with an entry arch, bed, side mirror, curtained corridor, and backstage shortcuts. Low props shape the route without trapping the player. The actors’ blocking is separated from the main walking corridor. Actor collision must not push or snag the camera operator.</p>
-<table><thead><tr><th>ID / shot</th><th>Window / hold</th><th>Position and framing</th><th>Purpose / score</th></tr></thead><tbody>
-<tr><td>B01 · The invitation</td><td>6–12 s / 1.5 s</td><td>Desk-side mark; victim’s hand holding a letter; 150–500 cm</td><td>Bonus: the victim expected a visitor. +250</td></tr>
-<tr><td>B02 · A moment of doubt</td><td>16–22 s / 1.5 s</td><td>Arch-side mark; Dracula’s face as he hesitates; 200–650 cm</td><td>Bonus: reveal hesitation before the attack. +250</td></tr>
-<tr><td>M01 · The bite</td><td>26–33 s / 2 s</td><td>Bedside mark; both head anchors in frame; 200–600 cm</td><td>Mandatory: the studio’s essential story beat. 1,000</td></tr>
-<tr><td>B03 · The aftermath</td><td>37–43 s / 1.5 s</td><td>Curtain-side mark; Dracula looking back; 200–650 cm</td><td>Bonus: suggest remorse after the attack. +250</td></tr>
-</tbody></table>
-<h3>Authored performance</h3><p>0–6 s: entrance and establishing motion. 6–12 s: letter reveal held clearly. 12–16 s: approach. 16–22 s: hesitation pose. 22–26 s: move to victim. 26–33 s: stylized bite pose with minimal motion. 33–37 s: retreat. 37–43 s: look back. 43–45 s: final hold and “Cut!” The target pose remains readable throughout its advertised window.</p>
-<h3>Route feasibility</h3><p>Block out approximately 8 m from start to B01, 10 m B01→B02, 12 m B02→M01, and 10 m M01→B03, measured along walkable paths. At 700 cm/s, the longest transit is about 1.7 seconds before turns and framing. Place each shot’s capture mark so the complete bonus route has at least two seconds of spare arrival time per transition in a human test. A direct start→M01 route must be obvious and safe. These distances are blockout targets, not verified map measurements.</p>
-<p><strong>Tutorial:</strong> first show the essential bite marker, then explain the optional shots. The first attempt can ignore every bonus. During preparation, show a static cue card at each mark with subject, window, and an example framing diagram; animated rehearsal is optional.</p></section>
+<section id="cameras">
+  <div class="eyebrow">Camera rigs</div>
+  <h2>As many cameras as you want, three kinds</h2>
+  <div class="cols">
+    <div class="note"><h3>Static</h3><p>On a floor stand (40–320 cm), a wall or a ceiling. Its position is fixed after placement. Aim and zoom only.</p></div>
+    <div class="note"><h3>Dolly</h3><p>Lay rail points on any floor, wall or ceiling, then mount the camera. Rails cannot pass through scenery. Travel at an adjustable speed (base 600 cm/s).</p></div>
+    <div class="note"><h3>Crane</h3><p>Stands on the floor; the boom raises the lens from 40 to 800 cm. Great for looking over the bus and the barricade.</p></div>
+  </div>
+  <p>Whatever position and aim a camera has when you leave it during preparation is where it starts every take. Zoom runs from 20° to 90° horizontal field of view; zooming in extends the distance at which scenes still count.</p>
+</section>
 
-<section id="score"><span class="number">06 / SUCCESS &amp; REPLAY</span><h2>The studio approves; the director goes further</h2>
-<p><strong>Approval requires every mandatory shot.</strong> Bonus footage never substitutes for the bite. On failure, show captured bonus shots for feedback, but the attempt has no submitted score and does not update the best score.</p>
-<pre>ApprovedScore = 1,000 + (250 × capturedBonusCount)
-              + (capturedBonusCount == 3 ? 250 : 0)
-Maximum = 2,000 points</pre>
-<table><thead><tr><th>Required shot</th><th>Bonuses</th><th>Result</th></tr></thead><tbody><tr><td>Missed</td><td>Any</td><td>Retake required · No approved score</td></tr><tr><td>Captured</td><td>0</td><td>Studio Cut · 1,000</td></tr><tr><td>Captured</td><td>1</td><td>Extended Cut · 1,250</td></tr><tr><td>Captured</td><td>2</td><td>Extended Cut · 1,500</td></tr><tr><td>Captured</td><td>3</td><td>Director’s Cut · 2,000</td></tr></tbody></table>
-<p>Results list footage in story order with a sentence explaining what each optional beat adds. Present a storyboard strip using authored cards in P0; actual still captures are P1. No exported movie is promised. There is no speed bonus: the challenge is being present at the right moments.</p></section>
+<section id="rules">
+  <div class="eyebrow">Capture rules</div>
+  <h2>What counts as filming a scene, and what counts as a zombie in shot</h2>
+  <div class="cols">
+    <div class="note"><h3>A scene is captured when</h3>
+      <ul>
+        <li>its time window is running and the camera is the live one;</li>
+        <li>every subject (head, prop or body) sits inside the central 70% of the frame;</li>
+        <li>each subject is within range (2,000 cm, more when zoomed) and not blocked by scenery;</li>
+        <li>face-required subjects are seen from the front;</li>
+        <li>all of that holds continuously for the scene's hold time (1.5–2.5 s). Cutting away resets the hold.</li>
+      </ul>
+    </div>
+    <div class="note"><h3>A zombie is in shot when</h3>
+      <ul>
+        <li>its head or body is anywhere in the live camera's full frame;</li>
+        <li>within 4,000 cm and not hidden behind scenery.</li>
+      </ul>
+      <p class="zed">Penalty: −150 points per second, with a red frame alarm.</p>
+    </div>
+  </div>
+</section>
 
-<section id="presentation"><span class="number">07 / PRESENTATION</span><h2>Readable filmmaking, theatrical horror</h2>
-<p><strong>Art:</strong> stylized period horror, strong silhouettes, warm practical lamps against cool moonlight, visible flats and studio equipment at the set edges. Use restrained bloodless staging for the bite. Optional footage should feel like intentional storytelling, not collectible hunting.</p>
-<p><strong>HUD:</strong> phase label, large take clock, required-shot status, upcoming shot countdown, and a compact timeline. The active shot displays a framing bracket, hold-progress ring, and specific invalid-condition text. Gold means mandatory, cyan means optional; icons and words repeat the distinction. Captured markers become checkmarks. Floor spray is visible from the player view but never obscures subjects.</p>
-<p><strong>Audio:</strong> clapperboard, “Action!”, timed actor cues, a recording hum, capture chime, last-five-seconds cue, and “Cut!”. Subtitle all spoken cues. Use audio as reinforcement, never the sole way to detect a shot window.</p>
-<p><strong>Accessibility:</strong> adjustable sensitivity, high-contrast text, no required camera shake, no flashing failure effect, pause, and repeatable attempts. Minimum 18 px-equivalent HUD text at 1080p. Keep default route markers distinct from interactive shot markers.</p>
-<p><strong>Minimum assets:</strong> two actors; a castle-room modular kit; bed, letter, curtains, and arch; camera/clapperboard props or simple UI equivalents; four shot markers; one spray decal; a short performance sequence; HUD, briefing, pause, and results widgets; a small set of cue sounds. Placeholder meshes and pose holds are sufficient for initial validation.</p></section>
+<section id="scene">
+  <div class="eyebrow">Playable scene</div>
+  <h2>Love in the Ruins: the town square at sunset</h2>
+  <p>A 30 × 24 m square inside ruined brick walls, with the exit to the sunset in the east wall. A fountain in the middle; a wrecked car south-west; a crate barricade and dumpster south-east; a burned-out bus north-west; a kiosk north-east. Sam and Ellie play the scene; five zombies wander through on fixed routes.</p>
+  <h3>Storyboard (what the player sees, in order)</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Scene</th><th>Window (hidden)</th><th>Hold</th><th>Subjects</th><th>Points</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Sam scavenges a can of peaches from a wrecked car.</td><td class="tc">00:07–00:13</td><td class="tc">2.0 s</td><td>Sam's can</td><td class="tc">200</td></tr>
+      <tr><td>2</td><td>Ellie watches him from behind a barricade.</td><td class="tc">00:09–00:15</td><td class="tc">2.0 s</td><td>Ellie's face</td><td class="tc">200</td></tr>
+      <tr><td>3</td><td>They meet at the fountain: she aims her crossbow, he raises his hands.</td><td class="tc">00:19–00:25</td><td class="tc">2.0 s</td><td>Crossbow + Sam's head</td><td class="tc">250</td></tr>
+      <tr><td>4</td><td>He offers her the peaches.</td><td class="tc">00:26–00:32</td><td class="tc">2.0 s</td><td>The can + Ellie's face</td><td class="tc">250</td></tr>
+      <tr><td>5</td><td>They share a laugh by the fountain.</td><td class="tc">00:33–00:39</td><td class="tc">2.0 s</td><td>Both heads</td><td class="tc">250</td></tr>
+      <tr><td>6</td><td><span class="req">The kiss. (required)</span></td><td class="tc">00:41–00:47</td><td class="tc">2.5 s</td><td>Both heads</td><td class="tc">1,000</td></tr>
+      <tr><td>7</td><td>They walk off together toward the sunset.</td><td class="tc">00:50–00:58</td><td class="tc">2.0 s</td><td>Both bodies</td><td class="tc">300</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Zombies (the obstacles)</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Zombie</th><th>Route and timing</th><th>Ruins the obvious angle on</th></tr></thead>
+    <tbody>
+      <tr><td class="k zed">Car</td><td>Shambles past behind Sam <span class="tc">00:00–00:10</span>, then lingers in the south-west corner</td><td>Scene 1 from the south; wide shots looking west</td></tr>
+      <tr><td class="k zed">Alley</td><td>Shuffles in behind the barricade from the south-east <span class="tc">00:04–00:16</span></td><td>Scene 2, which must be filmed from the west</td></tr>
+      <tr><td class="k zed">Shambler</td><td>Crosses north of the fountain <span class="tc">00:18–00:40</span></td><td>Scenes 3–5 filmed from the south</td></tr>
+      <tr><td class="k zed">Bus</td><td>Hides behind the bus, steps out toward the lovers <span class="tc">00:36–01:00</span></td><td>The kiss filmed from the south</td></tr>
+      <tr><td class="k zed">Kiosk</td><td>Lurches toward the exit <span class="tc">00:44–01:00</span></td><td>The walk-off filmed from the west</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Story pass needed.</b> The team noted the story needs more thought. Scene lines, captions and blocking are all editable in the level, so a rewrite costs level time, not code time.</p>
+</section>
 
-<section id="unreal"><span class="number">08 / UNREAL IMPLEMENTATION SPECIFICATION</span><h2>One clock, data-driven shots, reliable resets</h2>
-<p>This is a proposed Blueprint-first architecture, not a claim that assets or an MCP connection already exist. Keep gameplay logic out of the Level Blueprint. Use C++ only where the connected tool or existing project makes it preferable.</p>
-<table><thead><tr><th>Asset / responsibility</th><th>Implementation contract</th></tr></thead><tbody>
-<tr><td><code>BP_DCGameMode</code></td><td>Own phase enum: Briefing, Preparation, Countdown, Filming, Results, Paused. Store previous phase for pause/resume. Gate all player actions by phase.</td></tr>
-<tr><td><code>BP_DCTakeDirector</code></td><td>Own active scene definition, canonical time, sequence reference, start/reset/end commands, and result. Expose OnPhaseChanged, OnShotCaptured, OnTakeEnded. Ensure end-take fires once.</td></tr>
-<tr><td><code>BP_DCPlayerCharacter</code></td><td>First-person camera, movement, sprint/record exclusivity, interactions, floor-marker trace. Enhanced Input actions under a dedicated mapping context.</td></tr>
-<tr><td><code>BP_DCShotMarker</code></td><td>Editable ShotId and capture volume; resolve shot data and framing anchors. Display marker, window, and capture state. No independent scene clock.</td></tr>
-<tr><td><code>BPC_DCShotEvaluator</code></td><td>Evaluate capture conditions, continuous-hold timers, and failure reason. Return captured IDs; never calculate bonus rewards repeatedly on Tick.</td></tr>
-<tr><td><code>LS_DC_DraculaTake</code></td><td>Authored actor transforms/poses and deterministic environmental cues. No gameplay camera-cut track; retain the player’s camera. Clock is the sequence playback position during Filming, read by the director.</td></tr>
-<tr><td><code>BP_DCPrepMarkerManager</code></td><td>Manage up to 24 route decals; floor-only placement within 800 cm. Preserve on retry; clear on scene change or explicit Clear Route action.</td></tr>
-<tr><td><code>WBP_DCBriefing / HUD / Results / Pause</code></td><td>Read director/evaluator state. UI does not own timing or scoring. Results expose retry and menu actions.</td></tr>
-<tr><td><code>BP_DCDollyRail</code> · P1</td><td>Authored spline routes, mounted movement, endpoint interaction, configuration saved across retries.</td></tr>
-<tr><td><code>SG_DirectorsCut</code> · P1</td><td>Persist approved best score by SceneId and player settings. P0 retains best score for the current session only.</td></tr>
-</tbody></table>
-<h3>Data contract</h3>
-<pre>FShotDefinition
-  ShotId: Name (unique within scene)
-  DisplayName: Text
-  bMandatory: Boolean
-  WindowStartSeconds, WindowEndSeconds: Float
-  RequiredHoldSeconds: Float
-  MarkerId: Name
-  RequiredAnchorIds: Array&lt;Name&gt;
-  MinDistanceCm, MaxDistanceCm: Float
-  SafeFrameFraction: Float = 0.70
-  Points: Integer
-  StoryCaption: Text
+<section id="scoring">
+  <div class="eyebrow">Evaluation</div>
+  <h2>Replay first, then the grade</h2>
+  <pre>Scene points  = sum of captured scenes            (max 2,450)
+Zombie cost   = 150 × seconds a zombie was on the live camera
+Final score   = max(0, Scene points − Zombie cost)   if the kiss was captured
+              = 0, "Retake required"                  otherwise</pre>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Grade</th><th>Condition</th></tr></thead>
+    <tbody>
+      <tr><td class="k">S · Director's Cut</td><td>Score ≥ 2,200 (90%) and zero zombie screen time</td></tr>
+      <tr><td class="k">A</td><td>Score ≥ 1,840 (75%)</td></tr>
+      <tr><td class="k">B</td><td>Score ≥ 1,350 (55%)</td></tr>
+      <tr><td class="k">C · Studio Cut</td><td>The kiss was captured</td></tr>
+      <tr><td class="k">Retake</td><td>The kiss was missed</td></tr>
+    </tbody>
+  </table></div>
+  <p>The replay plays back exactly what went out live: every cut, aim, zoom and dolly move, recorded 30 times a second, with letterboxing and the recording look. Zombie moments flash a small red marker on the replay's timeline so players learn where they slipped.</p>
+</section>
 
-FSceneDefinition
-  SceneId: Name
-  DisplayName: Text
-  TakeDurationSeconds: Float = 45
-  Sequence: LevelSequence reference
-  StartTransform: Transform
-  Shots: Array&lt;FShotDefinition&gt;
-  AllBonusReward: Integer = 250
+<section id="presentation">
+  <div class="eyebrow">Presentation</div>
+  <h2>Low-poly, golden hour, home-movie romance</h2>
+  <ul>
+    <li><b>Art:</b> low-poly 3D asset packs (originally made for Unity) imported into Unreal: two survivors, a zombie set, and a ruined-town kit. Check each pack's licence allows use in Unreal and in a public jam build, and list it in the credits.</li>
+    <li><b>Recording effect:</b> REC dot and timecode, letterbox bars, light grain and vignette on the live feed; a short whip or flash on each cut.</li>
+    <li><b>Audio:</b> ambience, distant groans, clapperboard, "Action!" and "Cut!", a romantic theme that plays under the replay.</li>
+    <li><b>HUD:</b> phase, take clock, camera switcher with type labels, scene gauges for the live camera, zombie alarm. Required scene in gold, zombies in green, live camera in red.</li>
+  </ul>
+</section>
 
-Runtime per shot (never write into definition)
-  Status: Pending | Captured | Missed
-  ContinuousHoldSeconds: Float
-  LastFailureReason: Enum
-  CapturedAtSeconds: Float (unset until captured)</pre>
-<p>Store definitions as a Data Asset or Data Table according to tool support. Validate on load: unique IDs, existing markers/anchors, at least one mandatory shot, 0 ≤ start &lt; end ≤ duration, hold ≤ window length, and valid distance ranges. Invalid definitions block the take with a useful developer message.</p>
-<h3>Reset contract</h3><p>Stop and seek the sequence to zero; restore recorded initial transforms and relevant prop/light state; clear latent timers, temporary effects, audio, captured flags, and evaluator progress; release sprint/record inputs; teleport the player to the start; restore input mode and HUD; preserve prep markers. Explicit reset must work even if the sequence ended normally or was stopped early. Do not depend only on automatic sequence state restoration.</p>
-<h3>Suggested asset layout</h3><pre>/Game/DirectorsCut/
-  Blueprints/{Core,Player,Shots,Preparation}/
-  Data/    UI/    Input/    Audio/    Art/
-  Maps/L_DC_Dracula
-  Sequences/LS_DC_DraculaTake</pre>
-<p><strong>Performance:</strong> evaluate only shots whose windows are active. Four shots require little work; avoid per-frame actor searches. Cache subject and marker references. Defer render-target recording and replay systems until core performance is measured.</p></section>
+<section id="tech">
+  <div class="eyebrow">Unreal implementation</div>
+  <h2>What exists in the project today</h2>
+  <p>All gameplay is C++ in <code>Source/EpicAIMegaJam2026/DirectorsCut/</code>, built so designers edit everything in the level. The game level is <code>L_DC_Zombie</code> with <code>DCZombieGameMode</code>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Class</th><th>Responsibility</th></tr></thead>
+    <tbody>
+      <tr><td class="k mono">DCZombieDirector</td><td>Phases (storyboard, rehearsal, planning, shooting, results), scene clock, scrubbing, zombie penalty, scoring. Holds the <b>Build Zombie Scene</b> button. Extends the multi-cam director.</td></tr>
+      <tr><td class="k mono">DCMultiCamDirector</td><td>Camera placement (static, dolly, crane, unlimited), live switching, scene capture rules.</td></tr>
+      <tr><td class="k mono">DCMultiCam · DCRail</td><td>A placed camera and its mount; dolly rails on any surface.</td></tr>
+      <tr><td class="k mono">DCPerformer · DCWaypoint</td><td>Actors and zombies (<code>Ruins Shot</code> flag), with blocking as draggable waypoints: time, facing, lean, prop raise, tilt.</td></tr>
+      <tr><td class="k mono">DCBeat</td><td>One storyboard scene: text, hidden window, hold, subjects, points.</td></tr>
+      <tr><td class="k mono">DCSetPiece · DCStartMark · DCClapperboard</td><td>Blockout geometry, player start, take trigger.</td></tr>
+      <tr><td class="k mono">DCZombieHUD · DCMultiCamCharacter</td><td>Canvas HUD; the director on foot and their key bindings.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Earlier prototypes stay in the project for reference (<code>L_DC_Dracula</code>, <code>L_DC_Castle</code>, <code>L_DC_MultiCam</code>, <code>L_DC_Replica</code>) and are excluded from the packaged build. Spray markers can be ported from the Replica prototype.</p>
+</section>
 
-<section id="build"><span class="number">09 / BUILD PLAN</span><h2>Ship the loop before expanding the film</h2>
-<table><thead><tr><th>Stage</th><th>Work</th><th>Exit gate</th></tr></thead><tbody>
-<tr><td>1 · Foundation</td><td>Inspect project and MCP abilities; create dedicated asset folders, map, input, player, phases, and director.</td><td>Preparation → countdown → 45-second take → results → retry works.</td></tr>
-<tr><td>2 · Essential shot</td><td>Two placeholder actors, bite pose, shot definition, capture checks, failure feedback.</td><td>A properly framed bite passes; wrong position, timing, or visibility fails.</td></tr>
-<tr><td>3 · Full route</td><td>Three bonus beats, route decals, timeline HUD, scoring, repeatable reset.</td><td>Base-only and all-bonus routes are both achievable. Maximum score is exactly 2,000.</td></tr>
-<tr><td>4 · Playable build</td><td>Package Windows build; run outside the editor; fix controls, missing assets, and startup map.</td><td>A new player can understand and complete one take without developer help.</td></tr>
-<tr><td>5 · Presentation</td><td>Replace placeholders, improve cues, lighting, results cards, and readability.</td><td>Stable packaged gameplay with consistent visual and audio feedback.</td></tr>
-<tr><td>6 · Optional expansion</td><td>Add dolly rail or second scene only if all prior gates pass.</td><td>New feature preserves deterministic timing and does not block packaging.</td></tr>
-</tbody></table>
-<p><strong>Four-day allocation:</strong> Day 1 foundation and mandatory shot; Day 2 full route and first packaged build; Day 3 playtesting and presentation; Day 4 regression, final package, gameplay video, and submission buffer. Cut P1/P2 features first if behind schedule.</p>
-<p><strong>Primary risks:</strong> route feels trivial → tune travel and aiming after measuring player runs; capture feels arbitrary → show the exact failing condition; retries diverge → centralize reset and clock ownership; filming scope expands → keep capture as objective completion rather than video export; actors obscure each other → author readable holds and verify anchor visibility from the intended marks.</p></section>
+<section id="schedule">
+  <div class="eyebrow">Schedule · HKT · working hours 10:00–24:00</div>
+  <h2>Four days to a packaged build</h2>
+  <p>Owners are not assigned yet. The plan splits the work into four lanes so each person can own one: <b>Systems</b> (C++), <b>Level</b> (layout, blocking, zombies, story), <b>Art &amp; Audio</b> (assets, effects, sound), <b>UI &amp; Ship</b> (HUD, menus, packaging, video). Every day ends with a packaged build, so problems surface early.</p>
+  <div class="days">
+    <div class="day">
+      <div class="date"><h3>Thu 12</h3><span class="mono">Tonight · setup</span></div>
+      <div>
+        <div class="lane"><b>All</b><ul><li>Commit the prototypes; agree this GDD; assign lane owners.</li><li>Set <code>L_DC_Zombie</code> as the startup and default map.</li></ul></div>
+        <div class="lane"><b>Art &amp; Audio</b><ul><li>Pick the low-poly packs (two survivors, zombies, town kit); confirm licences and record credits.</li></ul></div>
+        <div class="lane"><b>UI &amp; Ship</b><ul><li>Package a first Windows build of the current prototype and run it on a second PC.</li></ul></div>
+        <p class="gate"><b>Gate</b>Packaged build opens on the storyboard.</p>
+      </div>
+    </div>
+    <div class="day">
+      <div class="date"><h3>Fri 13</h3><span class="mono">Core features</span></div>
+      <div>
+        <div class="lane"><b>Systems</b><ul><li>Merge rehearsal into preparation with play, pause, speed (0.5×–4×) and scrub.</li><li>Smooth zoom; rail speed adjustment.</li><li>Record the live feed each frame and play it back as the replay; add the letter grade.</li></ul></div>
+        <div class="lane"><b>Level</b><ul><li>Replace blockout with the imported town kit, keeping cover where zombies need hiding.</li><li>Story pass: final scene list and captions.</li></ul></div>
+        <div class="lane"><b>Art &amp; Audio</b><ul><li>Rig survivors and zombies on performers with idle and walk animations.</li></ul></div>
+        <div class="lane"><b>UI &amp; Ship</b><ul><li>Storyboard cards with sketch, angle and description; evaluation screen layout.</li></ul></div>
+        <p class="gate"><b>Gate</b>Storyboard → preparation → shooting → replay → grade works in a packaged build.</p>
+      </div>
+    </div>
+    <div class="day">
+      <div class="date"><h3>Sat 14</h3><span class="mono">Content &amp; feel</span></div>
+      <div>
+        <div class="lane"><b>Systems</b><ul><li>Recording effect and cut transitions; spray markers if time allows.</li><li>Profiling and shooting optimisation toward 60 FPS at 1080p.</li></ul></div>
+        <div class="lane"><b>Level</b><ul><li>Two playtests with fresh players; tune zombie routes, windows, holds and the penalty.</li></ul></div>
+        <div class="lane"><b>Art &amp; Audio</b><ul><li>Lighting pass, ambience, groans, clapperboard, Action/Cut, replay music.</li></ul></div>
+        <div class="lane"><b>UI &amp; Ship</b><ul><li>Title screen, pause menu with quit, controls card.</li></ul></div>
+        <p class="gate"><b>Gate</b>A new player finishes a take without help; feature complete by 24:00.</p>
+      </div>
+    </div>
+    <div class="day freeze">
+      <div class="date"><h3>Sun 15</h3><span class="mono">Code freeze · polish</span></div>
+      <div>
+        <div class="lane"><b>All</b><ul><li>Code freeze at 10:00. Bug fixes, readability and performance only.</li><li>Record the 30–60 s gameplay video; write the itch.io page, credits and tools-used list.</li></ul></div>
+        <p class="gate"><b>Gate</b>Final packaged build tested on two PCs by 22:00.</p>
+      </div>
+    </div>
+    <div class="day deadline">
+      <div class="date"><h3>Mon 16</h3><span class="mono">Submit by 10:00</span></div>
+      <div>
+        <div class="lane"><b>UI &amp; Ship</b><ul><li>Upload the build and video by 08:00, leaving two hours of buffer. The jam closes at 09:59 HKT.</li></ul></div>
+      </div>
+    </div>
+  </div>
+  <h3>If we fall behind, cut in this order</h3>
+  <ol>
+    <li>Spray markers (already marked nice-to-have).</li>
+    <li>Storyboard sketches (keep text and angle notes).</li>
+    <li>Skeletal animation (keep low-poly static meshes sliding on their routes).</li>
+    <li>Rail speed adjustment (keep the fixed speed).</li>
+    <li>Extra audio beyond Action, Cut and ambience.</li>
+  </ol>
+  <p>Never cut: the four phases, the replay, the zombie penalty, or the daily packaged build.</p>
+</section>
 
-<section id="qa"><span class="number">10 / ACCEPTANCE TESTS</span><h2>Observable behavior defines “done”</h2>
-<ol><li><strong>Basic approval:</strong> capture M01 only. Result is Studio Cut, 1,000 points, and scene completion.</li><li><strong>Full cut:</strong> capture all four shots. Result is Director’s Cut, exactly 2,000 points; no duplicate reward after holding Record longer.</li><li><strong>Mandatory failure:</strong> miss M01 with bonuses captured. End immediately after its window closes; show Retake Required and do not update approved best score.</li><li><strong>Capture gating:</strong> test outside volume, behind camera, out of safe frame, out of distance, blocked by a wall, before/after window, and while sprinting. Each prevents capture and provides the correct reason.</li><li><strong>Continuous hold:</strong> break a valid shot halfway through. Progress resets; reentering requires the full uninterrupted hold.</li><li><strong>Timing boundaries:</strong> capture at the end of a window; award only if enough eligible hold time accumulated. Repeat at 30, 60, and 120 FPS caps; no pause or outside-window time is counted.</li><li><strong>Pause:</strong> pause mid-hold for five seconds. Actor, clock, and progress remain frozen and resume together.</li><li><strong>Reset:</strong> retry ten times, including early restart and failure. Actors, light cues, shot status, and player start match; route marks remain; no duplicated sound or callbacks.</li><li><strong>Route fairness:</strong> a tester completes both the direct mandatory route and all-bonus route on foot. Record timings and adjust any transition lacking the intended arrival margin.</li><li><strong>Packaged build:</strong> launch on the test PC without the editor. Complete, fail, retry, pause, and exit successfully; verify startup map, controls, text legibility, and performance target.</li></ol></section>
+<section id="tests">
+  <div class="eyebrow">Acceptance tests</div>
+  <h2>Done means a player can do this</h2>
+  <ol>
+    <li>Read the storyboard, rehearse at 2× and paused, and scrub to the kiss.</li>
+    <li>Place one camera of each type; set a dolly's start and a crane's height; see them restored after a retake.</li>
+    <li>Capture the kiss only: the grade is C, Studio Cut.</li>
+    <li>Leave a zombie on the live camera for 2 s: exactly 300 points are lost and the alarm shows.</li>
+    <li>Cut away halfway through a scene: its hold resets.</li>
+    <li>Miss the kiss: "Retake required", no best score saved.</li>
+    <li>Watch the replay: every cut and camera move matches the take.</li>
+    <li>Retake ten times in a row: actors, zombies, clock and scores reset; cameras stay.</li>
+    <li>The packaged build runs outside the editor at 60 FPS at 1080p and exits cleanly.</li>
+  </ol>
+</section>
 
-<section id="handoff"><span class="number">11 / MCP HANDOFF</span><h2>Implementation brief for the connected agent</h2>
-<p>Copy this brief with the document into the Unreal agent’s context. MCP capabilities vary; these are requirements and staged tasks, not executable MCP commands. This document does not connect to Unreal or create a project.</p>
-<pre>You are implementing Director’s Cut from this GDD.
+<section id="open">
+  <div class="eyebrow">Open questions</div>
+  <h2>Decide before Friday morning</h2>
+  <ul>
+    <li><b>Story:</b> keep Sam and Ellie's seven scenes, or rewrite? Edits are level work only.</li>
+    <li><b>Shooting optimisation:</b> performance (frame rate), or making shooting easier to control? The schedule assumes performance.</li>
+    <li><b>Rail speed:</b> one speed per rail set in preparation, or adjustable live with Q/E? The table assumes live.</li>
+    <li><b>Camera count:</b> unlimited today. Add a budget (for example, a cost per camera) if playtests show players simply cover everything.</li>
+    <li><b>Owners:</b> who takes each of the four lanes.</li>
+  </ul>
+</section>
 
-1. Inspect the current Unreal project, engine version, enabled plugins,
-   existing assets, and actual connected MCP tools. Report the findings.
-   The workspace folder name is not evidence of the engine in use.
-   If no Unreal project is available, identify the missing project/setup
-   before performing project-dependent operations.
-2. Treat user-supplied core concept as fixed. Treat numerical defaults
-   as tunable. Implement only P0 until its acceptance tests pass.
-3. Use /Game/DirectorsCut for new assets. Reuse appropriate existing
-   assets and avoid overwriting unrelated project content.
-4. Implement build stages 1–4 in order. Start with placeholder geometry.
-   After each stage, compile affected Blueprints, run the relevant
-   acceptance checks, and report observed results and remaining issues.
-5. Preserve these invariants: one scene clock; deterministic performance;
-   all mandatory shots required; bonuses optional; continuous valid
-   recording; one reward per shot; complete reset; preserved route marks.
-6. Do not add actual video recording, multiplayer, procedural NPCs,
-   destruction, or a second map as part of P0.
-7. Use tool-supported operations only. If a required editor operation
-   is unavailable, state the limitation and provide a precise manual
-   step or compatible implementation fallback. Do not invent tool names
-   or claim an operation/test succeeded without observing it.
-8. Deliver the playable map, assets, packaged build where supported,
-   changed-asset inventory, validation results, and known limitations.
-</pre>
-<h3>Jam delivery notes</h3><p>The jam overview requires a packaged Unreal submission and a 30–60-second gameplay video. Prepare the team/game details, asset credits, and tools-used list alongside the build. The published deadline converts to <strong>16 November 2026, 09:59 Hong Kong time</strong>; reserve upload time before it. These notes summarize the overview, not the full Official Rules. <a href="https://itch.io/jam/2026-epic-ai-megajam">Source: 2026 Epic AI MegaJam overview</a>, checked 12 November 2026.</p>
-<p><strong>Remaining production choices:</strong> confirm the installed Unreal/MCP setup, asset sources, test-PC hardware, and final title at implementation kickoff. These do not block the proposed gameplay specification. The theme “Director’s Cut” is supplied by the user.</p></section>
+<footer>Director's Cut · GDD v2.0 · Replaces v1.0 (Dracula: The Midnight Visit). Sources: team planning doc and the five in-engine prototypes built on 12 Nov 2026.</footer>
 </main>
-<footer>Director’s Cut · GDD v1.0 · Standalone HTML with no external dependencies · Use browser Print → Save as PDF for a print copy.</footer>
 </body>
 </html>
