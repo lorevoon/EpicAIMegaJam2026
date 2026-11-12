@@ -117,6 +117,7 @@ void ADCZombieDirector::HandleTransportToggle()
 {
 	if (Phase != EDCPhase::Preparation)
 	{
+		Super::HandleTransportToggle();
 		return;
 	}
 	if (!bRehearsalPlaying && SceneTime >= TakeDuration)
@@ -138,6 +139,7 @@ void ADCZombieDirector::HandleScrub(float DeltaSeconds)
 {
 	if (Phase != EDCPhase::Preparation)
 	{
+		Super::HandleScrub(DeltaSeconds);
 		return;
 	}
 	SceneTime = FMath::Clamp(SceneTime + DeltaSeconds, 0.f, TakeDuration);

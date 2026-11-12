@@ -85,6 +85,9 @@ public:
 	 */
 	void SetFrameMasked(bool bMasked);
 
+	/** Hides the whole rig (camera, mount, label, and a dolly's rail), e.g. while the recorded film plays back. */
+	void SetRigHidden(bool bHide);
+
 	/** Tints the whole camera (used for the placement ghost). */
 	void SetTint(const FLinearColor& Color);
 

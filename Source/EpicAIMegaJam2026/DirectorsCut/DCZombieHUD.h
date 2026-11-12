@@ -27,6 +27,7 @@ private:
 	void DrawSwitcher(ADCZombieDirector* D);
 	void DrawHelp(ADCZombieDirector* D);
 	void DrawResults(ADCZombieDirector* D);
+	void DrawPremiere(ADCZombieDirector* D);
 
 	void Label(const FString& Text, float X, float Y, const FLinearColor& Color, float Scale = 1.f, bool bCenter = false);
 	bool ProjectVisible(const FVector& World, FVector2D& OutScreen) const;

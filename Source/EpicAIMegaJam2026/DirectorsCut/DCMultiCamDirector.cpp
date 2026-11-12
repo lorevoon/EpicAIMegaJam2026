@@ -7,6 +7,8 @@
 #include "DCPerformer.h"
 #include "DCRail.h"
 #include "DCSceneMarks.h"
+#include "Algo/BinarySearch.h"
+#include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -59,6 +61,8 @@ void ADCMultiCamDirector::BeginPlay()
 	Params.Owner = this;
 	Ghost = GetWorld()->SpawnActor<ADCMultiCam>(ADCMultiCam::StaticClass(), FTransform::Identity, Params);
 	Ghost->SetActorHiddenInGame(true);
+	PlaybackCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FTransform::Identity, Params);
+	PlaybackCamera->GetCameraComponent()->SetConstraintAspectRatio(false);
 
 	ResetScene();
 	Flash(IsUnlimited() ? FString(TEXT("Place as many cameras as you like. T switches between static, dolly, and crane."))
@@ -179,8 +183,8 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		break;
 	}
 
-	case EDCPhase::Results:
-		EnsureLiveCamera();
+	case EDCPhase::Premiere:
+		TickPremiere(DeltaSeconds);
 		break;
 
 	default:
@@ -217,6 +221,11 @@ bool ADCMultiCamDirector::EnsureLiveCamera()
 
 void ADCMultiCamDirector::HandleStartTake()
 {
+	if (Phase == EDCPhase::Premiere)
+	{
+		FinishPremiere(); // Enter skips to the results
+		return;
+	}
 	if (Phase != EDCPhase::Preparation)
 	{
 		return;
@@ -292,6 +301,9 @@ void ADCMultiCamDirector::ResetScene()
 	}
 	ViewWalking();
 	SetRigsFrameMasked(false);
+	SetRigsHidden(false);
+	Recording.Reset();
+	bPremierePaused = false;
 	if (ADCMultiCamCharacter* Player = GetPlayer())
 	{
 		Player->ResetToStart(StartTransform);
@@ -338,7 +350,122 @@ void ADCMultiCamDirector::EndTake()
 	{
 		BestScore = FMath::Max(BestScore, Score);
 	}
-	Flash(TEXT("CUT!"), 2.f);
+	StartPremiere();
+}
+
+// ---------------------------------------------------------------------------------------------
+// Recording and premiere: the take is re-shot from the recorded camera poses (the scene is driven
+// purely by the scene clock, so replaying the clock replays the performance exactly).
+
+void ADCMultiCamDirector::RecordSample()
+{
+	const ADCMultiCam* Live = GetCameraSlot(ViewingSlot);
+	if (!Live)
+	{
+		return;
+	}
+	const UCameraComponent* Lens = Live->GetCamera();
+	FDCTakeSample Sample;
+	Sample.Time = SceneTime;
+	Sample.Slot = ViewingSlot;
+	Sample.Location = Lens->GetComponentLocation();
+	Sample.Rotation = Lens->GetComponentRotation();
+	Sample.FOV = Lens->FieldOfView;
+	Sample.bSpoiled = IsLiveShotSpoiled();
+	Recording.Add(Sample);
+}
+
+void ADCMultiCamDirector::StartPremiere()
+{
+	APlayerController* PC = GetPC();
+	if (Recording.Num() == 0 || !PC)
+	{
+		Phase = EDCPhase::Results;
+		return;
+	}
+	Phase = EDCPhase::Premiere;
+	bPremierePaused = false;
+	SceneTime = 0.f;
+	SetRigsHidden(true);
+	ShowPremiereFrame(0.f);
+	PC->SetViewTargetWithBlend(PlaybackCamera, 0.f);
+}
+
+void ADCMultiCamDirector::TickPremiere(float DeltaSeconds)
+{
+	if (bPremierePaused)
+	{
+		return;
+	}
+	SceneTime = FMath::Min(SceneTime + DeltaSeconds, GetPremiereLength());
+	ShowPremiereFrame(SceneTime);
+	if (SceneTime >= GetPremiereLength())
+	{
+		FinishPremiere();
+	}
+}
+
+void ADCMultiCamDirector::ShowPremiereFrame(float Time)
+{
+	if (Recording.Num() == 0)
+	{
+		return;
+	}
+	for (ADCPerformer* Performer : Performers)
+	{
+		Performer->Evaluate(Time);
+	}
+
+	const int32 Next = Algo::UpperBoundBy(Recording, Time, &FDCTakeSample::Time);
+	const FDCTakeSample& A = Recording[FMath::Clamp(Next - 1, 0, Recording.Num() - 1)];
+	const FDCTakeSample& B = Recording.IsValidIndex(Next) ? Recording[Next] : A;
+	// Blend between frames of the same camera; a change of camera is a hard cut.
+	const bool bBlend = B.Slot == A.Slot && B.Time > A.Time;
+	const float Alpha = bBlend ? FMath::Clamp((Time - A.Time) / (B.Time - A.Time), 0.f, 1.f) : 0.f;
+	PlaybackCamera->SetActorLocationAndRotation(FMath::Lerp(A.Location, B.Location, Alpha),
+		FQuat::Slerp(A.Rotation.Quaternion(), B.Rotation.Quaternion(), Alpha));
+	PlaybackCamera->GetCameraComponent()->SetFieldOfView(FMath::Lerp(A.FOV, B.FOV, Alpha));
+}
+
+void ADCMultiCamDirector::FinishPremiere()
+{
+	// The results sit over the film's final frame; rigs stay hidden until back in preparation.
+	SceneTime = GetPremiereLength();
+	ShowPremiereFrame(SceneTime);
+	bPremierePaused = false;
+	Phase = EDCPhase::Results;
+}
+
+void ADCMultiCamDirector::HandleScrub(float DeltaSeconds)
+{
+	if (Phase == EDCPhase::Premiere)
+	{
+		SceneTime = FMath::Clamp(SceneTime + DeltaSeconds, 0.f, GetPremiereLength());
+		ShowPremiereFrame(SceneTime);
+	}
+}
+
+void ADCMultiCamDirector::HandleTransportToggle()
+{
+	if (Phase == EDCPhase::Premiere)
+	{
+		bPremierePaused = !bPremierePaused;
+	}
+	else if (Phase == EDCPhase::Results)
+	{
+		StartPremiere(); // watch the film again
+	}
+}
+
+void ADCMultiCamDirector::SetRigsHidden(bool bHide)
+{
+	for (ADCMultiCam* Cam : Cameras)
+	{
+		if (Cam)
+		{
+			Cam->SetRigHidden(bHide);
+		}
+	}
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -346,6 +473,9 @@ void ADCMultiCamDirector::EndTake()
 
 void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 {
+	// Record what went out live this frame (before the take can end below).
+	RecordSample();
+
 	const ADCMultiCam* Live = GetCameraSlot(ViewingSlot);
 
 	for (FDCMultiCamBeat& State : Beats)
@@ -557,7 +687,7 @@ void ADCMultiCamDirector::HandleSelectCamera(int32 Number)
 bool ADCMultiCamDirector::HandleLook(float DeltaYaw, float DeltaPitch)
 {
 	ADCMultiCam* Cam = GetCameraSlot(ViewingSlot);
-	if (!Cam || Phase == EDCPhase::Results)
+	if (!Cam || IsReviewing())
 	{
 		return Cam != nullptr;
 	}
@@ -575,7 +705,7 @@ void ADCMultiCamDirector::HandleWheel(float Delta)
 {
 	if (ADCMultiCam* Cam = GetCameraSlot(ViewingSlot))
 	{
-		if (Phase != EDCPhase::Results)
+		if (!IsReviewing())
 		{
 			Cam->SetFOV(Cam->GetTargetFOV() - Delta * 5.f);
 			if (Phase == EDCPhase::Preparation)
@@ -804,7 +934,7 @@ void ADCMultiCamDirector::HandleCycleTool()
 void ADCMultiCamDirector::HandleRigMove(float Axis, float DeltaSeconds)
 {
 	ADCMultiCam* Cam = GetCameraSlot(ViewingSlot);
-	if (!Cam || Phase == EDCPhase::Results || FMath::IsNearlyZero(Axis))
+	if (!Cam || IsReviewing() || FMath::IsNearlyZero(Axis))
 	{
 		return;
 	}
@@ -818,7 +948,7 @@ void ADCMultiCamDirector::HandleRigMove(float Axis, float DeltaSeconds)
 void ADCMultiCamDirector::HandleRailSpeed(int32 Direction)
 {
 	ADCMultiCam* Cam = GetCameraSlot(ViewingSlot);
-	if (!Cam || Cam->GetRig() != EDCCamRig::Dolly || Phase == EDCPhase::Results)
+	if (!Cam || Cam->GetRig() != EDCCamRig::Dolly || IsReviewing())
 	{
 		return;
 	}
@@ -961,6 +1091,9 @@ void ADCMultiCamDirector::HandleInteract()
 	{
 	case EDCPhase::Results:
 		HandleRestart();
+		break;
+	case EDCPhase::Premiere:
+		FinishPremiere();
 		break;
 	case EDCPhase::Preparation:
 		if (IsViewingCamera())

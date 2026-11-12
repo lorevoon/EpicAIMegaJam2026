@@ -16,6 +16,7 @@ class ADCMultiCam;
 class ADCPerformer;
 class ADCMultiCamCharacter;
 class ADCRail;
+class ACameraActor;
 class APlayerController;
 
 /** Which kind of camera the next placement builds. */
@@ -41,6 +42,19 @@ struct FDCMultiCamBeat
 	// Knowledge that survives retries (the player's notebook).
 	bool bSpotted = false;
 	bool bEverCaptured = false;
+};
+
+/** One frame of the take as it went out live: replaying these re-shoots the film exactly. */
+struct FDCTakeSample
+{
+	float Time = 0.f;
+	/** Camera slot that was live; a change between samples is a cut. */
+	int32 Slot = INDEX_NONE;
+	FVector Location = FVector::ZeroVector;
+	FRotator Rotation = FRotator::ZeroRotator;
+	float FOV = 75.f;
+	/** Something that ruins the shot (a zombie) was on screen. */
+	bool bSpoiled = false;
 };
 
 UCLASS()
@@ -93,10 +107,10 @@ public:
 	void HandleCycleTool();
 	void HandleFinishRail();
 	void HandleCycleCamera(int32 Direction);
-	/** Scrub the scene clock while planning (overridden by the zombie director). */
-	virtual void HandleScrub(float DeltaSeconds) {}
-	/** Space: play or pause the rehearsal (overridden by the zombie director). */
-	virtual void HandleTransportToggle() {}
+	/** Left/Right: scrub the premiere (the zombie director also scrubs its rehearsal). */
+	virtual void HandleScrub(float DeltaSeconds);
+	/** Space: pause/resume the premiere, or watch it again from the results (the zombie director adds its rehearsal). */
+	virtual void HandleTransportToggle();
 	/** , and .: rehearsal speed down / up (overridden by the zombie director). */
 	virtual void HandleTransportSpeed(int32 Direction) {}
 	/** Z / X: slower / faster dolly travel for the camera being looked through. */
@@ -135,6 +149,11 @@ public:
 	bool IsNearClapper() const;
 	int32 GetSpottedCount() const;
 	bool IsLiveFeedRolling() const;
+	/** Premiere or results: the take is over and only being reviewed. */
+	bool IsReviewing() const { return Phase == EDCPhase::Premiere || Phase == EDCPhase::Results; }
+	const TArray<FDCTakeSample>& GetRecording() const { return Recording; }
+	float GetPremiereLength() const { return Recording.Num() > 0 ? Recording.Last().Time : 0.f; }
+	bool IsPremierePaused() const { return bPremierePaused; }
 
 	bool bShowNotebook = true;
 
@@ -152,6 +171,17 @@ protected:
 	bool EnsureLiveCamera();
 	/** Fades every camera rig (and its rail) inside the capture frame during the take; off again in preparation. */
 	void SetRigsFrameMasked(bool bMasked);
+	/** Hides every rig completely, so the played-back film is clean. */
+	void SetRigsHidden(bool bHide);
+
+	/** Whether the live shot is spoiled right now (zombie in frame); recorded with each sample. */
+	virtual bool IsLiveShotSpoiled() const { return false; }
+	void RecordSample();
+	void StartPremiere();
+	void TickPremiere(float DeltaSeconds);
+	/** Re-shoots the recording at Time: performers to that moment, playback camera to the recorded pose. */
+	void ShowPremiereFrame(float Time);
+	void FinishPremiere();
 	void Flash(const FString& Text, float Seconds = 2.5f);
 	FCollisionQueryParams MakeTraceParams(const FName& Tag) const;
 
@@ -183,6 +213,13 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<ADCMultiCam> Ghost;
+
+	/** Plays the recorded take back as a film. */
+	UPROPERTY()
+	TObjectPtr<ACameraActor> PlaybackCamera;
+
+	TArray<FDCTakeSample> Recording;
+	bool bPremierePaused = false;
 
 	TArray<FDCMultiCamBeat> Beats;
 	FString SetupProblem;

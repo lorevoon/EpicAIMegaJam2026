@@ -88,6 +88,11 @@ void ADCZombieHUD::DrawHUD()
 		DrawStoryboardCard(D);
 		return;
 	}
+	if (D->GetPhase() == EDCPhase::Premiere)
+	{
+		DrawPremiere(D);
+		return;
+	}
 
 	if (D->GetPhase() == EDCPhase::Preparation && !D->IsViewingCamera())
 	{
@@ -118,7 +123,7 @@ void ADCZombieHUD::DrawHUD()
 		DrawStoryboardPanel(D);
 	}
 
-	if (D->IsViewingCamera())
+	if (D->IsViewingCamera() && !D->IsReviewing())
 	{
 		DrawFraming(D);
 	}
@@ -220,7 +225,7 @@ void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
 	case EDCPhase::Preparation: PhaseText = TEXT("PREPARATION"); PhaseColor = Gold; break;
 	case EDCPhase::Countdown:   PhaseText = TEXT("STAND BY");   PhaseColor = Gold; break;
 	case EDCPhase::Filming:     PhaseText = TEXT("SHOOTING");   PhaseColor = Bad;  break;
-	case EDCPhase::Results:     PhaseText = TEXT("PREMIERE");   PhaseColor = Rose; break;
+	case EDCPhase::Results:     PhaseText = TEXT("RESULTS");    PhaseColor = Rose; break;
 	default: break;
 	}
 	Label(PhaseText, 24.f * S, 18.f * S, PhaseColor, 1.2f);
@@ -475,5 +480,58 @@ void ADCZombieHUD::DrawResults(ADCZombieDirector* D)
 		: D->GetZombieSeconds() > 5.f ? TEXT("The audience is screaming... and not in the romantic way.")
 		: TEXT("A few undead extras slipped in. Nobody noticed. Probably."), CX, Y, Muted, 0.7f, true);
 	Y += 44.f * S;
-	Label(TEXT("R / Enter back to planning (cameras kept)   V rewatch rehearsal"), CX, Y, FLinearColor::White, 0.72f, true);
+	Label(TEXT("Space watch the film again   R / Enter back to planning (cameras kept)   V rewatch rehearsal"), CX, Y, FLinearColor::White, 0.72f, true);
+}
+
+void ADCZombieHUD::DrawPremiere(ADCZombieDirector* D)
+{
+	// The finished film: letterboxed, no gameplay HUD.
+	const float W = Canvas->ClipX;
+	const float H = Canvas->ClipY;
+	const float Bar = H * 0.11f;
+	const float Time = D->GetSceneTime();
+	const float Length = FMath::Max(D->GetPremiereLength(), KINDA_SMALL_NUMBER);
+	DrawRect(FLinearColor::Black, 0.f, 0.f, W, Bar);
+	DrawRect(FLinearColor::Black, 0.f, H - Bar, W, Bar);
+
+	// Opening title card.
+	if (Time < 3.5f)
+	{
+		Label(D->MovieTitle, W * 0.5f, H * 0.4f, Rose, 2.4f, true);
+		Label(TEXT("a film by you"), W * 0.5f, H * 0.4f + 90.f * S, FLinearColor::White, 0.9f, true);
+	}
+
+	// Timeline with red ticks wherever a zombie made it into the film.
+	const float X0 = W * 0.2f;
+	const float TW = W * 0.6f;
+	const float TY = H - Bar * 0.62f;
+	const float TH = 6.f * S;
+	DrawRect(FLinearColor(1.f, 1.f, 1.f, 0.2f), X0, TY, TW, TH);
+	bool bSpoiledNow = false;
+	const TArray<FDCTakeSample>& Rec = D->GetRecording();
+	for (int32 i = 0; i < Rec.Num(); ++i)
+	{
+		if (!Rec[i].bSpoiled)
+		{
+			continue;
+		}
+		const float T1 = Rec.IsValidIndex(i + 1) ? Rec[i + 1].Time : Rec[i].Time;
+		DrawRect(Bad, X0 + TW * Rec[i].Time / Length, TY - 2.f, FMath::Max(TW * (T1 - Rec[i].Time) / Length, 1.f), TH + 4.f);
+		bSpoiledNow |= Time >= Rec[i].Time && Time <= T1;
+	}
+	DrawRect(Rose, X0, TY, TW * Time / Length, TH);
+	DrawRect(FLinearColor::White, X0 + TW * Time / Length - 1.5f, TY - 6.f, 3.f, TH + 12.f);
+
+	Label(FString::Printf(TEXT("%02d:%04.1f / %02d:%04.1f"), int32(Time) / 60, FMath::Fmod(Time, 60.f), int32(Length) / 60, FMath::Fmod(Length, 60.f)),
+		24.f * S, TY - 10.f * S, Muted, 0.7f);
+	Label(TEXT("Space pause   Left/Right scrub   Enter skip to results"), W - 24.f * S - 420.f * S, TY - 10.f * S, Muted, 0.6f);
+	Label(D->MovieTitle, W * 0.5f, Bar * 0.35f, Rose, 0.8f, true);
+	if (bSpoiledNow)
+	{
+		Label(TEXT("zombie in shot"), W - 220.f * S, Bar * 0.35f, ZombieGreen, 0.7f);
+	}
+	if (D->IsPremierePaused())
+	{
+		Label(TEXT("PAUSED"), W * 0.5f, H * 0.5f - 20.f * S, FLinearColor::White, 1.4f, true);
+	}
 }

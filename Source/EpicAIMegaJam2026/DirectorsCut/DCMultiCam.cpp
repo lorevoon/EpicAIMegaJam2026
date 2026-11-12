@@ -248,6 +248,15 @@ void ADCMultiCam::SetFrameMasked(bool bMasked)
 	}
 }
 
+void ADCMultiCam::SetRigHidden(bool bHide)
+{
+	SetActorHiddenInGame(bHide);
+	if (Rail)
+	{
+		Rail->SetActorHiddenInGame(bHide);
+	}
+}
+
 void ADCMultiCam::SetTint(const FLinearColor& Color)
 {
 	DCVisuals::PaintWith(Body, RigMaterial, Color);

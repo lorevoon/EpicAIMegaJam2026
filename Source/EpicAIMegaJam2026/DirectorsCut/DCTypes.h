@@ -43,7 +43,9 @@ enum class EDCPhase : uint8
 	/** Reading the storyboard. */
 	Storyboard,
 	/** Watching the rehearsal on foot. */
-	Rehearsal
+	Rehearsal,
+	/** Watching the recorded take played back as a film, between shooting and the results. */
+	Premiere
 };
 
 UENUM()

@@ -75,6 +75,7 @@ protected:
 	virtual void EvaluateBeats(float PrevTime, float NowTime) override;
 	virtual void EndTake() override;
 	virtual void ResetScene() override;
+	virtual bool IsLiveShotSpoiled() const override { return bZombieInShot; }
 
 private:
 	void EnterPreparation(bool bPlayRehearsal);
