@@ -1,4 +1,4 @@
-// Director's Cut prototype 5 - canvas HUD: storyboard, rehearsal, planning preview, zombie alarm, results.
+// Director's Cut - canvas HUD: storyboard, rehearsal, planning preview, zombie alarm, results.
 
 #pragma once
 

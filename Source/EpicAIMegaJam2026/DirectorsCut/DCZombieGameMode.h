@@ -1,4 +1,4 @@
-// Director's Cut prototype 5 - game mode for "Love in the Ruins".
+// Director's Cut - game mode for "Love in the Ruins".
 // Set as the GameMode Override on a level containing DCBeat, DCPerformer (some with Ruins Shot), and related actors.
 
 #pragma once

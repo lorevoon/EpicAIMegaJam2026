@@ -1,8 +1,8 @@
-// Director's Cut prototype 5 - game mode.
+// Director's Cut - game mode.
 
 #include "DCZombieGameMode.h"
 #include "DCMultiCamCharacter.h"
-#include "DCTakeDirector.h"
+#include "DCSceneMarks.h"
 #include "DCZombieDirector.h"
 #include "DCZombieHUD.h"
 #include "EngineUtils.h"
@@ -39,7 +39,7 @@ AActor* ADCZombieGameMode::ChoosePlayerStart_Implementation(AController* Player)
 	{
 		FActorSpawnParameters Params;
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		StartSpot = GetWorld()->SpawnActor<APlayerStart>(APlayerStart::StaticClass(), ADCTakeDirector::FindStartTransform(GetWorld()), Params);
+		StartSpot = GetWorld()->SpawnActor<APlayerStart>(APlayerStart::StaticClass(), ADCStartMark::FindStartTransform(GetWorld()), Params);
 	}
 	return StartSpot;
 }

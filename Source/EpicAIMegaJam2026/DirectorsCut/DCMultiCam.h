@@ -1,4 +1,4 @@
-// Director's Cut prototypes 3 and 5 - a camera the player places on a stand, wall, or ceiling (static), on a rail
+// Director's Cut - a camera the player places on a stand, wall, or ceiling (static), on a rail
 // (dolly), or on a crane. Its mount never moves after placement; aim, zoom, and the dolly/crane travel can.
 
 #pragma once

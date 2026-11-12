@@ -1,4 +1,4 @@
-// Director's Cut prototype 2 - a hidden story beat. Players are never told where or when it happens;
+// Director's Cut - a hidden story beat. Players are never told where or when it happens;
 // it captures whenever the camera frames its anchors during its window, from any position or angle.
 // The actor's own location only matters in the editor (put it near the action so it is easy to find).
 

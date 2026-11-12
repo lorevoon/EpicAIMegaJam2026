@@ -1,4 +1,4 @@
-// Director's Cut prototype 4 - spray mark.
+// Director's Cut - spray mark.
 
 #include "DCSprayMark.h"
 #include "DCVisuals.h"

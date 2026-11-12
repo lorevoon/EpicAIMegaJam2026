@@ -1,4 +1,4 @@
-// Director's Cut prototype - dolly rail placement, validation, and visuals.
+// Director's Cut - dolly rail placement, validation, and visuals.
 
 #include "DCRail.h"
 #include "Components/SplineComponent.h"

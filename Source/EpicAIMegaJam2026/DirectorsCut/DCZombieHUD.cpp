@@ -1,4 +1,4 @@
-// Director's Cut prototype 5 - canvas HUD.
+// Director's Cut - canvas HUD.
 
 #include "DCZombieHUD.h"
 #include "DCBeat.h"

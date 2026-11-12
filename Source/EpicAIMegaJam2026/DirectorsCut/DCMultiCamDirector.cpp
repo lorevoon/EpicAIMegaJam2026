@@ -1,4 +1,4 @@
-// Director's Cut prototype 3 - multi-camera take director.
+// Director's Cut - multi-camera take director.
 
 #include "DCMultiCamDirector.h"
 #include "DCBeat.h"
@@ -7,7 +7,6 @@
 #include "DCPerformer.h"
 #include "DCRail.h"
 #include "DCSceneMarks.h"
-#include "DCTakeDirector.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -72,7 +71,7 @@ void ADCMultiCamDirector::GatherScene()
 		break;
 	}
 
-	StartTransform = ADCTakeDirector::FindStartTransform(World);
+	StartTransform = ADCStartMark::FindStartTransform(World);
 
 	Beats.Reset();
 	bool bHasMandatory = false;
@@ -109,7 +108,7 @@ void ADCMultiCamDirector::GatherScene()
 
 	if (Beats.Num() == 0 && Problems.Num() == 0)
 	{
-		Problems.Add(TEXT("No DCBeat actors in this level - build the castle with a DCFreeDirector, or place DCBeat actors"));
+		Problems.Add(TEXT("No DCBeat actors in this level - select the DCZombieDirector and click Build Zombie Scene, or place DCBeat actors"));
 	}
 	else if (!bHasMandatory)
 	{

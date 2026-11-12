@@ -1,4 +1,4 @@
-// Director's Cut prototype - a colored blockout mesh for set dressing. Move, scale, and duplicate it in the editor.
+// Director's Cut - a colored blockout mesh for set dressing. Move, scale, and duplicate it in the editor.
 
 #pragma once
 

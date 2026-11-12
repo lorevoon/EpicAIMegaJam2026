@@ -1,4 +1,4 @@
-// Director's Cut prototype - the camera dolly rail the player lays down during preparation.
+// Director's Cut - the camera dolly rail the player lays down during preparation.
 
 #pragma once
 

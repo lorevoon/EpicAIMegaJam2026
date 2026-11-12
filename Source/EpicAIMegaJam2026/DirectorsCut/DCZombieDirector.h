@@ -1,5 +1,5 @@
-// Director's Cut prototype 5 - "Love in the Ruins": a romance shot in a zombie apocalypse.
-// Built on prototype 3's multi-camera system, with unlimited static, dolly, and crane cameras.
+// Director's Cut - "Love in the Ruins": a romance shot in a zombie apocalypse.
+// Built on the multi-camera director, with unlimited static, dolly, and crane cameras.
 //
 //   Storyboard  the scenes are listed in order (from the DCBeat display names) - no times, no places
 //   Rehearsal   the whole scene plays while the player walks the set and watches

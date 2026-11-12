@@ -1,4 +1,4 @@
-// Director's Cut prototype - the player's start mark and the clapperboard that starts a take.
+// Director's Cut - the player's start mark and the clapperboard that starts a take.
 
 #pragma once
 
@@ -20,6 +20,9 @@ public:
 	ADCStartMark();
 
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	/** Where the player stands at the start of every take: the level's start mark, or a default spot. */
+	static FTransform FindStartTransform(UWorld* World);
 
 private:
 	UPROPERTY(VisibleAnywhere)

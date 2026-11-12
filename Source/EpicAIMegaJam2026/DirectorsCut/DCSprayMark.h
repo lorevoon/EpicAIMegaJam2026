@@ -1,4 +1,4 @@
-// Director's Cut prototype 4 - a numbered spray-paint mark the player leaves on any surface to plan their route.
+// Director's Cut - a numbered spray-paint mark the player leaves on any surface to plan their route.
 
 #pragma once
 

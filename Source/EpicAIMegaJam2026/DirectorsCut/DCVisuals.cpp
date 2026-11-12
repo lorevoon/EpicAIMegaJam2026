@@ -1,4 +1,4 @@
-// Director's Cut prototype - placeholder-art helpers.
+// Director's Cut - placeholder-art helpers.
 
 #include "DCVisuals.h"
 #include "Components/StaticMeshComponent.h"

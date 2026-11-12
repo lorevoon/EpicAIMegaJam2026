@@ -1,4 +1,4 @@
-// Director's Cut prototype - one pose in a performer's blocking. Position and facing come from the actor's transform.
+// Director's Cut - one pose in a performer's blocking. Position and facing come from the actor's transform.
 
 #pragma once
 

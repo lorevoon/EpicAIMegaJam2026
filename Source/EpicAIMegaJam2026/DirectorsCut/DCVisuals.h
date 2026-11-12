@@ -1,4 +1,4 @@
-// Director's Cut prototype - placeholder-art helpers shared by the editable actors.
+// Director's Cut - placeholder-art helpers shared by the editable actors.
 
 #pragma once
 

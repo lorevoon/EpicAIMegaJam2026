@@ -1,4 +1,4 @@
-// Director's Cut prototype - performer waypoint.
+// Director's Cut - performer waypoint.
 
 #include "DCWaypoint.h"
 #include "DCPerformer.h"

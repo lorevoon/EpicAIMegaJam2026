@@ -1,4 +1,4 @@
-// Director's Cut prototype - performer playback.
+// Director's Cut - performer playback.
 
 #include "DCPerformer.h"
 #include "DCVisuals.h"

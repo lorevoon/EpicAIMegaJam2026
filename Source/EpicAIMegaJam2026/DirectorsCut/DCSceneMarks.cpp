@@ -1,4 +1,4 @@
-// Director's Cut prototype - start mark and clapperboard.
+// Director's Cut - start mark and clapperboard.
 
 #include "DCSceneMarks.h"
 #include "DCVisuals.h"
@@ -7,6 +7,8 @@
 #include "Components/TextRenderComponent.h"
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/World.h"
+#include "EngineUtils.h"
 #include "UObject/ConstructorHelpers.h"
 
 ADCStartMark::ADCStartMark()
@@ -36,6 +38,19 @@ ADCStartMark::ADCStartMark()
 	Label->SetRelativeLocation(FVector(0.f, 0.f, 60.f));
 	Label->SetText(FText::FromString(TEXT("START MARK")));
 	DCVisuals::SetupLabel(Label, FColor::White, 28.f);
+}
+
+FTransform ADCStartMark::FindStartTransform(UWorld* World)
+{
+	constexpr float StandHeight = 100.f;
+	if (World)
+	{
+		for (TActorIterator<ADCStartMark> It(World); It; ++It)
+		{
+			return FTransform(FRotator(0.f, It->GetActorRotation().Yaw, 0.f), It->GetActorLocation() + FVector(0.f, 0.f, StandHeight));
+		}
+	}
+	return FTransform(FRotator::ZeroRotator, FVector(-1000.f, 0.f, StandHeight));
 }
 
 void ADCStartMark::OnConstruction(const FTransform& Transform)

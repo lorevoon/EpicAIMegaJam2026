@@ -1,4 +1,4 @@
-// Director's Cut prototype 3 - the director on foot.
+// Director's Cut - the director on foot.
 
 #include "DCMultiCamCharacter.h"
 #include "DCMultiCamDirector.h"

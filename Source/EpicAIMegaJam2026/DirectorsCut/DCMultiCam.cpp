@@ -1,4 +1,4 @@
-// Director's Cut prototype 3 - fixed camera.
+// Director's Cut - fixed camera.
 
 #include "DCMultiCam.h"
 #include "DCRail.h"

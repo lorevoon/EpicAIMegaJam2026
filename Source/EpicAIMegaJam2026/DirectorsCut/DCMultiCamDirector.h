@@ -1,6 +1,6 @@
-// Director's Cut prototype 3 - multi-camera take director.
-// The player places a fixed number of cameras during preparation. During the take they are locked to the
-// camera feeds, cut between them with 1-4, and can only re-aim (and zoom) the live camera.
+// Director's Cut - multi-camera take director.
+// The player places static, dolly, and crane cameras during preparation. During the take they are locked to the
+// camera feeds, cut between them (1-9, [ and ]), and can re-aim, zoom, and drive the live camera's rig.
 // Only the live feed captures hidden beats (ADCBeat), so choosing when to cut is the game.
 
 #pragma once
@@ -93,9 +93,9 @@ public:
 	void HandleCycleTool();
 	void HandleFinishRail();
 	void HandleCycleCamera(int32 Direction);
-	/** Scrub the scene clock while planning (later prototypes). */
+	/** Scrub the scene clock while planning (overridden by the zombie director). */
 	virtual void HandleScrub(float DeltaSeconds) {}
-	/** Re-watch the rehearsal (later prototypes). */
+	/** Re-watch the rehearsal (overridden by the zombie director). */
 	virtual void HandleRehearsal() {}
 	void HandleClearCameras();
 	void HandleSelectCamera(int32 Number);

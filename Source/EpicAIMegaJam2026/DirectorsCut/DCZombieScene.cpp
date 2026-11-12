@@ -1,4 +1,4 @@
-// Director's Cut prototype 5 - editor button that places the "Love in the Ruins" town square as editable actors.
+// Director's Cut - editor button that places the "Love in the Ruins" town square as editable actors.
 //
 // Layout (cm, X east / Y north): square x -1500..1500, y -1200..1200 inside ruined brick walls, exit gap east at
 // y -250..250 (the sunset). Fountain in the middle; wrecked car south-west; crate barricade south-east; burned-out

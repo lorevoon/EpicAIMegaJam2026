@@ -1,4 +1,4 @@
-// Director's Cut prototype - blockout set piece.
+// Director's Cut - blockout set piece.
 
 #include "DCSetPiece.h"
 #include "DCVisuals.h"

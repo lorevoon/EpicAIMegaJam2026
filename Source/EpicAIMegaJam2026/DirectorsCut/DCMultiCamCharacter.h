@@ -1,4 +1,4 @@
-// Director's Cut prototype 3 - the director on foot. Walks the set to place cameras; while looking through a
+// Director's Cut - the director on foot. Walks the set to place cameras; while looking through a
 // camera (always, during a take) mouse look re-aims that camera instead of the walking view.
 
 #pragma once

@@ -1,4 +1,4 @@
-// Director's Cut prototype 5 - "Love in the Ruins" director.
+// Director's Cut - "Love in the Ruins" director.
 
 #include "DCZombieDirector.h"
 #include "DCBeat.h"

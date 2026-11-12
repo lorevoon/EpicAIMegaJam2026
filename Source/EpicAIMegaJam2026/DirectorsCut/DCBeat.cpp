@@ -1,4 +1,4 @@
-// Director's Cut prototype 2 - hidden story beat.
+// Director's Cut - hidden story beat.
 
 #include "DCBeat.h"
 #include "DCPerformer.h"

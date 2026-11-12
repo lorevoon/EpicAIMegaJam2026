@@ -1,4 +1,4 @@
-// Director's Cut prototype - a placeholder actor that plays back its blocking on the scene clock.
+// Director's Cut - a placeholder actor that plays back its blocking on the scene clock.
 // Its placement in the level is its pose at 0 s; ADCWaypoint actors that point at it add the later poses.
 
 #pragma once
