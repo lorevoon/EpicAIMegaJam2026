@@ -25,6 +25,7 @@ public class EpicAIMegaJam2026 : ModuleRules
 
 		PublicIncludePaths.AddRange(new string[] {
 			"EpicAIMegaJam2026",
+			"EpicAIMegaJam2026/DirectorsCut",
 			"EpicAIMegaJam2026/Variant_Horror",
 			"EpicAIMegaJam2026/Variant_Horror/UI",
 			"EpicAIMegaJam2026/Variant_Shooter",
