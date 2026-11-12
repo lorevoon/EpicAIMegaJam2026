@@ -13,7 +13,8 @@ UENUM()
 enum class EDCAnchorPart : uint8
 {
 	Head,
-	Prop
+	Prop,
+	Body
 };
 
 /** Level-editable reference to a part of a performer that a shot must frame. */
@@ -27,6 +28,10 @@ struct FDCAnchorRef
 
 	UPROPERTY(EditAnywhere, Category = "Shot")
 	EDCAnchorPart Part = EDCAnchorPart::Head;
+
+	/** Only counts when the camera is in front of the performer (sees their face, not the back of their head). */
+	UPROPERTY(EditAnywhere, Category = "Shot")
+	bool bMustSeeFace = false;
 };
 
 UENUM()
@@ -66,6 +71,7 @@ struct FDCAnchor
 {
 	USceneComponent* Component = nullptr;
 	AActor* Owner = nullptr;
+	bool bMustSeeFace = false;
 };
 
 /** Shot definition copied from a placed ADCShotMarker, plus its runtime state (kept separate per the GDD's reset contract). */
@@ -112,4 +118,6 @@ struct FDCKey
 	float Lean = 0.f;
 	/** 0 = prop lowered, 1 = prop raised to face height. */
 	float PropRaise = 0.f;
+	/** Whole-body tilt in degrees around the feet: positive falls backward (faint), negative bows forward. */
+	float Tilt = 0.f;
 };

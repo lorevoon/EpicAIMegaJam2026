@@ -38,6 +38,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Blocking", meta = (ClampMin = "0", ClampMax = "1"))
 	float PropRaise = 0.f;
 
+	/** Whole-body tilt around the feet: positive falls backward (90 = lying down), negative bows forward. */
+	UPROPERTY(EditAnywhere, Category = "Blocking", meta = (ClampMin = "-90", ClampMax = "90", Units = "deg"))
+	float Tilt = 0.f;
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USceneComponent> Root;

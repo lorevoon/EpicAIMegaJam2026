@@ -21,8 +21,11 @@ public:
 
 	static constexpr int32 MaxPoints = 24;
 
-	/** Appends a floor point. Returns false (with a reason) if the new segment would pass through scenery. */
-	bool TryAddPoint(const FVector& FloorPoint, FString& OutReason);
+	/**
+	 * Appends a point. Returns false (with a reason) if the new segment would pass through scenery.
+	 * Surface is where the rail is bolted on (defaults to the point itself for floor rails).
+	 */
+	bool TryAddPoint(const FVector& Point, FString& OutReason, TOptional<FVector> Surface = {});
 
 	/** Removes the point nearest Near (within Radius), or the last point when none is close. */
 	bool RemovePointNear(const FVector& Near, float Radius);
@@ -30,7 +33,7 @@ public:
 	void Clear();
 
 	/** Ghost post that previews where the next point would go. */
-	void SetPreview(bool bVisible, const FVector& Location, bool bValid);
+	void SetPreview(bool bVisible, const FVector& Location, bool bValid, float ZOffset = 30.f);
 
 	int32 NumPoints() const { return Points.Num(); }
 	const TArray<FVector>& GetPoints() const { return Points; }
@@ -43,6 +46,15 @@ public:
 
 	/** Actors that rail placement traces should ignore (performers move, so their start pose proves nothing). */
 	TArray<TWeakObjectPtr<AActor>> IgnoredActors;
+
+	/**
+	 * Floor rails sit on the ground and carry a walking-height camera.
+	 * Free rails (false) run through the camera positions themselves and can be bolted to walls or ceilings.
+	 */
+	bool bFloorRail = true;
+
+	/** Color of the rail's point posts, so several rails can be told apart. */
+	FLinearColor PostColor = FLinearColor(1.f, 0.45f, 0.05f);
 
 private:
 	void RebuildSpline(const TArray<FVector>& InPoints) const;
@@ -81,4 +93,5 @@ private:
 	TObjectPtr<UMaterialInstanceDynamic> GhostMaterial;
 
 	TArray<FVector> Points;
+	TArray<FVector> SurfacePoints;
 };

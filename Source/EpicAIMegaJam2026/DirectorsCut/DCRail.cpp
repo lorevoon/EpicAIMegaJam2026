@@ -49,24 +49,26 @@ static UMaterialInstanceDynamic* MakeColor(UMaterialInterface* Base, UObject* Ou
 	return MID;
 }
 
-bool ADCRail::TryAddPoint(const FVector& FloorPoint, FString& OutReason)
+bool ADCRail::TryAddPoint(const FVector& Point, FString& OutReason, TOptional<FVector> Surface)
 {
 	if (Points.Num() >= MaxPoints)
 	{
 		OutReason = FString::Printf(TEXT("Rail is at the %d point limit"), MaxPoints);
 		return false;
 	}
-	if (Points.Num() > 0 && FVector::Dist2D(Points.Last(), FloorPoint) < MinPointSpacing)
+	if (Points.Num() > 0 && FVector::Dist(Points.Last(), Point) < MinPointSpacing)
 	{
 		OutReason = TEXT("Too close to the previous rail point");
 		return false;
 	}
 
-	Points.Add(FloorPoint);
+	Points.Add(Point);
+	SurfacePoints.Add(Surface.Get(Point));
 	RebuildSpline(Points);
 	if (!IsPathClear(OutReason))
 	{
 		Points.Pop();
+		SurfacePoints.Pop();
 		RebuildSpline(Points);
 		return false;
 	}
@@ -95,13 +97,16 @@ bool ADCRail::RemovePointNear(const FVector& Near, float Radius)
 	}
 
 	const FVector Removed = Points[Best];
+	const FVector RemovedSurface = SurfacePoints[Best];
 	Points.RemoveAt(Best);
+	SurfacePoints.RemoveAt(Best);
 	RebuildSpline(Points);
 	FString Unused;
 	if (!IsPathClear(Unused))
 	{
 		// Removing a middle point would reroute the curve through scenery, so keep it.
 		Points.Insert(Removed, Best);
+		SurfacePoints.Insert(RemovedSurface, Best);
 		RebuildSpline(Points);
 		return false;
 	}
@@ -112,11 +117,12 @@ bool ADCRail::RemovePointNear(const FVector& Near, float Radius)
 void ADCRail::Clear()
 {
 	Points.Reset();
+	SurfacePoints.Reset();
 	RebuildSpline(Points);
 	RebuildVisuals();
 }
 
-void ADCRail::SetPreview(bool bVisible, const FVector& Location, bool bValid)
+void ADCRail::SetPreview(bool bVisible, const FVector& Location, bool bValid, float ZOffset)
 {
 	Ghost->SetVisibility(bVisible);
 	if (!bVisible)
@@ -129,7 +135,7 @@ void ADCRail::SetPreview(bool bVisible, const FVector& Location, bool bValid)
 		Ghost->SetMaterial(0, GhostMaterial);
 	}
 	GhostMaterial->SetVectorParameterValue(TEXT("Color"), bValid ? FLinearColor(0.2f, 1.f, 0.4f) : FLinearColor(1.f, 0.15f, 0.1f));
-	Ghost->SetWorldLocation(Location + FVector(0.f, 0.f, 30.f));
+	Ghost->SetWorldLocation(Location + FVector(0.f, 0.f, ZOffset));
 }
 
 float ADCRail::GetLength() const
@@ -151,7 +157,8 @@ float ADCRail::FindClosestDistance(const FVector& Location, float& OutGap) const
 	}
 	const float Key = Spline->FindInputKeyClosestToWorldLocation(Location);
 	const float Distance = Spline->GetDistanceAlongSplineAtSplineInputKey(Key);
-	OutGap = FVector::Dist2D(GetFloorLocationAtDistance(Distance), Location);
+	const FVector OnRail = GetFloorLocationAtDistance(Distance);
+	OutGap = bFloorRail ? FVector::Dist2D(OnRail, Location) : FVector::Dist(OnRail, Location);
 	return Distance;
 }
 
@@ -178,13 +185,14 @@ bool ADCRail::IsPathClear(FString& OutReason) const
 		Params.AddIgnoredActor(Ignored.Get());
 	}
 
+	const FVector Lift(0.f, 0.f, bFloorRail ? TraceHeight : 0.f);
 	const float Length = Spline->GetSplineLength();
 	FVector Prev = GetFloorLocationAtDistance(0.f);
 	for (float D = SampleStep; D < Length + SampleStep; D += SampleStep)
 	{
 		const FVector Next = GetFloorLocationAtDistance(D);
 		FHitResult Hit;
-		if (GetWorld()->LineTraceSingleByChannel(Hit, Prev + FVector(0, 0, TraceHeight), Next + FVector(0, 0, TraceHeight), ECC_Visibility, Params))
+		if (GetWorld()->LineTraceSingleByChannel(Hit, Prev + Lift, Next + Lift, ECC_Visibility, Params))
 		{
 			OutReason = TEXT("Rail would pass through scenery");
 			return false;
@@ -223,12 +231,24 @@ void ADCRail::RebuildVisuals()
 	{
 		RailMaterial = MakeColor(BaseMaterial, this, FLinearColor(0.75f, 0.75f, 0.8f));
 		TieMaterial = MakeColor(BaseMaterial, this, FLinearColor(0.25f, 0.15f, 0.08f));
-		PostMaterial = MakeColor(BaseMaterial, this, FLinearColor(1.f, 0.45f, 0.05f));
+		PostMaterial = MakeColor(BaseMaterial, this, PostColor);
 	}
 
-	for (const FVector& P : Points)
+	for (int32 i = 0; i < Points.Num(); ++i)
 	{
-		AddPiece(CylinderMesh, FTransform(FRotator::ZeroRotator, P + FVector(0, 0, 6), FVector(0.22f, 0.22f, 0.12f)), PostMaterial);
+		const FVector& P = Points[i];
+		if (bFloorRail)
+		{
+			AddPiece(CylinderMesh, FTransform(FRotator::ZeroRotator, P + FVector(0, 0, 6), FVector(0.22f, 0.22f, 0.12f)), PostMaterial);
+			continue;
+		}
+		// Free rails: a knob at the camera position plus a standoff bracket back to the surface it is bolted to.
+		AddPiece(CylinderMesh, FTransform(FRotator::ZeroRotator, P, FVector(0.16f, 0.16f, 0.16f)), PostMaterial);
+		const FVector Bracket = SurfacePoints[i] - P;
+		if (Bracket.Size() > 1.f)
+		{
+			AddPiece(CubeMesh, FTransform(Bracket.Rotation(), P + Bracket * 0.5f, FVector(Bracket.Size() / 100.f, 0.05f, 0.05f)), TieMaterial);
+		}
 	}
 
 	if (!IsUsable())
@@ -249,12 +269,12 @@ void ADCRail::RebuildVisuals()
 		}
 		const FRotator Rot = Dir.Rotation();
 		const FVector Right = FRotationMatrix(Rot).GetUnitAxis(EAxis::Y);
-		const FVector Mid = (A + B) * 0.5f + FVector(0, 0, 4);
+		const FVector Mid = (A + B) * 0.5f + FVector(0, 0, bFloorRail ? 4.f : 0.f);
 		const float SegScale = (B - A).Size() / 100.f + 0.02f;
 
 		AddPiece(CubeMesh, FTransform(Rot, Mid + Right * RailGauge, FVector(SegScale, 0.04f, 0.04f)), RailMaterial);
 		AddPiece(CubeMesh, FTransform(Rot, Mid - Right * RailGauge, FVector(SegScale, 0.04f, 0.04f)), RailMaterial);
-		if (Step % 2 == 0)
+		if (bFloorRail && Step % 2 == 0)
 		{
 			AddPiece(CubeMesh, FTransform(Rot, A + FVector(0, 0, 1), FVector(0.08f, 0.7f, 0.02f)), TieMaterial);
 		}

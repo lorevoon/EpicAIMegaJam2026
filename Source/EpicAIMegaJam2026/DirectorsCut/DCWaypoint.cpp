@@ -55,6 +55,10 @@ void ADCWaypoint::OnConstruction(const FTransform& Transform)
 	{
 		Text += FString::Printf(TEXT(" prop %.0f%%"), PropRaise * 100.f);
 	}
+	if (!FMath::IsNearlyZero(Tilt))
+	{
+		Text += FString::Printf(TEXT(" tilt %.0f"), Tilt);
+	}
 	Label->SetText(FText::FromString(Text));
 
 	if (Performer)

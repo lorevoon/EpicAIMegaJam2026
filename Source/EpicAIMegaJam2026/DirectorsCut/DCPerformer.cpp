@@ -115,6 +115,7 @@ TArray<FDCKey> ADCPerformer::CollectKeys() const
 			Key.Yaw = It->GetActorRotation().Yaw;
 			Key.Lean = It->Lean;
 			Key.PropRaise = It->PropRaise;
+			Key.Tilt = It->Tilt;
 			Result.Add(Key);
 		}
 	}
@@ -156,7 +157,12 @@ void ADCPerformer::RefreshPath()
 
 USceneComponent* ADCPerformer::GetAnchor(EDCAnchorPart Part) const
 {
-	return Part == EDCAnchorPart::Prop ? Prop.Get() : Head.Get();
+	switch (Part)
+	{
+	case EDCAnchorPart::Prop: return Prop;
+	case EDCAnchorPart::Body: return Body;
+	default:                  return Head;
+	}
 }
 
 void ADCPerformer::Evaluate(float SceneTime)
@@ -176,12 +182,13 @@ void ADCPerformer::Evaluate(float SceneTime)
 			Pose.Yaw = FQuat::Slerp(FRotator(0.f, A.Yaw, 0.f).Quaternion(), FRotator(0.f, B.Yaw, 0.f).Quaternion(), Alpha).Rotator().Yaw;
 			Pose.Lean = FMath::Lerp(A.Lean, B.Lean, Alpha);
 			Pose.PropRaise = FMath::Lerp(A.PropRaise, B.PropRaise, Alpha);
+			Pose.Tilt = FMath::Lerp(A.Tilt, B.Tilt, Alpha);
 			break;
 		}
 	}
 
 	// Keep the authored floor height so the set can be raised or lowered freely.
-	SetActorLocationAndRotation(FVector(Pose.Location, GetActorLocation().Z), FRotator(0.f, Pose.Yaw, 0.f));
+	SetActorLocationAndRotation(FVector(Pose.Location, GetActorLocation().Z), FRotator(Pose.Tilt, Pose.Yaw, 0.f));
 	Head->SetRelativeLocation(HeadRest + FVector(Pose.Lean, 0.f, -FMath::Abs(Pose.Lean) * 0.5f));
 	Prop->SetRelativeLocation(FMath::Lerp(PropLowered, PropRaised, Pose.PropRaise));
 }
