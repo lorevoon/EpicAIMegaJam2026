@@ -486,11 +486,6 @@ void ADCZombieHUD::DrawFraming(ADCZombieDirector* D)
 	if (const ADCMultiCam* Cam = D->GetCameraSlot(D->GetViewingSlot()))
 	{
 		FString Rig = FString::Printf(TEXT("   %s | WASD within %.1fm"), Cam->GetRig() == EDCCamRig::Crane ? TEXT("CRANE") : TEXT("STATIC"), Cam->GetMovementRadius()/100.f);
-		if (D->GetPhase() == EDCPhase::Countdown || D->GetPhase() == EDCPhase::Filming)
-		{
-			const EDCStabilizer Stab = D->GetStabilizer();
-			Rig += Stab == EDCStabilizer::Off ? TEXT("   STAB OFF (G)") : Stab == EDCStabilizer::Light ? TEXT("   STAB LIGHT (G)") : TEXT("   STAB HEAVY (G)");
-		}
 		Label(FString::Printf(TEXT("CAM %d   %.0fmm%s"), Cam->GetNumber(), 18.f / FMath::Tan(FMath::DegreesToRadians(Cam->GetFOV() * 0.5f)), *Rig),
 			L, T - 34.f * S, D->GetPhase() == EDCPhase::Filming ? Bad : FLinearColor::White, 0.8f);
 	}
@@ -669,7 +664,7 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 	case EDCPhase::Countdown:
 	case EDCPhase::Filming:
 		Lines.Add(TEXT("1-9 or [ ] cut camera   Mouse aims   Wheel zooms   hold LMB pause recording"));
-		Lines.Add(TEXT("WASD move nearby   G aim stabilizer   R restart   P pause"));
+		Lines.Add(TEXT("WASD move nearby   R restart   P pause"));
 		break;
 	default:
 		break;

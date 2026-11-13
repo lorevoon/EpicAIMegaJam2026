@@ -22,14 +22,6 @@ class UTextureRenderTarget2D;
 class APlayerController;
 class UMaterialParameterCollection;
 
-/** How much the shooting stabilizer smooths aiming and dolly travel. */
-UENUM()
-enum class EDCStabilizer : uint8
-{
-	Off,
-	Light,
-	Heavy
-};
 class ADCCinemaReplay;
 
 /** Which kind of camera the next placement builds. */
@@ -159,19 +151,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (Units = "cm"))
 	float MaxStandHeight = 320.f;
 
-	/** Stabilizer while shooting: how quickly the camera head catches up with the mouse (lower = smoother). */
+	/** Stabilizer, always on while shooting: how quickly the camera head catches up with the mouse (lower = smoother). */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Stabilizer", meta = (ClampMin = "0.1"))
-	float LightAimSmoothing = 12.f;
+	float StabilizerAimSmoothing = 4.f;
 
+	/** Stabilizer, always on while shooting: how quickly a (legacy) dolly reaches and comes off its speed. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Stabilizer", meta = (ClampMin = "0.1"))
-	float HeavyAimSmoothing = 4.f;
-
-	/** Stabilizer while shooting: how quickly a dolly reaches and comes off its speed (lower = gentler). */
-	UPROPERTY(EditAnywhere, Category = "Directors Cut|Stabilizer", meta = (ClampMin = "0.1"))
-	float LightDollyEase = 4.f;
-
-	UPROPERTY(EditAnywhere, Category = "Directors Cut|Stabilizer", meta = (ClampMin = "0.1"))
-	float HeavyDollyEase = 1.5f;
+	float StabilizerDollyEase = 1.5f;
 
 	/** Camera-spot hint circles (beats with Show Camera Spot): how strongly they show while shooting (1 = as in preparation). */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Camera Spots", meta = (ClampMin = "0", ClampMax = "1"))
@@ -207,8 +193,6 @@ public:
 	/** W/S while looking through a dolly camera: travel along its rail. */
 	void HandleRigMove(FVector2D Axis, float DeltaSeconds);
 	void HandleCycleTool();
-	/** G: stabilizer off / light / heavy. Kept between takes; only active while shooting. */
-	void HandleCycleStabilizer();
 	void HandleFinishRail();
 	void HandleCycleCamera(int32 Direction);
 	/** Wheel or Left/Right: scrub the film in review (the zombie director also scrubs its preparation timeline). */
@@ -242,7 +226,6 @@ public:
 	int32 GetSlotCount() const { return Cameras.Num(); }
 	bool IsUnlimited() const { return MaxCameras <= 0; }
 	EDCCamTool GetTool() const { return Tool; }
-	EDCStabilizer GetStabilizer() const { return Stabilizer; }
 	/**
 	 * Slot of the camera being placed right now: the dolly whose rail is still being laid, else the slot the next
 	 * click would fill (may be one past the end when cameras are unlimited). INDEX_NONE when not placing.
@@ -366,7 +349,6 @@ protected:
 	TObjectPtr<ADCRail> PendingRail;
 
 	EDCCamTool Tool = EDCCamTool::Static;
-	EDCStabilizer Stabilizer = EDCStabilizer::Light;
 
 	UPROPERTY()
 	TArray<TObjectPtr<ADCPerformer>> Performers;

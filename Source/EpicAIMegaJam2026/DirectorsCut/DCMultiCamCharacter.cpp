@@ -105,7 +105,6 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Mapping->MapKey(Scrub, EKeys::Left).Modifiers.Add(NewObject<UInputModifierNegate>(this));
 	Input->BindAction(Scrub, ETriggerEvent::Triggered, this, &ADCMultiCamCharacter::OnScrub);
 	Input->BindAction(MapButton(EKeys::T), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleTool);
-	Input->BindAction(MapButton(EKeys::G), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleStabilizer);
 	Input->BindAction(MapButton(EKeys::LeftBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, -1);
 	Input->BindAction(MapButton(EKeys::RightBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, 1);
 	UInputAction* JumpOrTransport = MapButton(EKeys::SpaceBar);
@@ -273,14 +272,6 @@ void ADCMultiCamCharacter::OnScrub(const FInputActionValue& Value)
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleScrub(Value.Get<float>() * GetWorld()->GetDeltaSeconds() * D->KeyScrubRate);
-	}
-}
-
-void ADCMultiCamCharacter::OnCycleStabilizer()
-{
-	if (ADCMultiCamDirector* D = GetDirector())
-	{
-		D->HandleCycleStabilizer();
 	}
 }
 

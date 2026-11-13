@@ -55,7 +55,6 @@ private:
 	void OnSelectCamera(int32 Number);
 	void OnScrub(const FInputActionValue& Value);
 	void OnCycleTool();
-	void OnCycleStabilizer();
 	void OnFinishRail();
 	void OnCycleCamera(int32 Direction);
 	void OnTransportToggle();

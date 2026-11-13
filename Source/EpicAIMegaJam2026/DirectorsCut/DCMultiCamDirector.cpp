@@ -1151,26 +1151,12 @@ void ADCMultiCamDirector::UpdateCameraSpots()
 	}
 }
 
-void ADCMultiCamDirector::HandleCycleStabilizer()
-{
-	if (Phase == EDCPhase::Storyboard || IsReviewing())
-	{
-		return;
-	}
-	Stabilizer = Stabilizer == EDCStabilizer::Off ? EDCStabilizer::Light
-		: Stabilizer == EDCStabilizer::Light ? EDCStabilizer::Heavy : EDCStabilizer::Off;
-	ApplyStabilizer();
-	const TCHAR* Level = Stabilizer == EDCStabilizer::Off ? TEXT("OFF") : Stabilizer == EDCStabilizer::Light ? TEXT("LIGHT") : TEXT("HEAVY");
-	Flash(Phase == EDCPhase::Preparation ? FString::Printf(TEXT("Stabilizer %s (used while shooting)"), Level)
-		: FString::Printf(TEXT("Stabilizer %s"), Level), 1.5f);
-}
-
 void ADCMultiCamDirector::ApplyStabilizer()
 {
-	const bool bOn = (Phase == EDCPhase::Countdown || Phase == EDCPhase::Filming) && Stabilizer != EDCStabilizer::Off;
-	const bool bHeavy = Stabilizer == EDCStabilizer::Heavy;
-	const float Aim = bOn ? (bHeavy ? HeavyAimSmoothing : LightAimSmoothing) : 0.f;
-	const float Dolly = bOn ? (bHeavy ? HeavyDollyEase : LightDollyEase) : 0.f;
+	// Full stabilization while shooting; aiming in preparation stays instant.
+	const bool bOn = Phase == EDCPhase::Countdown || Phase == EDCPhase::Filming;
+	const float Aim = bOn ? StabilizerAimSmoothing : 0.f;
+	const float Dolly = bOn ? StabilizerDollyEase : 0.f;
 	for (ADCMultiCam* Cam : Cameras)
 	{
 		if (Cam)
