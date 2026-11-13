@@ -122,10 +122,10 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
 <header class="slate">
   <div class="stripes" aria-hidden="true"></div>
   <div class="slate-in">
-    <div class="slate-fields"><span>Prod. Director's Cut</span><span>Scene 01 · Love in the Ruins</span><span>Take 60 s</span><span>2026 Epic AI MegaJam</span></div>
-    <h1>Director's Cut: <span>Love in the Ruins</span></h1>
-    <p class="lead">You are directing a romance film in the middle of a zombie apocalypse. Read the storyboard, study the rehearsal, rig the set with as many cameras as you need, then cut the take live. Capture every scene of the love story, and keep every zombie out of the movie.</p>
-    <div class="slate-fields"><span>GDD v2.0</span><span>Updated 12 Nov 2026</span><span>Unreal Engine 5.8 · Windows</span><span>Deadline Mon 16 Nov 10:00 HKT</span></div>
+    <div class="slate-fields"><span>Prod. Director's Cut</span><span>Stages 1–3 · The Village Raid</span><span>Takes 40 / 50 / 60 s</span><span>2026 Epic AI MegaJam</span></div>
+    <h1>Director's Cut: <span>The Village Raid</span></h1>
+    <p class="lead">You are directing a fantasy tragedy on a working film set. A swordsman's small kindness, a monster raid and a broken promise play out across three stages. Read the storyboard, study the rehearsal, rig the village with as many cameras as you need, then cut each take live. Capture every beat of the story, and keep the film crew out of the movie.</p>
+    <div class="slate-fields"><span>GDD v2.1</span><span>Updated 12 Nov 2026</span><span>Unreal Engine 5.8 · Windows</span><span>Deadline Mon 16 Nov 10:00 HKT</span></div>
   </div>
 </header>
 
@@ -133,29 +133,30 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
 
 <section id="vision">
   <div class="eyebrow">Vision</div>
-  <h2>A love story, framed around the end of the world</h2>
-  <p>The studio wants a romance. The location is crawling with zombies. Your job is to find the angles that tell the love story and hide the apocalypse. Teardown inspires the rhythm: unlimited, calm preparation, then one committed, unforgiving take where the plan meets reality.</p>
+  <h2>A tragedy in three takes, framed around a busy film set</h2>
+  <p>The studio wants a fantasy tragedy: an act of kindness introduces a swordsman and the archer who loves him, a monster raid takes the life of the man he helped, and their return to defend the village ends with a rescue, a fatal moment of gratitude and a promise she must remember alone. The set is full of crew in black with headphones who keep wandering into the action. Your job is to find the angles that tell the story and hide the production. Teardown inspires the rhythm: unlimited, calm preparation, then one committed, unforgiving take where the plan meets reality.</p>
   <div class="cols">
     <div class="note"><h3>Learn the scene</h3><p>The storyboard says what happens and in what order, never where or when. The rehearsal shows you the rest, at your own pace.</p></div>
-    <div class="note"><h3>Frame out the dead</h3><p>Every second a zombie is visible on the live camera costs points. Walls, a burned-out bus and a kiosk are your best friends.</p></div>
-    <div class="note"><h3>Cut it live</h3><p>Only the live camera records. With scenes overlapping, choosing when to cut is the core decision of the game.</p></div>
+    <div class="note"><h3>Frame out the crew</h3><p>Every second a crew member is visible on the live camera costs points. Houses, the mill, fences and rooftops are your best friends.</p></div>
+    <div class="note"><h3>Cut it live</h3><p>Only the live camera records. With beats overlapping, choosing when to cut is the core decision of the game.</p></div>
   </div>
+  <p>Capture targets rise from 4 to 5 to 6 beats across the three stages. The mill-side bench, the old man's box and the mountain promise are planted early so they return during the tragedy.</p>
 </section>
 
 <section id="loop">
   <div class="eyebrow">Game loop</div>
-  <h2>Four phases, then try again</h2>
+  <h2>Four phases per stage, then try again or move on</h2>
   <div class="flow" aria-label="Phase order"><span class="step">Storyboard</span><span class="arrow">→</span><span class="step">Preparation</span><span class="arrow">→</span><span class="step">Shooting</span><span class="arrow">→</span><span class="step">Evaluation</span><span class="arrow">↻</span></div>
   <div class="table-wrap"><table>
     <thead><tr><th>Phase</th><th>What the player does</th><th>Status</th></tr></thead>
     <tbody>
-      <tr><td class="k">1 · Storyboard</td><td>Read the scenes in order: a sketch panel, a suggested angle and a one-line description for each. The required scene (the kiss) is marked. No times, no places.</td><td><span class="pill p-done">Text built</span> <span class="pill p-todo">Sketches + angles</span></td></tr>
+      <tr><td class="k">1 · Storyboard</td><td>Read the stage's beats in order: a sketch panel, a suggested angle, the action and dialogue, and the scored moment for each. Every beat is required to clear the stage. No times, no places; production timecodes stay hidden and are discovered through rehearsal.</td><td><span class="pill p-done">Text built</span> <span class="pill p-todo">Sketches + angles</span></td></tr>
       <tr><td class="k">2 · Preparation</td><td>Walk the set freely while the rehearsal plays. Pause, play, change speed (0.5× to 4×) and scrub to any moment. Place static, dolly and crane cameras, aim them, and set where each starts. Optionally spray numbered markers.</td><td><span class="pill p-done">Cameras + rehearsal transport built</span> <span class="pill p-nice">Markers</span></td></tr>
       <tr><td class="k">3 · Shooting</td><td>Hit the clapperboard. Cut between cameras live; aim, smoothly zoom, drive dollies (with adjustable rail speed) and raise or lower cranes. The REC overlay and film look sell the shoot.</td><td><span class="pill p-done">Multi-cam cutting, smooth zoom, rail speed built</span> <span class="pill p-todo">Recording effect</span></td></tr>
-      <tr><td class="k">4 · Evaluation</td><td>Watch the replay of your edited film, then see the grade: scenes captured, zombie screen time, score and letter grade. Return to preparation with every camera kept.</td><td><span class="pill p-done">Results built</span> <span class="pill p-todo">Replay + letter grade</span></td></tr>
+      <tr><td class="k">4 · Evaluation</td><td>Watch the replay of your edited film, then see the grade: beats captured, missed beats listed by name, crew screen time, score and letter grade. Clear the stage to unlock the next one, or return to preparation with every camera kept.</td><td><span class="pill p-done">Results built</span> <span class="pill p-todo">Replay + letter grade</span></td></tr>
     </tbody>
   </table></div>
-  <p>Retry never reloads the map. Cameras, rails and markers persist between takes; actors, zombies, clock and scores reset.</p>
+  <p>Retry never reloads the map. Cameras, rails and markers persist between takes; actors, film crew, props, fire effects, clock and scores reset. Stages are played in order: The Promise (4 beats), The Raid (5 beats), The Broken Promise (6 beats).</p>
 </section>
 
 <section id="controls">
@@ -184,108 +185,163 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
   <div class="cols">
     <div class="note"><h3>Static</h3><p>On a floor stand (40–320 cm), a wall or a ceiling. Its position is fixed after placement. Aim and zoom only.</p></div>
     <div class="note"><h3>Dolly</h3><p>Lay rail points on any floor, wall or ceiling, then mount the camera. Rails cannot pass through scenery. Travel at an adjustable speed (base 600 cm/s).</p></div>
-    <div class="note"><h3>Crane</h3><p>Stands on the floor; the boom raises the lens from 40 to 800 cm. Great for looking over the bus and the barricade.</p></div>
+    <div class="note"><h3>Crane</h3><p>Stands on the floor; the boom raises the lens from 40 to 800 cm. Great for looking over rooftops and fences, or linking the archer's upper landing to the lane below.</p></div>
   </div>
-  <p>Whatever position and aim a camera has when you leave it during preparation is where it starts every take. Zoom runs from 20° to 90° horizontal field of view; zooming in extends the distance at which scenes still count.</p>
+  <p>Whatever position and aim a camera has when you leave it during preparation is where it starts every take. Zoom runs from 20° to 90° horizontal field of view; zooming in extends the distance at which beats still count.</p>
 </section>
 
 <section id="rules">
   <div class="eyebrow">Capture rules</div>
-  <h2>What counts as filming a scene, and what counts as a zombie in shot</h2>
+  <h2>What counts as filming a beat, and what counts as crew in shot</h2>
   <div class="cols">
-    <div class="note"><h3>A scene is captured when</h3>
+    <div class="note"><h3>A beat is captured when</h3>
       <ul>
-        <li>its time window is running and the camera is the live one;</li>
-        <li>every subject (head, prop or body) sits inside the central 70% of the frame;</li>
-        <li>each subject is within range (2,000 cm, more when zoomed) and not blocked by scenery;</li>
-        <li>face-required subjects are seen from the front;</li>
-        <li>all of that holds continuously for the scene's hold time (1.5–2.5 s). Cutting away resets the hold.</li>
+        <li>its time window is running, its scored pose has begun (the pose gate is open) and the camera is the live one;</li>
+        <li>every capture anchor (head, face, prop, weapon hand, fire cue or body) sits inside the central 70% of the frame;</li>
+        <li>each anchor is within range (2,000 cm, more when zoomed) and not blocked by scenery;</li>
+        <li>face-required anchors are seen from the front; side angles are accepted for the kiss and the mourning pose;</li>
+        <li>all of that holds continuously for the beat's hold time (1.75–2.5 s). Cutting away resets an unfinished hold.</li>
       </ul>
     </div>
-    <div class="note"><h3>A zombie is in shot when</h3>
+    <div class="note"><h3>A crew member is in shot when</h3>
       <ul>
-        <li>its head or body is anywhere in the live camera's full frame;</li>
+        <li>their head or body is anywhere in the live camera's full frame;</li>
         <li>within 4,000 cm and not hidden behind scenery.</li>
       </ul>
       <p class="zed">Penalty: −150 points per second, with a red frame alarm.</p>
+      <p>Crew wear black clothes and headphones so they read instantly. The goblins, orcs and armoured orc are story performers and never trigger the penalty; the penalty belongs only to the separate crew intruders, so the required raid and combat shots score normally.</p>
     </div>
   </div>
+  <h3>Pose gates</h3>
+  <p>Each scored moment is gated to its pose so the player must witness its result, and the resulting pose stays readable for the full hold: fire anchors activate after both fire cues, the old man's death after his fall, the rescue after the arrow hit, and the stabbing after the swordsman falls. The monster-hand reveal (3.3) uses a dedicated weapon-hand anchor.</p>
 </section>
 
 <section id="scene">
   <div class="eyebrow">Playable scene</div>
-  <h2>Love in the Ruins: the town square at sunset</h2>
-  <p>A 30 × 24 m square inside ruined brick walls, with the exit to the sunset in the east wall. A fountain in the middle; a wrecked car south-west; a crate barricade and dumpster south-east; a burned-out bus north-west; a kiosk north-east. Sam and Ellie play the scene; five zombies wander through on fixed routes.</p>
-  <h3>Storyboard (what the player sees, in order)</h3>
+  <h2>The Village Raid: three stages, fifteen capture beats</h2>
+  <p>The story is set in a windmill village: a lane with a mill-side bench, a storehouse and a gate, a mill crossing over the water, a short walkable ramp up to a landing, and an uphill path to a mountain lookout. Stage 1 is shot in the WindmillValley <code>L_Showcase</code> map; Stages 2 and 3 reuse the same lane, mill crossing, ramp and lookout. The same couple carries the story through all three acts. Timings below are proposed rehearsal values, measured from the start of each take and hidden from the player. A capture window contains an authored sequence; its hold is enabled once the listed scored pose begins.</p>
+
+  <h3>Cast</h3>
   <div class="table-wrap"><table>
-    <thead><tr><th>#</th><th>Scene</th><th>Window (hidden)</th><th>Hold</th><th>Subjects</th><th>Points</th></tr></thead>
+    <thead><tr><th>Role</th><th>Asset</th><th>Part in the story</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td>Sam scavenges a can of peaches from a wrecked car.</td><td class="tc">00:07–00:13</td><td class="tc">2.0 s</td><td>Sam's can</td><td class="tc">200</td></tr>
-      <tr><td>2</td><td>Ellie watches him from behind a barricade.</td><td class="tc">00:09–00:15</td><td class="tc">2.0 s</td><td>Ellie's face</td><td class="tc">200</td></tr>
-      <tr><td>3</td><td>They meet at the fountain: she aims her crossbow, he raises his hands.</td><td class="tc">00:19–00:25</td><td class="tc">2.0 s</td><td>Crossbow + Sam's head</td><td class="tc">250</td></tr>
-      <tr><td>4</td><td>He offers her the peaches.</td><td class="tc">00:26–00:32</td><td class="tc">2.0 s</td><td>The can + Ellie's face</td><td class="tc">250</td></tr>
-      <tr><td>5</td><td>They share a laugh by the fountain.</td><td class="tc">00:33–00:39</td><td class="tc">2.0 s</td><td>Both heads</td><td class="tc">250</td></tr>
-      <tr><td>6</td><td><span class="req">The kiss. (required)</span></td><td class="tc">00:41–00:47</td><td class="tc">2.5 s</td><td>Both heads</td><td class="tc">1,000</td></tr>
-      <tr><td>7</td><td>They walk off together toward the sunset.</td><td class="tc">00:50–00:58</td><td class="tc">2.0 s</td><td>Both bodies</td><td class="tc">300</td></tr>
+      <tr><td class="k">Swordsman (hero)</td><td class="mono">Polysplit BasicHero_M_Swordsman</td><td>Helps the old man, makes the promise, duels the raider, dies from the final stab.</td></tr>
+      <tr><td class="k">Archer (heroine)</td><td class="mono">Polysplit BasicHero_F_Archer</td><td>Loves him for his kindness, fires the rescuing arrow, mourns him in the final shot.</td></tr>
+      <tr><td class="k">Old man</td><td>Villager with a distinctive vest, walking stick and marked wooden box</td><td>Receives the kindness in Act 1; killed by the blade-bearing raider in Act 2.</td></tr>
+      <tr><td class="k">Blade-bearing raider</td><td class="mono">Orc_armored</td><td>Leads the raid, kills the old man, duels the swordsman, takes the arrow and delivers the final stab. Its shoulder armour, weapon and fall location stay consistent.</td></tr>
+      <tr><td class="k">Raiders</td><td>Goblin and orc monsters</td><td>Two others establish the troop at the gate, then move into background lanes.</td></tr>
+      <tr><td class="k">Villagers</td><td>Background extras</td><td>Recoil, flee toward the crossing; one is struck down in the background in 2.3.</td></tr>
+      <tr><td class="k zed">Film crew</td><td>Black clothes, headphones</td><td>Roaming staff (boom, grips, runners) who wander the set on fixed routes. Not story performers: keep them out of frame.</td></tr>
     </tbody>
   </table></div>
-  <h3>Zombies (the obstacles)</h3>
+
+  <h3>Stage 1 · The Promise <span class="tc">4 beats · 40 s take</span></h3>
+  <p><b>Tone:</b> warmth → affection → hope. <b>Set:</b> village lane → uphill path → mountain lookout (WindmillValley <code>L_Showcase</code>). Establish his kindness before the romance. The old man's box and the lovers' promise become visual callbacks in the following acts.</p>
   <div class="table-wrap"><table>
-    <thead><tr><th>Zombie</th><th>Route and timing</th><th>Ruins the obvious angle on</th></tr></thead>
+    <thead><tr><th>ID</th><th>Beat</th><th>Window · hold</th><th>Capture anchors</th><th>Scored moment</th><th>Camera note</th></tr></thead>
     <tbody>
-      <tr><td class="k zed">Car</td><td>Shambles past behind Sam <span class="tc">00:00–00:10</span>, then lingers in the south-west corner</td><td>Scene 1 from the south; wide shots looking west</td></tr>
-      <tr><td class="k zed">Alley</td><td>Shuffles in behind the barricade from the south-east <span class="tc">00:04–00:16</span></td><td>Scene 2, which must be filmed from the west</td></tr>
-      <tr><td class="k zed">Shambler</td><td>Crosses north of the fountain <span class="tc">00:18–00:40</span></td><td>Scenes 3–5 filmed from the south</td></tr>
-      <tr><td class="k zed">Bus</td><td>Hides behind the bus, steps out toward the lovers <span class="tc">00:36–01:00</span></td><td>The kiss filmed from the south</td></tr>
-      <tr><td class="k zed">Kiosk</td><td>Lurches toward the exit <span class="tc">00:44–01:00</span></td><td>The walk-off filmed from the west</td></tr>
+      <tr><td class="k">1.1</td><td><b>A small kindness.</b> The swordsman takes the old man's wooden box, carries it to the mill-side bench and sets it down. The old man pats his shoulder: "Thank you, lad."</td><td class="tc">0:02–0:10 · 2 s</td><td>Swordsman + old man</td><td>Hold during the shoulder pat after the box is set down.</td><td>Begin wide with the turning mill, ease into a medium two-shot for the pat. Keep the box visible beside the bench.</td></tr>
+      <tr><td class="k">1.2</td><td><b>She sees his kindness.</b> The archer approaches: "My hero." He smiles. The old man waves them off as the couple walk toward the mountain path.</td><td class="tc">0:11–0:19 · 2 s</td><td>Swordsman + archer</td><td>Hold while both walk together after her greeting.</td><td>Dolly beside the couple, old man and box behind them. Her affectionate glance establishes why she loves him.</td></tr>
+      <tr><td class="k">1.3</td><td><b>Always together.</b> At the lookout: "Whatever comes, I'll always be by your side." "Promise?" "Promise."</td><td class="tc">0:22–0:29 · 2 s</td><td>Both faces</td><td>Hold their shared look after "Promise."</td><td>Medium profile two-shot with the village below. Pause on the exchanged look.</td></tr>
+      <tr><td class="k">1.4</td><td><b>The kiss.</b> They kiss against the sunset, then remain forehead to forehead. The village is quiet below.</td><td class="tc">0:31–0:38 · 2 s</td><td>Both heads</td><td>Hold the kiss or the forehead-to-forehead pose.</td><td>Static side silhouette with open sky around the couple; hold the tender final pose.</td></tr>
     </tbody>
   </table></div>
-  <p><b>Story pass needed.</b> The team noted the story needs more thought. Scene lines, captions and blocking are all editable in the level, so a rewrite costs level time, not code time.</p>
+
+  <h3>Stage 2 · The Raid <span class="tc">5 beats · 50 s take</span></h3>
+  <p><b>Tone:</b> alarm → terror → personal loss. <b>Set:</b> storehouse lane → gate → mill crossing → uphill path. Turn the familiar village into a disaster. Make the old man's death specific and recognisable, then send the lovers back toward danger.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>ID</th><th>Beat</th><th>Window · hold</th><th>Capture anchors</th><th>Scored moment</th><th>Camera note</th></tr></thead>
+    <tbody>
+      <tr><td class="k">2.1</td><td><b>Peace catches fire.</b> A flame catches beside the storehouse; a second awning burns across the lane. The old man turns from his bench as a villager cries "Fire!"</td><td class="tc">0:02–0:10 · 2 s</td><td>Two fire cues</td><td>Hold after the second fire ignites.</td><td>Raised diagonal wide showing both fires, old man at the lower edge. Same mill-side geography as the opening.</td></tr>
+      <tr><td class="k">2.2</td><td><b>Monsters at the gate.</b> Three monsters charge through the gate. The blade-bearing raider leads them toward the mill while villagers recoil and flee.</td><td class="tc">0:11–0:19 · 2 s</td><td>Blade raider + another monster</td><td>Hold the troop advancing together through the gate.</td><td>Crane wide down the lane. Clearly establish the raider's shoulder armour and weapon.</td></tr>
+      <tr><td class="k">2.3</td><td><b>No way out.</b> Villagers run for the crossing; one is struck down in the background. The old man stumbles beside his box and reaches toward an escaping villager.</td><td class="tc">0:19–0:28 · 2 s</td><td>Old man + box</td><td>Hold his reaching pose beside the fallen box.</td><td>Dolly along the evacuation lane, settle on the old man. Keep the box and his outstretched hand readable.</td></tr>
+      <tr><td class="k">2.4</td><td><b>The hand falls.</b> The blade-bearing raider strikes the old man. He collapses beside the same box the swordsman carried; his hand falls still; his walking stick rolls away.</td><td class="tc">0:28–0:38 · 2.5 s</td><td>Blade raider + old man</td><td>Hold the raider over the motionless old man after the strike.</td><td>Medium side angle with attacker and old man together, box between foreground and body. Sound falls away after the impact.</td></tr>
+      <tr><td class="k">2.5</td><td><b>Too late to help.</b> Descending from the lookout, the couple see the old man beside the box. "The man you helped…" He draws his sword and runs down; she follows.</td><td class="tc">0:39–0:48 · 2 s</td><td>Swordsman + archer</td><td>Hold their stunned reaction before the charge.</td><td>Medium two-shot from the crossing, body and box at the lower edge. Both look toward the same point before moving.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Stage 3 · The Broken Promise <span class="tc">6 beats · 60 s take</span></h3>
+  <p><b>Tone:</b> defiance → false relief → shock → grief. <b>Set:</b> mill crossing → upper landing → lane below. Give the audience a familiar rescue, allow a brief moment of relief, then punish the swordsman's unguarded thank-you. End with the archer beside the man who promised to stay.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>ID</th><th>Beat</th><th>Window · hold</th><th>Capture anchors</th><th>Scored moment</th><th>Camera note</th></tr></thead>
+    <tbody>
+      <tr><td class="k">3.1</td><td><b>Face the killer.</b> The swordsman duels the blade-bearing raider beside the mill while the archer climbs the ramp to the upper landing. The old man and box remain near the lane.</td><td class="tc">0:02–0:10 · 1.75 s</td><td>Swordsman + blade raider</td><td>Hold the duel after both fighters have engaged.</td><td>Medium wide across the duel, landing visible in the background.</td></tr>
+      <tr><td class="k">3.2</td><td><b>Her arrow finds its mark.</b> The raider drives him back. The archer fires from above; the raider staggers and falls. The swordsman steps clear, breathing hard.</td><td class="tc">0:11–0:19 · 1.75 s</td><td>Archer + blade raider</td><td>Hold the archer and fallen raider after the impact.</td><td>Diagonal wide linking the elevated archer to the raider below; her release and his reaction in one composition.</td></tr>
+      <tr><td class="k">3.3</td><td><b>The fatal thank-you.</b> He turns his back on the fallen raider and looks up: "You saved my life. Thank you." She smiles. Behind him, the raider's hand tightens around its blade.</td><td class="tc">0:20–0:28 · 2 s</td><td>Swordsman's face + raider's weapon hand</td><td>Hold his grateful look while the weapon hand moves, monster below his eye line.</td><td>Over the archer's shoulder toward him, fallen raider low in the background. The audience notices the hand before he does.</td></tr>
+      <tr><td class="k">3.4</td><td><b>One last strike.</b> The wounded raider rises and stabs him in the back. His sword drops; he looks up at her, staggers and collapses, dead. The raider falls beside him.</td><td class="tc">0:29–0:38 · 2 s</td><td>Swordsman + blade raider</td><td>Hold both fallen bodies after he collapses. His death remains final.</td><td>Medium side angle, both bodies readable; attack across the lens implies blade contact. Stay on his fall.</td></tr>
+      <tr><td class="k">3.5</td><td><b>The run down.</b> The archer freezes, screams "No!" and races down the ramp, nearly stumbling, and drops her bow beside him.</td><td class="tc">0:38–0:46 · 1.75 s</td><td>Archer's face + upper body</td><td>Hold her face during the scream and first steps, before she leaves the landing.</td><td>Dolly or pan along the ramp into the lane; keep her face visible as she turns to the body.</td></tr>
+      <tr><td class="k">3.6</td><td><b>You promised.</b> She kneels, cradles his head, searches his face. "You promised…" She presses her forehead to his and sobs. End on the still couple as the village burns.</td><td class="tc">0:47–0:58 · 2.5 s</td><td>Archer's face + swordsman's head</td><td>Hold the forehead-to-forehead mourning pose before the fade.</td><td>Low medium two-shot echoing the mountain kiss; ease back slightly, smoke and the old man's box at the edge of frame.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Staging notes (from the storyboard)</h3>
+  <div class="cols">
+    <div class="note"><h3>Dramatic callbacks</h3><p>Show the old man's vest, walking stick and marked box clearly in Act 1 and reuse them in Act 2. Repeat the lovers' forehead-to-forehead composition in the ending. Carry "Promise" from the lookout into "You promised" beside his body.</p></div>
+    <div class="note"><h3>The recognisable cliché</h3><p>The arrow should feel like a rescue. Give the couple a few seconds to smile before the monster's hand moves. Keep the swordsman unaware until the stab; the final quiet hold gives the loss room to land.</p></div>
+    <div class="note"><h3>Actor continuity</h3><p>One armoured orc does all the killing. The arrow wounds it, allowing its brief recovery; its final collapse is why the archer can reach her lover. The two other raiders move into background lanes after 2.2.</p></div>
+    <div class="note"><h3>Geography</h3><p>Bench and box close to the mill crossing. A short landing reached by a walkable ramp, about five seconds' descent. The duel within easy view of the landing. The couple reach the lower path before the final beat of Act 2.</p></div>
+    <div class="note"><h3>Animation staging</h3><p>Pre-attached box for the carry, transfer hidden by the grateful pat. Offset attacks and timed reactions for combat. Arrow animated separately, then a lodged-arrow prop after impact. Stab contact masked by the side angle and a sound cue. Aligned kneel and seated cradle for the ending. Paired kiss and mourning poses need an early rig test.</p></div>
+    <div class="note"><h3>Set reuse</h3><p>Reuse the village lane, mill crossing, short upper ramp and mountain lookout. Spreading fire comes from two timed effects and a shared smoke layer. Bodies and damage stay consistent between the raid and the combat.</p></div>
+  </div>
+
+  <h3>Film crew (the obstacles)</h3>
+  <p>Crew routes are authored per stage with the same waypoint tools as the performers. Proposed starting set, to be tuned in rehearsal so each one spoils the obvious angle on a beat without making any beat impossible:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Stage</th><th>Crew</th><th>Pressure</th></tr></thead>
+    <tbody>
+      <tr><td class="k">1 · The Promise</td><td class="zed">2 crew</td><td>Separated targets and broad setups: for example a boom operator near the mill bench and a runner on the uphill path.</td></tr>
+      <tr><td class="k">2 · The Raid</td><td class="zed">3 crew</td><td>Cameras are needed across the village plus a personal reaction shot: for example a grip by the gate and an effects tech near the burning awnings.</td></tr>
+      <tr><td class="k">3 · The Broken Promise</td><td class="zed">3–4 crew</td><td>Alternates elevation, action, an ominous background detail and an intimate final shot: for example a rigger on the landing ramp and a boom operator behind the mourning spot.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Paper timing permits all required holds. Rehearse actual cameras and pose gates before locking the windows. Beat lines, captions, blocking and crew routes are all editable in the level, so changes cost level time, not code time.</p>
 </section>
 
 <section id="scoring">
   <div class="eyebrow">Evaluation</div>
   <h2>Replay first, then the grade</h2>
-  <pre>Scene points  = sum of captured scenes            (max 2,450)
-Zombie cost   = 150 × seconds a zombie was on the live camera
-Final score   = max(0, Scene points − Zombie cost)   if the kiss was captured
-              = 0, "Retake required"                  otherwise</pre>
+  <p>Every beat is required. Capture all 4, 5 or 6 beats to clear the stage and unlock the next one; there are no bonus beats.</p>
+  <pre>Beat points   = 250 × beats captured             (max 1,000 / 1,250 / 1,500)
+Crew cost     = 150 × seconds crew were on the live camera
+Final score   = max(0, Beat points − Crew cost)   if every beat was captured
+              = 0, "Retake required"              otherwise (missed beats listed)</pre>
   <div class="table-wrap"><table>
     <thead><tr><th>Grade</th><th>Condition</th></tr></thead>
     <tbody>
-      <tr><td class="k">S · Director's Cut</td><td>Score ≥ 2,200 (90%) and zero zombie screen time</td></tr>
-      <tr><td class="k">A</td><td>Score ≥ 1,840 (75%)</td></tr>
-      <tr><td class="k">B</td><td>Score ≥ 1,350 (55%)</td></tr>
-      <tr><td class="k">C · Studio Cut</td><td>The kiss was captured</td></tr>
-      <tr><td class="k">Retake</td><td>The kiss was missed</td></tr>
+      <tr><td class="k">S · Director's Cut</td><td>All beats captured and zero crew screen time</td></tr>
+      <tr><td class="k">A</td><td>Score ≥ 85% of the stage maximum</td></tr>
+      <tr><td class="k">B</td><td>Score ≥ 65% of the stage maximum</td></tr>
+      <tr><td class="k">C · Studio Cut</td><td>All beats captured; stage cleared</td></tr>
+      <tr><td class="k">Retake</td><td>One or more beats missed; the results screen names each missed beat</td></tr>
     </tbody>
   </table></div>
-  <p>The replay plays back exactly what went out live: every cut, aim, zoom and dolly move, recorded 30 times a second, with letterboxing and the recording look. Zombie moments flash a small red marker on the replay's timeline so players learn where they slipped.</p>
+  <p>The replay plays back exactly what went out live: every cut, aim, zoom and dolly move, recorded 30 times a second, with letterboxing and the recording look. Crew moments flash a small red marker on the replay's timeline so players learn where they slipped.</p>
 </section>
 
 <section id="presentation">
   <div class="eyebrow">Presentation</div>
-  <h2>Low-poly, golden hour, home-movie romance</h2>
+  <h2>Stylised fantasy village, sunset to firelight</h2>
   <ul>
-    <li><b>Art:</b> low-poly 3D asset packs (originally made for Unity) imported into Unreal: two survivors, a zombie set, and a ruined-town kit. Check each pack's licence allows use in Unreal and in a public jam build, and list it in the credits.</li>
+    <li><b>Art:</b> stylised fantasy packs in Unreal: Polysplit <code>BasicHero_M_Swordsman</code> and <code>BasicHero_F_Archer</code>, an old villager, goblin and orc raiders with <code>Orc_armored</code> as the blade-bearing raider, crew figures in black with headphones, the WindmillValley set (<code>L_Showcase</code>) and the Stylized Village kit. Props: the old man's marked box, walking stick, bow, sword, lodged-arrow prop. Check each pack's licence allows use in a public jam build, and list it in the credits.</li>
+    <li><b>Lighting by stage:</b> warm afternoon to sunset for The Promise; firelight and smoke for The Raid; cooler dusk with the village burning behind for The Broken Promise.</li>
     <li><b>Recording effect:</b> REC dot and timecode, letterbox bars, light grain and vignette on the live feed; a short whip or flash on each cut.</li>
-    <li><b>Audio:</b> ambience, distant groans, clapperboard, "Action!" and "Cut!", a romantic theme that plays under the replay.</li>
-    <li><b>HUD:</b> phase, take clock, camera switcher with type labels, scene gauges for the live camera, zombie alarm. Required scene in gold, zombies in green, live camera in red.</li>
+    <li><b>Audio:</b> mill water, birds and village chatter to open; the fire alarm and battle sounds during the raid; music drops as the old man's hand falls; the thank-you plays against a brief lull, then the sword hitting the ground, the archer's scream and restrained sobbing; fire and water under her final line. Clapperboard, "Action!" and "Cut!" frame each take. Every line is subtitled.</li>
+    <li><b>HUD:</b> stage and phase, take clock, camera switcher with type labels, beat gauges for the live camera, crew alarm. Beats in gold, crew in green, live camera in red.</li>
   </ul>
 </section>
 
 <section id="tech">
   <div class="eyebrow">Unreal implementation</div>
   <h2>What exists in the project today</h2>
-  <p>All gameplay is C++ in <code>Source/EpicAIMegaJam2026/DirectorsCut/</code>, built so designers edit everything in the level. The game level is <code>L_DC_Zombie</code> with <code>DCZombieGameMode</code>.</p>
+  <p>All gameplay is C++ in <code>Source/EpicAIMegaJam2026/DirectorsCut/</code>, built so designers edit everything in the level. The current game level is still <code>L_DC_Zombie</code> with <code>DCZombieGameMode</code>; class names keep the "Zombie" prefix from the earlier scene, and the penalised performers are now the film crew. The Village Raid stages are set up in WindmillValley <code>L_Showcase</code> (Stage 1) and the reused village set (Stages 2–3).</p>
   <div class="table-wrap"><table>
     <thead><tr><th>Class</th><th>Responsibility</th></tr></thead>
     <tbody>
-      <tr><td class="k mono">DCZombieDirector</td><td>Phases (storyboard, rehearsal, planning, shooting, results), scene clock, scrubbing, zombie penalty, scoring. Holds the <b>Build Zombie Scene</b> button. Extends the multi-cam director.</td></tr>
+      <tr><td class="k mono">DCZombieDirector</td><td>Phases (storyboard, rehearsal, planning, shooting, results), scene clock, scrubbing, intruder penalty (film crew), scoring. Holds the <b>Build Zombie Scene</b> button, which still builds the old blockout. <span class="pill p-todo">Needs</span> stage order, all-beats clear rule and missed-beat list.</td></tr>
       <tr><td class="k mono">DCMultiCamDirector</td><td>Camera placement (static, dolly, crane, unlimited), live switching, scene capture rules.</td></tr>
       <tr><td class="k mono">DCMultiCam · DCRail</td><td>A placed camera and its mount; dolly rails on any surface.</td></tr>
-      <tr><td class="k mono">DCPerformer · DCWaypoint</td><td>Actors and zombies (<code>Ruins Shot</code> flag), with blocking as draggable waypoints: time, facing, lean, prop raise, tilt.</td></tr>
-      <tr><td class="k mono">DCBeat</td><td>One storyboard scene: text, hidden window, hold, subjects, points.</td></tr>
+      <tr><td class="k mono">DCPerformer · DCWaypoint</td><td>Story performers and film crew (crew use the <code>Ruins Shot</code> flag; raiders do not), with blocking as draggable waypoints: time, facing, lean, prop raise, tilt.</td></tr>
+      <tr><td class="k mono">DCBeat</td><td>One storyboard beat: text, hidden window, hold, capture anchors, points. <span class="pill p-todo">Needs</span> a pose gate (hold enabled once the scored pose begins) and weapon-hand / fire-cue anchors.</td></tr>
       <tr><td class="k mono">DCSetPiece · DCStartMark · DCClapperboard</td><td>Blockout geometry, player start, take trigger.</td></tr>
       <tr><td class="k mono">DCZombieHUD · DCMultiCamCharacter</td><td>Canvas HUD; the director on foot and their key bindings.</td></tr>
     </tbody>
@@ -296,13 +352,13 @@ Final score   = max(0, Scene points − Zombie cost)   if the kiss was captured
 <section id="schedule">
   <div class="eyebrow">Schedule · HKT · working hours 10:00–24:00</div>
   <h2>Four days to a packaged build</h2>
-  <p>Owners are not assigned yet. The plan splits the work into four lanes so each person can own one: <b>Systems</b> (C++), <b>Level</b> (layout, blocking, zombies, story), <b>Art &amp; Audio</b> (assets, effects, sound), <b>UI &amp; Ship</b> (HUD, menus, packaging, video). Every day ends with a packaged build, so problems surface early.</p>
+  <p>Owners are not assigned yet. The plan splits the work into four lanes so each person can own one: <b>Systems</b> (C++), <b>Level</b> (layout, blocking, film crew, story), <b>Art &amp; Audio</b> (assets, effects, sound), <b>UI &amp; Ship</b> (HUD, menus, packaging, video). Every day ends with a packaged build, so problems surface early.</p>
   <div class="days">
     <div class="day">
       <div class="date"><h3>Thu 12</h3><span class="mono">Tonight · setup</span></div>
       <div>
-        <div class="lane"><b>All</b><ul><li>Commit the prototypes; agree this GDD; assign lane owners.</li><li>Set <code>L_DC_Zombie</code> as the startup and default map.</li></ul></div>
-        <div class="lane"><b>Art &amp; Audio</b><ul><li>Pick the low-poly packs (two survivors, zombies, town kit); confirm licences and record credits.</li></ul></div>
+        <div class="lane"><b>All</b><ul><li>Commit the prototypes; agree this GDD; assign lane owners.</li><li>Lock the Village Raid storyboard (3 stages, 15 beats) as the story.</li><li>Set the Stage 1 map (WindmillValley <code>L_Showcase</code> with the director systems) as the startup and default map.</li></ul></div>
+        <div class="lane"><b>Art &amp; Audio</b><ul><li>Import Polysplit swordsman and archer, the old man, goblin/orc raiders with <code>Orc_armored</code>, and crew figures; confirm licences and record credits.</li><li>Early rig test of the paired kiss and mourning poses.</li></ul></div>
         <div class="lane"><b>UI &amp; Ship</b><ul><li>Package a first Windows build of the current prototype and run it on a second PC.</li></ul></div>
         <p class="gate"><b>Gate</b>Packaged build opens on the storyboard.</p>
       </div>
@@ -310,9 +366,9 @@ Final score   = max(0, Scene points − Zombie cost)   if the kiss was captured
     <div class="day">
       <div class="date"><h3>Fri 13</h3><span class="mono">Core features</span></div>
       <div>
-        <div class="lane"><b>Systems</b><ul><li>Merge rehearsal into preparation with play, pause, speed (0.5×–4×) and scrub.</li><li>Smooth zoom; rail speed adjustment.</li><li>Record the live feed each frame and play it back as the replay; add the letter grade.</li></ul></div>
-        <div class="lane"><b>Level</b><ul><li>Replace blockout with the imported town kit, keeping cover where zombies need hiding.</li><li>Story pass: final scene list and captions.</li></ul></div>
-        <div class="lane"><b>Art &amp; Audio</b><ul><li>Rig survivors and zombies on performers with idle and walk animations.</li></ul></div>
+        <div class="lane"><b>Systems</b><ul><li>Merge rehearsal into preparation with play, pause, speed (0.5×–4×) and scrub.</li><li>Smooth zoom; rail speed adjustment.</li><li>Record the live feed each frame and play it back as the replay; add the letter grade.</li><li>Stages: three takes in order, all-beats clear rule, missed-beat list; pose gates and weapon-hand / fire-cue anchors on beats.</li></ul></div>
+        <div class="lane"><b>Level</b><ul><li>Stage 1 in <code>L_Showcase</code>: bench, box, uphill path, lookout; author the 4 beats and crew routes.</li><li>Stages 2–3 on the reused village set: storehouse, gate, mill crossing, ramp to the landing (about 5 s descent), two timed fire effects and shared smoke.</li></ul></div>
+        <div class="lane"><b>Art &amp; Audio</b><ul><li>Put the cast on performers with idle, walk, carry, combat, hit, death, kneel and cradle animations; arrow and lodged-arrow prop.</li></ul></div>
         <div class="lane"><b>UI &amp; Ship</b><ul><li>Storyboard cards with sketch, angle and description; evaluation screen layout.</li></ul></div>
         <p class="gate"><b>Gate</b>Storyboard → preparation → shooting → replay → grade works in a packaged build.</p>
       </div>
@@ -321,10 +377,10 @@ Final score   = max(0, Scene points − Zombie cost)   if the kiss was captured
       <div class="date"><h3>Sat 14</h3><span class="mono">Content &amp; feel</span></div>
       <div>
         <div class="lane"><b>Systems</b><ul><li>Recording effect and cut transitions; spray markers if time allows.</li><li>Profiling and shooting optimisation toward 60 FPS at 1080p.</li></ul></div>
-        <div class="lane"><b>Level</b><ul><li>Two playtests with fresh players; tune zombie routes, windows, holds and the penalty.</li></ul></div>
-        <div class="lane"><b>Art &amp; Audio</b><ul><li>Lighting pass, ambience, groans, clapperboard, Action/Cut, replay music.</li></ul></div>
+        <div class="lane"><b>Level</b><ul><li>Two playtests with fresh players; rehearse real cameras and pose gates, then tune crew routes, windows, holds and the penalty before locking the windows.</li></ul></div>
+        <div class="lane"><b>Art &amp; Audio</b><ul><li>Lighting pass per stage; mill water, birds, chatter, fire alarm, battle, scream and sobs; clapperboard, Action/Cut, replay music; subtitles for every line.</li></ul></div>
         <div class="lane"><b>UI &amp; Ship</b><ul><li>Title screen, pause menu with quit, controls card.</li></ul></div>
-        <p class="gate"><b>Gate</b>A new player finishes a take without help; feature complete by 24:00.</p>
+        <p class="gate"><b>Gate</b>A new player clears Stage 1 without help and all three stages are playable; feature complete by 24:00.</p>
       </div>
     </div>
     <div class="day freeze">
@@ -345,25 +401,27 @@ Final score   = max(0, Scene points − Zombie cost)   if the kiss was captured
   <ol>
     <li>Spray markers (already marked nice-to-have).</li>
     <li>Storyboard sketches (keep text and angle notes).</li>
-    <li>Skeletal animation (keep low-poly static meshes sliding on their routes).</li>
+    <li>Paired kiss and mourning animations (fall back to aligned idle poses held for the side angle).</li>
     <li>Rail speed adjustment (keep the fixed speed).</li>
     <li>Extra audio beyond Action, Cut and ambience.</li>
   </ol>
-  <p>Never cut: the four phases, the replay, the zombie penalty, or the daily packaged build.</p>
+  <p>Never cut: the four phases, the three stages, the replay, the crew penalty, or the daily packaged build.</p>
 </section>
 
 <section id="tests">
   <div class="eyebrow">Acceptance tests</div>
   <h2>Done means a player can do this</h2>
   <ol>
-    <li>Read the storyboard, rehearse at 2× and paused, and scrub to the kiss.</li>
+    <li>Read the Stage 1 storyboard, rehearse at 2× and paused, and scrub to the kiss (1.4).</li>
     <li>Place one camera of each type; set a dolly's start and a crane's height; see them restored after a retake.</li>
-    <li>Capture the kiss only: the grade is C, Studio Cut.</li>
-    <li>Leave a zombie on the live camera for 2 s: exactly 300 points are lost and the alarm shows.</li>
-    <li>Cut away halfway through a scene: its hold resets.</li>
-    <li>Miss the kiss: "Retake required", no best score saved.</li>
+    <li>Capture all 4 beats of The Promise: Stage 1 is cleared (at least C, Studio Cut) and The Raid unlocks.</li>
+    <li>Miss one beat: "Retake required", the missed beat is named on the results screen, no best score saved.</li>
+    <li>Leave a crew member on the live camera for 2 s: exactly 300 points are lost and the alarm shows. Framing the armoured orc or a goblin costs nothing.</li>
+    <li>Cut away halfway through a beat: its hold resets.</li>
+    <li>Frame 2.4 before the old man falls, or 3.3 without the raider's weapon hand: the hold does not start (pose gate and weapon-hand anchor work).</li>
+    <li>Clear all three stages, 15 beats in total.</li>
     <li>Watch the replay: every cut and camera move matches the take.</li>
-    <li>Retake ten times in a row: actors, zombies, clock and scores reset; cameras stay.</li>
+    <li>Retake ten times in a row: actors, crew, props, fire, clock and scores reset; cameras stay.</li>
     <li>The packaged build runs outside the editor at 60 FPS at 1080p and exits cleanly.</li>
   </ol>
 </section>
@@ -372,7 +430,10 @@ Final score   = max(0, Scene points − Zombie cost)   if the kiss was captured
   <div class="eyebrow">Open questions</div>
   <h2>Decide before Friday morning</h2>
   <ul>
-    <li><b>Story:</b> keep Sam and Ellie's seven scenes, or rewrite? Edits are level work only.</li>
+    <li><b>Story:</b> settled. The Village Raid storyboard (4 → 5 → 6 beats) replaces Love in the Ruins.</li>
+    <li><b>Stages 2–3 map:</b> stay in <code>L_Showcase</code> with fire and damage layered on, or move to a Stylized Village map? The storyboard assumes the same lane, mill crossing, ramp and lookout.</li>
+    <li><b>Beat points and grade thresholds:</b> 250 per beat and the 85% / 65% bands are proposals; tune after playtests.</li>
+    <li><b>Old man asset:</b> which mesh plays him, with a distinctive vest and walking stick.</li>
     <li><b>Shooting optimisation:</b> performance (frame rate), or making shooting easier to control? The schedule assumes performance.</li>
     <li><b>Rail speed:</b> built as a per-dolly setting changed with Z/X, in preparation or live during the take.</li>
     <li><b>Camera count:</b> unlimited today. Add a budget (for example, a cost per camera) if playtests show players simply cover everything.</li>
@@ -380,7 +441,7 @@ Final score   = max(0, Scene points − Zombie cost)   if the kiss was captured
   </ul>
 </section>
 
-<footer>Director's Cut · GDD v2.0 · Replaces v1.0 (Dracula: The Midnight Visit). Sources: team planning doc and the five in-engine prototypes built on 12 Nov 2026.</footer>
+<footer>Director's Cut · GDD v2.1 · Story from the revised storyboard <code>DirectorsCut_VillageRaid_Storyboard.html</code> (The Village Raid, 15 capture beats). Replaces v2.0 (Love in the Ruins) and v1.0 (Dracula: The Midnight Visit). Sources: team planning doc and the five in-engine prototypes built on 12 Nov 2026.</footer>
 </main>
 </body>
 </html>

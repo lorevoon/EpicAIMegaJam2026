@@ -85,6 +85,7 @@ struct FDCKey
 {
 	float Time = 0.f;
 	FVector2D Location = FVector2D::ZeroVector;
+	float Height = 0.f;
 	float Yaw = 0.f;
 	/** Head offset toward facing direction in cm (positive leans in, negative recoils). */
 	float Lean = 0.f;

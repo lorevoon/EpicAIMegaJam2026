@@ -1,0 +1,46 @@
+[
+  {
+    "asset": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_PromiseLook.A_Swordsman_PromiseLook",
+    "length": 4.0
+  },
+  {
+    "asset": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_KissLean.A_Swordsman_KissLean",
+    "length": 3.0
+  },
+  {
+    "asset": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_ForeheadHold.A_Swordsman_ForeheadHold",
+    "length": 4.0
+  },
+  {
+    "asset": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_CarryWalk.A_Swordsman_CarryWalk",
+    "length": 1.0
+  },
+  {
+    "asset": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_CarryHold.A_Swordsman_CarryHold",
+    "length": 2.0
+  },
+  {
+    "asset": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_SetDown.A_Swordsman_SetDown",
+    "length": 2.0
+  },
+  {
+    "asset": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_ShoulderPat.A_Swordsman_ShoulderPat",
+    "length": 3.0
+  },
+  {
+    "asset": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Wave.A_Swordsman_Wave",
+    "length": 3.0
+  },
+  {
+    "asset": "/Game/DirectorsCut/Animations/Archer/A_Archer_PromiseLook.A_Archer_PromiseLook",
+    "length": 4.0
+  },
+  {
+    "asset": "/Game/DirectorsCut/Animations/Archer/A_Archer_KissLean.A_Archer_KissLean",
+    "length": 3.0
+  },
+  {
+    "asset": "/Game/DirectorsCut/Animations/Archer/A_Archer_ForeheadHold.A_Archer_ForeheadHold",
+    "length": 4.0
+  }
+]

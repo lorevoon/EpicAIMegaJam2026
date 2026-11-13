@@ -5,6 +5,8 @@
 #include "DCWaypoint.h"
 #include "Components/SplineComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimSequence.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -28,6 +30,15 @@ ADCPerformer::ADCPerformer()
 
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
+
+	Character = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Character"));
+	Character->SetupAttachment(Root);
+	Character->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+	Character->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Character->SetCollisionResponseToAllChannels(ECR_Ignore);
+	Character->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	Character->SetCanEverAffectNavigation(false);
+	Character->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 
 	Body = MakePart(TEXT("Body"), CylinderMesh.Object, Root);
 	Body->SetRelativeLocation(FVector(0.f, 0.f, 78.f));
@@ -87,6 +98,27 @@ void ADCPerformer::OnConstruction(const FTransform& Transform)
 	Cape->SetVisibility(bHasCape);
 	Cape->SetCollisionEnabled(bHasCape ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 	Prop->SetVisibility(bHasProp);
+	if (CarriedMesh)
+	{
+		Prop->SetStaticMesh(CarriedMesh);
+		Prop->EmptyOverrideMaterials();
+		Prop->SetRelativeTransform(CarryTransform);
+		Prop->SetVisibility(true);
+	}
+
+	Character->SetSkeletalMeshAsset(CharacterMesh);
+	Character->SetRelativeTransform(MeshOffset);
+	Character->SetVisibility(CharacterMesh != nullptr);
+	Character->SetComponentTickEnabled(false); // The scene clock is the only animation clock.
+	const bool bBlockout = CharacterMesh == nullptr;
+	Body->SetVisibility(bBlockout);
+	Head->SetVisibility(bBlockout);
+	Nose->SetVisibility(bBlockout);
+	Cape->SetVisibility(bBlockout && bHasCape);
+	Body->SetCollisionEnabled(bBlockout ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+	Head->SetCollisionEnabled(bBlockout ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+	Nose->SetCollisionEnabled(bBlockout ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+	Cape->SetCollisionEnabled(bBlockout && bHasCape ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 
 	RefreshPath();
 }
@@ -98,6 +130,7 @@ TArray<FDCKey> ADCPerformer::CollectKeys() const
 	FDCKey Start;
 	Start.Time = 0.f;
 	Start.Location = FVector2D(GetActorLocation());
+	Start.Height = GetActorLocation().Z;
 	Start.Yaw = GetActorRotation().Yaw;
 	Result.Add(Start);
 
@@ -112,6 +145,7 @@ TArray<FDCKey> ADCPerformer::CollectKeys() const
 			FDCKey Key;
 			Key.Time = It->Time;
 			Key.Location = FVector2D(It->GetActorLocation());
+			Key.Height = bUseWaypointHeight ? It->GetActorLocation().Z : Start.Height;
 			Key.Yaw = It->GetActorRotation().Yaw;
 			Key.Lean = It->Lean;
 			Key.PropRaise = It->PropRaise;
@@ -145,7 +179,7 @@ void ADCPerformer::RefreshPath()
 	Path->ClearSplinePoints(false);
 	for (const FDCKey& Key : CollectKeys())
 	{
-		Path->AddSplinePoint(FVector(Key.Location, 15.f), ESplineCoordinateSpace::World, false);
+		Path->AddSplinePoint(FVector(Key.Location, Key.Height + 15.f), ESplineCoordinateSpace::World, false);
 	}
 	for (int32 i = 0; i < Path->GetNumberOfSplinePoints(); ++i)
 	{
@@ -177,8 +211,10 @@ void ADCPerformer::Evaluate(float SceneTime)
 		if (SceneTime < B.Time)
 		{
 			const float Span = FMath::Max(B.Time - A.Time, KINDA_SMALL_NUMBER);
-			const float Alpha = FMath::InterpEaseInOut(0.f, 1.f, FMath::Clamp((SceneTime - A.Time) / Span, 0.f, 1.f), 2.f);
+			const float LinearAlpha = FMath::Clamp((SceneTime - A.Time) / Span, 0.f, 1.f);
+			const float Alpha = bLinearMovement ? LinearAlpha : FMath::InterpEaseInOut(0.f, 1.f, LinearAlpha, 2.f);
 			Pose.Location = FMath::Lerp(A.Location, B.Location, Alpha);
+			Pose.Height = FMath::Lerp(A.Height, B.Height, Alpha);
 			Pose.Yaw = FQuat::Slerp(FRotator(0.f, A.Yaw, 0.f).Quaternion(), FRotator(0.f, B.Yaw, 0.f).Quaternion(), Alpha).Rotator().Yaw;
 			Pose.Lean = FMath::Lerp(A.Lean, B.Lean, Alpha);
 			Pose.PropRaise = FMath::Lerp(A.PropRaise, B.PropRaise, Alpha);
@@ -188,7 +224,55 @@ void ADCPerformer::Evaluate(float SceneTime)
 	}
 
 	// Keep the authored floor height so the set can be raised or lowered freely.
-	SetActorLocationAndRotation(FVector(Pose.Location, GetActorLocation().Z), FRotator(Pose.Tilt, Pose.Yaw, 0.f));
+	SetActorLocationAndRotation(FVector(Pose.Location, bUseWaypointHeight ? Pose.Height : GetActorLocation().Z), FRotator(Pose.Tilt, Pose.Yaw, 0.f));
 	Head->SetRelativeLocation(HeadRest + FVector(Pose.Lean, 0.f, -FMath::Abs(Pose.Lean) * 0.5f));
 	Prop->SetRelativeLocation(FMath::Lerp(PropLowered, PropRaised, Pose.PropRaise));
+	if (CarriedMesh)
+	{
+		if (SetDownTime >= 0.f && SceneTime >= SetDownTime)
+		{
+			Prop->SetWorldTransform(SetDownTransform);
+		}
+		else
+		{
+			Prop->SetRelativeTransform(CarryTransform);
+		}
+	}
+
+	if (CharacterMesh)
+	{
+		const FDCAnimationCue* Cue = nullptr;
+		for (const FDCAnimationCue& Candidate : AnimationCues)
+		{
+			if (Candidate.Animation && Candidate.StartTime <= SceneTime && (!Cue || Candidate.StartTime >= Cue->StartTime))
+			{
+				Cue = &Candidate;
+			}
+		}
+		if (Cue)
+		{
+			const float Length = Cue->Animation->GetPlayLength();
+			float Position = FMath::Max(0.f, Cue->StartOffset + (SceneTime - Cue->StartTime) * Cue->PlayRate);
+			Position = Cue->bLoop && Length > KINDA_SMALL_NUMBER ? FMath::Fmod(Position, Length) : FMath::Clamp(Position, 0.f, Length);
+			Character->SetAnimation(Cue->Animation);
+			Character->SetPosition(Position, false);
+			Character->TickAnimation(0.f, false);
+			Character->RefreshBoneTransforms();
+			Character->UpdateComponentToWorld();
+		}
+		else
+		{
+			Character->SetAnimation(nullptr);
+			Character->TickAnimation(0.f, false);
+			Character->RefreshBoneTransforms();
+		}
+		if (Character->DoesSocketExist(HeadBone))
+		{
+			Head->SetWorldLocation(Character->GetSocketLocation(HeadBone));
+		}
+		if (Character->DoesSocketExist(BodyBone))
+		{
+			Body->SetWorldLocation(Character->GetSocketLocation(BodyBone));
+		}
+	}
 }

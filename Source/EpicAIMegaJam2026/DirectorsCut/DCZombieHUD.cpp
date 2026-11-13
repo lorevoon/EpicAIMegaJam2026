@@ -196,7 +196,7 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 	Y += 40.f * S;
 	Label(D->MovieTitle, CX, Y, Rose, 2.2f, true);
 	Y += 90.f * S;
-	Label(TEXT("A romance. In a zombie apocalypse. Capture every scene - and keep the zombies out of the movie."), CX, Y, FLinearColor::White, 0.8f, true);
+	Label(TEXT("A fantasy tragedy on a working film set. Capture every scene - and keep the crew out of the movie."), CX, Y, FLinearColor::White, 0.8f, true);
 	Y += 60.f * S;
 
 	const TArray<FDCMultiCamBeat>& Beats = D->GetBeats();
@@ -210,7 +210,7 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 	}
 
 	Y += 30.f * S;
-	Label(FString::Printf(TEXT("Zombies on camera cost %d points per second."), D->ZombiePenaltyPerSecond), CX, Y, ZombieGreen, 0.8f, true);
+	Label(FString::Printf(TEXT("Film crew on camera cost %d points per second."), D->ZombiePenaltyPerSecond), CX, Y, ZombieGreen, 0.8f, true);
 	Y += 60.f * S;
 	Label(TEXT("Press Enter to start preparing - the rehearsal plays while you place cameras"), CX, Y, FLinearColor::White, 1.f, true);
 }
@@ -243,7 +243,7 @@ void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
 	}
 	else if (D->GetPhase() == EDCPhase::Filming)
 	{
-		Label(FString::Printf(TEXT("Zombie screen time %.1fs  (-%d)"), D->GetZombieSeconds(), D->GetPenalty()),
+		Label(FString::Printf(TEXT("Crew screen time %.1fs  (-%d)"), D->GetZombieSeconds(), D->GetPenalty()),
 			Canvas->ClipX - 460.f * S, 22.f * S, D->GetZombieSeconds() > 0.f ? ZombieGreen : Muted, 0.8f);
 	}
 }
@@ -342,7 +342,7 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 	if (bZombie)
 	{
 		Y += 30.f * S;
-		Label(TEXT("ZOMBIE IN VIEW at this moment"), CX, Y, ZombieGreen, 0.85f, true);
+		Label(TEXT("CREW IN VIEW at this moment"), CX, Y, ZombieGreen, 0.85f, true);
 	}
 }
 
@@ -386,7 +386,7 @@ void ADCZombieHUD::DrawZombieAlarm(ADCZombieDirector* D)
 	DrawRect(Edge, 0.f, Canvas->ClipY - T, Canvas->ClipX, T);
 	DrawRect(Edge, 0.f, 0.f, T, Canvas->ClipY);
 	DrawRect(Edge, Canvas->ClipX - T, 0.f, T, Canvas->ClipY);
-	Label(FString::Printf(TEXT("ZOMBIE IN SHOT!  -%d/s"), D->ZombiePenaltyPerSecond), Canvas->ClipX * 0.5f, Canvas->ClipY * 0.16f, ZombieGreen, 1.4f, true);
+	Label(FString::Printf(TEXT("CREW IN SHOT!  -%d/s"), D->ZombiePenaltyPerSecond), Canvas->ClipX * 0.5f, Canvas->ClipY * 0.16f, ZombieGreen, 1.4f, true);
 }
 
 void ADCZombieHUD::DrawSwitcher(ADCZombieDirector* D)
@@ -492,14 +492,14 @@ void ADCZombieHUD::DrawResults(ADCZombieDirector* D)
 	}
 
 	Y += 16.f * S;
-	Label(FString::Printf(TEXT("Scenes  +%d      Zombie screen time %.1fs  -%d      %d cuts"),
+	Label(FString::Printf(TEXT("Scenes  +%d      Crew screen time %.1fs  -%d      %d cuts"),
 		D->GetBeatPoints(), D->GetZombieSeconds(), D->GetPenalty(), D->GetCutCount()), CX, Y, FLinearColor::White, 0.8f, true);
 	Y += 40.f * S;
 	Label(FString::Printf(TEXT("FINAL SCORE %d   (best %d)"), D->GetNetScore(), D->GetBestNet()), CX, Y, D->WasApproved() ? Gold : Bad, 1.2f, true);
 	Y += 56.f * S;
-	Label(D->GetZombieSeconds() <= 0.f && D->WasApproved() ? TEXT("Not a single zombie on screen. The audience swoons.")
-		: D->GetZombieSeconds() > 5.f ? TEXT("The audience is screaming... and not in the romantic way.")
-		: TEXT("A few undead extras slipped in. Nobody noticed. Probably."), CX, Y, Muted, 0.7f, true);
+	Label(D->GetZombieSeconds() <= 0.f && D->WasApproved() ? TEXT("Not a single crew member on screen. The illusion holds.")
+		: D->GetZombieSeconds() > 5.f ? TEXT("The crew distracted the audience. Rehearse their routes and try another take.")
+		: TEXT("A few crew members slipped into frame. Watch their routes on the next take."), CX, Y, Muted, 0.7f, true);
 	Y += 44.f * S;
 	Label(TEXT("Space watch the film again   R / Enter back to planning (cameras kept)   V rewatch rehearsal"), CX, Y, FLinearColor::White, 0.72f, true);
 }

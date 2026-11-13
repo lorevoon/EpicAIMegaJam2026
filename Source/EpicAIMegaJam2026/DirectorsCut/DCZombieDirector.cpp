@@ -67,7 +67,7 @@ void ADCZombieDirector::EnterPreparation(bool bPlayRehearsal)
 	bRehearsalPlaying = bPlayRehearsal;
 	if (bPlayRehearsal)
 	{
-		Flash(TEXT("The rehearsal is playing. Watch where each scene happens - and where the zombies go - while you place cameras."), 7.f);
+		Flash(TEXT("The rehearsal is playing. Watch where each scene happens - and where the film crew go - while you place cameras."), 7.f);
 	}
 }
 
@@ -265,7 +265,7 @@ void ADCZombieDirector::GetPlanPreview(TArray<FString>& OutFramedBeats, bool& bO
 	}
 	for (const FDCMultiCamBeat& State : Beats)
 	{
-		if (SceneTime >= State.Beat->WindowStart && SceneTime <= State.Beat->WindowEnd && IsFramed(State, Cam))
+		if (SceneTime >= State.Beat->GetCaptureStartTime() && SceneTime <= State.Beat->WindowEnd && IsFramed(State, Cam))
 		{
 			OutFramedBeats.Add(State.Beat->DisplayName);
 		}

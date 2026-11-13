@@ -112,9 +112,9 @@ void ADCMultiCamDirector::GatherScene()
 			Problems.Add(FString::Printf(TEXT("Beat %s has no anchors"), *Beat->BeatId));
 			continue;
 		}
-		if (Beat->WindowStart >= Beat->WindowEnd || Beat->RequiredHold > Beat->WindowEnd - Beat->WindowStart)
+		if (Beat->GetCaptureStartTime() >= Beat->WindowEnd || Beat->RequiredHold > Beat->WindowEnd - Beat->GetCaptureStartTime())
 		{
-			Problems.Add(FString::Printf(TEXT("Beat %s window is shorter than its hold time"), *Beat->BeatId));
+			Problems.Add(FString::Printf(TEXT("Beat %s capture window after the scored pose is shorter than its hold time"), *Beat->BeatId));
 			continue;
 		}
 		bHasMandatory |= Beat->bMandatory;
@@ -124,7 +124,7 @@ void ADCMultiCamDirector::GatherScene()
 
 	if (Beats.Num() == 0 && Problems.Num() == 0)
 	{
-		Problems.Add(TEXT("No DCBeat actors in this level - select the DCZombieDirector and click Build Zombie Scene, or place DCBeat actors"));
+		Problems.Add(TEXT("No story beats in this level - place DCBeat actors and assign their capture anchors"));
 	}
 	else if (!bHasMandatory)
 	{
@@ -499,7 +499,7 @@ void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 			continue;
 		}
 		const ADCBeat* Beat = State.Beat;
-		const float Eligible = FMath::Max(0.f, FMath::Min(NowTime, Beat->WindowEnd) - FMath::Max(PrevTime, Beat->WindowStart));
+		const float Eligible = FMath::Max(0.f, FMath::Min(NowTime, Beat->WindowEnd) - FMath::Max(PrevTime, Beat->GetCaptureStartTime()));
 		if (Live && Eligible > 0.f && !IsRecordingPaused() && IsFramed(State, Live))
 		{
 			State.Hold += Eligible;

@@ -1,0 +1,277 @@
+[
+  {
+    "file": "A_Swordsman_PromiseLook.fbx",
+    "character": "Swordsman",
+    "duration": 4,
+    "sample_time": 2.0,
+    "contact_positions_armature_cm": {
+      "head_joint": [
+        -8.87530404725112e-09,
+        175.9378204345703,
+        -2.235304594039917
+      ],
+      "L_wrist_joint": [
+        26.999988555908203,
+        107.99999237060547,
+        6.000010013580322
+      ],
+      "R_wrist_joint": [
+        -26.99998664855957,
+        107.99998474121094,
+        6.0000081062316895
+      ]
+    },
+    "authored": true,
+    "root": "rootSkeleton"
+  },
+  {
+    "file": "A_Swordsman_KissLean.fbx",
+    "character": "Swordsman",
+    "duration": 3,
+    "sample_time": 3,
+    "contact_positions_armature_cm": {
+      "head_joint": [
+        3.8581075045840407e-07,
+        175.60507202148438,
+        7.348857879638672
+      ],
+      "L_wrist_joint": [
+        30.000011444091797,
+        132.0,
+        34.99998092651367
+      ],
+      "R_wrist_joint": [
+        -29.9999942779541,
+        132.0,
+        34.99999237060547
+      ]
+    },
+    "authored": true,
+    "root": "rootSkeleton"
+  },
+  {
+    "file": "A_Swordsman_ForeheadHold.fbx",
+    "character": "Swordsman",
+    "duration": 4,
+    "sample_time": 2.0,
+    "contact_positions_armature_cm": {
+      "head_joint": [
+        3.7390088891697815e-07,
+        175.64254760742188,
+        7.064612865447998
+      ],
+      "L_wrist_joint": [
+        29.999998092651367,
+        132.0,
+        35.0
+      ],
+      "R_wrist_joint": [
+        -30.000003814697266,
+        132.0,
+        34.9999885559082
+      ]
+    },
+    "authored": true,
+    "root": "rootSkeleton"
+  },
+  {
+    "file": "A_Swordsman_CarryWalk.fbx",
+    "character": "Swordsman",
+    "duration": 1,
+    "sample_time": 0.5,
+    "contact_positions_armature_cm": {
+      "head_joint": [
+        8.317044830619125e-09,
+        175.9695281982422,
+        -1.8173798322677612
+      ],
+      "L_wrist_joint": [
+        21.999980926513672,
+        122.99999237060547,
+        40.00001907348633
+      ],
+      "R_wrist_joint": [
+        -21.999998092651367,
+        123.0,
+        40.0000114440918
+      ]
+    },
+    "authored": true,
+    "root": "rootSkeleton"
+  },
+  {
+    "file": "A_Swordsman_CarryHold.fbx",
+    "character": "Swordsman",
+    "duration": 2,
+    "sample_time": 1.0,
+    "contact_positions_armature_cm": {
+      "head_joint": [
+        7.551477665401762e-09,
+        175.96824645996094,
+        -1.835991621017456
+      ],
+      "L_wrist_joint": [
+        21.999996185302734,
+        122.99998474121094,
+        39.999996185302734
+      ],
+      "R_wrist_joint": [
+        -21.999988555908203,
+        123.0,
+        40.0
+      ]
+    },
+    "authored": true,
+    "root": "rootSkeleton"
+  },
+  {
+    "file": "A_Swordsman_SetDown.fbx",
+    "character": "Swordsman",
+    "duration": 2,
+    "sample_time": 1.0,
+    "contact_positions_armature_cm": {
+      "head_joint": [
+        1.0272528925270308e-06,
+        171.59788513183594,
+        21.9197940826416
+      ],
+      "L_wrist_joint": [
+        22.05939483642578,
+        106.25558471679688,
+        46.794742584228516
+      ],
+      "R_wrist_joint": [
+        -22.05938720703125,
+        106.25543212890625,
+        46.7947998046875
+      ]
+    },
+    "authored": true,
+    "root": "rootSkeleton"
+  },
+  {
+    "file": "A_Swordsman_ShoulderPat.fbx",
+    "character": "Swordsman",
+    "duration": 3,
+    "sample_time": 1.5,
+    "contact_positions_armature_cm": {
+      "head_joint": [
+        -1.4279117888094106e-09,
+        175.9523468017578,
+        -2.0550832748413086
+      ],
+      "L_wrist_joint": [
+        26.999990463256836,
+        108.00831604003906,
+        6.057269096374512
+      ],
+      "R_wrist_joint": [
+        -24.99998664855957,
+        159.00001525878906,
+        48.00001525878906
+      ]
+    },
+    "authored": true,
+    "root": "rootSkeleton"
+  },
+  {
+    "file": "A_Swordsman_Wave.fbx",
+    "character": "Swordsman",
+    "duration": 3,
+    "sample_time": 1.5,
+    "contact_positions_armature_cm": {
+      "head_joint": [
+        -1.4597389963455498e-09,
+        175.95233154296875,
+        -2.0550832748413086
+      ],
+      "L_wrist_joint": [
+        51.99998474121094,
+        191.00001525878906,
+        18.999990463256836
+      ],
+      "R_wrist_joint": [
+        -26.999988555908203,
+        108.00830078125,
+        6.057279586791992
+      ]
+    },
+    "authored": true,
+    "root": "rootSkeleton"
+  },
+  {
+    "file": "A_Archer_PromiseLook.fbx",
+    "character": "Archer",
+    "duration": 4,
+    "sample_time": 2.0,
+    "contact_positions_armature_cm": {
+      "head_joint": [
+        -8.87530404725112e-09,
+        175.9378204345703,
+        -2.235304594039917
+      ],
+      "L_wrist_joint": [
+        26.999988555908203,
+        107.99999237060547,
+        6.000010013580322
+      ],
+      "R_wrist_joint": [
+        -26.99998664855957,
+        107.99998474121094,
+        6.0000081062316895
+      ]
+    },
+    "authored": true,
+    "root": "rootSkeleton"
+  },
+  {
+    "file": "A_Archer_KissLean.fbx",
+    "character": "Archer",
+    "duration": 3,
+    "sample_time": 3,
+    "contact_positions_armature_cm": {
+      "head_joint": [
+        2.5139684112218674e-07,
+        175.9208221435547,
+        4.097838401794434
+      ],
+      "L_wrist_joint": [
+        25.00000762939453,
+        148.00001525878906,
+        35.00000762939453
+      ],
+      "R_wrist_joint": [
+        -25.000015258789062,
+        148.0,
+        34.999996185302734
+      ]
+    },
+    "authored": true,
+    "root": "rootSkeleton"
+  },
+  {
+    "file": "A_Archer_ForeheadHold.fbx",
+    "character": "Archer",
+    "duration": 4,
+    "sample_time": 2.0,
+    "contact_positions_armature_cm": {
+      "head_joint": [
+        2.3953759864525637e-07,
+        175.9384307861328,
+        3.811678647994995
+      ],
+      "L_wrist_joint": [
+        25.000003814697266,
+        148.0,
+        35.0
+      ],
+      "R_wrist_joint": [
+        -25.0,
+        148.0,
+        35.00000762939453
+      ]
+    },
+    "authored": true,
+    "root": "rootSkeleton"
+  }
+]

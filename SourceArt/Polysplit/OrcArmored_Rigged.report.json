@@ -1,0 +1,13 @@
+{
+  "retained_meshes": [
+    "Orc_Bottom_Armor",
+    "Orc_Bottom_underArmor",
+    "Orc_Head",
+    "Orc_Sword",
+    "Orc_Top_Armor",
+    "Orc_Top_underArmor"
+  ],
+  "bone_count": 99,
+  "vertices": 2215,
+  "output": "C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\Polysplit\\OrcArmored_Rigged.fbx"
+}
