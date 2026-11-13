@@ -40,9 +40,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Beat|Cinema")
 	EDCCinemaMood ReplayMood = EDCCinemaMood::Neutral;
 
-	/** Mandatory beats must be captured for the take to be approved. Their names are in the studio brief. */
-	UPROPERTY(EditAnywhere, Category = "Beat")
-	bool bMandatory = false;
 
 	UPROPERTY(EditAnywhere, Category = "Beat|Timing", meta = (ClampMin = "0", Units = "s"))
 	float WindowStart = 5.f;
@@ -69,8 +66,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Beat|Framing")
 	TArray<FDCAnchorRef> Anchors;
 
-	UPROPERTY(EditAnywhere, Category = "Beat")
-	int32 Points = 250;
 
 	/** Shows a glowing circle on the ground where a camera gets this scene well, while its window is on the timeline. */
 	UPROPERTY(EditAnywhere, Category = "Beat|Camera Spot")

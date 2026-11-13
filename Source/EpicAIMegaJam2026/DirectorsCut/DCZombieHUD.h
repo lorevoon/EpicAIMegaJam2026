@@ -57,14 +57,13 @@ private:
 	void DrawFraming(ADCZombieDirector* D);
 	void DrawPlanPreview(ADCZombieDirector* D);
 	void DrawGauges(ADCZombieDirector* D);
-	void DrawZombieAlarm(ADCZombieDirector* D);
 	void DrawSwitcher(ADCZombieDirector* D);
 	void DrawHelp(ADCZombieDirector* D);
 	void DrawResults(ADCZombieDirector* D);
 	void DrawPremiere(ADCZombieDirector* D);
 	/** Storyboard: the reference cut, letterboxed, with each beat's storyboard line as a subtitle. */
 	void DrawReferenceCut(ADCZombieDirector* D);
-	/** Preparation: the reference cut in the bottom-right corner, in step with the rehearsal timeline. */
+	/** Preparation and shooting: the reference cut in the bottom-right corner, in step with the scene clock. */
 	void DrawReferenceInset(ADCZombieDirector* D);
 
 	/** Draws text; a line too long for MaxWidth (or, by default, the screen) shrinks to fit instead of running off. */

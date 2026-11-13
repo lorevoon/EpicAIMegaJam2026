@@ -44,7 +44,7 @@ bool FDCDualSceneReplayTest::RunTest(const FString& Parameters)
 		D->Tick(8.f);
 		TestEqual(TEXT("Preparation advances rehearsal clock"), D->GetSceneTime(), 8.f);
 		TestTrue(TEXT("Rehearsal actually moves the actor"), FVector::Dist(StartPosition, Romeo->GetActorLocation()) > 100.f);
-		TestTrue(TEXT("Rehearsal does not record or score"), D->Recording.IsEmpty() && D->GetScore() == 0);
+		TestTrue(TEXT("Rehearsal does not record or grade"), D->Recording.IsEmpty() && D->GetMatch().Overall == 0.f);
 		D->HandleRehearsalToggle();
 		const FVector PausedPosition = Romeo->GetActorLocation();
 		D->Tick(1.f);

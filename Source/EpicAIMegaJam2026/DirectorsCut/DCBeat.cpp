@@ -89,9 +89,9 @@ void ADCBeat::OnConstruction(const FTransform& Transform)
 		const TCHAR* Part = Ref.Part == EDCAnchorPart::Prop ? TEXT("prop") : Ref.Part == EDCAnchorPart::Body ? TEXT("body") : TEXT("head");
 		Subjects.Add(FString::Printf(TEXT("%s %s%s"), Ref.Performer ? *Ref.Performer->DisplayName : TEXT("(none)"), Part, Ref.bMustSeeFace ? TEXT(" (face)") : TEXT("")));
 	}
-	Label->SetText(FText::FromString(FString::Printf(TEXT("BEAT %s %s%s\n%.0f-%.0fs: %s"),
-		*BeatId, *DisplayName, bMandatory ? TEXT(" [REQUIRED]") : TEXT(""), WindowStart, WindowEnd, *FString::Join(Subjects, TEXT(" + ")))));
-	Label->SetTextRenderColor(bMandatory ? FColor(255, 170, 30) : FColor(80, 220, 255));
+	Label->SetText(FText::FromString(FString::Printf(TEXT("BEAT %s %s\n%.0f-%.0fs: %s"),
+		*BeatId, *DisplayName, WindowStart, WindowEnd, *FString::Join(Subjects, TEXT(" + ")))));
+	Label->SetTextRenderColor(FColor(80, 220, 255));
 
 	// In the editor the circle is always shown (when enabled) so it can be placed; in game the director drives it.
 	SpotMarker->SetVisibility(bShowCameraSpot);

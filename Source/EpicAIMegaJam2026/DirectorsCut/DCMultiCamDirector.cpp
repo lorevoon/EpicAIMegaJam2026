@@ -28,7 +28,6 @@ namespace
 	constexpr float PickRadius = 80.f;
 	constexpr float FaceDot = 0.25f;
 	constexpr float LookDegreesPerUnit = 2.5f;
-	constexpr int32 AllBeatsReward = 500;
 
 	/** The dolly camera riding Rail, if one has been created for it yet. */
 	ADCMultiCam* FindCameraOnRail(const TArray<TObjectPtr<ADCMultiCam>>& Cameras, const ADCRail* Rail)
@@ -109,7 +108,6 @@ void ADCMultiCamDirector::GatherScene()
 	StartTransform = ADCStartMark::FindStartTransform(World);
 
 	Beats.Reset();
-	bool bHasMandatory = false;
 	for (TActorIterator<ADCBeat> It(World); It; ++It)
 	{
 		ADCBeat* Beat = *It;
@@ -136,7 +134,6 @@ void ADCMultiCamDirector::GatherScene()
 			Problems.Add(FString::Printf(TEXT("Beat %s capture window after the scored pose is shorter than its hold time"), *Beat->BeatId));
 			continue;
 		}
-		bHasMandatory |= Beat->bMandatory;
 		Beats.Add(State);
 	}
 	Beats.StableSort([](const FDCMultiCamBeat& A, const FDCMultiCamBeat& B) { return A.Beat->WindowStart < B.Beat->WindowStart; });
@@ -144,10 +141,6 @@ void ADCMultiCamDirector::GatherScene()
 	if (Beats.Num() == 0 && Problems.Num() == 0)
 	{
 		Problems.Add(TEXT("No story beats in this level - place DCBeat actors and assign their capture anchors"));
-	}
-	else if (!bHasMandatory)
-	{
-		Problems.Add(TEXT("No mandatory beat - tick Mandatory on at least one DCBeat"));
 	}
 	SetupProblem = FString::Join(Problems, TEXT("\n"));
 }
@@ -192,6 +185,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 			return;
 		}
 		CountdownRemaining -= DeltaSeconds;
+		UpdateReferenceInset();
 		if (CountdownRemaining <= 0.f)
 		{
 			BeginFilming();
@@ -210,6 +204,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		{
 			Performer->Evaluate(SceneTime);
 		}
+		UpdateReferenceInset(); // before EvaluateBeats, which can end the take
 		EvaluateBeats(Prev, SceneTime);
 		break;
 	}
@@ -326,8 +321,7 @@ void ADCMultiCamDirector::ResetScene()
 	Phase = EDCPhase::Preparation;
 	SceneTime = 0.f;
 	CountdownRemaining = 0.f;
-	bApproved = false;
-	Score = 0;
+	Match = FDCMatch();
 
 	for (FDCMultiCamBeat& State : Beats)
 	{
@@ -371,38 +365,16 @@ void ADCMultiCamDirector::EndTake()
 	}
 
 	Phase = EDCPhase::Review;
-	bApproved = true;
-	bool bAll = true;
-	Score = 0;
 	for (FDCMultiCamBeat& State : Beats)
 	{
 		if (State.Status == EDCShotStatus::Pending)
 		{
 			State.Status = EDCShotStatus::Missed;
 		}
-		const bool bGot = State.Status == EDCShotStatus::Captured;
-		bAll &= bGot;
-		if (State.Beat->bMandatory)
-		{
-			bApproved &= bGot;
-		}
-		if (bGot)
-		{
-			Score += State.Beat->Points;
-		}
 	}
-	if (bAll)
-	{
-		Score += AllBeatsReward;
-	}
-	if (!bApproved)
-	{
-		Score = 0;
-	}
-	else
-	{
-		BestScore = FMath::Max(BestScore, Score);
-	}
+	// The grade: how closely the film matches the reference cut.
+	ComputeMatch();
+	BestMatch = FMath::Max(BestMatch, Match.Overall);
 	StartPremiere();
 }
 
@@ -434,7 +406,6 @@ void ADCMultiCamDirector::RecordSample(float DeltaSeconds)
 	Sample.Location = Lens->GetComponentLocation();
 	Sample.Rotation = Lens->GetComponentRotation();
 	Sample.FilmFOV = DCFrame::CaptureFOV(Lens->FieldOfView, GetViewAspect());
-	Sample.bSpoiled = IsLiveShotSpoiled();
 	Recording.Add(Sample);
 }
 
@@ -701,7 +672,7 @@ void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 			State.bEverCaptured = true;
 			State.CapturedBy = Live ? Live->GetNumber() : 0;
 			State.CapturedFilmTime = SceneTime - PausedSeconds;
-			Flash(FString::Printf(TEXT("Captured on CAM %d: %s (+%d)"), State.CapturedBy, *Beat->DisplayName, Beat->Points));
+			Flash(FString::Printf(TEXT("Captured on CAM %d: %s"), State.CapturedBy, *Beat->DisplayName));
 		}
 		else if (NowTime > Beat->WindowEnd)
 		{
@@ -1360,40 +1331,32 @@ bool ADCMultiCamDirector::IsLiveFeedRolling() const
 	return false;
 }
 
-FString ADCMultiCamDirector::GetBrief() const
+namespace
 {
-	TArray<FString> Required;
-	for (const FDCMultiCamBeat& State : Beats)
+	/** Minimum match for S, A, B and C; anything lower is a D. */
+	constexpr float GradeThresholds[] = { 0.85f, 0.7f, 0.55f, 0.4f };
+	const TCHAR* const GradeLetters[] = { TEXT("S"), TEXT("A"), TEXT("B"), TEXT("C"), TEXT("D") };
+	const TCHAR* const CutNames[] = { TEXT("Director's Cut"), TEXT("Final Cut"), TEXT("Rough Cut"), TEXT("Assembly Cut"), TEXT("Back to the storyboard") };
+}
+
+int32 ADCMultiCamDirector::GetGradeRank() const
+{
+	int32 Rank = 0;
+	while (Rank < UE_ARRAY_COUNT(GradeThresholds) && Match.Overall < GradeThresholds[Rank])
 	{
-		if (State.Beat->bMandatory)
-		{
-			Required.Add(FString::Printf(TEXT("\"%s\""), *State.Beat->DisplayName));
-		}
+		++Rank;
 	}
-	return FString::Printf(TEXT("The studio needs %s. %d more beats are hidden. Only the live camera records."),
-		*FString::Join(Required, TEXT(", ")), Beats.Num() - Required.Num());
+	return Rank;
+}
+
+FString ADCMultiCamDirector::GetGrade() const
+{
+	return GradeLetters[GetGradeRank()];
 }
 
 FString ADCMultiCamDirector::GetCutName() const
 {
-	if (!bApproved)
-	{
-		return TEXT("Retake required");
-	}
-	int32 Bonus = 0, BonusTotal = 0;
-	for (const FDCMultiCamBeat& State : Beats)
-	{
-		if (!State.Beat->bMandatory)
-		{
-			++BonusTotal;
-			Bonus += State.Status == EDCShotStatus::Captured ? 1 : 0;
-		}
-	}
-	if (Bonus == 0)
-	{
-		return TEXT("Studio Cut");
-	}
-	return Bonus == BonusTotal ? TEXT("Director's Cut") : FString::Printf(TEXT("Extended Cut (%d/%d beats)"), Bonus, BonusTotal);
+	return CutNames[GetGradeRank()];
 }
 
 FString ADCMultiCamDirector::GetMessage() const

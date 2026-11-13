@@ -66,8 +66,16 @@ struct FDCTakeSample
 	FRotator Rotation = FRotator::ZeroRotator;
 	/** Horizontal FOV of the film frame itself (the capture frame of the live lens at that moment). */
 	float FilmFOV = 50.f;
-	/** Something that ruins the shot (a zombie) was on screen. */
-	bool bSpoiled = false;
+};
+
+/** How closely a take matches the reference cut, each 0-1 (averaged over the whole take). */
+struct FDCMatch
+{
+	float Position = 0.f;
+	float Angle = 0.f;
+	float Zoom = 0.f;
+	/** Weighted blend of the three: the take's grade. */
+	float Overall = 0.f;
 };
 
 UCLASS()
@@ -126,12 +134,36 @@ public:
 	/** The beat the reference cut shows at scene time Time (null between beats). */
 	const ADCBeat* GetReferenceBeatAt(float Time) const;
 
-	/** During preparation the reference cut also plays in a corner inset, in step with the rehearsal timeline. */
+	/** During preparation and shooting the reference cut also plays in a corner inset, in step with the scene clock. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut")
 	bool bShowReferenceInset = true;
 
-	/** The inset picture during preparation; null when there's nothing to show. */
+	/** The inset picture during preparation and shooting; null when there's nothing to show. */
 	UTextureRenderTarget2D* GetReferenceInset() const;
+
+	/**
+	 * Grading: each moment of the take is compared with the reference cut. A part scores 100% when it matches and
+	 * falls off gently (near misses cost little) to 0% at its tolerance; moments missing from the film (recording
+	 * paused) score 0.
+	 */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "1", Units = "cm"))
+	float MatchPositionTolerance = 1500.f;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "1", Units = "deg"))
+	float MatchAngleTolerance = 75.f;
+
+	/** Difference in the film's field of view at which the zoom score reaches 0. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "1", Units = "deg"))
+	float MatchZoomTolerance = 35.f;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "0"))
+	float MatchPositionWeight = 0.4f;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "0"))
+	float MatchAngleWeight = 0.4f;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "0"))
+	float MatchZoomWeight = 0.2f;
 
 	/** How many cameras the player may place; 0 = unlimited. Keys 1-9 pick the first nine, [ and ] step through all. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0"))
@@ -236,13 +268,17 @@ public:
 	int32 GetViewingSlot() const { return ViewingSlot; }
 	bool IsViewingCamera() const { return ViewingSlot != INDEX_NONE; }
 	float GetPendingHeight() const { return PendingHeight; }
-	bool WasApproved() const { return bApproved; }
-	int32 GetScore() const { return Score; }
-	int32 GetBestScore() const { return BestScore; }
-	int32 GetCutCount() const { return CutCount; }
+	/** The last take's match with the reference cut, and the best match so far. */
+	const FDCMatch& GetMatch() const { return Match; }
+	float GetBestMatch() const { return BestMatch; }
+	/** Letter grade (S, A, B, C, D) and cut title for the last take's match. */
+	FString GetGrade() const;
 	FString GetCutName() const;
+	/** 0 = S ... 4 = D. B or better counts as a good take. */
+	int32 GetGradeRank() const;
+	bool IsGoodTake() const { return GetGradeRank() <= 2; }
+	int32 GetCutCount() const { return CutCount; }
 	FString GetMessage() const;
-	FString GetBrief() const;
 	const FString& GetSetupProblem() const { return SetupProblem; }
 	ADCClapperboard* GetClapperboard() const { return Clapperboard; }
 	bool IsNearClapper() const;
@@ -284,8 +320,6 @@ protected:
 	void SetReviewEnvironment(bool bReview);
 	TMap<TWeakObjectPtr<AActor>, bool> SetOnlyHiddenStates;
 
-	/** Whether the live shot is spoiled right now (zombie in frame); recorded with each sample. */
-	virtual bool IsLiveShotSpoiled() const { return false; }
 	/** Appends what went out live this frame, or skips it (and marks a jump cut) while recording is paused. */
 	void RecordSample(float DeltaSeconds);
 	void StartPremiere();
@@ -303,6 +337,8 @@ protected:
 
 	// Reference cut (DCReferenceCut.cpp)
 	void BuildReferenceCut();
+	/** Grades the recording against the reference cut (sets Match). */
+	void ComputeMatch();
 	/** Best spot and lens for one beat; false if even the best can't hold it long enough to capture. */
 	bool FindReferenceShot(const FDCMultiCamBeat& State, FVector& OutLocation, float& OutFOV, float& OutCleanFrom);
 	void StartReferenceCut();
@@ -392,9 +428,8 @@ protected:
 	float PendingHeight = 170.f;
 	float SceneTime = 0.f;
 	float CountdownRemaining = 0.f;
-	bool bApproved = false;
-	int32 Score = 0;
-	int32 BestScore = 0;
+	FDCMatch Match;
+	float BestMatch = 0.f;
 	int32 CutCount = 0;
 
 	FTransform StartTransform;

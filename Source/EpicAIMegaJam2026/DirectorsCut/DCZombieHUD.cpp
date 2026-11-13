@@ -25,7 +25,6 @@ namespace
 	const FLinearColor Gold(1.f, 0.72f, 0.2f);
 	const FLinearColor Good(0.35f, 1.f, 0.45f);
 	const FLinearColor Bad(1.f, 0.3f, 0.25f);
-	const FLinearColor ZombieGreen(0.55f, 0.9f, 0.3f);
 	const FLinearColor Muted(0.7f, 0.74f, 0.78f);
 	const FLinearColor Panel(0.f, 0.f, 0.f, 0.6f);
 	const FLinearColor Live(0.9f, 0.08f, 0.08f);
@@ -222,7 +221,6 @@ void ADCZombieHUD::DrawHUD()
 	if (D->GetPhase() == EDCPhase::Filming)
 	{
 		DrawGauges(D);
-		DrawZombieAlarm(D);
 	}
 
 	if (D->GetPhase() == EDCPhase::Countdown)
@@ -305,12 +303,11 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 	for (int32 i = 0; i < Beats.Num(); ++i)
 	{
 		const ADCBeat* Beat = Beats[i].Beat;
-		Type(FString::Printf(TEXT("%d.  %s%s"), i + 1, *Beat->DisplayName, Beat->bMandatory ? TEXT("   (the studio needs this one)") : TEXT("")),
-			0.13f, FY, Beat->bMandatory ? InkRed : Ink, 0.85f, false);
+		Type(FString::Printf(TEXT("%d.  %s"), i + 1, *Beat->DisplayName), 0.13f, FY, Ink, 0.85f, false);
 		FY += Step;
 	}
 
-	Type(FString::Printf(TEXT("Film crew on camera cost %d points per second."), D->ZombiePenaltyPerSecond), 0.5f, 0.76f, InkRed, 0.75f, true);
+	Type(TEXT("Your film is graded on how closely it matches the reference cut: camera position, angle and zoom."), 0.5f, 0.76f, InkRed, 0.75f, true);
 	Type(TEXT("Press Enter to start preparing"), 0.5f, 0.815f, Ink, 0.85f, true);
 	Type(D->bShowReferenceCut ? TEXT("Space: watch the reference cut again")
 		: TEXT("H pause/play rehearsal   Q/E scrub   , / . rehearsal speed"), 0.5f, 0.87f, InkFaded, 0.65f, true);
@@ -406,11 +403,6 @@ void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
 		Label(FString::Printf(TEXT("Cameras %d   [T] %s"), D->GetCameraCount(), *ToolText),
 			Canvas->ClipX - 560.f * S, 22.f * S, FLinearColor(1.f, 0.6f, 0.2f), 0.8f);
 	}
-	else if (D->GetPhase() == EDCPhase::Filming)
-	{
-		Label(FString::Printf(TEXT("Crew screen time %.1fs  (-%d)"), D->GetZombieSeconds(), D->GetPenalty()),
-			Canvas->ClipX - 460.f * S, 22.f * S, D->GetZombieSeconds() > 0.f ? ZombieGreen : Muted, 0.8f);
-	}
 }
 
 void ADCZombieHUD::DrawStoryboardPanel(ADCZombieDirector* D)
@@ -436,8 +428,7 @@ void ADCZombieHUD::DrawStoryboardPanel(ADCZombieDirector* D)
 	for (int32 i = 0; i < Beats.Num(); ++i)
 	{
 		const FDCMultiCamBeat& State = Beats[i];
-		const FLinearColor Color = State.Status == EDCShotStatus::Captured ? Good : State.Status == EDCShotStatus::Missed ? Muted
-			: State.Beat->bMandatory ? Gold : FLinearColor::White;
+		const FLinearColor Color = State.Status == EDCShotStatus::Captured ? Good : State.Status == EDCShotStatus::Missed ? Muted : FLinearColor::White;
 		Label(Lines[i], X, Y, Color, 0.58f);
 		Y += RowH;
 	}
@@ -512,8 +503,7 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 		return;
 	}
 	TArray<FString> Framed;
-	bool bZombie = false;
-	D->GetPlanPreview(Framed, bZombie);
+	D->GetPlanPreview(Framed);
 	Y += 32.f * S;
 	if (Framed.Num() > 0)
 	{
@@ -522,11 +512,6 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 	else
 	{
 		Label(TEXT("No storyboard scene framed at this moment"), CX, Y, Muted, 0.7f, true);
-	}
-	if (bZombie)
-	{
-		Y += 30.f * S;
-		Label(TEXT("CREW IN VIEW at this moment"), CX, Y, ZombieGreen, 0.85f, true);
 	}
 }
 
@@ -546,7 +531,7 @@ void ADCZombieHUD::DrawGauges(ADCZombieDirector* D)
 			continue;
 		}
 		const float Fill = bJustCaptured ? 1.f : FMath::Clamp(State.Hold / State.Beat->RequiredHold, 0.f, 1.f);
-		const FLinearColor Color = bJustCaptured ? Good : State.Beat->bMandatory ? Gold : Rose;
+		const FLinearColor Color = bJustCaptured ? Good : Rose;
 		Label(bJustCaptured ? FString::Printf(TEXT("%s - IN THE CAN"), *State.Beat->DisplayName) : State.Beat->DisplayName,
 			Canvas->ClipX * 0.5f, Y, Color, 0.7f, true);
 		Y += 26.f * S;
@@ -554,23 +539,6 @@ void ADCZombieHUD::DrawGauges(ADCZombieDirector* D)
 		DrawRect(Color, X, Y, BarW * Fill, BarH);
 		Y += BarH + 12.f * S;
 	}
-}
-
-void ADCZombieHUD::DrawZombieAlarm(ADCZombieDirector* D)
-{
-	if (!D->IsZombieInShot())
-	{
-		return;
-	}
-	// Pulsing red frame around the live feed.
-	const float Pulse = 0.5f + 0.5f * FMath::Sin(GetWorld()->GetTimeSeconds() * 10.f);
-	const FLinearColor Edge(1.f, 0.f, 0.f, 0.25f + 0.35f * Pulse);
-	const float T = 18.f * S;
-	DrawRect(Edge, 0.f, 0.f, Canvas->ClipX, T);
-	DrawRect(Edge, 0.f, Canvas->ClipY - T, Canvas->ClipX, T);
-	DrawRect(Edge, 0.f, 0.f, T, Canvas->ClipY);
-	DrawRect(Edge, Canvas->ClipX - T, 0.f, T, Canvas->ClipY);
-	Label(FString::Printf(TEXT("CREW IN SHOT!  -%d/s"), D->ZombiePenaltyPerSecond), Canvas->ClipX * 0.5f, Canvas->ClipY * 0.16f, ZombieGreen, 1.4f, true);
 }
 
 void ADCZombieHUD::DrawSwitcher(ADCZombieDirector* D)
@@ -692,7 +660,9 @@ void ADCZombieHUD::DrawResults(ADCZombieDirector* D)
 	Y += 16.f * S;
 	Label(D->MovieTitle, CX, Y, Rose, 1.8f, true);
 	Y += 64.f * S;
-	Label(D->WasApproved() ? D->GetCutName() : TEXT("Retake required - the studio's key scene is missing"), CX, Y, D->WasApproved() ? Gold : Bad, 1.f, true);
+	const FDCMatch& Match = D->GetMatch();
+	const bool bGood = D->IsGoodTake();
+	Label(FString::Printf(TEXT("GRADE %s  -  %s"), *D->GetGrade(), *D->GetCutName()), CX, Y, bGood ? Gold : Bad, 1.f, true);
 	Y += 46.f * S;
 
 	for (int32 i = 0; i < Beats.Num(); ++i)
@@ -700,21 +670,24 @@ void ADCZombieHUD::DrawResults(ADCZombieDirector* D)
 		const FDCMultiCamBeat& State = Beats[i];
 		const bool bGot = State.Status == EDCShotStatus::Captured;
 		const FString Line = bGot
-			? FString::Printf(TEXT("[OK] %d. %s   +%d  (CAM %d)"), i + 1, *State.Beat->DisplayName, State.Beat->Points, State.CapturedBy)
+			? FString::Printf(TEXT("[OK] %d. %s   (CAM %d)"), i + 1, *State.Beat->DisplayName, State.CapturedBy)
 			: FString::Printf(TEXT("[--] %d. %s"), i + 1, *State.Beat->DisplayName);
-		Label(Line, X + 40.f * S, Y, bGot ? Good : State.Beat->bMandatory ? Bad : Muted, 0.62f, false, true, W - 80.f * S);
+		Label(Line, X + 40.f * S, Y, bGot ? Good : Muted, 0.62f, false, true, W - 80.f * S);
 		Y += 34.f * S;
 	}
 
 	Y += 16.f * S;
-	Label(FString::Printf(TEXT("Scenes  +%d      Crew screen time %.1fs  -%d      %d cuts"),
-		D->GetBeatPoints(), D->GetZombieSeconds(), D->GetPenalty(), D->GetCutCount()), CX, Y, FLinearColor::White, 0.8f, true);
+	Label(FString::Printf(TEXT("Camera position %.0f%%      Angle %.0f%%      Zoom %.0f%%      %d cuts"),
+		Match.Position * 100.f, Match.Angle * 100.f, Match.Zoom * 100.f, D->GetCutCount()), CX, Y, FLinearColor::White, 0.8f, true);
 	Y += 40.f * S;
-	Label(FString::Printf(TEXT("FINAL SCORE %d   (best %d)"), D->GetNetScore(), D->GetBestNet()), CX, Y, D->WasApproved() ? Gold : Bad, 1.2f, true);
+	Label(FString::Printf(TEXT("MATCH %.0f%%   (best %.0f%%)"), Match.Overall * 100.f, D->GetBestMatch() * 100.f), CX, Y, bGood ? Gold : Bad, 1.2f, true);
 	Y += 56.f * S;
-	Label(D->GetZombieSeconds() <= 0.f && D->WasApproved() ? TEXT("Not a single crew member on screen. The illusion holds.")
-		: D->GetZombieSeconds() > 5.f ? TEXT("The crew distracted the audience. Rehearse their routes and try another take.")
-		: TEXT("A few crew members slipped into frame. Watch their routes on the next take."), CX, Y, Muted, 0.7f, true);
+	// A tip about the weakest part of the match.
+	const float Weakest = FMath::Min3(Match.Position, Match.Angle, Match.Zoom);
+	Label(D->GetGradeRank() == 0 ? TEXT("Shot for shot, that's the reference cut.")
+		: Weakest == Match.Position ? TEXT("Your cameras stood far from the reference spots - watch where the reference cut films from.")
+		: Weakest == Match.Angle ? TEXT("Your cameras pointed elsewhere - match the reference cut's framing.")
+		: TEXT("Your lenses differ - zoom like the reference cut does."), CX, Y, Muted, 0.7f, true);
 	Y += 44.f * S;
 	Label(TEXT("Space watch the film again   Q/E scrub the film   R / Enter back to preparation (cameras kept)"), CX, Y, FLinearColor::White, 0.72f, true);
 }
@@ -737,25 +710,12 @@ void ADCZombieHUD::DrawPremiere(ADCZombieDirector* D)
 		Label(TEXT("a film by you"), W * 0.5f, H * 0.4f + 90.f * S, FLinearColor::White, 0.9f, true);
 	}
 
-	// Timeline with red ticks wherever a zombie made it into the film.
+	// Timeline.
 	const float X0 = W * 0.2f;
 	const float TW = W * 0.6f;
 	const float TY = H - Bar * 0.62f;
 	const float TH = 6.f * S;
 	DrawRect(FLinearColor(1.f, 1.f, 1.f, 0.2f), X0, TY, TW, TH);
-	bool bSpoiledNow = false;
-	const TArray<FDCTakeSample>& Rec = D->GetRecording();
-	for (int32 i = 0; i < Rec.Num(); ++i)
-	{
-		if (!Rec[i].bSpoiled)
-		{
-			continue;
-		}
-		const float T0 = Rec[i].FilmTime;
-		const float T1 = Rec.IsValidIndex(i + 1) ? Rec[i + 1].FilmTime : T0;
-		DrawRect(Bad, X0 + TW * T0 / Length, TY - 2.f, FMath::Max(TW * (T1 - T0) / Length, 1.f), TH + 4.f);
-		bSpoiledNow |= Time >= T0 && Time <= T1;
-	}
 	DrawRect(Rose, X0, TY, TW * Time / Length, TH);
 	// Gold marks where each storyboard scene made it into the film; a caption as the film reaches it.
 	FString JustCaptured;
@@ -768,7 +728,7 @@ void ADCZombieHUD::DrawPremiere(ADCZombieDirector* D)
 		DrawRect(Gold, X0 + TW * State.CapturedFilmTime / Length - 2.f, TY - 8.f * S, 4.f, TH + 16.f * S);
 		if (!D->IsFilmFinished() && Time >= State.CapturedFilmTime && Time - State.CapturedFilmTime < 2.5f)
 		{
-			JustCaptured = FString::Printf(TEXT("IN THE CAN: %s  +%d"), *State.Beat->DisplayName, State.Beat->Points);
+			JustCaptured = FString::Printf(TEXT("IN THE CAN: %s"), *State.Beat->DisplayName);
 		}
 	}
 	DrawRect(FLinearColor::White, X0 + TW * Time / Length - 1.5f, TY - 6.f, 3.f, TH + 12.f);
@@ -786,10 +746,6 @@ void ADCZombieHUD::DrawPremiere(ADCZombieDirector* D)
 		Label(Hint, W - 24.f * S - HintW, TY - 10.f * S, Muted, 0.6f);
 	}
 	Label(D->MovieTitle, W * 0.5f, Bar * 0.35f, Rose, 0.8f, true);
-	if (bSpoiledNow)
-	{
-		Label(TEXT("zombie in shot"), W - 220.f * S, Bar * 0.35f, ZombieGreen, 0.7f);
-	}
 	if (D->IsPremierePaused() && !D->IsFilmFinished())
 	{
 		Label(TEXT("PAUSED"), W * 0.5f, H * 0.5f - 20.f * S, FLinearColor::White, 1.4f, true);

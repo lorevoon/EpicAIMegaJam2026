@@ -23,11 +23,8 @@ public:
 
 	virtual void BeginPlay() override;
 
-	/** Points lost per second while any zombie is visible on the live camera. */
-	UPROPERTY(EditAnywhere, Category = "Directors Cut|Zombies", meta = (ClampMin = "0"))
-	int32 ZombiePenaltyPerSecond = 150;
-
-	/** Zombies farther than this from the camera are too small to notice. */
+	/** Crew (performers that ruin a shot) farther than this from the camera are too small to notice. The reference
+	 *  cut keeps them out of its shots; they don't affect the player's grade. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Zombies", meta = (Units = "cm"))
 	float ZombieSightRange = 4000.f;
 
@@ -55,21 +52,10 @@ public:
 
 
 	// HUD
-	bool IsZombieInShot() const { return bZombieInShot; }
-	const FString& GetZombieInShotName() const { return ZombieInShotName; }
-	float GetZombieSeconds() const { return ZombieSeconds; }
-	int32 GetPenalty() const { return FMath::RoundToInt(ZombieSeconds * ZombiePenaltyPerSecond); }
-	int32 GetBeatPoints() const;
-	int32 GetNetScore() const { return NetScore; }
-	int32 GetBestNet() const { return BestNet; }
-	/** While planning and looking through a camera: storyboard beats it frames and whether a zombie shows, at the scrubbed time. */
-	void GetPlanPreview(TArray<FString>& OutFramedBeats, bool& bOutZombie) const;
+	/** While planning and looking through a camera: storyboard beats it frames at the scrubbed time. */
+	void GetPlanPreview(TArray<FString>& OutFramedBeats) const;
 
 protected:
-	virtual void EvaluateBeats(float PrevTime, float NowTime) override;
-	virtual void EndTake() override;
-	virtual void ResetScene() override;
-	virtual bool IsLiveShotSpoiled() const override { return bZombieInShot; }
 	virtual bool IsShotSpoiledFrom(const ADCMultiCam* Cam) const override { return IsZombieVisible(Cam, nullptr); }
 
 private:
@@ -78,10 +64,4 @@ private:
 
 	UPROPERTY()
 	TArray<TObjectPtr<ADCPerformer>> Zombies;
-
-	float ZombieSeconds = 0.f;
-	bool bZombieInShot = false;
-	FString ZombieInShotName;
-	int32 NetScore = 0;
-	int32 BestNet = 0;
 };

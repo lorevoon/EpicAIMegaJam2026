@@ -381,7 +381,8 @@ const ADCBeat* ADCMultiCamDirector::GetReferenceBeatAt(float Time) const
 
 UTextureRenderTarget2D* ADCMultiCamDirector::GetReferenceInset() const
 {
-	return Phase == EDCPhase::Preparation && bShowReferenceInset && ReferenceCut.Num() > 0 ? ReferenceInsetTarget.Get() : nullptr;
+	const bool bPhase = Phase == EDCPhase::Preparation || Phase == EDCPhase::Countdown || Phase == EDCPhase::Filming;
+	return bPhase && bShowReferenceInset && ReferenceCut.Num() > 0 ? ReferenceInsetTarget.Get() : nullptr;
 }
 
 void ADCMultiCamDirector::UpdateReferenceInset()
@@ -429,4 +430,53 @@ void ADCMultiCamDirector::UpdateReferenceInset()
 	ReferenceCapture->SetWorldLocationAndRotation(Location, Rotation);
 	ReferenceCapture->FOVAngle = FOV;
 	ReferenceCapture->CaptureScene();
+}
+
+void ADCMultiCamDirector::ComputeMatch()
+{
+	Match = FDCMatch();
+	if (!bReferenceCutBuilt)
+	{
+		BuildReferenceCut();
+	}
+	if (ReferenceCut.Num() == 0 || TakeDuration <= 0.f)
+	{
+		return;
+	}
+	// Compare the film with the reference cut moment by moment, in scene time.
+	constexpr float Step = 0.1f;
+	// A gap longer than this in the recording (a recording pause) means the moment isn't in the film.
+	constexpr float MaxGap = 0.25f;
+	const int32 NumMoments = FMath::FloorToInt(TakeDuration / Step) + 1;
+	double Position = 0.0, Angle = 0.0, Zoom = 0.0;
+	for (int32 i = 0; i < NumMoments; ++i)
+	{
+		const float Time = i * Step;
+		FVector RefLocation;
+		FQuat RefRotation;
+		float RefFOV = 0.f, ScenePoint = 0.f;
+		const int32 Next = Algo::UpperBoundBy(Recording, Time, &FDCTakeSample::Time);
+		if (Next == 0 || !GetFilmView(ReferenceCut, Time, RefLocation, RefRotation, RefFOV, ScenePoint))
+		{
+			continue;
+		}
+		const FDCTakeSample& Shot = Recording[Next - 1];
+		if (Time - Shot.Time > MaxGap)
+		{
+			continue;
+		}
+		const float Distance = FVector::Dist(Shot.Location, RefLocation);
+		const float Degrees = FMath::RadiansToDegrees(Shot.Rotation.Quaternion().AngularDistance(RefRotation));
+		// 1 - x^2: near misses cost little, the score only drops fast close to the tolerance.
+		auto Closeness = [](float Error, float Tolerance) { return 1.f - FMath::Square(FMath::Clamp(Error / Tolerance, 0.f, 1.f)); };
+		Position += Closeness(Distance, MatchPositionTolerance);
+		Angle += Closeness(Degrees, MatchAngleTolerance);
+		Zoom += Closeness(FMath::Abs(Shot.FilmFOV - RefFOV), MatchZoomTolerance);
+	}
+	Match.Position = float(Position / NumMoments);
+	Match.Angle = float(Angle / NumMoments);
+	Match.Zoom = float(Zoom / NumMoments);
+	const float Weights = MatchPositionWeight + MatchAngleWeight + MatchZoomWeight;
+	Match.Overall = Weights > 0.f
+		? (Match.Position * MatchPositionWeight + Match.Angle * MatchAngleWeight + Match.Zoom * MatchZoomWeight) / Weights : 0.f;
 }

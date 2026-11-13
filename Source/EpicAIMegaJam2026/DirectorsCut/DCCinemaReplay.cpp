@@ -268,7 +268,9 @@ void ADCCinemaReplay::DrawCinema(AHUD* HUD,UCanvas* Canvas,ADCZombieDirector* Fi
    P.Text(Film->GetRecording().IsEmpty()?TEXT("THE SCREEN STAYED DARK"):TEXT("THE AUDIENCE HAS SPOKEN"),960,Y+26,.55f,Gold,1100);
    P.Text(Film->MovieTitle,960,Y+62,1.25f,Ivory,1100);
   }
-  if(Age>.8f) P.Text(Film->WasApproved()?Film->GetCutName():TEXT("RETAKE REQUIRED"),960,Y+119,.72f,Film->WasApproved()?Green:Red,1100);
+  const FDCMatch& Match=Film->GetMatch();
+  const bool Good=Film->IsGoodTake();
+  if(Age>.8f) P.Text(FString::Printf(TEXT("GRADE %s   -   %s"),*Film->GetGrade(),*Film->GetCutName()),960,Y+119,.72f,Good?Green:Red,1100);
   const auto& Beats=Film->GetBeats();
   const float RowH=FMath::Min(31.f,240.f/FMath::Max(1,Beats.Num()));
   for(int i=0;i<Beats.Num();++i)
@@ -283,8 +285,9 @@ void ADCCinemaReplay::DrawCinema(AHUD* HUD,UCanvas* Canvas,ADCZombieDirector* Fi
   if(Age>ScoreStart)
   {
    const float Count=FMath::SmoothStep(0.f,1.2f,Age-ScoreStart);
-   P.Text(FString::Printf(TEXT("FINAL SCORE   %d"),FMath::RoundToInt(Film->GetNetScore()*Count)),960,Y+426,1.3f,Gold,1100);
-   P.Text(FString::Printf(TEXT("Story %d   /   Crew penalty -%d   /   Best %d"),Film->GetBeatPoints(),Film->GetPenalty(),Film->GetBestNet()),960,Y+480,.48f,Ivory,1100);
+   P.Text(FString::Printf(TEXT("MATCH   %d%%"),FMath::RoundToInt(Match.Overall*100*Count)),960,Y+426,1.3f,Gold,1100);
+   P.Text(FString::Printf(TEXT("Camera position %d%%   /   Angle %d%%   /   Zoom %d%%   /   Best %d%%"),FMath::RoundToInt(Match.Position*100),
+    FMath::RoundToInt(Match.Angle*100),FMath::RoundToInt(Match.Zoom*100),FMath::RoundToInt(Film->GetBestMatch()*100)),960,Y+480,.48f,Ivory,1100);
   }
   P.Text(TEXT("SPACE  Watch again        R / ENTER  Back to the set"),960,Y+530,.47f,Ivory,1100);
  }

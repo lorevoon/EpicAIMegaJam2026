@@ -74,17 +74,8 @@ void ADCZombieDirector::HandleScrub(float DeltaSeconds)
 	Super::HandleScrub(DeltaSeconds);
 }
 
-void ADCZombieDirector::ResetScene()
-{
-	Super::ResetScene();
-	ZombieSeconds = 0.f;
-	bZombieInShot = false;
-	ZombieInShotName.Reset();
-	NetScore = 0;
-}
-
 // ---------------------------------------------------------------------------------------------
-// Shooting: zombies on the live camera cost points
+// Crew in shot: only used to keep the reference cut's shots clean
 
 bool ADCZombieDirector::IsZombieVisible(const ADCMultiCam* Cam, FString* OutName) const
 {
@@ -130,45 +121,9 @@ bool ADCZombieDirector::IsZombieVisible(const ADCMultiCam* Cam, FString* OutName
 	return false;
 }
 
-void ADCZombieDirector::EvaluateBeats(float PrevTime, float NowTime)
-{
-	FString Name;
-	// A paused recording films nothing, so nothing on screen can ruin it.
-	bZombieInShot = !IsRecordingPaused() && IsZombieVisible(GetCameraSlot(ViewingSlot), &Name);
-	if (bZombieInShot)
-	{
-		ZombieSeconds += NowTime - PrevTime;
-		ZombieInShotName = Name;
-	}
-	Super::EvaluateBeats(PrevTime, NowTime);
-}
-
-int32 ADCZombieDirector::GetBeatPoints() const
-{
-	int32 Points = 0;
-	for (const FDCMultiCamBeat& State : Beats)
-	{
-		Points += State.Status == EDCShotStatus::Captured ? State.Beat->Points : 0;
-	}
-	return Points;
-}
-
-void ADCZombieDirector::EndTake()
-{
-	if (Phase != EDCPhase::Filming)
-	{
-		return;
-	}
-	Super::EndTake();
-	bZombieInShot = false;
-	NetScore = bApproved ? FMath::Max(0, Score - GetPenalty()) : 0;
-	BestNet = FMath::Max(BestNet, NetScore);
-}
-
-void ADCZombieDirector::GetPlanPreview(TArray<FString>& OutFramedBeats, bool& bOutZombie) const
+void ADCZombieDirector::GetPlanPreview(TArray<FString>& OutFramedBeats) const
 {
 	OutFramedBeats.Reset();
-	bOutZombie = false;
 	const ADCMultiCam* Cam = GetCameraSlot(ViewingSlot);
 	if (Phase != EDCPhase::Preparation || !Cam)
 	{
@@ -181,5 +136,4 @@ void ADCZombieDirector::GetPlanPreview(TArray<FString>& OutFramedBeats, bool& bO
 			OutFramedBeats.Add(State.Beat->DisplayName);
 		}
 	}
-	bOutZombie = IsZombieVisible(Cam, nullptr);
 }
