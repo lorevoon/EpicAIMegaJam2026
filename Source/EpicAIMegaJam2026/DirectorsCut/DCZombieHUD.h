@@ -7,6 +7,7 @@
 #include "DCZombieHUD.generated.h"
 
 class ADCZombieDirector;
+class UTexture2D;
 
 UCLASS()
 class ADCZombieHUD : public AHUD
@@ -14,7 +15,16 @@ class ADCZombieHUD : public AHUD
 	GENERATED_BODY()
 
 public:
+	ADCZombieHUD();
+
 	virtual void DrawHUD() override;
+
+	/** Camera-type icons on the switcher buttons. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
+	TObjectPtr<UTexture2D> StaticCameraIcon;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
+	TObjectPtr<UTexture2D> DollyCameraIcon;
 
 private:
 	void DrawStoryboardCard(ADCZombieDirector* D);

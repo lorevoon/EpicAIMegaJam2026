@@ -891,6 +891,24 @@ int32 ADCMultiCamDirector::FindFreeSlot()
 	return Slot;
 }
 
+int32 ADCMultiCamDirector::GetPlacementSlot() const
+{
+	if (Phase != EDCPhase::Preparation || IsViewingCamera())
+	{
+		return INDEX_NONE;
+	}
+	if (const ADCMultiCam* Dolly = FindCameraOnRail(Cameras, PendingRail))
+	{
+		return Cameras.IndexOfByKey(Dolly);
+	}
+	if (!HasCameraBudget())
+	{
+		return INDEX_NONE;
+	}
+	const int32 Free = Cameras.Find(nullptr);
+	return Free != INDEX_NONE ? Free : Cameras.Num();
+}
+
 bool ADCMultiCamDirector::HasCameraBudget() const
 {
 	return IsUnlimited() || GetCameraCount() < MaxCameras;

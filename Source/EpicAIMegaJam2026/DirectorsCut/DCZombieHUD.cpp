@@ -9,9 +9,11 @@
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
+#include "Engine/Texture2D.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "UObject/ConstructorHelpers.h"
 
 namespace
 {
@@ -24,6 +26,14 @@ namespace
 	const FLinearColor Panel(0.f, 0.f, 0.f, 0.6f);
 	const FLinearColor Live(0.9f, 0.08f, 0.08f);
 	constexpr float GaugeLinger = 1.5f;
+}
+
+ADCZombieHUD::ADCZombieHUD()
+{
+	static ConstructorHelpers::FObjectFinder<UTexture2D> StaticIcon(TEXT("/Game/DirectorsCut/UI/Icons/Vintage_Film_Camera_Rotation_Icon-1.Vintage_Film_Camera_Rotation_Icon-1"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> DollyIcon(TEXT("/Game/DirectorsCut/UI/Icons/Vintage_Film_Camera_on_Rails-2.Vintage_Film_Camera_on_Rails-2"));
+	StaticCameraIcon = StaticIcon.Object;
+	DollyCameraIcon = DollyIcon.Object;
 }
 
 ADCZombieDirector* ADCZombieHUD::FindDirector()
@@ -397,39 +407,67 @@ void ADCZombieHUD::DrawZombieAlarm(ADCZombieDirector* D)
 
 void ADCZombieHUD::DrawSwitcher(ADCZombieDirector* D)
 {
-	// One button per camera; shrinks to fit when there are many.
-	const int32 Count = D->IsUnlimited() ? D->GetSlotCount() : D->MaxCameras;
+	// One button per camera (number + camera-type icon); shrinks to fit when there are many. While placing, the
+	// camera about to be placed already has its button, pulsing, with the icon of the selected type (T switches it).
+	const int32 PlaceSlot = D->GetPlacementSlot();
+	const int32 Count = FMath::Max(D->IsUnlimited() ? D->GetSlotCount() : D->MaxCameras, PlaceSlot + 1);
 	if (Count == 0)
 	{
 		return;
 	}
 	const float Gap = 10.f * S;
 	const float BoxW = FMath::Min(110.f * S, (Canvas->ClipX * 0.8f - (Count - 1) * Gap) / Count);
-	const float BoxH = 56.f * S;
+	const float BoxH = 84.f * S;
 	float X = Canvas->ClipX * 0.5f - (Count * BoxW + (Count - 1) * Gap) * 0.5f;
 	const float Y = Canvas->ClipY - BoxH - 160.f * S;
 	const bool bOnAir = D->GetPhase() == EDCPhase::Filming || D->GetPhase() == EDCPhase::Countdown;
+	const float Pulse = 0.65f + 0.35f * FMath::Sin(GetWorld()->GetRealTimeSeconds() * 5.f);
 
 	for (int32 i = 0; i < Count; ++i)
 	{
 		const ADCMultiCam* Cam = D->GetCameraSlot(i);
-		const bool bViewing = D->GetViewingSlot() == i;
+		const bool bPlacing = i == PlaceSlot;
 		FLinearColor Fill = Panel;
-		FLinearColor Text = Cam ? FLinearColor::White : Muted;
-		FString Status = !Cam ? TEXT("empty")
-			: Cam->GetRig() == EDCCamRig::Dolly ? TEXT("dolly") : TEXT("static");
-		if (bViewing)
+		FLinearColor Edge = Cam ? FLinearColor::White : Muted;
+		if (D->GetViewingSlot() == i)
 		{
 			Fill = bOnAir ? Live : FLinearColor(0.8f, 0.6f, 0.1f, 0.85f);
-			Status = bOnAir ? TEXT("LIVE") : TEXT("aiming");
+		}
+		else if (bPlacing)
+		{
+			Fill = FLinearColor(Gold.R, Gold.G, Gold.B, 0.25f * Pulse);
+			Edge = FLinearColor(Gold.R, Gold.G, Gold.B, Pulse);
 		}
 		DrawRect(Fill, X, Y, BoxW, BoxH);
-		DrawLine(X, Y, X + BoxW, Y, Text, 1.f);
-		DrawLine(X, Y + BoxH, X + BoxW, Y + BoxH, Text, 1.f);
-		DrawLine(X, Y, X, Y + BoxH, Text, 1.f);
-		DrawLine(X + BoxW, Y, X + BoxW, Y + BoxH, Text, 1.f);
-		Label(FString::Printf(TEXT("%d"), i + 1), X + BoxW * 0.5f, Y + 2.f * S, Text, 1.1f, true);
-		Label(Status, X + BoxW * 0.5f, Y + 32.f * S, Text, 0.55f, true);
+		const float Thick = bPlacing ? 2.f : 1.f;
+		DrawLine(X, Y, X + BoxW, Y, Edge, Thick);
+		DrawLine(X, Y + BoxH, X + BoxW, Y + BoxH, Edge, Thick);
+		DrawLine(X, Y, X, Y + BoxH, Edge, Thick);
+		DrawLine(X + BoxW, Y, X + BoxW, Y + BoxH, Edge, Thick);
+		Label(FString::Printf(TEXT("%d"), i + 1), X + BoxW * 0.5f, Y + 2.f * S, Edge, 1.1f, true);
+
+		// The placed camera's type, or (for the button being placed) the type the next click will build.
+		if (Cam || bPlacing)
+		{
+			const bool bDolly = Cam ? Cam->GetRig() == EDCCamRig::Dolly : D->GetTool() == EDCCamTool::Dolly;
+			if (UTexture2D* Icon = bDolly ? DollyCameraIcon : StaticCameraIcon)
+			{
+				const float Aspect = Icon->GetSurfaceHeight() > 0.f ? Icon->GetSurfaceWidth() / Icon->GetSurfaceHeight() : 1.f;
+				float IconH = BoxH - 40.f * S;
+				float IconW = IconH * Aspect;
+				if (IconW > BoxW - 10.f * S)
+				{
+					IconW = BoxW - 10.f * S;
+					IconH = IconW / Aspect;
+				}
+				DrawTexture(Icon, X + (BoxW - IconW) * 0.5f, Y + 36.f * S + (BoxH - 40.f * S - IconH) * 0.5f, IconW, IconH,
+					0.f, 0.f, 1.f, 1.f, bPlacing && !Cam ? Edge : FLinearColor::White);
+			}
+		}
+		if (bPlacing)
+		{
+			Label(TEXT("T switch"), X + BoxW * 0.5f, Y + BoxH + 4.f * S, Gold, 0.5f, true);
+		}
 		X += BoxW + Gap;
 	}
 }

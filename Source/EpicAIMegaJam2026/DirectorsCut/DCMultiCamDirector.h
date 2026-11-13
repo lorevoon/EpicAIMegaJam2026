@@ -172,6 +172,11 @@ public:
 	bool IsUnlimited() const { return MaxCameras <= 0; }
 	EDCCamTool GetTool() const { return Tool; }
 	EDCStabilizer GetStabilizer() const { return Stabilizer; }
+	/**
+	 * Slot of the camera being placed right now: the dolly whose rail is still being laid, else the slot the next
+	 * click would fill (may be one past the end when cameras are unlimited). INDEX_NONE when not placing.
+	 */
+	int32 GetPlacementSlot() const;
 	int32 GetPendingRailPoints() const;
 	/** 0-based slot being looked through, or INDEX_NONE while walking. */
 	int32 GetViewingSlot() const { return ViewingSlot; }
