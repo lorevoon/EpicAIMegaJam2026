@@ -40,7 +40,7 @@ void ADCZombieDirector::BeginPlay()
 void ADCZombieDirector::EnterPreparation()
 {
 	ResetScene();
-	Flash(TEXT("Rehearsal is playing. H pauses/resumes, comma/period change speed. Wheel or arrows scrub and pause."), 7.f);
+	Flash(TEXT("Rehearsal is playing. H pauses/resumes, comma/period change speed. Hold Q/E to scrub (and pause)."), 7.f);
 }
 
 void ADCZombieDirector::HandleStartTake()

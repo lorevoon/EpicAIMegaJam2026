@@ -313,7 +313,7 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 	Type(FString::Printf(TEXT("Film crew on camera cost %d points per second."), D->ZombiePenaltyPerSecond), 0.5f, 0.76f, InkRed, 0.75f, true);
 	Type(TEXT("Press Enter to start preparing"), 0.5f, 0.815f, Ink, 0.85f, true);
 	Type(D->bShowReferenceCut ? TEXT("Space: watch the reference cut again")
-		: TEXT("H pause/play rehearsal   Wheel scrub   , / . rehearsal speed"), 0.5f, 0.87f, InkFaded, 0.65f, true);
+		: TEXT("H pause/play rehearsal   Q/E scrub   , / . rehearsal speed"), 0.5f, 0.87f, InkFaded, 0.65f, true);
 }
 
 void ADCZombieHUD::DrawReferenceInset(ADCZombieDirector* D)
@@ -372,7 +372,7 @@ void ADCZombieHUD::DrawReferenceCut(ADCZombieDirector* D)
 	DrawRect(FLinearColor::White, X0 + TW * Time / Length - 1.5f, TY - 6.f, 3.f, TH + 12.f);
 	Label(FString::Printf(TEXT("%04.1f / %04.1f"), Time, Length), 24.f * S, TY - 10.f * S, Muted, 0.6f);
 	{
-		const FString Hint = TEXT("Space pause   Wheel scrub   Enter storyboard");
+		const FString Hint = TEXT("Space pause   Q/E scrub   Enter storyboard");
 		float HintW = 0.f, HintH = 0.f;
 		GetTextSize(Hint, HintW, HintH, GetTextFont(), 0.6f * S);
 		Label(Hint, W - 24.f * S - HintW, TY - 10.f * S, Muted, 0.6f);
@@ -502,7 +502,7 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 	float Y = Canvas->ClipY * 0.48f;
 	const float Length = FMath::Max(D->TakeDuration, KINDA_SMALL_NUMBER);
 	const float Time = D->GetSceneTime();
-	Label(FString::Printf(TEXT("REHEARSAL %s   %.1fx   %.1fs / %.0fs   H play/pause   ,/. speed   Wheel/arrows scrub"),
+	Label(FString::Printf(TEXT("REHEARSAL %s   %.1fx   %.1fs / %.0fs   H play/pause   ,/. speed   Q/E scrub"),
 		D->IsRehearsalPlaying() ? TEXT("PLAYING") : TEXT("PAUSED"), D->GetRehearsalSpeed(), Time, Length), CX, Y, Gold, 0.65f, true);
 	const float TW = 640.f * S;
 	const float X0 = CX - TW * 0.5f;
@@ -655,15 +655,15 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 		if (D->IsViewingCamera())
 		{
 			Lines.Add(TEXT("AIMING - this is where the camera starts every take"));
-			Lines.Add(TEXT("Mouse turn   Shift+Wheel zoom   Wheel scrub the scene"));
-			Lines.Add(TEXT("WASD move nearby   1-9 / [ ] switch cameras   E step back | Preset autosaved"));
+			Lines.Add(TEXT("Mouse turn   Wheel zoom   Q/E scrub the scene"));
+			Lines.Add(TEXT("WASD move nearby   1-9 / [ ] switch cameras   RMB step back | Preset autosaved"));
 		}
 		else
 		{
-			Lines.Add(TEXT("T camera type   LMB place   RMB remove   Q/E height   C clear"));
+			Lines.Add(TEXT("T camera type   LMB place   RMB remove   Wheel height   C clear"));
 			Lines.Add(TEXT("Static / Crane: one click to place   1-9 or [ ] look through"));
 			Lines.Add(D->IsNearClapper() ? TEXT("Enter: hit the clapperboard and call ACTION!")
-				: TEXT("Wheel scrub   H rehearsal   Tab storyboard   Shift sprint   Space jump   Enter: Action!"));
+				: TEXT("Q/E scrub   H rehearsal   Tab storyboard   Shift sprint   Space jump   Enter: Action!"));
 		}
 		break;
 	case EDCPhase::Countdown:
@@ -721,7 +721,7 @@ void ADCZombieHUD::DrawResults(ADCZombieDirector* D)
 		: D->GetZombieSeconds() > 5.f ? TEXT("The crew distracted the audience. Rehearse their routes and try another take.")
 		: TEXT("A few crew members slipped into frame. Watch their routes on the next take."), CX, Y, Muted, 0.7f, true);
 	Y += 44.f * S;
-	Label(TEXT("Space watch the film again   Wheel scrub the film   R / Enter back to preparation (cameras kept)"), CX, Y, FLinearColor::White, 0.72f, true);
+	Label(TEXT("Space watch the film again   Q/E scrub the film   R / Enter back to preparation (cameras kept)"), CX, Y, FLinearColor::White, 0.72f, true);
 }
 
 void ADCZombieHUD::DrawPremiere(ADCZombieDirector* D)
@@ -785,7 +785,7 @@ void ADCZombieHUD::DrawPremiere(ADCZombieDirector* D)
 	Label(FString::Printf(TEXT("%02d:%04.1f / %02d:%04.1f"), int32(Time) / 60, FMath::Fmod(Time, 60.f), int32(Length) / 60, FMath::Fmod(Length, 60.f)),
 		24.f * S, TY - 10.f * S, Muted, 0.7f);
 	{
-		const FString Hint = TEXT("4/4 REVIEW   Space pause   Wheel scrub   Enter skip to evaluation");
+		const FString Hint = TEXT("4/4 REVIEW   Space pause   Q/E scrub   Enter skip to evaluation");
 		float HintW = 0.f, HintH = 0.f;
 		GetTextSize(Hint, HintW, HintH, GetTextFont(), 0.6f * S);
 		Label(Hint, W - 24.f * S - HintW, TY - 10.f * S, Muted, 0.6f);

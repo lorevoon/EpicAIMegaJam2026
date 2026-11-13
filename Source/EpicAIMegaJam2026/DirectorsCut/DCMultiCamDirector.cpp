@@ -887,11 +887,11 @@ bool ADCMultiCamDirector::HandleLook(float DeltaYaw, float DeltaPitch)
 	return true;
 }
 
-void ADCMultiCamDirector::HandleWheel(float Delta, bool bZoom)
+void ADCMultiCamDirector::HandleWheel(float Delta)
 {
 	ADCMultiCam* Cam = GetCameraSlot(ViewingSlot);
 	const bool bShooting = Phase == EDCPhase::Countdown || Phase == EDCPhase::Filming;
-	if (Cam && (bShooting || (Phase == EDCPhase::Preparation && bZoom)))
+	if (Cam && (bShooting || Phase == EDCPhase::Preparation))
 	{
 		Cam->SetFOV(Cam->GetTargetFOV() - Delta * 5.f);
 		if (Phase == EDCPhase::Preparation)
@@ -899,17 +899,21 @@ void ADCMultiCamDirector::HandleWheel(float Delta, bool bZoom)
 			Cam->SaveHome();
 		}
 	}
-	else if (Phase == EDCPhase::Preparation || Phase == EDCPhase::Review || Phase == EDCPhase::Storyboard)
+	else if (Phase == EDCPhase::Preparation)
+	{
+		HandlePlacementHeight(Delta);
+	}
+	else if (Phase == EDCPhase::Review || Phase == EDCPhase::Storyboard)
 	{
 		HandleScrub(Delta * WheelScrubSeconds);
 	}
 }
 
-void ADCMultiCamDirector::HandlePlacementHeight(float AxisTimesDelta)
+void ADCMultiCamDirector::HandlePlacementHeight(float Notches)
 {
 	if (Phase == EDCPhase::Preparation && !IsViewingCamera())
 	{
-		PendingHeight = FMath::Clamp(PendingHeight + AxisTimesDelta * StandHeightSpeed, Tool == EDCCamTool::Crane ? 450.f : MinStandHeight, Tool == EDCCamTool::Crane ? 1200.f : MaxStandHeight);
+		PendingHeight = FMath::Clamp(PendingHeight + Notches * StandHeightStep, Tool == EDCCamTool::Crane ? 450.f : MinStandHeight, Tool == EDCCamTool::Crane ? 1200.f : MaxStandHeight);
 	}
 }
 
@@ -1231,7 +1235,12 @@ void ADCMultiCamDirector::HandleCycleCamera(int32 Direction)
 void ADCMultiCamDirector::HandleSecondaryPressed()
 {
 	ADCMultiCamCharacter* Player = GetPlayer();
-	if (Phase != EDCPhase::Preparation || IsViewingCamera() || !Player)
+	if (Phase == EDCPhase::Preparation && IsViewingCamera())
+	{
+		ViewWalking(); // step back out of the camera
+		return;
+	}
+	if (Phase != EDCPhase::Preparation || !Player)
 	{
 		return;
 	}
@@ -1328,16 +1337,6 @@ bool ADCMultiCamDirector::IsNearClapper() const
 	ADCMultiCamCharacter* Player = GetPlayer();
 	return Player && Clapperboard && !IsViewingCamera()
 		&& FVector::Dist2D(Player->GetActorLocation(), Clapperboard->GetActorLocation()) < Clapperboard->InteractRange;
-}
-
-void ADCMultiCamDirector::HandleInteract()
-{
-	// E only steps back out of a camera. It doubles as "raise camera" while placing, so it never
-	// advances the game - Enter alone moves from one phase to the next.
-	if (Phase == EDCPhase::Preparation && IsViewingCamera())
-	{
-		ViewWalking();
-	}
 }
 
 // ---------------------------------------------------------------------------------------------

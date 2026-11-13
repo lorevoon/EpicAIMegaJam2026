@@ -181,13 +181,17 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Camera Spots", meta = (ClampMin = "0", Units = "s"))
 	float CameraSpotLeadTime = 1.5f;
 
-	/** How far one mouse-wheel notch scrubs the timeline in preparation and review. */
+	/** How far one mouse-wheel notch scrubs the storyboard's reference cut and the review film. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0.05", Units = "s"))
 	float WheelScrubSeconds = 0.5f;
 
-	/** How fast holding Q/E lowers or raises the next camera before it's placed. */
+	/** Holding Q / E (or Left / Right) scrubs the timeline at this many scene seconds per second. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0.5"))
+	float KeyScrubRate = 4.f;
+
+	/** How far one mouse-wheel notch raises or lowers the next camera before it's placed. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "1", Units = "cm"))
-	float StandHeightSpeed = 150.f;
+	float StandHeightStep = 20.f;
 
 	/** Zooming in lets a camera capture subjects proportionally farther than a beat's Max Distance. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras")
@@ -196,8 +200,8 @@ public:
 	// Player commands. Look/zoom return true when they were applied to a camera instead of the walking view.
 	void HandlePrimaryPressed();
 	void HandlePrimaryReleased();
+	/** Right Mouse: removes the camera aimed at while walking, or steps back out of the camera being looked through. */
 	void HandleSecondaryPressed();
-	virtual void HandleInteract();
 	virtual void HandleStartTake();
 	virtual void HandleRestart();
 	/** W/S while looking through a dolly camera: travel along its rail. */
@@ -220,10 +224,13 @@ public:
 	void HandleClearCameras();
 	void HandleSelectCamera(int32 Number);
 	bool HandleLook(float DeltaYaw, float DeltaPitch);
-	/** Zooms while shooting; scrubs the timeline in preparation and review. bZoom (Shift) zooms in preparation instead. */
-	void HandleWheel(float Delta, bool bZoom);
-	/** Q/E held while walking in preparation: Axis is -1..1 scaled by frame time. */
-	void HandlePlacementHeight(float AxisTimesDelta);
+	/**
+	 * Mouse wheel: zooms the camera being looked through (preparation and shooting); while walking in preparation it
+	 * raises/lowers the next camera; in the storyboard and review it scrubs the film.
+	 */
+	void HandleWheel(float Delta);
+	/** Raises or lowers the next camera by this many wheel notches. */
+	void HandlePlacementHeight(float Notches);
 
 	// Read-only state for the HUD and character
 	EDCPhase GetPhase() const { return Phase; }

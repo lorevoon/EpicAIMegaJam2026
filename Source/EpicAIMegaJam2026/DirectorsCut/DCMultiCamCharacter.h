@@ -49,13 +49,11 @@ private:
 	void OnPrimary();
 	void OnPrimaryReleased();
 	void OnSecondary();
-	void OnInteract();
 	void OnStartTake();
 	void OnRestart();
 	void OnClearCameras();
 	void OnSelectCamera(int32 Number);
 	void OnScrub(const FInputActionValue& Value);
-	void OnPlacementHeight(const FInputActionValue& Value);
 	void OnCycleTool();
 	void OnCycleStabilizer();
 	void OnFinishRail();

@@ -91,25 +91,19 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Input->BindAction(Primary, ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnPrimary);
 	Input->BindAction(Primary, ETriggerEvent::Completed, this, &ADCMultiCamCharacter::OnPrimaryReleased);
 	Input->BindAction(MapButton(EKeys::RightMouseButton), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnSecondary);
-	Input->BindAction(MapButton(EKeys::E), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnInteract);
 	Input->BindAction(MapButton(EKeys::Enter), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnStartTake);
 	Input->BindAction(MapButton(EKeys::R), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRestart);
 	Input->BindAction(MapButton(EKeys::C), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnClearCameras);
 	Input->BindAction(MapButton(EKeys::Tab), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnToggleNotebook);
 	Input->BindAction(MapButton(EKeys::P, true), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTogglePause);
 
+	// Hold E (or Right) to scrub the timeline forward, Q (or Left) to scrub back.
 	UInputAction* Scrub = MakeAction(EInputActionValueType::Axis1D);
+	Mapping->MapKey(Scrub, EKeys::E);
 	Mapping->MapKey(Scrub, EKeys::Right);
-	FEnhancedActionKeyMapping& ScrubBack = Mapping->MapKey(Scrub, EKeys::Left);
-	ScrubBack.Modifiers.Add(NewObject<UInputModifierNegate>(this));
+	Mapping->MapKey(Scrub, EKeys::Q).Modifiers.Add(NewObject<UInputModifierNegate>(this));
+	Mapping->MapKey(Scrub, EKeys::Left).Modifiers.Add(NewObject<UInputModifierNegate>(this));
 	Input->BindAction(Scrub, ETriggerEvent::Triggered, this, &ADCMultiCamCharacter::OnScrub);
-
-	// Q lowers / E raises the next camera while placing (E still interacts when there's something to interact with).
-	UInputAction* Height = MakeAction(EInputActionValueType::Axis1D);
-	Mapping->MapKey(Height, EKeys::E);
-	FEnhancedActionKeyMapping& Lower = Mapping->MapKey(Height, EKeys::Q);
-	Lower.Modifiers.Add(NewObject<UInputModifierNegate>(this));
-	Input->BindAction(Height, ETriggerEvent::Triggered, this, &ADCMultiCamCharacter::OnPlacementHeight);
 	Input->BindAction(MapButton(EKeys::T), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleTool);
 	Input->BindAction(MapButton(EKeys::G), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleStabilizer);
 	Input->BindAction(MapButton(EKeys::LeftBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, -1);
@@ -214,7 +208,7 @@ void ADCMultiCamCharacter::OnWheel(const FInputActionValue& Value)
 {
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
-		D->HandleWheel(Value.Get<float>(), bSprintHeld); // Shift + wheel zooms in preparation
+		D->HandleWheel(Value.Get<float>());
 	}
 }
 
@@ -239,14 +233,6 @@ void ADCMultiCamCharacter::OnSecondary()
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleSecondaryPressed();
-	}
-}
-
-void ADCMultiCamCharacter::OnInteract()
-{
-	if (ADCMultiCamDirector* D = GetDirector())
-	{
-		D->HandleInteract();
 	}
 }
 
@@ -286,16 +272,7 @@ void ADCMultiCamCharacter::OnScrub(const FInputActionValue& Value)
 {
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
-		// Holding an arrow key scrubs the scene at 8x speed.
-		D->HandleScrub(Value.Get<float>() * GetWorld()->GetDeltaSeconds() * 8.f);
-	}
-}
-
-void ADCMultiCamCharacter::OnPlacementHeight(const FInputActionValue& Value)
-{
-	if (ADCMultiCamDirector* D = GetDirector())
-	{
-		D->HandlePlacementHeight(Value.Get<float>() * GetWorld()->GetDeltaSeconds());
+		D->HandleScrub(Value.Get<float>() * GetWorld()->GetDeltaSeconds() * D->KeyScrubRate);
 	}
 }
 
