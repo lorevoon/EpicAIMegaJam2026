@@ -37,6 +37,11 @@ ADCMultiCam::ADCMultiCam()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(Head);
 	Camera->SetFieldOfView(DefaultFOV);
+	// FOV is the horizontal angle across the whole screen, on any screen shape. The engine's default (Maintain Y FOV)
+	// would rescale it by the window's aspect, and then the live view would no longer match the capture-frame math
+	// (DCFrame), the zombie and beat checks, or the review playback.
+	Camera->bOverrideAspectRatioAxisConstraint = true;
+	Camera->SetAspectRatioAxisConstraint(EAspectRatioAxisConstraint::AspectRatio_MaintainXFOV);
 	Camera->PostProcessSettings.bOverride_MotionBlurAmount = true;
 	Camera->PostProcessSettings.MotionBlurAmount = 0.f;
 

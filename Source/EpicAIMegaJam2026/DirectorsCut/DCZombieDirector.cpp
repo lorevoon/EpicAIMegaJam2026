@@ -97,20 +97,6 @@ void ADCZombieDirector::ResetScene()
 // ---------------------------------------------------------------------------------------------
 // Shooting: zombies on the live camera cost points
 
-float ADCZombieDirector::GetAspect() const
-{
-	if (APlayerController* PC = GetPC())
-	{
-		int32 W = 0, H = 0;
-		PC->GetViewportSize(W, H);
-		if (W > 0 && H > 0)
-		{
-			return float(W) / float(H);
-		}
-	}
-	return 16.f / 9.f;
-}
-
 bool ADCZombieDirector::IsZombieVisible(const ADCMultiCam* Cam, FString* OutName) const
 {
 	if (!Cam)
@@ -120,7 +106,8 @@ bool ADCZombieDirector::IsZombieVisible(const ADCMultiCam* Cam, FString* OutName
 	const FTransform CamXf = Cam->GetCamera()->GetComponentTransform();
 	const FVector CamLoc = CamXf.GetLocation();
 	const float HalfTan = FMath::Tan(FMath::DegreesToRadians(Cam->GetFOV() * 0.5f));
-	const float Aspect = GetAspect();
+	const float Aspect = GetViewAspect();
+	const FVector2D Frame = DCFrame::CaptureExtent(Aspect);
 	const FCollisionQueryParams Params = MakeTraceParams(SCENE_QUERY_STAT_NAME_ONLY(DCZombieVisibility));
 
 	for (ADCPerformer* Zombie : Zombies)
@@ -135,8 +122,8 @@ bool ADCZombieDirector::IsZombieVisible(const ADCMultiCam* Cam, FString* OutName
 				continue;
 			}
 			// Only the capture frame is recorded; zombies in the dimmed margin around it don't count.
-			if (FMath::Abs((Local.Y / Local.X) / HalfTan) > DCFrame::CaptureFraction
-				|| FMath::Abs((Local.Z / Local.X) / (HalfTan / Aspect)) > DCFrame::CaptureFraction)
+			if (FMath::Abs((Local.Y / Local.X) / HalfTan) > Frame.X
+				|| FMath::Abs((Local.Z / Local.X) / (HalfTan / Aspect)) > Frame.Y)
 			{
 				continue;
 			}

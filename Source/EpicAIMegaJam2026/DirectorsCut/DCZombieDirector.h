@@ -75,7 +75,6 @@ protected:
 private:
 	void EnterPreparation();
 	bool IsZombieVisible(const ADCMultiCam* Cam, FString* OutName) const;
-	float GetAspect() const;
 
 	UPROPERTY()
 	TArray<TObjectPtr<ADCPerformer>> Zombies;

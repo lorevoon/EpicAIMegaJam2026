@@ -26,14 +26,22 @@ namespace
 	const FLinearColor Panel(0.f, 0.f, 0.f, 0.6f);
 	const FLinearColor Live(0.9f, 0.08f, 0.08f);
 	constexpr float GaugeLinger = 1.5f;
+	// Typewriter ink on the storyboard page.
+	const FLinearColor Ink(0.12f, 0.09f, 0.07f);
+	const FLinearColor InkFaded(0.38f, 0.3f, 0.22f);
+	const FLinearColor InkRed(0.55f, 0.08f, 0.06f);
 }
 
 ADCZombieHUD::ADCZombieHUD()
 {
 	static ConstructorHelpers::FObjectFinder<UTexture2D> StaticIcon(TEXT("/Game/DirectorsCut/UI/Icons/Vintage_Film_Camera_Rotation_Icon-1.Vintage_Film_Camera_Rotation_Icon-1"));
 	static ConstructorHelpers::FObjectFinder<UTexture2D> DollyIcon(TEXT("/Game/DirectorsCut/UI/Icons/Vintage_Film_Camera_on_Rails-2.Vintage_Film_Camera_on_Rails-2"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> Paper(TEXT("/Game/DirectorsCut/UI/Vintage_Script_Paper_UI_Element.Vintage_Script_Paper_UI_Element"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> Monitor(TEXT("/Game/DirectorsCut/UI/SMALLHD_Monitor_Rig_Assembly.SMALLHD_Monitor_Rig_Assembly"));
+	MonitorFrame = Monitor.Object;
 	StaticCameraIcon = StaticIcon.Object;
 	DollyCameraIcon = DollyIcon.Object;
+	StoryboardPaper = Paper.Object;
 }
 
 ADCZombieDirector* ADCZombieHUD::FindDirector()
@@ -49,7 +57,7 @@ ADCZombieDirector* ADCZombieHUD::FindDirector()
 	return Director.Get();
 }
 
-void ADCZombieHUD::Label(const FString& Text, float X, float Y, const FLinearColor& Color, float Scale, bool bCenter)
+void ADCZombieHUD::Label(const FString& Text, float X, float Y, const FLinearColor& Color, float Scale, bool bCenter, bool bShadow)
 {
 	UFont* Font = GEngine->GetLargeFont();
 	const float FinalScale = Scale * S;
@@ -59,8 +67,22 @@ void ADCZombieHUD::Label(const FString& Text, float X, float Y, const FLinearCol
 		GetTextSize(Text, W, H, Font, FinalScale);
 		X -= W * 0.5f;
 	}
-	DrawText(Text, FLinearColor(0.f, 0.f, 0.f, 0.8f), X + 2.f, Y + 2.f, Font, FinalScale);
+	if (bShadow)
+	{
+		DrawText(Text, FLinearColor(0.f, 0.f, 0.f, 0.8f), X + 2.f, Y + 2.f, Font, FinalScale);
+	}
 	DrawText(Text, Color, X, Y, Font, FinalScale);
+}
+
+void ADCZombieHUD::GetCaptureRect(float& L, float& T, float& R, float& B) const
+{
+	const float W = Canvas->ClipX;
+	const float H = Canvas->ClipY;
+	const FVector2D Half = DCFrame::CaptureExtent(W / FMath::Max(H, 1.f)) * 0.5f;
+	L = W * (0.5f - Half.X);
+	R = W * (0.5f + Half.X);
+	T = H * (0.5f - Half.Y);
+	B = H * (0.5f + Half.Y);
 }
 
 bool ADCZombieHUD::ProjectVisible(const FVector& World, FVector2D& OutScreen) const
@@ -117,19 +139,29 @@ void ADCZombieHUD::DrawHUD()
 		}
 	}
 
-	// While shooting, dim everything outside the capture frame (the 70% safe area that scenes must sit in).
-	// Drawn first so the HUD panels stay readable on top of it.
+	// While shooting, dim everything outside the capture frame (the 70% safe area that scenes must sit in) and frame
+	// it with the field monitor, its screen fitted exactly over the capture frame. Drawn first so the HUD stays on top.
 	if ((D->GetPhase() == EDCPhase::Countdown || D->GetPhase() == EDCPhase::Filming) && D->IsViewingCamera())
 	{
 		const float W = Canvas->ClipX;
 		const float H = Canvas->ClipY;
-		const float Margin = (1.f - DCFrame::CaptureFraction) * 0.5f;
-		const float L = W * Margin, R = W * (1.f - Margin), T = H * Margin, B = H * (1.f - Margin);
+		float L, T, R, B;
+		GetCaptureRect(L, T, R, B);
 		const FLinearColor Mask(0.f, 0.f, 0.f, 0.5f);
 		DrawRect(Mask, 0.f, 0.f, W, T);
 		DrawRect(Mask, 0.f, B, W, H - B);
 		DrawRect(Mask, 0.f, T, L, B - T);
 		DrawRect(Mask, R, T, W - R, B - T);
+
+		if (MonitorFrame)
+		{
+			// Scale so the screen opening covers the frame exactly (the frame has the screen's own aspect).
+			const FVector2D Screen = MonitorScreenMax - MonitorScreenMin + FVector2D(1.f, 1.f);
+			const float ScaleX = (R - L) / Screen.X;
+			const float ScaleY = (B - T) / Screen.Y;
+			DrawTexture(MonitorFrame, L - MonitorScreenMin.X * ScaleX, T - MonitorScreenMin.Y * ScaleY,
+				MonitorFrame->GetSurfaceWidth() * ScaleX, MonitorFrame->GetSurfaceHeight() * ScaleY, 0.f, 0.f, 1.f, 1.f);
+		}
 	}
 
 	DrawHeader(D);
@@ -193,31 +225,55 @@ void ADCZombieHUD::DrawHUD()
 
 void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 {
-	// Phase 1: the storyboard - what happens, in order. Never when or where.
-	DrawRect(FLinearColor(0.02f, 0.02f, 0.03f, 0.92f), 0.f, 0.f, Canvas->ClipX, Canvas->ClipY);
-	const float CX = Canvas->ClipX * 0.5f;
-	float Y = Canvas->ClipY * 0.12f;
-	Label(TEXT("1/4 STORYBOARD"), CX, Y, Muted, 0.8f, true);
-	Y += 40.f * S;
-	Label(D->MovieTitle, CX, Y, Rose, 2.2f, true);
-	Y += 90.f * S;
-	Label(TEXT("A fantasy tragedy on a working film set. Capture every scene - and keep the crew out of the movie."), CX, Y, FLinearColor::White, 0.8f, true);
-	Y += 60.f * S;
+	// Phase 1: the storyboard - what happens, in order (never when or where), typed on a script page.
+	const float W = Canvas->ClipX;
+	const float H = Canvas->ClipY;
+	DrawRect(FLinearColor(0.02f, 0.02f, 0.03f, 0.92f), 0.f, 0.f, W, H);
+
+	// The page: as large as fits, keeping the art's proportions.
+	const float Aspect = StoryboardPaper && StoryboardPaper->GetSurfaceHeight() > 0.f
+		? StoryboardPaper->GetSurfaceWidth() / StoryboardPaper->GetSurfaceHeight() : 1.5f;
+	float PH = H * 0.94f;
+	float PW = PH * Aspect;
+	if (PW > W * 0.96f)
+	{
+		PW = W * 0.96f;
+		PH = PW / Aspect;
+	}
+	const float PX = (W - PW) * 0.5f;
+	const float PY = (H - PH) * 0.5f;
+	if (StoryboardPaper)
+	{
+		DrawTexture(StoryboardPaper, PX, PY, PW, PH, 0.f, 0.f, 1.f, 1.f);
+	}
+	else
+	{
+		DrawRect(FLinearColor(0.93f, 0.87f, 0.74f), PX, PY, PW, PH);
+	}
+
+	// Everything below is placed in page fractions and sized with the page, in ink (no drop shadow).
+	const float K = PH / (1000.f * S);
+	auto Type = [&](const FString& Text, float FX, float FY, const FLinearColor& Color, float Scale, bool bCenter)
+	{
+		Label(Text, PX + PW * FX, PY + PH * FY, Color, Scale * K, bCenter, false);
+	};
+	Type(TEXT("STORYBOARD   1/4"), 0.14f, 0.052f, InkFaded, 0.7f, false);
+	Type(D->MovieTitle, 0.5f, 0.12f, InkRed, 2.f, true);
+	Type(TEXT("A fantasy tragedy on a working film set. Capture every scene - and keep the crew out of the movie."), 0.5f, 0.225f, InkFaded, 0.72f, true);
 
 	const TArray<FDCMultiCamBeat>& Beats = D->GetBeats();
-	const float X = CX - 520.f * S;
+	const float Step = FMath::Min(0.06f, 0.4f / FMath::Max(Beats.Num(), 1));
+	float FY = 0.3f;
 	for (int32 i = 0; i < Beats.Num(); ++i)
 	{
 		const ADCBeat* Beat = Beats[i].Beat;
-		Label(FString::Printf(TEXT("%d.  %s%s"), i + 1, *Beat->DisplayName, Beat->bMandatory ? TEXT("   (the studio needs this one)") : TEXT("")),
-			X, Y, Beat->bMandatory ? Gold : FLinearColor::White, 0.85f);
-		Y += 40.f * S;
+		Type(FString::Printf(TEXT("%d.  %s%s"), i + 1, *Beat->DisplayName, Beat->bMandatory ? TEXT("   (the studio needs this one)") : TEXT("")),
+			0.13f, FY, Beat->bMandatory ? InkRed : Ink, 0.85f, false);
+		FY += Step;
 	}
 
-	Y += 30.f * S;
-	Label(FString::Printf(TEXT("Film crew on camera cost %d points per second."), D->ZombiePenaltyPerSecond), CX, Y, ZombieGreen, 0.8f, true);
-	Y += 60.f * S;
-	Label(TEXT("Press Enter to start preparing - scrub through the scene with the mouse wheel while you place cameras"), CX, Y, FLinearColor::White, 1.f, true);
+	Type(FString::Printf(TEXT("Film crew on camera cost %d points per second."), D->ZombiePenaltyPerSecond), 0.5f, 0.76f, InkRed, 0.75f, true);
+	Type(TEXT("Press Enter to start preparing - scrub through the scene with the mouse wheel while you place cameras"), 0.5f, 0.83f, Ink, 0.75f, true);
 }
 
 void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
@@ -282,8 +338,8 @@ void ADCZombieHUD::DrawFraming(ADCZombieDirector* D)
 	}
 	const FLinearColor BracketColor = bRolling ? Good : FLinearColor(1.f, 1.f, 1.f, 0.45f);
 
-	const float Margin = (1.f - DCFrame::CaptureFraction) * 0.5f;
-	const float L = W * Margin, R = W * (1.f - Margin), T = H * Margin, B = H * (1.f - Margin);
+	float L, T, R, B;
+	GetCaptureRect(L, T, R, B);
 	const float Arm = 40.f * S;
 	const float Th = 3.f;
 	DrawLine(L, T, L + Arm, T, BracketColor, Th); DrawLine(L, T, L, T + Arm, BracketColor, Th);
@@ -549,10 +605,10 @@ void ADCZombieHUD::DrawResults(ADCZombieDirector* D)
 
 void ADCZombieHUD::DrawPremiere(ADCZombieDirector* D)
 {
-	// The finished film: letterboxed, no gameplay HUD.
+	// The finished film: letterboxed to the film's aspect (the bars match the engine's), no gameplay HUD.
 	const float W = Canvas->ClipX;
 	const float H = Canvas->ClipY;
-	const float Bar = H * 0.11f;
+	const float Bar = FMath::Max((H - W / DCFrame::FilmAspect) * 0.5f, 0.f);
 	const float Time = D->GetSceneTime();
 	const float Length = FMath::Max(D->GetPremiereLength(), KINDA_SMALL_NUMBER);
 	DrawRect(FLinearColor::Black, 0.f, 0.f, W, Bar);

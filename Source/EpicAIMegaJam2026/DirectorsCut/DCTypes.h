@@ -11,16 +11,30 @@ class ADCPerformer;
 namespace DCFrame
 {
 	/**
-	 * The recorded picture is the central part of each camera's view: this fraction of its width and height.
-	 * Scenes must sit inside it, zombies only count inside it, the HUD dims everything outside it, and the
-	 * premiere plays back only this part. (M_DCRig's in-frame fade uses the same 0.15-0.85 bounds.)
+	 * Aspect ratio of the film. The screen of the field monitor drawn around the live frame is 912 x 430 px, so the
+	 * recording, the review playback, and its letterbox are all 912:430 (about 2.12:1).
 	 */
-	constexpr float CaptureFraction = 0.70f;
+	constexpr float FilmAspect = 912.f / 430.f;
 
-	/** Field of view that shows exactly the capture frame of a camera with the given horizontal FOV. */
-	inline float CaptureFOV(float FullFOVDegrees)
+	/** The capture frame is the largest FilmAspect rectangle within this centred share of the view's width and height. */
+	constexpr float SafeFraction = 0.70f;
+
+	/**
+	 * Half-size of the capture frame in normalized view coordinates (1 = the view's edge) for a view of the given
+	 * aspect. Scenes must sit inside it, zombies only count inside it, the HUD dims everything outside it, rigs
+	 * fade inside it (M_DCRig reads it from MPC_DCFrame), and the review plays back exactly this part.
+	 */
+	inline FVector2D CaptureExtent(float ViewAspect)
 	{
-		return FMath::RadiansToDegrees(2.f * FMath::Atan(CaptureFraction * FMath::Tan(FMath::DegreesToRadians(FullFOVDegrees * 0.5f))));
+		const float X = FMath::Min(SafeFraction, SafeFraction * FilmAspect / ViewAspect);
+		return FVector2D(X, X * ViewAspect / FilmAspect);
+	}
+
+	/** Horizontal FOV that shows exactly the capture frame of a camera with the given horizontal FOV. */
+	inline float CaptureFOV(float FullFOVDegrees, float ViewAspect)
+	{
+		const float HalfTan = CaptureExtent(ViewAspect).X * FMath::Tan(FMath::DegreesToRadians(FullFOVDegrees * 0.5f));
+		return FMath::RadiansToDegrees(2.f * FMath::Atan(HalfTan));
 	}
 }
 

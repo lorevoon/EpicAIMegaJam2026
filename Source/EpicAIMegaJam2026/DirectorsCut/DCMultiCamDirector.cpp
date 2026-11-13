@@ -14,6 +14,9 @@
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "Materials/MaterialParameterCollection.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
+#include "UObject/ConstructorHelpers.h"
 
 namespace
 {
@@ -39,6 +42,8 @@ namespace
 
 ADCMultiCamDirector::ADCMultiCamDirector()
 {
+	static ConstructorHelpers::FObjectFinder<UMaterialParameterCollection> FrameMPC(TEXT("/Game/DirectorsCut/Materials/MPC_DCFrame.MPC_DCFrame"));
+	FrameParams = FrameMPC.Object;
 	PrimaryActorTick.bCanEverTick = true;
 	// Evaluate after the player has re-aimed the live camera this frame.
 	PrimaryActorTick.TickGroup = TG_PostUpdateWork;
@@ -61,7 +66,9 @@ void ADCMultiCamDirector::BeginPlay()
 	Ghost = GetWorld()->SpawnActor<ADCMultiCam>(ADCMultiCam::StaticClass(), FTransform::Identity, Params);
 	Ghost->SetActorHiddenInGame(true);
 	PlaybackCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), FTransform::Identity, Params);
-	PlaybackCamera->GetCameraComponent()->SetConstraintAspectRatio(false);
+	// The film is FilmAspect wide; the engine letterboxes (or pillarboxes) the playback to it on any screen.
+	PlaybackCamera->GetCameraComponent()->SetAspectRatio(DCFrame::FilmAspect);
+	PlaybackCamera->GetCameraComponent()->SetConstraintAspectRatio(true);
 
 	ResetScene();
 	Flash(IsUnlimited() ? FString(TEXT("Place as many cameras as you like. T switches between static and dolly."))
@@ -150,6 +157,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 	}
 
 	UpdateCameraSpots();
+	UpdateFrameParams();
 
 	switch (Phase)
 	{
@@ -395,7 +403,7 @@ void ADCMultiCamDirector::RecordSample(float DeltaSeconds)
 	Sample.Slot = ViewingSlot;
 	Sample.Location = Lens->GetComponentLocation();
 	Sample.Rotation = Lens->GetComponentRotation();
-	Sample.FOV = Lens->FieldOfView;
+	Sample.FilmFOV = DCFrame::CaptureFOV(Lens->FieldOfView, GetViewAspect());
 	Sample.bSpoiled = IsLiveShotSpoiled();
 	Recording.Add(Sample);
 }
@@ -451,7 +459,7 @@ void ADCMultiCamDirector::ShowPremiereFrame(float Time)
 	PlaybackCamera->SetActorLocationAndRotation(FMath::Lerp(A.Location, B.Location, Alpha),
 		FQuat::Slerp(A.Rotation.Quaternion(), B.Rotation.Quaternion(), Alpha));
 	// The film is only what was inside the capture frame, so the playback lens shows just that part.
-	PlaybackCamera->GetCameraComponent()->SetFieldOfView(DCFrame::CaptureFOV(FMath::Lerp(A.FOV, B.FOV, Alpha)));
+	PlaybackCamera->GetCameraComponent()->SetFieldOfView(FMath::Lerp(A.FilmFOV, B.FilmFOV, Alpha));
 }
 
 void ADCMultiCamDirector::FinishPremiere()
@@ -559,16 +567,8 @@ bool ADCMultiCamDirector::IsFramed(const FDCMultiCamBeat& State, const ADCMultiC
 	const FTransform CamXf = Cam->GetCamera()->GetComponentTransform();
 	const FVector CamLoc = CamXf.GetLocation();
 	const float HalfTan = FMath::Tan(FMath::DegreesToRadians(Cam->GetFOV() * 0.5f));
-	float Aspect = 16.f / 9.f;
-	if (APlayerController* PC = GetPC())
-	{
-		int32 ViewW = 0, ViewH = 0;
-		PC->GetViewportSize(ViewW, ViewH);
-		if (ViewW > 0 && ViewH > 0)
-		{
-			Aspect = float(ViewW) / float(ViewH);
-		}
-	}
+	const float Aspect = GetViewAspect();
+	const FVector2D Frame = DCFrame::CaptureExtent(Aspect);
 	// Zooming in extends reach in proportion to the magnification relative to the default lens.
 	const float Reach = bZoomExtendsRange ? FMath::Tan(FMath::DegreesToRadians(ADCMultiCam::DefaultFOV * 0.5f)) / HalfTan : 1.f;
 	const ADCBeat* Beat = State.Beat;
@@ -584,7 +584,7 @@ bool ADCMultiCamDirector::IsFramed(const FDCMultiCamBeat& State, const ADCMultiC
 		}
 		const float NdcX = (Local.Y / Local.X) / HalfTan;
 		const float NdcY = (Local.Z / Local.X) / (HalfTan / Aspect);
-		if (FMath::Abs(NdcX) > DCFrame::CaptureFraction || FMath::Abs(NdcY) > DCFrame::CaptureFraction)
+		if (FMath::Abs(NdcX) > Frame.X || FMath::Abs(NdcY) > Frame.Y)
 		{
 			return false;
 		}
@@ -988,6 +988,36 @@ void ADCMultiCamDirector::HandleCycleTool()
 	Tool = Tool == EDCCamTool::Static ? EDCCamTool::Dolly : EDCCamTool::Static;
 	Flash(Tool == EDCCamTool::Static ? TEXT("STATIC camera: stand, wall, or ceiling")
 		: TEXT("DOLLY camera: click rail points on any surface; the camera appears at the second point. F starts a new rail."), 2.5f);
+}
+
+float ADCMultiCamDirector::GetViewAspect() const
+{
+	if (APlayerController* PC = GetPC())
+	{
+		int32 W = 0, H = 0;
+		PC->GetViewportSize(W, H);
+		if (W > 0 && H > 0)
+		{
+			return float(W) / float(H);
+		}
+	}
+	return 16.f / 9.f;
+}
+
+void ADCMultiCamDirector::UpdateFrameParams()
+{
+	const float Aspect = GetViewAspect();
+	if (!FrameParams || Aspect == FrameParamsAspect)
+	{
+		return;
+	}
+	if (UMaterialParameterCollectionInstance* Params = GetWorld()->GetParameterCollectionInstance(FrameParams))
+	{
+		// Viewport UV of the frame: min corner in RG, max corner in BA.
+		const FVector2D Half = DCFrame::CaptureExtent(Aspect) * 0.5f;
+		Params->SetVectorParameterValue(TEXT("CaptureRect"), FLinearColor(0.5f - Half.X, 0.5f - Half.Y, 0.5f + Half.X, 0.5f + Half.Y));
+		FrameParamsAspect = Aspect;
+	}
 }
 
 void ADCMultiCamDirector::UpdateCameraSpots()

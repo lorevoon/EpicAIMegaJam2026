@@ -18,6 +18,7 @@ class ADCMultiCamCharacter;
 class ADCRail;
 class ACameraActor;
 class APlayerController;
+class UMaterialParameterCollection;
 
 /** How much the shooting stabilizer smooths aiming and dolly travel. */
 UENUM()
@@ -67,7 +68,8 @@ struct FDCTakeSample
 	int32 Slot = INDEX_NONE;
 	FVector Location = FVector::ZeroVector;
 	FRotator Rotation = FRotator::ZeroRotator;
-	float FOV = 75.f;
+	/** Horizontal FOV of the film frame itself (the capture frame of the live lens at that moment). */
+	float FilmFOV = 50.f;
 	/** Something that ruins the shot (a zombie) was on screen. */
 	bool bSpoiled = false;
 };
@@ -249,6 +251,10 @@ protected:
 
 	ADCMultiCamCharacter* GetPlayer() const;
 	APlayerController* GetPC() const;
+	/** Width / height of the player's viewport (16:9 until there is one). */
+	float GetViewAspect() const;
+	/** Tells M_DCRig (through MPC_DCFrame) where the capture frame is on screen; only does work when the view's shape changes. */
+	void UpdateFrameParams();
 
 	/** First empty camera slot; grows the list when cameras are unlimited. INDEX_NONE when the budget is spent. */
 	int32 FindFreeSlot();
@@ -276,9 +282,15 @@ protected:
 	UPROPERTY()
 	TObjectPtr<ADCMultiCam> Ghost;
 
-	/** Plays the recorded take back as a film. */
+	/** Plays the recorded take back as a film, locked to DCFrame::FilmAspect. */
 	UPROPERTY()
 	TObjectPtr<ACameraActor> PlaybackCamera;
+
+	/** Holds the capture frame's on-screen rectangle (CaptureRect) for M_DCRig's in-frame fade. */
+	UPROPERTY()
+	TObjectPtr<UMaterialParameterCollection> FrameParams;
+
+	float FrameParamsAspect = 0.f;
 
 	TArray<FDCTakeSample> Recording;
 	bool bPremierePaused = false;
