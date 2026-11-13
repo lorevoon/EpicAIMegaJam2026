@@ -12,6 +12,9 @@
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Components/AudioComponent.h"
+#include "Sound/AmbientSound.h"
+#include "Sound/AudioSettings.h"
 #include "Engine/World.h"
 #include "Engine/LevelStreaming.h"
 #include "Engine/LevelStreamingDynamic.h"
@@ -90,6 +93,16 @@ void ADCMultiCamDirector::GatherScene()
 {
 	UWorld* World = GetWorld();
 	TArray<FString> Problems;
+	SceneDialogue.Reset();
+	for (TActorIterator<AAmbientSound> It(World); It; ++It)
+	{
+		if (It->ActorHasTag(TEXT("DCSceneDialogue")))
+		{
+			SceneDialogue = It->GetAudioComponent();
+			SceneDialogue->Stop();
+			break;
+		}
+	}
 
 	Performers.Reset();
 	for (TActorIterator<ADCPerformer> It(World); It; ++It)
@@ -220,6 +233,61 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 	default:
 		break;
 	}
+	UpdateSceneDialogue(DeltaSeconds);
+}
+
+void ADCMultiCamDirector::UpdateSceneDialogue(float DeltaSeconds)
+{
+	UAudioComponent* Audio = SceneDialogue.Get();
+	if (!Audio || !Audio->Sound) return;
+	float Position = SceneTime;
+	float Rate = 1.f;
+	bool bPlaying = false;
+	FVector Location;
+	FQuat Rotation;
+	float FOV;
+	if (Phase == EDCPhase::Preparation)
+	{
+		bPlaying = bRehearsalPlaying;
+		Rate = RehearsalSpeed;
+	}
+	else if (Phase == EDCPhase::Filming)
+	{
+		// Pausing recording omits footage, but the actors and their speech continue on set.
+		bPlaying = SceneTime < TakeDuration;
+	}
+	else if (Phase == EDCPhase::Storyboard)
+	{
+		bPlaying = bReferencePlaying && !bReferencePaused
+			&& GetFilmView(ReferenceCut, ReferenceTime, Location, Rotation, FOV, Position);
+	}
+	else if (Phase == EDCPhase::Review)
+	{
+		bPlaying = !bPremierePaused && !IsFilmFinished() && !(Cinema && Cinema->IsOpening())
+			&& GetFilmView(Recording, SceneTime, Location, Rotation, FOV, Position);
+	}
+	// Beyond the device pitch range, keep fast rehearsal silent instead of playing out of sync.
+	if (!bPlaying || Rate > GetDefault<UAudioSettings>()->GlobalMaxPitchScale
+		|| Position < 0.f || Position >= TakeDuration)
+	{
+		Audio->Stop();
+		DialoguePosition = -1.f;
+		return;
+	}
+	// Seek after a scrub, loop, retry, phase switch, speed change or a cut over omitted footage.
+	const float Expected = DialoguePosition + FMath::Max(0.f, DeltaSeconds) * DialogueRate;
+	const bool bSeek = DialoguePosition < 0.f || DialoguePhase != Phase
+		|| !FMath::IsNearlyEqual(Rate, DialogueRate)
+		|| FMath::Abs(Position - Expected) > .08f;
+	Audio->SetPitchMultiplier(Rate);
+	if (bSeek || !Audio->IsPlaying())
+	{
+		Audio->Stop();
+		Audio->Play(Position);
+	}
+	DialoguePosition = Position;
+	DialogueRate = Rate;
+	DialoguePhase = Phase;
 }
 
 bool ADCMultiCamDirector::EnsureLiveCamera()
@@ -313,6 +381,8 @@ void ADCMultiCamDirector::HandleRestart()
 
 void ADCMultiCamDirector::ResetScene()
 {
+	if (SceneDialogue.IsValid()) SceneDialogue->Stop();
+	DialoguePosition = -1.f;
 	bRehearsalPlaying = true;
 	RehearsalSpeed = 1.f;
 	if (Cinema) { Cinema->EndScreening(); Cinema->ClearMissionOutcomes(); }
