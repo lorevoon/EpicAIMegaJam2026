@@ -39,6 +39,8 @@ struct FDCMultiCamBeat
 	float LastProgressTime = -100.f;
 	/** Camera number that captured it. */
 	int32 CapturedBy = 0;
+	/** Where in the finished film it was captured (for the review timeline). */
+	float CapturedFilmTime = 0.f;
 	// Knowledge that survives retries (the player's notebook).
 	bool bSpotted = false;
 	bool bEverCaptured = false;
@@ -97,6 +99,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (Units = "cm"))
 	float MaxStandHeight = 320.f;
 
+	/** How far one mouse-wheel notch scrubs the timeline in preparation and review. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0.05", Units = "s"))
+	float WheelScrubSeconds = 0.5f;
+
+	/** How fast holding Q/E lowers or raises the next camera before it's placed. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "1", Units = "cm"))
+	float StandHeightSpeed = 150.f;
+
 	/** Zooming in lets a camera capture subjects proportionally farther than a beat's Max Distance. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras")
 	bool bZoomExtendsRange = true;
@@ -113,20 +123,19 @@ public:
 	void HandleCycleTool();
 	void HandleFinishRail();
 	void HandleCycleCamera(int32 Direction);
-	/** Left/Right: scrub the premiere (the zombie director also scrubs its rehearsal). */
+	/** Wheel or Left/Right: scrub the film in review (the zombie director also scrubs its preparation timeline). */
 	virtual void HandleScrub(float DeltaSeconds);
-	/** Space: pause/resume the premiere, or watch it again from the results (the zombie director adds its rehearsal). */
-	virtual void HandleTransportToggle();
-	/** , and .: rehearsal speed down / up (overridden by the zombie director). */
-	virtual void HandleTransportSpeed(int32 Direction) {}
+	/** Space in review: pause/resume the film, or watch it again once it has ended. */
+	void HandleTransportToggle();
 	/** Z / X: slower / faster dolly travel for the camera being looked through. */
 	void HandleRailSpeed(int32 Direction);
-	/** Re-watch the rehearsal (overridden by the zombie director). */
-	virtual void HandleRehearsal() {}
 	void HandleClearCameras();
 	void HandleSelectCamera(int32 Number);
 	bool HandleLook(float DeltaYaw, float DeltaPitch);
-	void HandleWheel(float Delta);
+	/** Zooms while shooting; scrubs the timeline in preparation and review. bZoom (Shift) zooms in preparation instead. */
+	void HandleWheel(float Delta, bool bZoom);
+	/** Q/E held while walking in preparation: Axis is -1..1 scaled by frame time. */
+	void HandlePlacementHeight(float AxisTimesDelta);
 
 	// Read-only state for the HUD and character
 	EDCPhase GetPhase() const { return Phase; }
@@ -155,8 +164,10 @@ public:
 	bool IsNearClapper() const;
 	int32 GetSpottedCount() const;
 	bool IsLiveFeedRolling() const;
-	/** Premiere or results: the take is over and only being reviewed. */
-	bool IsReviewing() const { return Phase == EDCPhase::Premiere || Phase == EDCPhase::Results; }
+	/** The take is over and only being played back and evaluated. */
+	bool IsReviewing() const { return Phase == EDCPhase::Review; }
+	/** Review with the film played to its end: the evaluation is up. */
+	bool IsFilmFinished() const { return IsReviewing() && SceneTime >= GetPremiereLength(); }
 	const TArray<FDCTakeSample>& GetRecording() const { return Recording; }
 	float GetPremiereLength() const { return Recording.Num() > 0 ? Recording.Last().FilmTime : 0.f; }
 	/** Left click held during the take: nothing is recorded, captured, or penalized until it's released. */

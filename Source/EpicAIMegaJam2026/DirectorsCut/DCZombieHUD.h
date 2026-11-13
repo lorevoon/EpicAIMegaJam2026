@@ -1,4 +1,4 @@
-// Director's Cut - canvas HUD: storyboard, rehearsal, planning preview, zombie alarm, results.
+// Director's Cut - canvas HUD: storyboard, preparation timeline, shooting frame and zombie alarm, review (film + evaluation).
 
 #pragma once
 

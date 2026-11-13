@@ -52,16 +52,15 @@ struct FDCAnchorRef
 UENUM()
 enum class EDCPhase : uint8
 {
+	/** 1. Reading the storyboard. */
+	Storyboard,
+	/** 2. Placing cameras and scrubbing the scene's timeline to test them. */
 	Preparation,
+	/** 3. Shooting: the count-in, then the take itself. */
 	Countdown,
 	Filming,
-	Results,
-	/** Reading the storyboard. */
-	Storyboard,
-	/** Watching the rehearsal on foot. */
-	Rehearsal,
-	/** Watching the recorded take played back as a film, between shooting and the results. */
-	Premiere
+	/** 4. The recorded take played back as a film, with its evaluation. */
+	Review
 };
 
 UENUM()

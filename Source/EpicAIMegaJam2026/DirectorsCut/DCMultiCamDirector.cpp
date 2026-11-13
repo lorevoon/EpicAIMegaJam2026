@@ -182,7 +182,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		break;
 	}
 
-	case EDCPhase::Premiere:
+	case EDCPhase::Review:
 		TickPremiere(DeltaSeconds);
 		break;
 
@@ -220,9 +220,17 @@ bool ADCMultiCamDirector::EnsureLiveCamera()
 
 void ADCMultiCamDirector::HandleStartTake()
 {
-	if (Phase == EDCPhase::Premiere)
+	if (Phase == EDCPhase::Review)
 	{
-		FinishPremiere(); // Enter skips to the results
+		// Enter skips to the evaluation, then goes back to preparation.
+		if (IsFilmFinished())
+		{
+			HandleRestart();
+		}
+		else
+		{
+			FinishPremiere();
+		}
 		return;
 	}
 	if (Phase != EDCPhase::Preparation)
@@ -319,7 +327,7 @@ void ADCMultiCamDirector::EndTake()
 		return; // end-take fires once
 	}
 
-	Phase = EDCPhase::Results;
+	Phase = EDCPhase::Review;
 	bApproved = true;
 	bool bAll = true;
 	Score = 0;
@@ -390,12 +398,12 @@ void ADCMultiCamDirector::RecordSample(float DeltaSeconds)
 void ADCMultiCamDirector::StartPremiere()
 {
 	APlayerController* PC = GetPC();
+	Phase = EDCPhase::Review;
 	if (Recording.Num() == 0 || !PC)
 	{
-		Phase = EDCPhase::Results;
+		FinishPremiere(); // nothing was filmed: straight to the evaluation
 		return;
 	}
-	Phase = EDCPhase::Premiere;
 	bPremierePaused = false;
 	SceneTime = 0.f;
 	SetRigsHidden(true);
@@ -443,16 +451,15 @@ void ADCMultiCamDirector::ShowPremiereFrame(float Time)
 
 void ADCMultiCamDirector::FinishPremiere()
 {
-	// The results sit over the film's final frame; rigs stay hidden until back in preparation.
+	// The evaluation sits over the film's final frame; rigs stay hidden until back in preparation.
 	SceneTime = GetPremiereLength();
 	ShowPremiereFrame(SceneTime);
-	bPremierePaused = false;
-	Phase = EDCPhase::Results;
+	bPremierePaused = true;
 }
 
 void ADCMultiCamDirector::HandleScrub(float DeltaSeconds)
 {
-	if (Phase == EDCPhase::Premiere)
+	if (Phase == EDCPhase::Review)
 	{
 		SceneTime = FMath::Clamp(SceneTime + DeltaSeconds, 0.f, GetPremiereLength());
 		ShowPremiereFrame(SceneTime);
@@ -461,13 +468,19 @@ void ADCMultiCamDirector::HandleScrub(float DeltaSeconds)
 
 void ADCMultiCamDirector::HandleTransportToggle()
 {
-	if (Phase == EDCPhase::Premiere)
+	if (Phase != EDCPhase::Review)
+	{
+		return;
+	}
+	if (IsFilmFinished())
+	{
+		SceneTime = 0.f; // watch the film again
+		ShowPremiereFrame(SceneTime);
+		bPremierePaused = false;
+	}
+	else
 	{
 		bPremierePaused = !bPremierePaused;
-	}
-	else if (Phase == EDCPhase::Results)
-	{
-		StartPremiere(); // watch the film again
 	}
 }
 
@@ -521,6 +534,7 @@ void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 			State.Status = EDCShotStatus::Captured;
 			State.bEverCaptured = true;
 			State.CapturedBy = Live ? Live->GetNumber() : 0;
+			State.CapturedFilmTime = SceneTime - PausedSeconds;
 			Flash(FString::Printf(TEXT("Captured on CAM %d: %s (+%d)"), State.CapturedBy, *Beat->DisplayName, Beat->Points));
 		}
 		else if (NowTime > Beat->WindowEnd)
@@ -715,22 +729,29 @@ bool ADCMultiCamDirector::HandleLook(float DeltaYaw, float DeltaPitch)
 	return true;
 }
 
-void ADCMultiCamDirector::HandleWheel(float Delta)
+void ADCMultiCamDirector::HandleWheel(float Delta, bool bZoom)
 {
-	if (ADCMultiCam* Cam = GetCameraSlot(ViewingSlot))
+	ADCMultiCam* Cam = GetCameraSlot(ViewingSlot);
+	const bool bShooting = Phase == EDCPhase::Countdown || Phase == EDCPhase::Filming;
+	if (Cam && (bShooting || (Phase == EDCPhase::Preparation && bZoom)))
 	{
-		if (!IsReviewing())
+		Cam->SetFOV(Cam->GetTargetFOV() - Delta * 5.f);
+		if (Phase == EDCPhase::Preparation)
 		{
-			Cam->SetFOV(Cam->GetTargetFOV() - Delta * 5.f);
-			if (Phase == EDCPhase::Preparation)
-			{
-				Cam->SaveHome();
-			}
+			Cam->SaveHome();
 		}
 	}
-	else if (Phase == EDCPhase::Preparation)
+	else if (Phase == EDCPhase::Preparation || Phase == EDCPhase::Review)
 	{
-		PendingHeight = FMath::Clamp(PendingHeight + Delta * 10.f, MinStandHeight, MaxStandHeight);
+		HandleScrub(Delta * WheelScrubSeconds);
+	}
+}
+
+void ADCMultiCamDirector::HandlePlacementHeight(float AxisTimesDelta)
+{
+	if (Phase == EDCPhase::Preparation && !IsViewingCamera())
+	{
+		PendingHeight = FMath::Clamp(PendingHeight + AxisTimesDelta * StandHeightSpeed, MinStandHeight, MaxStandHeight);
 	}
 }
 
@@ -1114,11 +1135,8 @@ void ADCMultiCamDirector::HandleInteract()
 {
 	switch (Phase)
 	{
-	case EDCPhase::Results:
-		HandleRestart();
-		break;
-	case EDCPhase::Premiere:
-		FinishPremiere();
+	case EDCPhase::Review:
+		HandleStartTake(); // skip to the evaluation, then back to preparation
 		break;
 	case EDCPhase::Preparation:
 		if (IsViewingCamera())
@@ -1128,10 +1146,6 @@ void ADCMultiCamDirector::HandleInteract()
 		else if (IsNearClapper())
 		{
 			HandleStartTake();
-		}
-		else
-		{
-			Flash(TEXT("Nothing to interact with here"), 1.5f);
 		}
 		break;
 	default:
