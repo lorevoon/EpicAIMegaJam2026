@@ -1,0 +1,15 @@
+{
+  "name": "04_big_box",
+  "source": "Hyper3D Rodin via official CLI / MCP service",
+  "generation_id": "efb08f9c-d936-46da-ba29-e9c6a3d2e221",
+  "vertices": 24324,
+  "triangles": 24646,
+  "meshes": 1,
+  "units": "meters",
+  "pivot": "bottom center",
+  "formats": [
+    "glb",
+    "fbx"
+  ],
+  "rigged": false
+}

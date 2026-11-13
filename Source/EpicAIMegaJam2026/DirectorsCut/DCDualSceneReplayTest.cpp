@@ -1,0 +1,91 @@
+#if WITH_DEV_AUTOMATION_TESTS
+#include "Misc/AutomationTest.h"
+#include "Tests/AutomationCommon.h"
+#include "DCMultiCamDirector.h"
+#include "DCMultiCam.h"
+#include "DCPerformer.h"
+#include "DCRail.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
+#include "Engine/Engine.h"
+#include "Engine/World.h"
+#include "Engine/LevelStreaming.h"
+#include "EngineUtils.h"
+#include "Kismet/GameplayStatics.h"
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDCDualSceneReplayTest, "DirectorsCut.Replay.AlignedEnvironments",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FDCDualSceneReplayTest::RunTest(const FString& Parameters)
+{
+	AutomationOpenMap(TEXT("/Game/DirectorsCut/Levels/L_DC_Act1_Promise"));
+	const double Deadline = FPlatformTime::Seconds() + 60.;
+	ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this, Deadline]()
+	{
+		UWorld* World = nullptr;
+		for (const FWorldContext& Context : GEngine->GetWorldContexts())
+		{
+			if (Context.WorldType == EWorldType::PIE) { World = Context.World(); break; }
+		}
+		if (!World || !World->HasBegunPlay())
+		{
+			if (FPlatformTime::Seconds() < Deadline) return false;
+			AddError(TEXT("Act 1 PIE did not start")); return true;
+		}
+		ADCMultiCamDirector* D = nullptr;
+		for (TActorIterator<ADCMultiCamDirector> It(World); It; ++It) { D = *It; break; }
+		if (!TestNotNull(TEXT("Shared director"), D)) return true;
+		D->ResetScene();
+		ULevelStreaming* Studio = UGameplayStatics::GetStreamingLevel(D, D->StudioEnvironmentLevel);
+		ULevelStreaming* Real = UGameplayStatics::GetStreamingLevel(D, D->RealEnvironmentLevel);
+		if (!TestNotNull(TEXT("Studio layer"), Studio) || !TestNotNull(TEXT("Real layer"), Real)) return true;
+		TestTrue(TEXT("Studio visible during preparation"), Studio->IsLevelVisible());
+		TestFalse(TEXT("Real hidden during preparation"), Real->IsLevelVisible());
+		TestTrue(TEXT("Real preloaded"), Real->IsLevelLoaded());
+		TestTrue(TEXT("Both layers at identical world origin"), Studio->LevelTransform.Equals(FTransform::Identity) && Real->LevelTransform.Equals(FTransform::Identity));
+		ADCMultiCam* Cam = D->SpawnCamera(FVector(1000,-1200,250));
+		D->Cameras.Add(Cam);
+		D->ViewingSlot = D->Cameras.Num()-1;
+		D->Phase = EDCPhase::Filming;
+		// Exercise 60 fps motion, zoom, a hard camera cut, and a recording pause.
+		for (int32 Frame=0; Frame<=1200; ++Frame)
+		{
+			D->SceneTime = Frame/60.f;
+			D->bRecordingPauseHeld = Frame>=300 && Frame<360;
+			Cam->GetCamera()->SetWorldLocationAndRotation(FVector(900+Frame*.2,-1200+Frame*.1,250+Frame*.03), FRotator(-5,45+Frame*.04,0));
+			Cam->GetCamera()->SetFieldOfView(75-Frame*.02);
+			if (Frame==600) { D->Cameras.Add(Cam); D->ViewingSlot=D->Cameras.Num()-1; }
+			D->RecordSample(Frame==0 ? 0.f : 1.f/60.f);
+		}
+		TestEqual(TEXT("Paused frames omitted"), D->Recording.Num(), 1141);
+		ADCRail* UnattachedRail = World->SpawnActor<ADCRail>();
+		TMap<ADCPerformer*,FTransform> CastBefore;
+		for (ADCPerformer* Actor : D->Performers) CastBefore.Add(Actor,Actor->GetActorTransform());
+		D->SetReviewEnvironment(true);
+		for (const auto& Pair : CastBefore) TestTrue(TEXT("Environment swap preserves cast transform"), Pair.Key->GetActorTransform().Equals(Pair.Value));
+		D->StartPremiere();
+		TestFalse(TEXT("No studio in replay"), Studio->IsLevelVisible());
+		TestTrue(TEXT("Real visible in replay"), Real->IsLevelVisible());
+		TestTrue(TEXT("Unattached rails removed too"), UnattachedRail->IsHidden());
+		for (TActorIterator<AActor> It(World); It; ++It)
+			if (It->ActorHasTag(TEXT("DC_SetOnly"))) TestTrue(TEXT("Crew and set-only props removed"), It->IsHidden());
+		for (const FDCTakeSample& Sample : D->Recording)
+		{
+			D->ShowPremiereFrame(Sample.FilmTime);
+			TestTrue(TEXT("Recorded lens position matches replay"), D->PlaybackCamera->GetActorLocation().Equals(Sample.Location,.01));
+			TestTrue(TEXT("Recorded lens rotation matches replay"), D->PlaybackCamera->GetActorRotation().Equals(Sample.Rotation,.01));
+			TestTrue(TEXT("Recorded framing matches replay"), FMath::IsNearlyEqual(D->PlaybackCamera->GetCameraComponent()->FieldOfView, DCFrame::CaptureFOV(Sample.FOV),.001f));
+		}
+		D->HandleScrub(-10.f);
+		TestTrue(TEXT("Scrubbing stays in real environment"), Real->IsLevelVisible());
+		D->ResetScene();
+		TestTrue(TEXT("Retry restores studio"), Studio->IsLevelVisible());
+		TestFalse(TEXT("Retry hides real environment"), Real->IsLevelVisible());
+		TestFalse(TEXT("Retry restores rails"), UnattachedRail->IsHidden());
+		for (TActorIterator<AActor> It(World); It; ++It)
+			if (It->ActorHasTag(TEXT("DC_SetOnly"))) TestFalse(TEXT("Retry restores crew"), It->IsHidden());
+		return true;
+	}));
+	return true;
+}
+#endif

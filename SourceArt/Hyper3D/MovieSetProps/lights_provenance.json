@@ -1,0 +1,9 @@
+{
+  "source_generation_id": "2b503bd5-dc28-49ad-b50c-78dafa5986e5",
+  "method": "Separate disconnected light geometry by spatial cluster, preserving UVs and materials",
+  "outputs": [
+    "06_light_tall_rectangular",
+    "07_light_medium_round",
+    "08_light_short_large"
+  ]
+}

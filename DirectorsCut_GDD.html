@@ -122,7 +122,7 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
 <header class="slate">
   <div class="stripes" aria-hidden="true"></div>
   <div class="slate-in">
-    <div class="slate-fields"><span>Prod. Director's Cut</span><span>Stages 1–3 · The Village Raid</span><span>Takes 40 / 50 / 60 s</span><span>2026 Epic AI MegaJam</span></div>
+    <div class="slate-fields"><span>Prod. Director's Cut</span><span>Stages 1–3 · The Village Raid</span><span>Takes 20 / 50 / 60 s</span><span>2026 Epic AI MegaJam</span></div>
     <h1>Director's Cut: <span>The Village Raid</span></h1>
     <p class="lead">You are directing a fantasy tragedy on a working film set. A swordsman's small kindness, a monster raid and a broken promise play out across three stages. Read the storyboard, study the rehearsal, rig the village with as many cameras as you need, then cut each take live. Capture every beat of the story, and keep the film crew out of the movie.</p>
     <div class="slate-fields"><span>GDD v2.1</span><span>Updated 12 Nov 2026</span><span>Unreal Engine 5.8 · Windows</span><span>Deadline Mon 16 Nov 10:00 HKT</span></div>
@@ -140,7 +140,7 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
     <div class="note"><h3>Frame out the crew</h3><p>Every second a crew member is visible on the live camera costs points. Houses, the mill, fences and rooftops are your best friends.</p></div>
     <div class="note"><h3>Cut it live</h3><p>Only the live camera records. With beats overlapping, choosing when to cut is the core decision of the game.</p></div>
   </div>
-  <p>Capture targets rise from 4 to 5 to 6 beats across the three stages. The mill-side bench, the old man's box and the mountain promise are planted early so they return during the tragedy.</p>
+  <p>Capture targets rise from 4 to 5 to 6 beats across the three stages. The mill-side bench, the old man's box and the promise under the tree are planted early so they return during the tragedy.</p>
 </section>
 
 <section id="loop">
@@ -219,15 +219,15 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
 <section id="scene">
   <div class="eyebrow">Playable scene</div>
   <h2>The Village Raid: three stages, fifteen capture beats</h2>
-  <p>The story is set in a windmill village: a lane with a mill-side bench, a storehouse and a gate, a mill crossing over the water, a short walkable ramp up to a landing, and an uphill path to a mountain lookout. Stage 1 is shot in the WindmillValley <code>L_Showcase</code> map; Stages 2 and 3 reuse the same lane, mill crossing, ramp and lookout. The same couple carries the story through all three acts. Timings below are proposed rehearsal values, measured from the start of each take and hidden from the player. A capture window contains an authored sequence; its hold is enabled once the listed scored pose begins.</p>
+  <p>The story is set in a windmill village: a lane with a mill-side bench, a storehouse and a gate, a mill crossing over the water, a short walkable ramp up to a landing, and a downhill path from the mill to a tree clearing. Stage 1 is shot on a compact 30 × 24 metre green-screen soundstage in <code>L_DC_Act1_Promise</code>, using selected WindmillValley practical props; Stages 2 and 3 reuse the same lane, mill crossing, ramp and tree clearing. The same couple carries the story through all three acts. Timings below are proposed rehearsal values, measured from the start of each take and hidden from the player. A capture window contains an authored sequence; its hold is enabled once the listed scored pose begins.</p>
 
   <h3>Cast</h3>
   <div class="table-wrap"><table>
     <thead><tr><th>Role</th><th>Asset</th><th>Part in the story</th></tr></thead>
     <tbody>
-      <tr><td class="k">Swordsman (hero)</td><td class="mono">Polysplit BasicHero_M_Swordsman</td><td>Helps the old man, makes the promise, duels the raider, dies from the final stab.</td></tr>
-      <tr><td class="k">Archer (heroine)</td><td class="mono">Polysplit BasicHero_F_Archer</td><td>Loves him for his kindness, fires the rescuing arrow, mourns him in the final shot.</td></tr>
-      <tr><td class="k">Old man</td><td>Villager with a distinctive vest, walking stick and marked wooden box</td><td>Receives the kindness in Act 1; killed by the blade-bearing raider in Act 2.</td></tr>
+      <tr><td class="k">Romeo · swordsman (hero)</td><td class="mono">Polysplit BasicHero_M_Swordsman</td><td>Helps the old man, makes the promise, duels the raider, dies from the final stab.</td></tr>
+      <tr><td class="k">Juliet · archer (heroine)</td><td class="mono">Polysplit BasicHero_F_Archer</td><td>Loves him for his kindness, fires the rescuing arrow, mourns him in the final shot.</td></tr>
+      <tr><td class="k">Mr. Smith · old man</td><td>Villager with a distinctive vest, walking stick and marked wooden box</td><td>Receives the kindness in Act 1; killed by the blade-bearing raider in Act 2.</td></tr>
       <tr><td class="k">Blade-bearing raider</td><td class="mono">Orc_armored</td><td>Leads the raid, kills the old man, duels the swordsman, takes the arrow and delivers the final stab. Its shoulder armour, weapon and fall location stay consistent.</td></tr>
       <tr><td class="k">Raiders</td><td>Goblin and orc monsters</td><td>Two others establish the troop at the gate, then move into background lanes.</td></tr>
       <tr><td class="k">Villagers</td><td>Background extras</td><td>Recoil, flee toward the crossing; one is struck down in the background in 2.3.</td></tr>
@@ -235,17 +235,19 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
     </tbody>
   </table></div>
 
-  <h3>Stage 1 · The Promise <span class="tc">4 beats · 40 s take</span></h3>
-  <p><b>Tone:</b> warmth → affection → hope. <b>Set:</b> village lane → uphill path → mountain lookout (WindmillValley <code>L_Showcase</code>). Establish his kindness before the romance. The old man's box and the lovers' promise become visual callbacks in the following acts.</p>
+  <h3>Stage 1 · The Promise <span class="tc">4 beats · 20 s take</span></h3>
+  <p><b>Tone:</b> warmth → affection → hope. <b>Set:</b> practical mill → shallow studio path → practical tree (compact green-screen stage). Establish his kindness before the romance. The old man's box and the lovers' promise become visual callbacks in the following acts.</p>
   <div class="table-wrap"><table>
     <thead><tr><th>ID</th><th>Beat</th><th>Window · hold</th><th>Capture anchors</th><th>Scored moment</th><th>Camera note</th></tr></thead>
     <tbody>
-      <tr><td class="k">1.1</td><td><b>A small kindness.</b> The swordsman takes the old man's wooden box, carries it to the mill-side bench and sets it down. The old man pats his shoulder: "Thank you, lad."</td><td class="tc">0:02–0:10 · 2 s</td><td>Swordsman + old man</td><td>Hold during the shoulder pat after the box is set down.</td><td>Begin wide with the turning mill, ease into a medium two-shot for the pat. Keep the box visible beside the bench.</td></tr>
-      <tr><td class="k">1.2</td><td><b>She sees his kindness.</b> The archer approaches: "My hero." He smiles. The old man waves them off as the couple walk toward the mountain path.</td><td class="tc">0:11–0:19 · 2 s</td><td>Swordsman + archer</td><td>Hold while both walk together after her greeting.</td><td>Dolly beside the couple, old man and box behind them. Her affectionate glance establishes why she loves him.</td></tr>
-      <tr><td class="k">1.3</td><td><b>Always together.</b> At the lookout: "Whatever comes, I'll always be by your side." "Promise?" "Promise."</td><td class="tc">0:22–0:29 · 2 s</td><td>Both faces</td><td>Hold their shared look after "Promise."</td><td>Medium profile two-shot with the village below. Pause on the exchanged look.</td></tr>
-      <tr><td class="k">1.4</td><td><b>The kiss.</b> They kiss against the sunset, then remain forehead to forehead. The village is quiet below.</td><td class="tc">0:31–0:38 · 2 s</td><td>Both heads</td><td>Hold the kiss or the forehead-to-forehead pose.</td><td>Static side silhouette with open sky around the couple; hold the tender final pose.</td></tr>
+      <tr><td class="k">1.1</td><td><b>A small kindness.</b> Romeo (male protagonist) sees Mr. Smith struggling with his wooden box. Romeo says, “Hey, Mr.Smith! Let me help you.” He carries the box to the mill-side bench and sets it down. Mr. Smith pats his shoulder: “oh ho, Thank you Romeo.”</td><td class="tc">0:01–0:05 · 1 s</td><td>Swordsman + old man</td><td>Hold during the shoulder pat after the box is set down.</td><td>Begin wide with the turning mill, ease into a medium two-shot for the pat. Keep the box visible beside the bench.</td></tr>
+      <tr><td class="k">1.2</td><td><b>She sees his kindness.</b> Juliet (female protagonist) approaches and greets them: “Hi Mr Smith! Hi Romeo! Good morning!” Romeo replies, “Hi Honey!” Mr. Smith replies, “Hello lady!” As he waves the couple off, Mr. Smith says to himself, “What a match made in heaven”. Romeo and Juliet walk down the path together toward the tree.</td><td class="tc">0:06–0:10.5 · 1 s</td><td>Swordsman + archer</td><td>Hold while both walk together after her greeting.</td><td>Dolly beside the couple, old man and box behind them. Her affectionate glance establishes why she loves him.</td></tr>
+      <tr><td class="k">1.3</td><td><b>Always together.</b> Under the tree: "Whatever comes, I'll always be by your side." "Promise?" "Promise."</td><td class="tc">0:12.5–0:16 · 1 s</td><td>Both faces</td><td>Hold their shared look after "Promise."</td><td>Medium profile two-shot beneath the tree canopy. Pause on the exchanged look.</td></tr>
+      <tr><td class="k">1.4</td><td><b>The kiss.</b> Under the tree, Romeo and Juliet kiss in the morning light, then remain forehead to forehead.</td><td class="tc">0:17–0:20 · 1 s</td><td>Both heads</td><td>Hold the kiss or the forehead-to-forehead pose.</td><td>Static side two-shot beneath the tree; hold the tender final pose.</td></tr>
     </tbody>
   </table></div>
+
+  <div class="note"><p><strong>Act 1 practical film set.</strong> A 56 × 48 metre enclosed studio accommodates the complete user-added mill group at original scale: the large house, windmill, smaller house, wheat cart, wheat stacks, barrels and mailbox. Four green-screen walls replace the distant environment. All floors are neutral charcoal or earth; overhead soft lights illuminate the enclosed set. Gentle access ramps connect raised scenery to the walking lanes. The old outdoor coordinates are reference landmarks only; the compact studio now uses local marks near the origin. Romeo helps Mr. Smith near (1100, 300, 62), then walks with Juliet down a short, clear path to the tree near (1150, -600, 12), in Unreal centimetres. Separated approach lanes keep the cast clear of each other and the scenery. Crew use designated clear lanes and the access ramp. Space jumps while the player is on foot; it retains playback control during review.</p><p><strong>Juliet walking animation.</strong> The existing walk remains active. The requested <a href="https://www.mixamo.com/#/?page=1&amp;query=female+walk">Mixamo Female Walk</a> download and retargeting remain deferred. Dialogue is recorded in the GDD and level beat captions; the scene remains unvoiced.</p><p><strong>Studio timing and production dressing.</strong> Four capture beats in a 20-second take, with 1-second capture holds. Blocking, animation cues and the box set-down event are retimed together; the shared walk lasts from 7 to approximately 12 seconds over about 9 metres, with normal-speed animation clips. Dialogue remains the full script reference; this fast visual take is unvoiced. Exposed lighting bars, softboxes, stands, a boom microphone, dolly rails, equipment cases and a monitor table establish a working film set. Leave a clear camera lane across the front. Replay uses a matched outdoor version. L_DC_Act1_Promise holds the shared cast, waypoints, slopes, tree, mill group and story beats. L_DC_Act1_Set holds studio walls, floor, lighting and equipment; L_DC_Act1_Real holds the outdoor ground, trees, distant ridges, sky and daylight. Both environment layers use the identity transform. Preparation and filming show the set; review shows the real environment and hides crew, clapperboard and all camera rails. Returning to preparation restores them. The existing 20-second action and four capture beats are unchanged. Each recorded frame preserves lens position, rotation, FOV, camera slot and scene time; cuts and recording pauses remain hard cuts in the finished film. Shared action geometry is edited once, so there is no duplicate slope or actor route to drift out of alignment.</p></div>
 
   <h3>Stage 2 · The Raid <span class="tc">5 beats · 50 s take</span></h3>
   <p><b>Tone:</b> alarm → terror → personal loss. <b>Set:</b> storehouse lane → gate → mill crossing → uphill path. Turn the familiar village into a disaster. Make the old man's death specific and recognisable, then send the lovers back toward danger.</p>
@@ -256,7 +258,7 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
       <tr><td class="k">2.2</td><td><b>Monsters at the gate.</b> Three monsters charge through the gate. The blade-bearing raider leads them toward the mill while villagers recoil and flee.</td><td class="tc">0:11–0:19 · 2 s</td><td>Blade raider + another monster</td><td>Hold the troop advancing together through the gate.</td><td>Crane wide down the lane. Clearly establish the raider's shoulder armour and weapon.</td></tr>
       <tr><td class="k">2.3</td><td><b>No way out.</b> Villagers run for the crossing; one is struck down in the background. The old man stumbles beside his box and reaches toward an escaping villager.</td><td class="tc">0:19–0:28 · 2 s</td><td>Old man + box</td><td>Hold his reaching pose beside the fallen box.</td><td>Dolly along the evacuation lane, settle on the old man. Keep the box and his outstretched hand readable.</td></tr>
       <tr><td class="k">2.4</td><td><b>The hand falls.</b> The blade-bearing raider strikes the old man. He collapses beside the same box the swordsman carried; his hand falls still; his walking stick rolls away.</td><td class="tc">0:28–0:38 · 2.5 s</td><td>Blade raider + old man</td><td>Hold the raider over the motionless old man after the strike.</td><td>Medium side angle with attacker and old man together, box between foreground and body. Sound falls away after the impact.</td></tr>
-      <tr><td class="k">2.5</td><td><b>Too late to help.</b> Descending from the lookout, the couple see the old man beside the box. "The man you helped…" He draws his sword and runs down; she follows.</td><td class="tc">0:39–0:48 · 2 s</td><td>Swordsman + archer</td><td>Hold their stunned reaction before the charge.</td><td>Medium two-shot from the crossing, body and box at the lower edge. Both look toward the same point before moving.</td></tr>
+      <tr><td class="k">2.5</td><td><b>Too late to help.</b> Returning uphill from the tree clearing, the couple see the old man beside the box. "The man you helped…" He draws his sword and runs toward the crossing; she follows.</td><td class="tc">0:39–0:48 · 2 s</td><td>Swordsman + archer</td><td>Hold their stunned reaction before the charge.</td><td>Medium two-shot from the crossing, body and box at the lower edge. Both look toward the same point before moving.</td></tr>
     </tbody>
   </table></div>
 
@@ -270,18 +272,18 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
       <tr><td class="k">3.3</td><td><b>The fatal thank-you.</b> He turns his back on the fallen raider and looks up: "You saved my life. Thank you." She smiles. Behind him, the raider's hand tightens around its blade.</td><td class="tc">0:20–0:28 · 2 s</td><td>Swordsman's face + raider's weapon hand</td><td>Hold his grateful look while the weapon hand moves, monster below his eye line.</td><td>Over the archer's shoulder toward him, fallen raider low in the background. The audience notices the hand before he does.</td></tr>
       <tr><td class="k">3.4</td><td><b>One last strike.</b> The wounded raider rises and stabs him in the back. His sword drops; he looks up at her, staggers and collapses, dead. The raider falls beside him.</td><td class="tc">0:29–0:38 · 2 s</td><td>Swordsman + blade raider</td><td>Hold both fallen bodies after he collapses. His death remains final.</td><td>Medium side angle, both bodies readable; attack across the lens implies blade contact. Stay on his fall.</td></tr>
       <tr><td class="k">3.5</td><td><b>The run down.</b> The archer freezes, screams "No!" and races down the ramp, nearly stumbling, and drops her bow beside him.</td><td class="tc">0:38–0:46 · 1.75 s</td><td>Archer's face + upper body</td><td>Hold her face during the scream and first steps, before she leaves the landing.</td><td>Dolly or pan along the ramp into the lane; keep her face visible as she turns to the body.</td></tr>
-      <tr><td class="k">3.6</td><td><b>You promised.</b> She kneels, cradles his head, searches his face. "You promised…" She presses her forehead to his and sobs. End on the still couple as the village burns.</td><td class="tc">0:47–0:58 · 2.5 s</td><td>Archer's face + swordsman's head</td><td>Hold the forehead-to-forehead mourning pose before the fade.</td><td>Low medium two-shot echoing the mountain kiss; ease back slightly, smoke and the old man's box at the edge of frame.</td></tr>
+      <tr><td class="k">3.6</td><td><b>You promised.</b> She kneels, cradles his head, searches his face. "You promised…" She presses her forehead to his and sobs. End on the still couple as the village burns.</td><td class="tc">0:47–0:58 · 2.5 s</td><td>Archer's face + swordsman's head</td><td>Hold the forehead-to-forehead mourning pose before the fade.</td><td>Low medium two-shot echoing the kiss under the tree; ease back slightly, smoke and the old man's box at the edge of frame.</td></tr>
     </tbody>
   </table></div>
 
   <h3>Staging notes (from the storyboard)</h3>
   <div class="cols">
-    <div class="note"><h3>Dramatic callbacks</h3><p>Show the old man's vest, walking stick and marked box clearly in Act 1 and reuse them in Act 2. Repeat the lovers' forehead-to-forehead composition in the ending. Carry "Promise" from the lookout into "You promised" beside his body.</p></div>
+    <div class="note"><h3>Dramatic callbacks</h3><p>Show the old man's vest, walking stick and marked box clearly in Act 1 and reuse them in Act 2. Repeat the lovers' forehead-to-forehead composition in the ending. Carry "Promise" from the tree clearing into "You promised" beside his body.</p></div>
     <div class="note"><h3>The recognisable cliché</h3><p>The arrow should feel like a rescue. Give the couple a few seconds to smile before the monster's hand moves. Keep the swordsman unaware until the stab; the final quiet hold gives the loss room to land.</p></div>
     <div class="note"><h3>Actor continuity</h3><p>One armoured orc does all the killing. The arrow wounds it, allowing its brief recovery; its final collapse is why the archer can reach her lover. The two other raiders move into background lanes after 2.2.</p></div>
     <div class="note"><h3>Geography</h3><p>Bench and box close to the mill crossing. A short landing reached by a walkable ramp, about five seconds' descent. The duel within easy view of the landing. The couple reach the lower path before the final beat of Act 2.</p></div>
     <div class="note"><h3>Animation staging</h3><p>Pre-attached box for the carry, transfer hidden by the grateful pat. Offset attacks and timed reactions for combat. Arrow animated separately, then a lodged-arrow prop after impact. Stab contact masked by the side angle and a sound cue. Aligned kneel and seated cradle for the ending. Paired kiss and mourning poses need an early rig test.</p></div>
-    <div class="note"><h3>Set reuse</h3><p>Reuse the village lane, mill crossing, short upper ramp and mountain lookout. Spreading fire comes from two timed effects and a shared smoke layer. Bodies and damage stay consistent between the raid and the combat.</p></div>
+    <div class="note"><h3>Set reuse</h3><p>Reuse the village lane, mill crossing, short upper ramp and tree clearing. Spreading fire comes from two timed effects and a shared smoke layer. Bodies and damage stay consistent between the raid and the combat.</p></div>
   </div>
 
   <h3>Film crew (the obstacles)</h3>
@@ -289,7 +291,7 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
   <div class="table-wrap"><table>
     <thead><tr><th>Stage</th><th>Crew</th><th>Pressure</th></tr></thead>
     <tbody>
-      <tr><td class="k">1 · The Promise</td><td class="zed">2 crew</td><td>Separated targets and broad setups: for example a boom operator near the mill bench and a runner on the uphill path.</td></tr>
+      <tr><td class="k">1 · The Promise</td><td class="zed">2 crew</td><td>Separated targets and broad setups: for example a boom operator near the mill bench and a runner on the downhill path.</td></tr>
       <tr><td class="k">2 · The Raid</td><td class="zed">3 crew</td><td>Cameras are needed across the village plus a personal reaction shot: for example a grip by the gate and an effects tech near the burning awnings.</td></tr>
       <tr><td class="k">3 · The Broken Promise</td><td class="zed">3–4 crew</td><td>Alternates elevation, action, an ominous background detail and an intimate final shot: for example a rigger on the landing ramp and a boom operator behind the mourning spot.</td></tr>
     </tbody>
@@ -320,10 +322,10 @@ Final score   = max(0, Beat points − Crew cost)   if every beat was captured
 
 <section id="presentation">
   <div class="eyebrow">Presentation</div>
-  <h2>Stylised fantasy village, sunset to firelight</h2>
+  <h2>Stylised fantasy village, morning to firelight</h2>
   <ul>
     <li><b>Art:</b> stylised fantasy packs in Unreal: Polysplit <code>BasicHero_M_Swordsman</code> and <code>BasicHero_F_Archer</code>, an old villager, goblin and orc raiders with <code>Orc_armored</code> as the blade-bearing raider, crew figures in black with headphones, the WindmillValley set (<code>L_Showcase</code>) and the Stylized Village kit. Props: the old man's marked box, walking stick, bow, sword, lodged-arrow prop. Check each pack's licence allows use in a public jam build, and list it in the credits.</li>
-    <li><b>Lighting by stage:</b> warm afternoon to sunset for The Promise; firelight and smoke for The Raid; cooler dusk with the village burning behind for The Broken Promise.</li>
+    <li><b>Lighting by stage:</b> warm morning light for The Promise; firelight and smoke for The Raid; cooler dusk with the village burning behind for The Broken Promise.</li>
     <li><b>Recording effect:</b> REC dot and timecode, letterbox bars, light grain and vignette on the live feed; a short whip or flash on each cut.</li>
     <li><b>Audio:</b> mill water, birds and village chatter to open; the fire alarm and battle sounds during the raid; music drops as the old man's hand falls; the thank-you plays against a brief lull, then the sword hitting the ground, the archer's scream and restrained sobbing; fire and water under her final line. Clapperboard, "Action!" and "Cut!" frame each take. Every line is subtitled.</li>
     <li><b>HUD:</b> stage and phase, take clock, camera switcher with type labels, beat gauges for the live camera, crew alarm. Beats in gold, crew in green, live camera in red.</li>
@@ -367,7 +369,7 @@ Final score   = max(0, Beat points − Crew cost)   if every beat was captured
       <div class="date"><h3>Fri 13</h3><span class="mono">Core features</span></div>
       <div>
         <div class="lane"><b>Systems</b><ul><li>Merge rehearsal into preparation with play, pause, speed (0.5×–4×) and scrub.</li><li>Smooth zoom; rail speed adjustment.</li><li>Record the live feed each frame and play it back as the replay; add the letter grade.</li><li>Stages: three takes in order, all-beats clear rule, missed-beat list; pose gates and weapon-hand / fire-cue anchors on beats.</li></ul></div>
-        <div class="lane"><b>Level</b><ul><li>Stage 1 in <code>L_Showcase</code>: bench, box, uphill path, lookout; author the 4 beats and crew routes.</li><li>Stages 2–3 on the reused village set: storehouse, gate, mill crossing, ramp to the landing (about 5 s descent), two timed fire effects and shared smoke.</li></ul></div>
+        <div class="lane"><b>Level</b><ul><li>Stage 1 in <code>L_DC_Act1_Promise</code>: compact green-screen stage, practical mill and house, wheat, bench, box, shallow path and tree; retain the 4 beats and crew routes.</li><li>Stages 2–3 on the reused village set: storehouse, gate, mill crossing, ramp to the landing (about 5 s descent), two timed fire effects and shared smoke.</li></ul></div>
         <div class="lane"><b>Art &amp; Audio</b><ul><li>Put the cast on performers with idle, walk, carry, combat, hit, death, kneel and cradle animations; arrow and lodged-arrow prop.</li></ul></div>
         <div class="lane"><b>UI &amp; Ship</b><ul><li>Storyboard cards with sketch, angle and description; evaluation screen layout.</li></ul></div>
         <p class="gate"><b>Gate</b>Storyboard → preparation → shooting → replay → grade works in a packaged build.</p>
@@ -431,7 +433,7 @@ Final score   = max(0, Beat points − Crew cost)   if every beat was captured
   <h2>Decide before Friday morning</h2>
   <ul>
     <li><b>Story:</b> settled. The Village Raid storyboard (4 → 5 → 6 beats) replaces Love in the Ruins.</li>
-    <li><b>Stages 2–3 map:</b> stay in <code>L_Showcase</code> with fire and damage layered on, or move to a Stylized Village map? The storyboard assumes the same lane, mill crossing, ramp and lookout.</li>
+    <li><b>Stages 2–3 map:</b> stay in <code>L_Showcase</code> with fire and damage layered on, or move to a Stylized Village map? The storyboard assumes the same lane, mill crossing, ramp and tree clearing.</li>
     <li><b>Beat points and grade thresholds:</b> 250 per beat and the 85% / 65% bands are proposals; tune after playtests.</li>
     <li><b>Old man asset:</b> which mesh plays him, with a distinctive vest and walking stick.</li>
     <li><b>Shooting optimisation:</b> performance (frame rate), or making shooting easier to control? The schedule assumes performance.</li>

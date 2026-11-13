@@ -1,0 +1,15 @@
+{
+  "name": "03_rails",
+  "source": "Hyper3D Rodin via official CLI / MCP service",
+  "generation_id": "60af38ff-c0fa-4c2e-97e4-75a17148bd7b",
+  "vertices": 6426,
+  "triangles": 9965,
+  "meshes": 1,
+  "units": "meters",
+  "pivot": "bottom center",
+  "formats": [
+    "glb",
+    "fbx"
+  ],
+  "rigged": false
+}

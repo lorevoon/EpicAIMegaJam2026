@@ -24,7 +24,7 @@ public class EpicAIMegaJam2026 : ModuleRules
 			"Slate"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange(new string[] { "RenderCore" });
 
 		PublicIncludePaths.AddRange(new string[] {
 			"EpicAIMegaJam2026",

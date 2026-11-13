@@ -1,0 +1,15 @@
+{
+  "name": "08_light_short_large",
+  "source": "Hyper3D Rodin via official CLI / MCP service",
+  "generation_id": "2b503bd5-dc28-49ad-b50c-78dafa5986e5",
+  "vertices": 4357,
+  "triangles": 7236,
+  "meshes": 1,
+  "units": "meters",
+  "pivot": "bottom center",
+  "formats": [
+    "glb",
+    "fbx"
+  ],
+  "rigged": false
+}

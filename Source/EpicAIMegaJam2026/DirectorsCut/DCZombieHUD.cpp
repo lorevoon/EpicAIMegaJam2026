@@ -2,6 +2,7 @@
 
 #include "DCZombieHUD.h"
 #include "DCBeat.h"
+#include "DCCinemaReplay.h"
 #include "DCMultiCam.h"
 #include "DCSceneMarks.h"
 #include "DCZombieDirector.h"
@@ -90,6 +91,11 @@ void ADCZombieHUD::DrawHUD()
 	}
 	if (D->IsReviewing())
 	{
+		if (D->GetCinema())
+		{
+			D->GetCinema()->DrawCinema(this, Canvas, D);
+			return;
+		}
 		DrawPremiere(D);
 		if (D->IsFilmFinished())
 		{
@@ -450,7 +456,7 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 				Lines.Add(TEXT("Enter: hit the clapperboard and call ACTION!"));
 			}
 			Lines.Add(TEXT("T camera type   LMB place (dolly: rail points, F new rail)   RMB remove   Q/E height   1-9 or [ ] look through   C clear"));
-			Lines.Add(TEXT("Wheel or Left/Right scrub the scene   Enter / clapperboard: Action!   Tab storyboard   Shift sprint"));
+			Lines.Add(TEXT("Wheel or Left/Right scrub   Enter / clapperboard: Action!   Tab storyboard   Shift sprint   Space jump"));
 		}
 		break;
 	case EDCPhase::Countdown:

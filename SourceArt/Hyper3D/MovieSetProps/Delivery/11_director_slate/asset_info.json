@@ -1,0 +1,15 @@
+{
+  "name": "11_director_slate",
+  "source": "Hyper3D Rodin via official CLI / MCP service",
+  "generation_id": "52038575-1292-4de4-b220-d1e55e88f1ab",
+  "vertices": 12505,
+  "triangles": 23238,
+  "meshes": 1,
+  "units": "meters",
+  "pivot": "bottom center",
+  "formats": [
+    "glb",
+    "fbx"
+  ],
+  "rigged": false
+}

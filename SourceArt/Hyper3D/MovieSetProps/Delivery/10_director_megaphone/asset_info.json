@@ -1,0 +1,15 @@
+{
+  "name": "10_director_megaphone",
+  "source": "Hyper3D Rodin via official CLI / MCP service",
+  "generation_id": "a7bc23e6-749f-4ebd-9721-74c2f53de722",
+  "vertices": 11985,
+  "triangles": 22278,
+  "meshes": 1,
+  "units": "meters",
+  "pivot": "bottom center",
+  "formats": [
+    "glb",
+    "fbx"
+  ],
+  "rigged": false
+}

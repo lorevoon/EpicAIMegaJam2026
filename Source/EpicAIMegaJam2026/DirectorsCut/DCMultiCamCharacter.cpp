@@ -31,6 +31,9 @@ ADCMultiCamCharacter::ADCMultiCamCharacter()
 	bUseControllerRotationYaw = true;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
+	GetCharacterMovement()->JumpZVelocity = 520.f;
+	GetCharacterMovement()->AirControl = 0.35f;
+	GetCharacterMovement()->MaxStepHeight = 45.f;
 }
 
 UInputAction* ADCMultiCamCharacter::MakeAction(EInputActionValueType Type, bool bWhenPaused)
@@ -111,7 +114,10 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Input->BindAction(MapButton(EKeys::F), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnFinishRail);
 	Input->BindAction(MapButton(EKeys::LeftBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, -1);
 	Input->BindAction(MapButton(EKeys::RightBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, 1);
-	Input->BindAction(MapButton(EKeys::SpaceBar), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTransportToggle);
+	UInputAction* JumpOrTransport = MapButton(EKeys::SpaceBar);
+	Input->BindAction(JumpOrTransport, ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTransportToggle);
+	Input->BindAction(JumpOrTransport, ETriggerEvent::Completed, this, &ADCMultiCamCharacter::StopJumping);
+	Input->BindAction(JumpOrTransport, ETriggerEvent::Canceled, this, &ADCMultiCamCharacter::StopJumping);
 	Input->BindAction(MapButton(EKeys::Z), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRailSpeed, -1);
 	Input->BindAction(MapButton(EKeys::X), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRailSpeed, 1);
 
@@ -160,6 +166,7 @@ bool ADCMultiCamCharacter::IsLockedToCamera()
 void ADCMultiCamCharacter::ResetToStart(const FTransform& Start)
 {
 	bSprintHeld = false;
+	StopJumping();
 	GetCharacterMovement()->StopMovementImmediately();
 	TeleportTo(Start.GetLocation(), Start.Rotator(), false, true);
 	if (AController* C = GetController())
@@ -317,6 +324,12 @@ void ADCMultiCamCharacter::OnCycleCamera(int32 Direction)
 
 void ADCMultiCamCharacter::OnTransportToggle()
 {
+	ADCMultiCamDirector* DirectorActor = GetDirector();
+	if (!IsLockedToCamera() && (!DirectorActor || DirectorActor->GetPhase() == EDCPhase::Preparation))
+	{
+		Jump();
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleTransportToggle();

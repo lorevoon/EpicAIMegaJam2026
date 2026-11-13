@@ -18,6 +18,7 @@ class ADCMultiCamCharacter;
 class ADCRail;
 class ACameraActor;
 class APlayerController;
+class ADCCinemaReplay;
 
 /** Which kind of camera the next placement builds. */
 UENUM()
@@ -68,6 +69,8 @@ UCLASS()
 class ADCMultiCamDirector : public AActor
 {
 	GENERATED_BODY()
+	friend class FDCDualSceneReplayTest;
+	friend class FDCCinemaReplayTest;
 
 public:
 	ADCMultiCamDirector();
@@ -80,6 +83,23 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Directors Cut", meta = (ClampMin = "0", Units = "s"))
 	float CountdownDuration = 3.f;
+
+	/** Dressing-only sublevels at identity transforms. Blocking, slopes and cast remain in the persistent level. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Replay")
+	FName StudioEnvironmentLevel;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Replay")
+	FName RealEnvironmentLevel;
+
+	/** Separate presentation level, loaded on demand and retained for repeat screenings. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Replay")
+	TSoftObjectPtr<UWorld> CinemaLevel = TSoftObjectPtr<UWorld>(FSoftObjectPath(TEXT("/Game/DirectorsCut/Levels/L_DC_Cinema.L_DC_Cinema")));
+
+	ADCCinemaReplay* GetCinema() const { return Cinema; }
+
+	/** Future mission system: submit the timing/item verdict before the take ends. */
+	UFUNCTION(BlueprintCallable, Category = "Directors Cut|Replay")
+	void SetReplayMissionOutcome(FName BeatId, bool bSucceeded);
 
 	/** How many cameras the player may place; 0 = unlimited. Keys 1-9 pick the first nine, [ and ] step through all. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0"))
@@ -192,6 +212,9 @@ protected:
 	void SetRigsFrameMasked(bool bMasked);
 	/** Hides every rig completely, so the played-back film is clean. */
 	void SetRigsHidden(bool bHide);
+	/** Swap dressing before showing a replay frame; keep both layers resident for instant retries. */
+	void SetReviewEnvironment(bool bReview);
+	TMap<TWeakObjectPtr<AActor>, bool> SetOnlyHiddenStates;
 
 	/** Whether the live shot is spoiled right now (zombie in frame); recorded with each sample. */
 	virtual bool IsLiveShotSpoiled() const { return false; }
@@ -237,6 +260,10 @@ protected:
 	/** Plays the recorded take back as a film. */
 	UPROPERTY()
 	TObjectPtr<ACameraActor> PlaybackCamera;
+
+	UPROPERTY()
+	TObjectPtr<ADCCinemaReplay> Cinema;
+	TMap<FName, bool> ReplayMissionOutcomes;
 
 	TArray<FDCTakeSample> Recording;
 	bool bPremierePaused = false;

@@ -1,0 +1,353 @@
+[
+  {
+    "name": "01_jib",
+    "reference": "C:/Users/iris6/AppData/Local/Temp/codex-clipboard-94fc5c86-e19f-4395-b3b0-cdb24ef9b8df.png",
+    "prompt": "Create ONLY the single requested prop as an isolated textured 3D game asset. Reference image contains multiple objects: exclude every other object, ground, backdrop, lettering, watermarks and logos. Match the reference stylized toon movie set aesthetic: chunky readable silhouette, simple clean beveled geometry, muted colors, matte surfaces, minimal realistic wear. Complete geometry on all sides. ONLY the dark charcoal teal camera jib crane assembly, WITHOUT camera and WITHOUT rails. Include the low rectangular four-wheel dolly base with pale gray wheels, upright cylindrical pivot pedestal, long rectangular boom angled upward, thinner parallel upper support rod, vertical end mounting bracket, short rear arm with stacked round counterweights. Preserve open spaces between rods and the base frame.",
+    "generation": {
+      "generation_id": "60af38ff-c0fa-4c2e-97e4-75a17148bd7b",
+      "status": "queued"
+    },
+    "status": {
+      "generation_id": "60af38ff-c0fa-4c2e-97e4-75a17148bd7b",
+      "status": "completed",
+      "stage": {
+        "name": "pack",
+        "current": 5,
+        "total": 5
+      }
+    },
+    "result": {
+      "files": [
+        {
+          "name": "base_basic_pbr.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/60af38ff-c0fa-4c2e-97e4-75a17148bd7b/pack/glb/base_basic_pbr.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_pbr.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082356Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=bec40242d2c83e6e433892addbec5c59c36a3a16329629bb48b92e15f1179255"
+        },
+        {
+          "name": "base_basic_shaded.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/60af38ff-c0fa-4c2e-97e4-75a17148bd7b/pack/glb/base_basic_shaded.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_shaded.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082356Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=7e1378ddf04e04f07d1aca9e9940a6f1f3274df4bb5fffa71bb1fde3a31b05d1"
+        }
+      ]
+    },
+    "local_model": "C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\Hyper3D\\MovieSetProps\\01_jib\\original.glb"
+  },
+  {
+    "name": "02_crane_camera",
+    "reference": "C:/Users/iris6/AppData/Local/Temp/codex-clipboard-94fc5c86-e19f-4395-b3b0-cdb24ef9b8df.png",
+    "prompt": "Create ONLY the single requested prop as an isolated textured 3D game asset. Reference image contains multiple objects: exclude every other object, ground, backdrop, lettering, watermarks and logos. Match the reference stylized toon movie set aesthetic: chunky readable silhouette, simple clean beveled geometry, muted colors, matte surfaces, minimal realistic wear. Complete geometry on all sides. ONLY the small vintage cinema camera hanging from the end of the crane, isolated with no crane, no pedestal and no rails. Dark charcoal teal boxy camera body, rounded oval top film magazine, long cylindrical lens projecting forward with wider front lens ring and dark glass, small mounting bracket above camera. Compact chunky proportions.",
+    "generation": {
+      "generation_id": "4029c386-0033-4861-9d84-241801208af0",
+      "status": "queued"
+    },
+    "status": {
+      "generation_id": "4029c386-0033-4861-9d84-241801208af0",
+      "status": "completed",
+      "stage": {
+        "name": "pack",
+        "current": 5,
+        "total": 5
+      }
+    },
+    "result": {
+      "files": [
+        {
+          "name": "base_basic_pbr.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/4029c386-0033-4861-9d84-241801208af0/pack/glb/base_basic_pbr.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_pbr.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082331Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=8df3a5800a48c1b1efc751ab4d523c52744c2583f8749379ddaca589401dcc02"
+        },
+        {
+          "name": "base_basic_shaded.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/4029c386-0033-4861-9d84-241801208af0/pack/glb/base_basic_shaded.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_shaded.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082331Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=9b9f375ab55c1ab0fd783ec6876251de06537f9eb8ebc98e6b3888b6fa6979f3"
+        }
+      ]
+    },
+    "local_model": "C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\Hyper3D\\MovieSetProps\\02_crane_camera\\original.glb"
+  },
+  {
+    "name": "03_rails",
+    "reference": "C:/Users/iris6/AppData/Local/Temp/codex-clipboard-94fc5c86-e19f-4395-b3b0-cdb24ef9b8df.png",
+    "prompt": "Create ONLY the single requested prop as an isolated textured 3D game asset. Reference image contains multiple objects: exclude every other object, ground, backdrop, lettering, watermarks and logos. Match the reference stylized toon movie set aesthetic: chunky readable silhouette, simple clean beveled geometry, muted colors, matte surfaces, minimal realistic wear. Complete geometry on all sides. ONLY one straight camera dolly rail track section. Two parallel long dark brown metal rails joined by evenly spaced dark teal perpendicular cross ties, approximately 4 meters long and 0.8 meters wide. Low profile, straight and symmetrical with open spaces between cross ties. No crane, no camera, no dolly and no wheels.",
+    "generation": {
+      "generation_id": "b423c6f4-401f-41b9-b701-310b663ea852",
+      "status": "queued"
+    },
+    "status": {
+      "generation_id": "b423c6f4-401f-41b9-b701-310b663ea852",
+      "status": "completed",
+      "stage": {
+        "name": "pack",
+        "current": 5,
+        "total": 5
+      }
+    },
+    "result": {
+      "files": [
+        {
+          "name": "base_basic_pbr.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/b423c6f4-401f-41b9-b701-310b663ea852/pack/glb/base_basic_pbr.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_pbr.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082333Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=b02865f61518559edee130a0cce085ae43ff10432421c3f7bc2de81dc7f3f9a3"
+        },
+        {
+          "name": "base_basic_shaded.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/b423c6f4-401f-41b9-b701-310b663ea852/pack/glb/base_basic_shaded.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_shaded.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082333Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=c6a0bc236a03a3083d9c52e613d3e62911be6941dd755ae96c8a966b3f28525c"
+        }
+      ]
+    },
+    "local_model": "C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\Hyper3D\\MovieSetProps\\03_rails\\original.glb"
+  },
+  {
+    "name": "04_big_box",
+    "reference": "C:/Users/iris6/AppData/Local/Temp/codex-clipboard-f02a402e-5d15-4cbe-b3fe-f4306b00b3a1.png",
+    "prompt": "Create ONLY the single requested prop as an isolated textured 3D game asset. Reference image contains multiple objects: exclude every other object, ground, backdrop, lettering, watermarks and logos. Match the reference stylized toon movie set aesthetic: chunky readable silhouette, simple clean beveled geometry, muted colors, matte surfaces, minimal realistic wear. Complete geometry on all sides. ONLY one large closed rectangular film equipment flight case like the front left box. Dark desaturated teal panels, pale silver aluminum trim around every edge and around the lid seam, black rounded protective corner caps, recessed silver carrying handles on short sides. Wide horizontal trunk, roughly 1.2 meters wide, 0.65 meters deep, 0.75 meters tall. No other boxes or ladder.",
+    "generation": {
+      "generation_id": "e4cba331-8036-4747-bb75-b1349afb9df8",
+      "status": "queued"
+    },
+    "status": {
+      "generation_id": "e4cba331-8036-4747-bb75-b1349afb9df8",
+      "status": "completed",
+      "stage": {
+        "name": "pack",
+        "current": 5,
+        "total": 5
+      }
+    },
+    "result": {
+      "files": [
+        {
+          "name": "base_basic_pbr.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/e4cba331-8036-4747-bb75-b1349afb9df8/pack/glb/base_basic_pbr.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_pbr.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082335Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=6c34345d1095a352c20950bc60293f1dc5bfa39bc6b1692dcaf217b21d411827"
+        },
+        {
+          "name": "base_basic_shaded.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/e4cba331-8036-4747-bb75-b1349afb9df8/pack/glb/base_basic_shaded.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_shaded.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082335Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=65b838086420c87fa40b01afeeb56b1a1a1791790eeb7f2d55562a7ce5496c89"
+        }
+      ]
+    },
+    "local_model": "C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\Hyper3D\\MovieSetProps\\04_big_box\\original.glb"
+  },
+  {
+    "name": "05_ladder",
+    "reference": "C:/Users/iris6/AppData/Local/Temp/codex-clipboard-f02a402e-5d15-4cbe-b3fe-f4306b00b3a1.png",
+    "prompt": "Create ONLY the single requested prop as an isolated textured 3D game asset. Reference image contains multiple objects: exclude every other object, ground, backdrop, lettering, watermarks and logos. Match the reference stylized toon movie set aesthetic: chunky readable silhouette, simple clean beveled geometry, muted colors, matte surfaces, minimal realistic wear. Complete geometry on all sides. ONLY the tall freestanding open wooden A-frame stepladder. Honey tan wooden rectangular side rails, evenly spaced thick rungs on both sides, hinge bolts at top, four black rubber feet, sturdy slightly tapered silhouette. Approximately 2.4 meters tall. Preserve all open spaces between rungs. No boxes.",
+    "generation": {
+      "generation_id": "14faa927-d634-4438-863d-e8eb4e703631",
+      "status": "queued"
+    },
+    "status": {
+      "generation_id": "14faa927-d634-4438-863d-e8eb4e703631",
+      "status": "completed",
+      "stage": {
+        "name": "pack",
+        "current": 5,
+        "total": 5
+      }
+    },
+    "result": {
+      "files": [
+        {
+          "name": "base_basic_pbr.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/14faa927-d634-4438-863d-e8eb4e703631/pack/glb/base_basic_pbr.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_pbr.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082337Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=c789896f41bb867bda7a1da6ffe69aed7bff24ee19fd3c8f4b6df019c4fe70a2"
+        },
+        {
+          "name": "base_basic_shaded.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/14faa927-d634-4438-863d-e8eb4e703631/pack/glb/base_basic_shaded.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_shaded.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082337Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=afebc5db22a0245dfa8dfcdb86370c1d937681ce7706fc3707d0e81eb224ee56"
+        }
+      ]
+    },
+    "local_model": "C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\Hyper3D\\MovieSetProps\\05_ladder\\original.glb"
+  },
+  {
+    "name": "06_light_tall_rectangular",
+    "reference": "C:/Users/iris6/AppData/Local/Temp/codex-clipboard-5ced2830-eeb3-4544-a969-b6c9e65b4ec5.png",
+    "prompt": "Create ONLY the single requested prop as an isolated textured 3D game asset. Reference image contains multiple objects: exclude every other object, ground, backdrop, lettering, watermarks and logos. Match the reference stylized toon movie set aesthetic: chunky readable silhouette, simple clean beveled geometry, muted colors, matte surfaces, minimal realistic wear. Complete geometry on all sides. ONLY the tallest light at left: a small rectangular warm ivory lamp face in ochre yellow housing, four dark barn doors, U-shaped tilt yoke, silver telescoping upper pole, tall brown wooden tripod with three splayed legs and black feet. Full freestanding light approximately 2.6 meters tall. No other lights.",
+    "generation": {
+      "generation_id": "2b503bd5-dc28-49ad-b50c-78dafa5986e5",
+      "status": "queued"
+    },
+    "status": {
+      "generation_id": "2b503bd5-dc28-49ad-b50c-78dafa5986e5",
+      "status": "completed",
+      "stage": {
+        "name": "pack",
+        "current": 5,
+        "total": 5
+      }
+    },
+    "result": {
+      "files": [
+        {
+          "name": "base_basic_pbr.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/2b503bd5-dc28-49ad-b50c-78dafa5986e5/pack/glb/base_basic_pbr.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_pbr.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082413Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=4273fd2a9c2ff78f87dd5ab4455497b34e8777d083a6d5bd388d17170fdaca97"
+        },
+        {
+          "name": "base_basic_shaded.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/2b503bd5-dc28-49ad-b50c-78dafa5986e5/pack/glb/base_basic_shaded.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_shaded.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082413Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=598970fa447f6db1ac0ee8417aef6b07f2b4be2e60f7b66c93ab9896f88f5518"
+        }
+      ]
+    },
+    "local_model": "C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\Hyper3D\\MovieSetProps\\06_light_tall_rectangular\\original.glb"
+  },
+  {
+    "name": "07_light_medium_round",
+    "reference": "C:/Users/iris6/AppData/Local/Temp/codex-clipboard-5ced2830-eeb3-4544-a969-b6c9e65b4ec5.png",
+    "prompt": "Create ONLY the single requested prop as an isolated textured 3D game asset. Reference image contains multiple objects: exclude every other object, ground, backdrop, lettering, watermarks and logos. Match the reference stylized toon movie set aesthetic: chunky readable silhouette, simple clean beveled geometry, muted colors, matte surfaces, minimal realistic wear. Complete geometry on all sides. ONLY the center light: medium height compact round studio spotlight, pale blue faceted housing, circular ivory lens, four dark gray barn doors and tilt yoke, slim black telescoping metal stand with three low splayed feet. Approximately 1.8 meters tall. No other lights.",
+    "generation": {
+      "generation_id": "45371ad2-b178-4b19-bf43-9061094ca7ea",
+      "status": "queued"
+    },
+    "status": {
+      "generation_id": "45371ad2-b178-4b19-bf43-9061094ca7ea",
+      "status": "completed",
+      "stage": {
+        "name": "pack",
+        "current": 5,
+        "total": 5
+      }
+    },
+    "result": {
+      "files": [
+        {
+          "name": "base_basic_pbr.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/45371ad2-b178-4b19-bf43-9061094ca7ea/pack/glb/base_basic_pbr.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_pbr.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082339Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=c893023f8ac646fdf0ea3e5eb6ff46bf413cfe183a0eb483036686700ece2027"
+        },
+        {
+          "name": "base_basic_shaded.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/45371ad2-b178-4b19-bf43-9061094ca7ea/pack/glb/base_basic_shaded.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_shaded.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082339Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=2d92c2bc1d2d70db422afe32e5a4990b76778a871fde69612ffa021ec75c793e"
+        }
+      ]
+    },
+    "local_model": "C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\Hyper3D\\MovieSetProps\\07_light_medium_round\\original.glb"
+  },
+  {
+    "name": "08_light_short_large",
+    "reference": "C:/Users/iris6/AppData/Local/Temp/codex-clipboard-5ced2830-eeb3-4544-a969-b6c9e65b4ec5.png",
+    "prompt": "Create ONLY the single requested prop as an isolated textured 3D game asset. Reference image contains multiple objects: exclude every other object, ground, backdrop, lettering, watermarks and logos. Match the reference stylized toon movie set aesthetic: chunky readable silhouette, simple clean beveled geometry, muted colors, matte surfaces, minimal realistic wear. Complete geometry on all sides. ONLY the right light as a shorter sturdy light: large deep barrel-shaped pale blue studio Fresnel spotlight housing, broad circular ivory lens, four broad dark barn doors, black U-yoke, short black telescoping stand with three splayed feet. Approximately 1.3 meters tall overall, visually distinct from the taller slim center light. A simple black power cable down the stand. No other lights.",
+    "generation": {
+      "generation_id": "57544c2c-9989-4655-9927-9ac77c579198",
+      "status": "queued"
+    },
+    "status": {
+      "generation_id": "57544c2c-9989-4655-9927-9ac77c579198",
+      "status": "completed",
+      "stage": {
+        "name": "pack",
+        "current": 5,
+        "total": 5
+      }
+    },
+    "result": {
+      "files": [
+        {
+          "name": "base_basic_pbr.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/57544c2c-9989-4655-9927-9ac77c579198/pack/glb/base_basic_pbr.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_pbr.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082420Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=38c233113c9a55dcc960785c5fed46cbc387f8dc8cae23811809f89648b220b9"
+        },
+        {
+          "name": "base_basic_shaded.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/57544c2c-9989-4655-9927-9ac77c579198/pack/glb/base_basic_shaded.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_shaded.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082420Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=e4c3325b427958a2b78f13c12b53a4d3267e0b0c27d9ff3479eafd87c77ac10e"
+        }
+      ]
+    },
+    "local_model": "C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\Hyper3D\\MovieSetProps\\08_light_short_large\\original.glb"
+  },
+  {
+    "name": "09_director_chair",
+    "reference": "C:/Users/iris6/AppData/Local/Temp/codex-clipboard-d355eef9-cf68-4e68-9001-987df9bf559b.png",
+    "prompt": "Create ONLY the single requested prop as an isolated textured 3D game asset. Reference image contains multiple objects: exclude every other object, ground, backdrop, lettering, watermarks and logos. Match the reference stylized toon movie set aesthetic: chunky readable silhouette, simple clean beveled geometry, muted colors, matte surfaces, minimal realistic wear. Complete geometry on all sides. ONLY the wooden folding director chair in center. Warm honey brown frame, crossed X-shaped folding legs with long feet, broad wooden armrests, cream canvas sling seat and rectangular cream canvas back stretched between two vertical posts with rounded finials. Empty chair, no person, no objects around or on it. Approximately 0.95 meters tall.",
+    "generation": {
+      "generation_id": "733ed5b4-cab3-436c-b19c-5a2a7ad25fc4",
+      "status": "queued"
+    },
+    "status": {
+      "generation_id": "733ed5b4-cab3-436c-b19c-5a2a7ad25fc4",
+      "status": "completed",
+      "stage": {
+        "name": "pack",
+        "current": 5,
+        "total": 5
+      }
+    },
+    "result": {
+      "files": [
+        {
+          "name": "base_basic_pbr.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/733ed5b4-cab3-436c-b19c-5a2a7ad25fc4/pack/glb/base_basic_pbr.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_pbr.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082423Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=94e1564fca9a409a85d65ad054f605f4f312d932f58c4369a02e49e5ad1d4395"
+        },
+        {
+          "name": "base_basic_shaded.glb",
+          "role": "model",
+          "mime_type": "model/gltf-binary",
+          "url": "https://file.hyper3d.com/assets/rodin/733ed5b4-cab3-436c-b19c-5a2a7ad25fc4/pack/glb/base_basic_shaded.glb?response-cache-control=private&response-content-type=model%2Fgltf-binary&response-content-disposition=attachment%3B%20filename%3D%22base_basic_shaded.glb%22&X-Tos-Algorithm=TOS4-HMAC-SHA256&X-Tos-Content-Sha256=UNSIGNED-PAYLOAD&X-Tos-Credential=AKLTYzE0MDRlNzUyNWMzNGE5N2JlZTQ5ZGRkZWQ2NWY5ZTA%2F20261113%2Ffile.hyper3d.com%2Ftos%2Frequest&X-Tos-Date=20261113T082423Z&X-Tos-Expires=604800&X-Tos-SignedHeaders=host&X-Tos-Signature=03fa08751e9e70ccdad5aabb90a57ff3af024b83bbe71998a906ad220ac16826"
+        }
+      ]
+    },
+    "local_model": "C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\Hyper3D\\MovieSetProps\\09_director_chair\\original.glb"
+  },
+  {
+    "name": "10_director_megaphone",
+    "reference": "C:/Users/iris6/AppData/Local/Temp/codex-clipboard-d355eef9-cf68-4e68-9001-987df9bf559b.png",
+    "prompt": "Create ONLY the single requested prop as an isolated textured 3D game asset. Reference image contains multiple objects: exclude every other object, ground, backdrop, lettering, watermarks and logos. Match the reference stylized toon movie set aesthetic: chunky readable silhouette, simple clean beveled geometry, muted colors, matte surfaces, minimal realistic wear. Complete geometry on all sides. ONLY the handheld megaphone at left. Broad flared ivory white hollow conical horn with thick rounded rim and small inner sound cone, muted blue rear housing and blue angled pistol grip with small ivory trigger. Horn approximately 0.35 meters diameter, entire prop 0.5 meters long. No chair or other objects.",
+    "generation": {
+      "generation_id": "b85f2f03-98d4-4a98-9aae-6d367c7d3c7e",
+      "status": "queued"
+    },
+    "status": {
+      "generation_id": "b85f2f03-98d4-4a98-9aae-6d367c7d3c7e",
+      "status": "processing",
+      "stage": {
+        "name": "remesh",
+        "current": 3,
+        "total": 5
+      }
+    }
+  },
+  {
+    "name": "11_director_slate",
+    "reference": "C:/Users/iris6/AppData/Local/Temp/codex-clipboard-d355eef9-cf68-4e68-9001-987df9bf559b.png",
+    "prompt": "Create ONLY the single requested prop as an isolated textured 3D game asset. Reference image contains multiple objects: exclude every other object, ground, backdrop, lettering, watermarks and logos. Match the reference stylized toon movie set aesthetic: chunky readable silhouette, simple clean beveled geometry, muted colors, matte surfaces, minimal realistic wear. Complete geometry on all sides. ONLY the black movie clapperboard at lower right. Thin rectangular charcoal black slate with fine white ruled production fields, hinged top clapper bar with alternating diagonal black and ivory white stripes, small round hinge bolt on left. Top bar slightly open. Approximately 0.3 meters wide. No chair or other props.",
+    "generation": {
+      "generation_id": "17bb2a0f-1b51-4bde-a9e0-d3c86eebff38",
+      "status": "queued"
+    },
+    "status": {
+      "generation_id": "17bb2a0f-1b51-4bde-a9e0-d3c86eebff38",
+      "status": "processing",
+      "stage": {
+        "name": "remesh",
+        "current": 3,
+        "total": 5
+      }
+    }
+  }
+]
