@@ -147,6 +147,10 @@ public:
 	virtual void HandleScrub(float DeltaSeconds);
 	/** Space in review: pause/resume the film, or watch it again once it has ended. */
 	void HandleTransportToggle();
+	void HandleRehearsalToggle();
+	void HandleRehearsalSpeed(int32 Direction);
+	bool IsRehearsalPlaying() const { return Phase == EDCPhase::Preparation && bRehearsalPlaying; }
+	float GetRehearsalSpeed() const { return RehearsalSpeed; }
 	/** Z / X: slower / faster dolly travel for the camera being looked through. */
 	void HandleRailSpeed(int32 Direction);
 	void HandleClearCameras();
@@ -267,6 +271,8 @@ protected:
 
 	TArray<FDCTakeSample> Recording;
 	bool bPremierePaused = false;
+	bool bRehearsalPlaying = true;
+	float RehearsalSpeed = 1.f;
 	bool bRecordingPauseHeld = false;
 	float PausedSeconds = 0.f;
 	bool bJumpCutPending = false;

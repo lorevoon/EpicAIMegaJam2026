@@ -154,6 +154,14 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 	switch (Phase)
 	{
 	case EDCPhase::Preparation:
+		if (bRehearsalPlaying && TakeDuration > KINDA_SMALL_NUMBER)
+		{
+			SceneTime = FMath::Fmod(SceneTime + FMath::Max(0.f, DeltaSeconds) * RehearsalSpeed, TakeDuration);
+			for (ADCPerformer* Performer : Performers)
+			{
+				Performer->Evaluate(SceneTime);
+			}
+		}
 		UpdatePrepPreview();
 		break;
 
@@ -284,6 +292,8 @@ void ADCMultiCamDirector::HandleRestart()
 
 void ADCMultiCamDirector::ResetScene()
 {
+	bRehearsalPlaying = true;
+	RehearsalSpeed = 1.f;
 	if (Cinema) { Cinema->EndScreening(); Cinema->ClearMissionOutcomes(); }
 	ReplayMissionOutcomes.Reset();
 	SetReviewEnvironment(false);
@@ -489,6 +499,13 @@ void ADCMultiCamDirector::FinishPremiere()
 
 void ADCMultiCamDirector::HandleScrub(float DeltaSeconds)
 {
+	if (Phase == EDCPhase::Preparation)
+	{
+		bRehearsalPlaying = false;
+		SceneTime = FMath::Clamp(SceneTime + DeltaSeconds, 0.f, TakeDuration);
+		for (ADCPerformer* Performer : Performers) Performer->Evaluate(SceneTime);
+		return;
+	}
 	if (Phase == EDCPhase::Review)
 	{
 		SceneTime = FMath::Clamp(SceneTime + DeltaSeconds, 0.f, GetPremiereLength());
@@ -512,6 +529,22 @@ void ADCMultiCamDirector::HandleTransportToggle()
 	else
 	{
 		bPremierePaused = !bPremierePaused;
+	}
+}
+
+void ADCMultiCamDirector::HandleRehearsalToggle()
+{
+	if (Phase == EDCPhase::Preparation)
+	{
+		bRehearsalPlaying = !bRehearsalPlaying;
+	}
+}
+
+void ADCMultiCamDirector::HandleRehearsalSpeed(int32 Direction)
+{
+	if (Phase == EDCPhase::Preparation && Direction != 0)
+	{
+		RehearsalSpeed = FMath::Clamp(RehearsalSpeed * (Direction > 0 ? 2.f : 0.5f), 0.5f, 4.f);
 	}
 }
 

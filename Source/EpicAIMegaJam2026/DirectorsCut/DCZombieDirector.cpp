@@ -49,7 +49,7 @@ void ADCZombieDirector::Tick(float DeltaSeconds)
 void ADCZombieDirector::EnterPreparation()
 {
 	ResetScene();
-	Flash(TEXT("Scroll the mouse wheel to scrub through the scene. Find where each moment happens - and where the film crew go."), 7.f);
+	Flash(TEXT("Rehearsal is playing. H pauses/resumes, comma/period change speed. Wheel or arrows scrub and pause."), 7.f);
 }
 
 void ADCZombieDirector::HandleStartTake()
@@ -72,17 +72,7 @@ void ADCZombieDirector::HandleRestart()
 
 void ADCZombieDirector::HandleScrub(float DeltaSeconds)
 {
-	if (Phase != EDCPhase::Preparation)
-	{
-		Super::HandleScrub(DeltaSeconds);
-		return;
-	}
-	// The preparation timeline: the scene never plays on its own, it only moves when scrubbed.
-	SceneTime = FMath::Clamp(SceneTime + DeltaSeconds, 0.f, TakeDuration);
-	for (ADCPerformer* Performer : Performers)
-	{
-		Performer->Evaluate(SceneTime);
-	}
+	Super::HandleScrub(DeltaSeconds);
 }
 
 void ADCZombieDirector::ResetScene()

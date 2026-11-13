@@ -36,6 +36,43 @@ bool FDCDualSceneReplayTest::RunTest(const FString& Parameters)
 		for (TActorIterator<ADCMultiCamDirector> It(World); It; ++It) { D = *It; break; }
 		if (!TestNotNull(TEXT("Shared director"), D)) return true;
 		D->ResetScene();
+		ADCPerformer* Romeo = nullptr;
+		for (ADCPerformer* Actor : D->Performers)
+			if (Actor->GetActorLabel() == TEXT("Romeo")) Romeo = Actor;
+		if (!TestNotNull(TEXT("Rehearsal has Romeo"), Romeo)) return true;
+		const FVector StartPosition = Romeo->GetActorLocation();
+		D->Tick(8.f);
+		TestEqual(TEXT("Preparation advances rehearsal clock"), D->GetSceneTime(), 8.f);
+		TestTrue(TEXT("Rehearsal actually moves the actor"), FVector::Dist(StartPosition, Romeo->GetActorLocation()) > 100.f);
+		TestTrue(TEXT("Rehearsal does not record or score"), D->Recording.IsEmpty() && D->GetScore() == 0);
+		D->HandleRehearsalToggle();
+		const FVector PausedPosition = Romeo->GetActorLocation();
+		D->Tick(1.f);
+		TestTrue(TEXT("Paused rehearsal holds actor pose"), Romeo->GetActorLocation().Equals(PausedPosition));
+		TestEqual(TEXT("Paused rehearsal holds time"), D->GetSceneTime(), 8.f);
+		D->HandleScrub(2.f);
+		TestEqual(TEXT("Paused rehearsal scrubs"), D->GetSceneTime(), 10.f);
+		D->HandleRehearsalSpeed(1);
+		D->HandleRehearsalToggle();
+		D->Tick(1.f);
+		TestEqual(TEXT("Rehearsal speed controls clock"), D->GetSceneTime(), 12.f);
+		D->HandleScrub(7.5f);
+		TestFalse(TEXT("Scrub pauses playback"), D->IsRehearsalPlaying());
+		D->HandleRehearsalToggle();
+		D->Tick(.5f);
+		TestEqual(TEXT("Rehearsal loops at take duration"), D->GetSceneTime(), .5f);
+		TestTrue(TEXT("Rehearsal stays in preparation"), D->GetPhase() == EDCPhase::Preparation);
+		D->ResetScene();
+		TestTrue(TEXT("Reset rewinds actor to authored start"), Romeo->GetActorLocation().Equals(StartPosition));
+		TestTrue(TEXT("Reset resumes normal rehearsal"), D->IsRehearsalPlaying() && D->GetRehearsalSpeed() == 1.f);
+		TMap<AActor*, FTransform> SharedProps;
+		for (TActorIterator<AActor> It(World); It; ++It)
+			if (It->ActorHasTag(TEXT("DC_MillAssembly")) || It->GetActorLabel() == TEXT("Practical promise tree") || It->ActorHasTag(TEXT("DC_OriginalTerrain")))
+				SharedProps.Add(*It, It->GetActorTransform());
+		TestTrue(TEXT("Shared mill, tree and slope are present"), SharedProps.Num() >= 9);
+		ULevelStreaming* Ground = UGameplayStatics::GetStreamingLevel(D, TEXT("L_DC_Act1_Ground"));
+		if (!TestNotNull(TEXT("Original WindmillValley terrain"), Ground)) return true;
+		TestTrue(TEXT("Original terrain visible during rehearsal"), Ground->IsLevelVisible());
 		ULevelStreaming* Studio = UGameplayStatics::GetStreamingLevel(D, D->StudioEnvironmentLevel);
 		ULevelStreaming* Real = UGameplayStatics::GetStreamingLevel(D, D->RealEnvironmentLevel);
 		if (!TestNotNull(TEXT("Studio layer"), Studio) || !TestNotNull(TEXT("Real layer"), Real)) return true;
@@ -64,8 +101,11 @@ bool FDCDualSceneReplayTest::RunTest(const FString& Parameters)
 		D->SetReviewEnvironment(true);
 		for (const auto& Pair : CastBefore) TestTrue(TEXT("Environment swap preserves cast transform"), Pair.Key->GetActorTransform().Equals(Pair.Value));
 		D->StartPremiere();
+		for (const auto& Prop : SharedProps)
+			TestTrue(TEXT("Set and real scene use identical prop transforms"), Prop.Key->GetActorTransform().Equals(Prop.Value));
 		TestFalse(TEXT("No studio in replay"), Studio->IsLevelVisible());
 		TestTrue(TEXT("Real visible in replay"), Real->IsLevelVisible());
+		TestTrue(TEXT("Same original terrain remains visible in replay"), Ground->IsLevelVisible());
 		TestTrue(TEXT("Unattached rails removed too"), UnattachedRail->IsHidden());
 		for (TActorIterator<AActor> It(World); It; ++It)
 			if (It->ActorHasTag(TEXT("DC_SetOnly"))) TestTrue(TEXT("Crew and set-only props removed"), It->IsHidden());

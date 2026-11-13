@@ -120,6 +120,9 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Input->BindAction(JumpOrTransport, ETriggerEvent::Canceled, this, &ADCMultiCamCharacter::StopJumping);
 	Input->BindAction(MapButton(EKeys::Z), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRailSpeed, -1);
 	Input->BindAction(MapButton(EKeys::X), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRailSpeed, 1);
+	Input->BindAction(MapButton(EKeys::H), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRehearsalToggle);
+	Input->BindAction(MapButton(EKeys::Comma), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRehearsalSpeed, -1);
+	Input->BindAction(MapButton(EKeys::Period), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRehearsalSpeed, 1);
 
 	const FKey NumberKeys[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine };
 	for (int32 i = 0; i < UE_ARRAY_COUNT(NumberKeys); ++i)
@@ -342,6 +345,16 @@ void ADCMultiCamCharacter::OnRailSpeed(int32 Direction)
 	{
 		D->HandleRailSpeed(Direction);
 	}
+}
+
+void ADCMultiCamCharacter::OnRehearsalToggle()
+{
+	if (ADCMultiCamDirector* D = GetDirector()) D->HandleRehearsalToggle();
+}
+
+void ADCMultiCamCharacter::OnRehearsalSpeed(int32 Direction)
+{
+	if (ADCMultiCamDirector* D = GetDirector()) D->HandleRehearsalSpeed(Direction);
 }
 
 void ADCMultiCamCharacter::OnToggleNotebook()

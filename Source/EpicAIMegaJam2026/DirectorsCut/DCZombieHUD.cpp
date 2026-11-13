@@ -213,7 +213,7 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 	Y += 30.f * S;
 	Label(FString::Printf(TEXT("Film crew on camera cost %d points per second."), D->ZombiePenaltyPerSecond), CX, Y, ZombieGreen, 0.8f, true);
 	Y += 60.f * S;
-	Label(TEXT("Press Enter to start preparing - scrub through the scene with the mouse wheel while you place cameras"), CX, Y, FLinearColor::White, 1.f, true);
+	Label(TEXT("Enter: prepare and rehearse   H: pause/play   Wheel: scrub while placing cameras"), CX, Y, FLinearColor::White, 1.f, true);
 }
 
 void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
@@ -323,7 +323,8 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 	float Y = Canvas->ClipY * 0.62f;
 	const float Length = FMath::Max(D->TakeDuration, KINDA_SMALL_NUMBER);
 	const float Time = D->GetSceneTime();
-	Label(FString::Printf(TEXT("SCENE TIMELINE   %.1fs / %.0fs   (Wheel or Left/Right to scrub)"), Time, Length), CX, Y, Gold, 0.75f, true);
+	Label(FString::Printf(TEXT("REHEARSAL %s   %.1fx   %.1fs / %.0fs   H play/pause   ,/. speed   Wheel/arrows scrub"),
+		D->IsRehearsalPlaying() ? TEXT("PLAYING") : TEXT("PAUSED"), D->GetRehearsalSpeed(), Time, Length), CX, Y, Gold, 0.65f, true);
 	const float TW = 640.f * S;
 	const float X0 = CX - TW * 0.5f;
 	const float TY = Y + 32.f * S;
