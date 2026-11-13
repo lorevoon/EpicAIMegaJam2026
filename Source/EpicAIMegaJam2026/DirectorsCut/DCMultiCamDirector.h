@@ -19,6 +19,15 @@ class ADCRail;
 class ACameraActor;
 class APlayerController;
 
+/** How much the shooting stabilizer smooths aiming and dolly travel. */
+UENUM()
+enum class EDCStabilizer : uint8
+{
+	Off,
+	Light,
+	Heavy
+};
+
 /** Which kind of camera the next placement builds. */
 UENUM()
 enum class EDCCamTool : uint8
@@ -98,6 +107,20 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (Units = "cm"))
 	float MaxStandHeight = 320.f;
 
+	/** Stabilizer while shooting: how quickly the camera head catches up with the mouse (lower = smoother). */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Stabilizer", meta = (ClampMin = "0.1"))
+	float LightAimSmoothing = 12.f;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Stabilizer", meta = (ClampMin = "0.1"))
+	float HeavyAimSmoothing = 4.f;
+
+	/** Stabilizer while shooting: how quickly a dolly reaches and comes off its speed (lower = gentler). */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Stabilizer", meta = (ClampMin = "0.1"))
+	float LightDollyEase = 4.f;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Stabilizer", meta = (ClampMin = "0.1"))
+	float HeavyDollyEase = 1.5f;
+
 	/** How far one mouse-wheel notch scrubs the timeline in preparation and review. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0.05", Units = "s"))
 	float WheelScrubSeconds = 0.5f;
@@ -120,6 +143,8 @@ public:
 	/** W/S while looking through a dolly camera: travel along its rail. */
 	void HandleRigMove(float Axis, float DeltaSeconds);
 	void HandleCycleTool();
+	/** G: stabilizer off / light / heavy. Kept between takes; only active while shooting. */
+	void HandleCycleStabilizer();
 	void HandleFinishRail();
 	void HandleCycleCamera(int32 Direction);
 	/** Wheel or Left/Right: scrub the film in review (the zombie director also scrubs its preparation timeline). */
@@ -146,6 +171,7 @@ public:
 	int32 GetSlotCount() const { return Cameras.Num(); }
 	bool IsUnlimited() const { return MaxCameras <= 0; }
 	EDCCamTool GetTool() const { return Tool; }
+	EDCStabilizer GetStabilizer() const { return Stabilizer; }
 	int32 GetPendingRailPoints() const;
 	/** 0-based slot being looked through, or INDEX_NONE while walking. */
 	int32 GetViewingSlot() const { return ViewingSlot; }
@@ -191,6 +217,8 @@ protected:
 	void SetRigsFrameMasked(bool bMasked);
 	/** Hides every rig completely, so the played-back film is clean. */
 	void SetRigsHidden(bool bHide);
+	/** Hands every camera the stabilizer strength for the current phase (none outside shooting). */
+	void ApplyStabilizer();
 
 	/** Whether the live shot is spoiled right now (zombie in frame); recorded with each sample. */
 	virtual bool IsLiveShotSpoiled() const { return false; }
@@ -218,6 +246,7 @@ protected:
 	TObjectPtr<ADCRail> PendingRail;
 
 	EDCCamTool Tool = EDCCamTool::Static;
+	EDCStabilizer Stabilizer = EDCStabilizer::Light;
 
 	UPROPERTY()
 	TArray<TObjectPtr<ADCPerformer>> Performers;

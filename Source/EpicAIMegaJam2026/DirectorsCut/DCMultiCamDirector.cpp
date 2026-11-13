@@ -145,6 +145,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		if (Cam)
 		{
 			Cam->UpdateZoom(DeltaSeconds);
+			Cam->UpdateStabilizer(DeltaSeconds);
 		}
 	}
 
@@ -253,6 +254,7 @@ void ADCMultiCamDirector::HandleStartTake()
 	Phase = EDCPhase::Countdown;
 	CountdownRemaining = CountdownDuration;
 	CutCount = 0;
+	ApplyStabilizer();
 
 	// From Action! until back in preparation, rigs are ghosted inside every shot. Go live on the lowest-numbered camera.
 	SetRigsFrameMasked(true);
@@ -309,6 +311,7 @@ void ADCMultiCamDirector::ResetScene()
 	ViewWalking();
 	SetRigsFrameMasked(false);
 	SetRigsHidden(false);
+	ApplyStabilizer();
 	Recording.Reset();
 	bPremierePaused = false;
 	bRecordingPauseHeld = false;
@@ -965,6 +968,35 @@ void ADCMultiCamDirector::HandleCycleTool()
 	Tool = Tool == EDCCamTool::Static ? EDCCamTool::Dolly : EDCCamTool::Static;
 	Flash(Tool == EDCCamTool::Static ? TEXT("STATIC camera: stand, wall, or ceiling")
 		: TEXT("DOLLY camera: click rail points on any surface; the camera appears at the second point. F starts a new rail."), 2.5f);
+}
+
+void ADCMultiCamDirector::HandleCycleStabilizer()
+{
+	if (Phase == EDCPhase::Storyboard || IsReviewing())
+	{
+		return;
+	}
+	Stabilizer = Stabilizer == EDCStabilizer::Off ? EDCStabilizer::Light
+		: Stabilizer == EDCStabilizer::Light ? EDCStabilizer::Heavy : EDCStabilizer::Off;
+	ApplyStabilizer();
+	const TCHAR* Level = Stabilizer == EDCStabilizer::Off ? TEXT("OFF") : Stabilizer == EDCStabilizer::Light ? TEXT("LIGHT") : TEXT("HEAVY");
+	Flash(Phase == EDCPhase::Preparation ? FString::Printf(TEXT("Stabilizer %s (used while shooting)"), Level)
+		: FString::Printf(TEXT("Stabilizer %s"), Level), 1.5f);
+}
+
+void ADCMultiCamDirector::ApplyStabilizer()
+{
+	const bool bOn = (Phase == EDCPhase::Countdown || Phase == EDCPhase::Filming) && Stabilizer != EDCStabilizer::Off;
+	const bool bHeavy = Stabilizer == EDCStabilizer::Heavy;
+	const float Aim = bOn ? (bHeavy ? HeavyAimSmoothing : LightAimSmoothing) : 0.f;
+	const float Dolly = bOn ? (bHeavy ? HeavyDollyEase : LightDollyEase) : 0.f;
+	for (ADCMultiCam* Cam : Cameras)
+	{
+		if (Cam)
+		{
+			Cam->SetStabilizer(Aim, Dolly);
+		}
+	}
 }
 
 void ADCMultiCamDirector::HandleRigMove(float Axis, float DeltaSeconds)

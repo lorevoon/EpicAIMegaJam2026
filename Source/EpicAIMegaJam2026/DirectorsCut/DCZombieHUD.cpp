@@ -304,6 +304,11 @@ void ADCZombieHUD::DrawFraming(ADCZombieDirector* D)
 	if (const ADCMultiCam* Cam = D->GetCameraSlot(D->GetViewingSlot()))
 	{
 		FString Rig = Cam->GetRig() == EDCCamRig::Dolly ? FString::Printf(TEXT("   DOLLY x%.2g (Z/X)"), Cam->GetRailSpeedScale()) : FString();
+		if (D->GetPhase() == EDCPhase::Countdown || D->GetPhase() == EDCPhase::Filming)
+		{
+			const EDCStabilizer Stab = D->GetStabilizer();
+			Rig += Stab == EDCStabilizer::Off ? TEXT("   STAB OFF (G)") : Stab == EDCStabilizer::Light ? TEXT("   STAB LIGHT (G)") : TEXT("   STAB HEAVY (G)");
+		}
 		Label(FString::Printf(TEXT("CAM %d   %.0fmm%s"), Cam->GetNumber(), 18.f / FMath::Tan(FMath::DegreesToRadians(Cam->GetFOV() * 0.5f)), *Rig),
 			L, T - 34.f * S, D->GetPhase() == EDCPhase::Filming ? Bad : FLinearColor::White, 0.8f);
 	}
@@ -452,7 +457,7 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 		break;
 	case EDCPhase::Countdown:
 	case EDCPhase::Filming:
-		Lines.Add(TEXT("1-9 or [ ] cut camera   hold LMB pause recording   Mouse aims   W/S dolly   Z/X dolly speed   Wheel zooms   R restart   P pause"));
+		Lines.Add(TEXT("1-9 or [ ] cut camera   hold LMB pause recording   Mouse aims   W/S dolly   Z/X dolly speed   G stabilizer   Wheel zooms   R restart   P pause"));
 		break;
 	default:
 		break;

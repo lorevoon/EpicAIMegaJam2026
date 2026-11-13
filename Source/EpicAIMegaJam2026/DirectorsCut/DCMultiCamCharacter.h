@@ -57,6 +57,7 @@ private:
 	void OnScrub(const FInputActionValue& Value);
 	void OnPlacementHeight(const FInputActionValue& Value);
 	void OnCycleTool();
+	void OnCycleStabilizer();
 	void OnFinishRail();
 	void OnCycleCamera(int32 Direction);
 	void OnTransportToggle();

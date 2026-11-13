@@ -44,15 +44,24 @@ public:
 	ADCRail* GetRail() const { return Rail; }
 	float GetRailProgress() const;
 
-	/** W/S input: travel along the rail. Static cameras ignore it. */
+	/** W/S input this frame: travel along the rail (eased by the stabilizer). Static cameras ignore it. */
 	void MoveRig(float Axis, float DeltaSeconds);
 
 	int32 GetNumber() const { return Number; }
 	UCameraComponent* GetCamera() const { return Camera; }
 
 	FRotator GetAim() const { return Aim; }
+	/** Points the camera at NewAim right away (no stabilizer). */
 	void SetAim(const FRotator& NewAim);
-	void AddAim(float DeltaYaw, float DeltaPitch) { SetAim(Aim + FRotator(DeltaPitch, DeltaYaw, 0.f)); }
+	/** Mouse aiming: moves the aim target; with the stabilizer on, the head glides after it. */
+	void AddAim(float DeltaYaw, float DeltaPitch);
+
+	/**
+	 * Shooting stabilizer. AimSmoothing: how quickly the head catches up with the aim. DollyEase: how quickly a dolly
+	 * reaches (and comes off) its travel speed. 0 for either means instant, as in preparation.
+	 */
+	void SetStabilizer(float InAimSmoothing, float InDollyEase);
+	void UpdateStabilizer(float DeltaSeconds);
 
 	/** Current (eased) field of view. */
 	float GetFOV() const;
@@ -120,13 +129,21 @@ private:
 
 	void UpdateMount(const FVector& Surface);
 	void ApplyRigPosition();
+	void SetAimTarget(const FRotator& NewAim);
 	void SetNumberLabel();
 
 	int32 Number = 0;
 	EDCCamRig Rig = EDCCamRig::Static;
 	float RailDistance = 0.f;
 	float HomeRailDistance = 0.f;
+	/** Where the camera is meant to point; the head follows it through the stabilizer. */
 	FRotator Aim = FRotator::ZeroRotator;
+	float AimSmoothing = 0.f;
+	float DollyEase = 0.f;
+	/** W/S held this frame (-1..1), consumed by UpdateStabilizer. */
+	float RigInput = 0.f;
+	/** Current dolly travel speed along the rail, cm/s. */
+	float RailVelocity = 0.f;
 	FRotator HomeAim = FRotator::ZeroRotator;
 	float HomeFOV = DefaultFOV;
 	float TargetFOV = DefaultFOV;

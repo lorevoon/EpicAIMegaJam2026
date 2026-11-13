@@ -133,6 +133,11 @@ void ADCMultiCam::ApplyRigPosition()
 
 void ADCMultiCam::MoveRig(float Axis, float DeltaSeconds)
 {
+	if (DollyEase > 0.f)
+	{
+		RigInput = Axis; // eased in UpdateStabilizer
+		return;
+	}
 	if (Rig == EDCCamRig::Dolly && Rail)
 	{
 		RailDistance = FMath::Clamp(RailDistance + Axis * DollySpeed * GetRailSpeedScale() * DeltaSeconds, 0.f, Rail->GetLength());
@@ -155,10 +160,65 @@ float ADCMultiCam::GetRailProgress() const
 	return Rail && Rail->GetLength() > 0.f ? RailDistance / Rail->GetLength() : 0.f;
 }
 
-void ADCMultiCam::SetAim(const FRotator& NewAim)
+void ADCMultiCam::SetAimTarget(const FRotator& NewAim)
 {
 	Aim = FRotator(FMath::Clamp(NewAim.Pitch, -85.f, 85.f), FRotator::NormalizeAxis(NewAim.Yaw), 0.f);
+}
+
+void ADCMultiCam::SetAim(const FRotator& NewAim)
+{
+	SetAimTarget(NewAim);
 	Head->SetWorldRotation(Aim);
+}
+
+void ADCMultiCam::AddAim(float DeltaYaw, float DeltaPitch)
+{
+	SetAimTarget(Aim + FRotator(DeltaPitch, DeltaYaw, 0.f));
+	if (AimSmoothing <= 0.f)
+	{
+		Head->SetWorldRotation(Aim);
+	}
+}
+
+void ADCMultiCam::SetStabilizer(float InAimSmoothing, float InDollyEase)
+{
+	AimSmoothing = InAimSmoothing;
+	DollyEase = InDollyEase;
+	if (AimSmoothing <= 0.f)
+	{
+		Head->SetWorldRotation(Aim);
+	}
+	if (DollyEase <= 0.f)
+	{
+		RailVelocity = 0.f;
+		RigInput = 0.f;
+	}
+}
+
+void ADCMultiCam::UpdateStabilizer(float DeltaSeconds)
+{
+	// Head: glide toward the aim (shortest way round) instead of snapping, like a fluid head on a tripod.
+	if (AimSmoothing > 0.f)
+	{
+		Head->SetWorldRotation(FMath::RInterpTo(Head->GetComponentRotation(), Aim, DeltaSeconds, AimSmoothing));
+	}
+
+	// Dolly: ease up to speed and coast to a stop instead of starting and stopping dead.
+	if (DollyEase > 0.f && Rig == EDCCamRig::Dolly && Rail)
+	{
+		RailVelocity = FMath::FInterpTo(RailVelocity, RigInput * DollySpeed * GetRailSpeedScale(), DeltaSeconds, DollyEase);
+		RigInput = 0.f;
+		if (!FMath::IsNearlyZero(RailVelocity, 0.5f))
+		{
+			const float Unclamped = RailDistance + RailVelocity * DeltaSeconds;
+			RailDistance = FMath::Clamp(Unclamped, 0.f, Rail->GetLength());
+			if (RailDistance != Unclamped)
+			{
+				RailVelocity = 0.f; // hit the end of the rail
+			}
+			ApplyRigPosition();
+		}
+	}
 }
 
 float ADCMultiCam::GetFOV() const
@@ -204,6 +264,8 @@ void ADCMultiCam::RestoreHome()
 	TargetFOV = HomeFOV;
 	Camera->SetFieldOfView(HomeFOV);
 	RailDistance = HomeRailDistance;
+	RailVelocity = 0.f;
+	RigInput = 0.f;
 	ApplyRigPosition();
 }
 

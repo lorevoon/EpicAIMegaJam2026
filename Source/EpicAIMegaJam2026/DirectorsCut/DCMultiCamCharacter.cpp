@@ -108,6 +108,7 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Lower.Modifiers.Add(NewObject<UInputModifierNegate>(this));
 	Input->BindAction(Height, ETriggerEvent::Triggered, this, &ADCMultiCamCharacter::OnPlacementHeight);
 	Input->BindAction(MapButton(EKeys::T), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleTool);
+	Input->BindAction(MapButton(EKeys::G), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleStabilizer);
 	Input->BindAction(MapButton(EKeys::F), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnFinishRail);
 	Input->BindAction(MapButton(EKeys::LeftBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, -1);
 	Input->BindAction(MapButton(EKeys::RightBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, 1);
@@ -288,6 +289,14 @@ void ADCMultiCamCharacter::OnPlacementHeight(const FInputActionValue& Value)
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandlePlacementHeight(Value.Get<float>() * GetWorld()->GetDeltaSeconds());
+	}
+}
+
+void ADCMultiCamCharacter::OnCycleStabilizer()
+{
+	if (ADCMultiCamDirector* D = GetDirector())
+	{
+		D->HandleCycleStabilizer();
 	}
 }
 
