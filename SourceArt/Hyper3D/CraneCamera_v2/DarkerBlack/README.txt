@@ -1,0 +1,1 @@
+Darker charcoal-black material revision. Original red and bright accents retained. Geometry and 3.2 m height unchanged. Includes GLB, FBX, Blender source, texture images and previews. The darker finish is defined by the body material multiplier, not by replacing the shared original texture. Not imported into Unreal.

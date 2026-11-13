@@ -65,6 +65,9 @@ public:
 	FTransform CarryTransform = FTransform::Identity;
 	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
 	float SetDownTime = -1.f;
+	/** Seconds spent lowering the prop before release. Zero preserves an instant placement. */
+	UPROPERTY(EditAnywhere, Category = "Performer|Prop", meta = (ClampMin = "0.0"))
+	float SetDownBlendDuration = 0.f;
 	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
 	FTransform SetDownTransform = FTransform::Identity;
 
