@@ -1,5 +1,5 @@
 // Director's Cut - multi-camera take director.
-// The player places static, dolly, and crane cameras during preparation. During the take they are locked to the
+// The player places static and dolly cameras during preparation. During the take they are locked to the
 // camera feeds, cut between them (1-9, [ and ]), and can re-aim, zoom, and drive the live camera's rig.
 // Only the live feed captures hidden beats (ADCBeat), so choosing when to cut is the game.
 
@@ -24,8 +24,7 @@ UENUM()
 enum class EDCCamTool : uint8
 {
 	Static,
-	Dolly,
-	Crane
+	Dolly
 };
 
 /** Runtime state of one hidden beat. */
@@ -85,7 +84,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0"))
 	int32 MaxCameras = 4;
 
-	/** Lets the player build dolly (rail) and crane cameras as well as static ones. T cycles the camera type. */
+	/** Lets the player build dolly (rail) cameras as well as static ones. T switches the camera type. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras")
 	bool bAllowMovingRigs = false;
 
@@ -118,7 +117,7 @@ public:
 	virtual void HandleInteract();
 	virtual void HandleStartTake();
 	virtual void HandleRestart();
-	/** W/S while looking through a dolly or crane camera: travel along the rail / raise and lower the boom. */
+	/** W/S while looking through a dolly camera: travel along its rail. */
 	void HandleRigMove(float Axis, float DeltaSeconds);
 	void HandleCycleTool();
 	void HandleFinishRail();
@@ -219,7 +218,6 @@ protected:
 	TObjectPtr<ADCRail> PendingRail;
 
 	EDCCamTool Tool = EDCCamTool::Static;
-	bool bPreviewFloor = false;
 
 	UPROPERTY()
 	TArray<TObjectPtr<ADCPerformer>> Performers;

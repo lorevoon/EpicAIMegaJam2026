@@ -176,7 +176,7 @@ void ADCMultiCamCharacter::OnMove(const FInputActionValue& Value)
 	const FVector2D Axis = Value.Get<FVector2D>();
 	if (IsLockedToCamera())
 	{
-		// W/S drive the dolly or crane of the camera being looked through.
+		// W/S drive the dolly of the camera being looked through.
 		if (ADCMultiCamDirector* D = GetDirector())
 		{
 			D->HandleRigMove(Axis.Y, GetWorld()->GetDeltaSeconds());

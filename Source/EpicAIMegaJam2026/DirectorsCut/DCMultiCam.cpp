@@ -101,21 +101,9 @@ void ADCMultiCam::SetupDolly(int32 InNumber, ADCRail* InRail)
 	SetLive(false);
 }
 
-void ADCMultiCam::SetupCrane(int32 InNumber, const FVector& Floor, float Height)
-{
-	Number = InNumber;
-	Rig = EDCCamRig::Crane;
-	CraneBase = Floor;
-	CraneHeight = HomeCraneHeight = FMath::Clamp(Height, CraneMinHeight, CraneMaxHeight);
-	SetNumberLabel();
-	ApplyRigPosition();
-	SetTint(FLinearColor(0.02f, 0.06f, 0.1f));
-	SetLive(false);
-}
-
 void ADCMultiCam::SetNumberLabel()
 {
-	const TCHAR* Kind = Rig == EDCCamRig::Dolly ? TEXT(" DOLLY") : Rig == EDCCamRig::Crane ? TEXT(" CRANE") : TEXT("");
+	const TCHAR* Kind = Rig == EDCCamRig::Dolly ? TEXT(" DOLLY") : TEXT("");
 	Label->SetText(FText::FromString(Number > 0 ? FString::Printf(TEXT("CAM %d%s"), Number, Kind) : FString()));
 }
 
@@ -141,11 +129,6 @@ void ADCMultiCam::ApplyRigPosition()
 		SetActorLocation(OnRail + FVector(0.f, 0.f, DollyLift));
 		UpdateMount(OnRail);
 	}
-	else if (Rig == EDCCamRig::Crane)
-	{
-		SetActorLocation(CraneBase + FVector(0.f, 0.f, CraneHeight));
-		UpdateMount(CraneBase);
-	}
 }
 
 void ADCMultiCam::MoveRig(float Axis, float DeltaSeconds)
@@ -153,12 +136,8 @@ void ADCMultiCam::MoveRig(float Axis, float DeltaSeconds)
 	if (Rig == EDCCamRig::Dolly && Rail)
 	{
 		RailDistance = FMath::Clamp(RailDistance + Axis * DollySpeed * GetRailSpeedScale() * DeltaSeconds, 0.f, Rail->GetLength());
+		ApplyRigPosition();
 	}
-	else if (Rig == EDCCamRig::Crane)
-	{
-		CraneHeight = FMath::Clamp(CraneHeight + Axis * CraneSpeed * DeltaSeconds, CraneMinHeight, CraneMaxHeight);
-	}
-	ApplyRigPosition();
 }
 
 void ADCMultiCam::Destroyed()
@@ -217,7 +196,6 @@ void ADCMultiCam::SaveHome()
 	HomeAim = Aim;
 	HomeFOV = TargetFOV;
 	HomeRailDistance = RailDistance;
-	HomeCraneHeight = CraneHeight;
 }
 
 void ADCMultiCam::RestoreHome()
@@ -226,7 +204,6 @@ void ADCMultiCam::RestoreHome()
 	TargetFOV = HomeFOV;
 	Camera->SetFieldOfView(HomeFOV);
 	RailDistance = HomeRailDistance;
-	CraneHeight = HomeCraneHeight;
 	ApplyRigPosition();
 }
 

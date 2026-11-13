@@ -1,8 +1,8 @@
 // Director's Cut - "Love in the Ruins": a romance shot in a zombie apocalypse.
-// Built on the multi-camera director, with unlimited static, dolly, and crane cameras.
+// Built on the multi-camera director, with unlimited static and dolly cameras.
 //
 //   Storyboard  the scenes are listed in order (from the DCBeat display names) - no times, no places
-//   Preparation place as many static / dolly / crane cameras as you like; the scene only moves when the
+//   Preparation place as many static / dolly cameras as you like; the scene only moves when the
 //               player scrubs its timeline (mouse wheel or arrows), so cameras can be tested at any moment
 //   Shooting    cut between cameras; storyboard beats on the live camera score, zombies on it cost points
 //   Review      the recorded film plays back, then the evaluation
