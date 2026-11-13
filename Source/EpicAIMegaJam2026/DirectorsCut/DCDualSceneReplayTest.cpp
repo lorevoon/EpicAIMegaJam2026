@@ -65,6 +65,41 @@ bool FDCDualSceneReplayTest::RunTest(const FString& Parameters)
 		D->ResetScene();
 		TestTrue(TEXT("Reset rewinds actor to authored start"), Romeo->GetActorLocation().Equals(StartPosition));
 		TestTrue(TEXT("Reset resumes normal rehearsal"), D->IsRehearsalPlaying() && D->GetRehearsalSpeed() == 1.f);
+		// Both camera types move in a bounded horizontal disc and keep independent presets.
+		TArray<ADCMultiCam*> FreeCameras;
+		TArray<int32> FreeSlots;
+		for (int32 Index=0; Index<3; ++Index)
+		{
+			const bool Crane = Index==1;
+			const FVector Floor(Index*2000.f, 0.f, 10000.f);
+			ADCMultiCam* C = D->SpawnCamera(Floor+FVector(0,0,Crane ? ADCMultiCam::CraneHeight : ADCMultiCam::StaticHeight));
+			C->Setup(Index+1, Floor, Crane ? EDCCamRig::Crane : EDCCamRig::Static);
+			C->SetAim(FRotator(Crane ? -90.f : 0.f,90.f,0.f));
+			const FVector Center=C->GetActorLocation();
+			C->MoveLocal(FVector2D(0,1),.5f);
+			TestTrue(TEXT("W follows camera yaw even looking straight down"),C->GetActorLocation().Y>Center.Y);
+			TestEqual(TEXT("WASD keeps camera height"),C->GetActorLocation().Z,Center.Z);
+			C->MoveLocal(FVector2D(1,1),100.f);
+			TestTrue(TEXT("Diagonal travel is clamped to placement radius"),FVector::Dist(Center,C->GetActorLocation())<=C->GetMovementRadius()+.01f);
+			C->SaveHome();
+			const FVector Preset=C->GetActorLocation();
+			C->MoveLocal(FVector2D(-1,-1),.3f); C->AddAim(30,10);
+			C->RestoreHome();
+			TestTrue(TEXT("Retry restores prepared camera position"),C->GetActorLocation().Equals(Preset,.01f));
+			TestTrue(TEXT("Retry restores prepared camera angle"),C->GetAim().Equals(FRotator(Crane ? -90.f : 0.f,90.f,0.f),.01f));
+			TestNull(TEXT("New camera needs no rail"),C->GetRail());
+			FreeSlots.Add(D->Cameras.Add(C)); FreeCameras.Add(C);
+		}
+		D->Phase=EDCPhase::Filming;
+		for (int32 Index : {0,1,2,0})
+		{
+			const FVector Before=FreeCameras[Index]->GetActorLocation();
+			D->HandleSelectCamera(FreeSlots[Index]+1);
+			TestEqual(TEXT("Number selects the requested camera"),D->GetViewingSlot(),FreeSlots[Index]);
+			TestTrue(TEXT("Cut retains the camera preset"),FreeCameras[Index]->GetActorLocation().Equals(Before));
+		}
+		D->ResetScene();
+		for (int32 Index=0;Index<3;++Index) { D->Cameras[FreeSlots[Index]]=nullptr; FreeCameras[Index]->Destroy(); }
 		TMap<AActor*, FTransform> SharedProps;
 		for (TActorIterator<AActor> It(World); It; ++It)
 			if (It->ActorHasTag(TEXT("DC_MillAssembly")) || It->GetActorLabel() == TEXT("Practical promise tree") || It->ActorHasTag(TEXT("DC_OriginalTerrain")))

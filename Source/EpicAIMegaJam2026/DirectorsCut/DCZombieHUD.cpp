@@ -323,8 +323,7 @@ void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
 	if (D->GetPhase() == EDCPhase::Preparation)
 	{
 		const EDCCamTool Tool = D->GetTool();
-		FString ToolText = Tool == EDCCamTool::Dolly ? FString::Printf(TEXT("DOLLY (%d rail pts, F = new rail)"), D->GetPendingRailPoints())
-			: FString::Printf(TEXT("STATIC @%.0fcm"), D->GetPendingHeight());
+		FString ToolText = FString::Printf(TEXT("%s @%.0fcm"), Tool == EDCCamTool::Crane ? TEXT("CRANE") : TEXT("STATIC"), D->GetPendingHeight());
 		Label(FString::Printf(TEXT("Cameras %d   [T] %s"), D->GetCameraCount(), *ToolText),
 			Canvas->ClipX - 560.f * S, 22.f * S, FLinearColor(1.f, 0.6f, 0.2f), 0.8f);
 	}
@@ -407,7 +406,7 @@ void ADCZombieHUD::DrawFraming(ADCZombieDirector* D)
 
 	if (const ADCMultiCam* Cam = D->GetCameraSlot(D->GetViewingSlot()))
 	{
-		FString Rig = Cam->GetRig() == EDCCamRig::Dolly ? FString::Printf(TEXT("   DOLLY x%.2g (Z/X)"), Cam->GetRailSpeedScale()) : FString();
+		FString Rig = FString::Printf(TEXT("   %s | WASD within %.1fm"), Cam->GetRig() == EDCCamRig::Crane ? TEXT("CRANE") : TEXT("STATIC"), Cam->GetMovementRadius()/100.f);
 		if (D->GetPhase() == EDCPhase::Countdown || D->GetPhase() == EDCPhase::Filming)
 		{
 			const EDCStabilizer Stab = D->GetStabilizer();
@@ -544,8 +543,9 @@ void ADCZombieHUD::DrawSwitcher(ADCZombieDirector* D)
 		// The placed camera's type, or (for the button being placed) the type the next click will build.
 		if (Cam || bPlacing)
 		{
-			const bool bDolly = Cam ? Cam->GetRig() == EDCCamRig::Dolly : D->GetTool() == EDCCamTool::Dolly;
-			if (UTexture2D* Icon = bDolly ? DollyCameraIcon : StaticCameraIcon)
+			const bool bCrane = Cam ? Cam->GetRig() == EDCCamRig::Crane : D->GetTool() == EDCCamTool::Crane;
+			if (bCrane) Label(TEXT("CRANE"), X + BoxW*.5f, Y + 45.f*S, Edge, .55f, true);
+			if (UTexture2D* Icon = bCrane ? nullptr : StaticCameraIcon)
 			{
 				const float Aspect = Icon->GetSurfaceHeight() > 0.f ? Icon->GetSurfaceWidth() / Icon->GetSurfaceHeight() : 1.f;
 				float IconH = BoxH - 40.f * S;
@@ -577,12 +577,12 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 		{
 			Lines.Add(TEXT("AIMING - this is where the camera starts every take"));
 			Lines.Add(TEXT("Mouse turn   Shift+Wheel zoom   Wheel scrub the scene"));
-			Lines.Add(TEXT("W/S move dolly   Z/X dolly speed   [ / ] other cameras   E step back"));
+			Lines.Add(TEXT("WASD move nearby   1-9 / [ ] switch cameras   E step back | Preset autosaved"));
 		}
 		else
 		{
 			Lines.Add(TEXT("T camera type   LMB place   RMB remove   Q/E height   C clear"));
-			Lines.Add(TEXT("Dolly: click rail points, F starts a new rail   1-9 or [ ] look through"));
+			Lines.Add(TEXT("Static / Crane: one click to place   1-9 or [ ] look through"));
 			Lines.Add(D->IsNearClapper() ? TEXT("Enter: hit the clapperboard and call ACTION!")
 				: TEXT("Wheel scrub   H rehearsal   Tab storyboard   Shift sprint   Space jump   Enter: Action!"));
 		}
@@ -590,7 +590,7 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 	case EDCPhase::Countdown:
 	case EDCPhase::Filming:
 		Lines.Add(TEXT("1-9 or [ ] cut camera   Mouse aims   Wheel zooms   hold LMB pause recording"));
-		Lines.Add(TEXT("W/S dolly   Z/X dolly speed   G stabilizer   R restart   P pause"));
+		Lines.Add(TEXT("WASD move nearby   G aim stabilizer   R restart   P pause"));
 		break;
 	default:
 		break;

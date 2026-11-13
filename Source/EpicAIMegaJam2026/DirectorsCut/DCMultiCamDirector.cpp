@@ -74,8 +74,8 @@ void ADCMultiCamDirector::BeginPlay()
 	PlaybackCamera->GetCameraComponent()->SetConstraintAspectRatio(true);
 
 	ResetScene();
-	Flash(IsUnlimited() ? FString(TEXT("Place as many cameras as you like. T switches between static and dolly."))
-		: FString::Printf(TEXT("Place up to %d fixed cameras. Once placed they can't move - only turn."), MaxCameras), 7.f);
+	Flash(IsUnlimited() ? FString(TEXT("Place as many cameras as you like. T switches between static and crane."))
+		: FString::Printf(TEXT("Place up to %d cameras. WASD adjusts position nearby; mouse aims."), MaxCameras), 7.f);
 }
 
 void ADCMultiCamDirector::GatherScene()
@@ -870,7 +870,7 @@ void ADCMultiCamDirector::HandlePlacementHeight(float AxisTimesDelta)
 {
 	if (Phase == EDCPhase::Preparation && !IsViewingCamera())
 	{
-		PendingHeight = FMath::Clamp(PendingHeight + AxisTimesDelta * StandHeightSpeed, MinStandHeight, MaxStandHeight);
+		PendingHeight = FMath::Clamp(PendingHeight + AxisTimesDelta * StandHeightSpeed, Tool == EDCCamTool::Crane ? 450.f : MinStandHeight, Tool == EDCCamTool::Crane ? 1200.f : MaxStandHeight);
 	}
 }
 
@@ -905,15 +905,15 @@ void ADCMultiCamDirector::UpdatePrepPreview()
 		PreviewPoint = Hit.ImpactNormal.Z > 0.7f ? Hit.ImpactPoint + FVector(0.f, 0.f, PendingHeight) : Hit.ImpactPoint + Hit.ImpactNormal * WallStandoff;
 		FHitResult Block;
 		const bool bRoom = !GetWorld()->LineTraceSingleByChannel(Block, Hit.ImpactPoint + Hit.ImpactNormal * 2.f, PreviewPoint, ECC_Visibility, Params);
-		bPreviewValid = bRoom && (HasCameraBudget() || PendingRail);
+		bPreviewValid = bRoom && Hit.ImpactNormal.Z > 0.7f && HasCameraBudget();
 	}
 
 	Ghost->SetActorHiddenInGame(!bPreviewHit);
 	if (bPreviewHit)
 	{
 		Ghost->SetActorLocation(PreviewPoint);
-		Ghost->Setup(0, PreviewSurface);
-		Ghost->SetAim(Player->GetControlRotation());
+		Ghost->Setup(0, PreviewSurface, Tool == EDCCamTool::Crane ? EDCCamRig::Crane : EDCCamRig::Static);
+		Ghost->SetAim(FRotator(Tool == EDCCamTool::Crane ? -60.f : 0.f, Player->GetControlRotation().Yaw, 0.f));
 		Ghost->SetTint(bPreviewValid ? FLinearColor(0.2f, 1.f, 0.4f) : FLinearColor(1.f, 0.15f, 0.1f));
 	}
 }
@@ -937,55 +937,14 @@ void ADCMultiCamDirector::HandlePrimaryPressed()
 	}
 	if (!bPreviewHit || !bPreviewValid)
 	{
-		Flash(!bPreviewHit ? TEXT("Aim at a floor, wall, or ceiling within 15 m") : TEXT("No room for a camera there"));
-		return;
-	}
-
-	if (Tool == EDCCamTool::Dolly)
-	{
-		// Lay the next rail point; F mounts the dolly camera on the finished rail.
-		if (!PendingRail)
-		{
-			FActorSpawnParameters Params;
-			Params.Owner = this;
-			PendingRail = GetWorld()->SpawnActor<ADCRail>(ADCRail::StaticClass(), FTransform::Identity, Params);
-			PendingRail->bFloorRail = false;
-			for (ADCPerformer* Performer : Performers)
-			{
-				PendingRail->IgnoredActors.Add(Performer);
-			}
-		}
-		FString Reason;
-		if (!PendingRail->TryAddPoint(PreviewPoint, Reason, PreviewSurface))
-		{
-			Flash(Reason);
-			return;
-		}
-		// The dolly camera exists as soon as its rail does (two points), so it is in the switcher straight away.
-		if (ADCMultiCam* Dolly = FindCameraOnRail(Cameras, PendingRail))
-		{
-			Dolly->MoveRig(0.f, 0.f);
-			Dolly->SaveHome();
-		}
-		else if (PendingRail->IsUsable())
-		{
-			const int32 Slot = FindFreeSlot();
-			Dolly = SpawnCamera(PendingRail->GetFloorLocationAtDistance(0.f));
-			Dolly->SetupDolly(Slot + 1, PendingRail);
-			Dolly->SaveHome();
-			Cameras[Slot] = Dolly;
-			Flash(FString::Printf(TEXT("Dolly CAM %d added. Keep clicking to extend its rail; F when done."), Slot + 1), 3.f);
-		}
-		else
-		{
-			Flash(TEXT("Click a second point to lay the dolly rail"), 2.f);
-		}
+		Flash(!bPreviewHit ? TEXT("Aim at clear ground within 15 m") : TEXT("No room for a camera there"));
 		return;
 	}
 
 	const int32 Slot = FindFreeSlot();
 	ADCMultiCam* Cam = SpawnCamera(PreviewPoint);
-	Cam->Setup(Slot + 1, PreviewSurface);
+	Cam->Setup(Slot + 1, PreviewSurface, Tool == EDCCamTool::Crane ? EDCCamRig::Crane : EDCCamRig::Static);
+	Cam->SetAim(FRotator(Tool == EDCCamTool::Crane ? -60.f : 0.f, Cam->GetAim().Yaw, 0.f));
 	Cam->SaveHome();
 	Cameras[Slot] = Cam;
 	Flash(FString::Printf(TEXT("CAM %d placed - look through it with %s to aim"), Slot + 1,
@@ -1093,15 +1052,11 @@ void ADCMultiCamDirector::HandleCycleTool()
 	{
 		return;
 	}
-	if (!bAllowMovingRigs)
-	{
-		Flash(TEXT("Only static cameras on this production"), 1.5f);
-		return;
-	}
 	FinishPendingRail(true);
-	Tool = Tool == EDCCamTool::Static ? EDCCamTool::Dolly : EDCCamTool::Static;
-	Flash(Tool == EDCCamTool::Static ? TEXT("STATIC camera: stand, wall, or ceiling")
-		: TEXT("DOLLY camera: click rail points on any surface; the camera appears at the second point. F starts a new rail."), 2.5f);
+	Tool = Tool == EDCCamTool::Static ? EDCCamTool::Crane : EDCCamTool::Static;
+	PendingHeight = Tool == EDCCamTool::Crane ? ADCMultiCam::CraneHeight : ADCMultiCam::StaticHeight;
+	Flash(Tool == EDCCamTool::Crane ? TEXT("CRANE: elevated bird's-eye camera; click ground to place")
+		: TEXT("STATIC: eye-level camera; click ground to place"), 2.5f);
 }
 
 float ADCMultiCamDirector::GetViewAspect() const
@@ -1182,14 +1137,14 @@ void ADCMultiCamDirector::ApplyStabilizer()
 	}
 }
 
-void ADCMultiCamDirector::HandleRigMove(float Axis, float DeltaSeconds)
+void ADCMultiCamDirector::HandleRigMove(FVector2D Axis, float DeltaSeconds)
 {
 	ADCMultiCam* Cam = GetCameraSlot(ViewingSlot);
-	if (!Cam || IsReviewing() || FMath::IsNearlyZero(Axis))
+	if (!Cam || IsReviewing() || Axis.IsNearlyZero())
 	{
 		return;
 	}
-	Cam->MoveRig(Axis, DeltaSeconds);
+	Cam->MoveLocal(Axis, DeltaSeconds);
 	if (Phase == EDCPhase::Preparation)
 	{
 		Cam->SaveHome();

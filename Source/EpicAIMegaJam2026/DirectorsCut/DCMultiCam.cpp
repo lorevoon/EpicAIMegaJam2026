@@ -7,6 +7,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/World.h"
+#include "EngineUtils.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace
@@ -71,6 +73,8 @@ ADCMultiCam::ADCMultiCam()
 	Tally->SetRelativeScale3D(FVector(0.06f));
 
 	Mount = MakePart(TEXT("Mount"), CubeMesh.Object, Root);
+	Boom = MakePart(TEXT("CraneBoom"), CubeMesh.Object, Root);
+	Boom->SetVisibility(false);
 
 	Label = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Label"));
 	Label->SetupAttachment(Root);
@@ -84,10 +88,12 @@ ADCMultiCam::ADCMultiCam()
 	Label->SetOwnerNoSee(true);
 }
 
-void ADCMultiCam::Setup(int32 InNumber, const FVector& Surface)
+void ADCMultiCam::Setup(int32 InNumber, const FVector& Surface, EDCCamRig InRig)
 {
 	Number = InNumber;
-	Rig = EDCCamRig::Static;
+	Rig = InRig;
+	PlacementCenter = HomeLocation = GetActorLocation();
+	MountSurface = Surface;
 	SetNumberLabel();
 	UpdateMount(Surface);
 	SetTint(FLinearColor(0.08f, 0.08f, 0.09f));
@@ -108,21 +114,25 @@ void ADCMultiCam::SetupDolly(int32 InNumber, ADCRail* InRail)
 
 void ADCMultiCam::SetNumberLabel()
 {
-	const TCHAR* Kind = Rig == EDCCamRig::Dolly ? TEXT(" DOLLY") : TEXT("");
+	const TCHAR* Kind = Rig == EDCCamRig::Crane ? TEXT(" CRANE") : Rig == EDCCamRig::Dolly ? TEXT(" DOLLY") : TEXT(" STATIC");
 	Label->SetText(FText::FromString(Number > 0 ? FString::Printf(TEXT("CAM %d%s"), Number, Kind) : FString()));
 }
 
 void ADCMultiCam::UpdateMount(const FVector& Surface)
 {
-	// Mount: a stand down to the floor or a bracket back to the wall/ceiling it is bolted to.
-	const FVector ToSurface = Surface - GetActorLocation();
-	const float Length = ToSurface.Size();
-	Mount->SetVisibility(Length > 1.f);
-	if (Length > 1.f)
+	const bool bCrane = Rig == EDCCamRig::Crane;
+	const FVector Base = bCrane ? MountSurface - FVector(250.f, 0.f, 0.f) : Surface;
+	const FVector Top = bCrane ? FVector(Base.X, Base.Y, PlacementCenter.Z) : GetActorLocation();
+	auto Beam = [](UStaticMeshComponent* Part, const FVector& A, const FVector& B, float Width)
 	{
-		Mount->SetWorldLocationAndRotation(GetActorLocation() + ToSurface * 0.5f, FRotationMatrix::MakeFromX(ToSurface).Rotator());
-		Mount->SetWorldScale3D(FVector(Length / 100.f, 0.05f, 0.05f));
-	}
+		const FVector Delta = B - A;
+		Part->SetVisibility(Delta.Size() > 1.f);
+		Part->SetWorldLocationAndRotation((A+B)*.5f, Delta.Rotation());
+		Part->SetWorldScale3D(FVector(Delta.Size()/100.f, Width, Width));
+	};
+	Beam(Mount, Base, Top, bCrane ? .14f : .05f);
+	Boom->SetVisibility(bCrane);
+	if (bCrane) Beam(Boom, Top, GetActorLocation(), .10f);
 }
 
 void ADCMultiCam::ApplyRigPosition()
@@ -150,6 +160,28 @@ void ADCMultiCam::MoveRig(float Axis, float DeltaSeconds)
 	}
 }
 
+void ADCMultiCam::MoveLocal(const FVector2D& Axis, float DeltaSeconds)
+{
+	if (Rig == EDCCamRig::Dolly) { MoveRig(Axis.Y, DeltaSeconds); return; }
+	const FVector2D Input = Axis.GetClampedToMaxSize(1.f);
+	const FRotator Facing(0.f, Aim.Yaw, 0.f);
+	const FVector Delta = (Facing.Vector()*Input.Y + FRotationMatrix(Facing).GetUnitAxis(EAxis::Y)*Input.X)
+		* (Rig == EDCCamRig::Crane ? 180.f : 120.f) * FMath::Max(0.f, DeltaSeconds);
+	FVector Offset = GetActorLocation() + Delta - PlacementCenter;
+	Offset.Z = 0.f;
+	const FVector Target = PlacementCenter + Offset.GetClampedToMaxSize(GetMovementRadius());
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(DCFreeCameraMove), false, this);
+	if (GetOwner()) Params.AddIgnoredActor(GetOwner());
+	for (TActorIterator<ADCMultiCam> It(GetWorld()); It; ++It) Params.AddIgnoredActor(*It);
+	FHitResult Hit;
+	if (!GetWorld()->SweepSingleByChannel(Hit, GetActorLocation(), Target, FQuat::Identity,
+		ECC_Visibility, FCollisionShape::MakeSphere(15.f), Params))
+	{
+		SetActorLocation(Target);
+		UpdateMount(MountSurface);
+	}
+}
+
 void ADCMultiCam::Destroyed()
 {
 	if (Rail)
@@ -167,7 +199,7 @@ float ADCMultiCam::GetRailProgress() const
 
 void ADCMultiCam::SetAimTarget(const FRotator& NewAim)
 {
-	Aim = FRotator(FMath::Clamp(NewAim.Pitch, -85.f, 85.f), FRotator::NormalizeAxis(NewAim.Yaw), 0.f);
+	Aim = FRotator(FMath::Clamp(NewAim.Pitch, -90.f, 85.f), FRotator::NormalizeAxis(NewAim.Yaw), 0.f);
 }
 
 void ADCMultiCam::SetAim(const FRotator& NewAim)
@@ -258,6 +290,7 @@ void ADCMultiCam::AdjustRailSpeed(int32 Direction)
 
 void ADCMultiCam::SaveHome()
 {
+	HomeLocation = GetActorLocation();
 	HomeAim = Aim;
 	HomeFOV = TargetFOV;
 	HomeRailDistance = RailDistance;
@@ -265,6 +298,11 @@ void ADCMultiCam::SaveHome()
 
 void ADCMultiCam::RestoreHome()
 {
+	if (Rig != EDCCamRig::Dolly)
+	{
+		SetActorLocation(HomeLocation);
+		UpdateMount(MountSurface);
+	}
 	SetAim(HomeAim);
 	TargetFOV = HomeFOV;
 	Camera->SetFieldOfView(HomeFOV);
@@ -281,7 +319,7 @@ void ADCMultiCam::SetLive(bool bLive)
 
 void ADCMultiCam::SetFrameMasked(bool bMasked)
 {
-	for (UStaticMeshComponent* Part : { Body.Get(), Lens.Get(), Tally.Get(), Mount.Get() })
+	for (UStaticMeshComponent* Part : { Body.Get(), Lens.Get(), Tally.Get(), Mount.Get(), Boom.Get() })
 	{
 		DCVisuals::SetFrameMask(Part, bMasked);
 	}
@@ -306,4 +344,5 @@ void ADCMultiCam::SetTint(const FLinearColor& Color)
 	DCVisuals::PaintWith(Body, RigMaterial, Color);
 	DCVisuals::PaintWith(Lens, RigMaterial, Color * 0.5f);
 	DCVisuals::PaintWith(Mount, RigMaterial, Color * 1.5f);
+	DCVisuals::PaintWith(Boom, RigMaterial, Color * 1.5f);
 }

@@ -151,12 +151,12 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
     <thead><tr><th>Phase</th><th>What the player does</th><th>Status</th></tr></thead>
     <tbody>
       <tr><td class="k">1 · Storyboard</td><td>Read the stage's beats in order: a sketch panel, a suggested angle, the action and dialogue, and the scored moment for each. Every beat is required to clear the stage. No times, no places; production timecodes stay hidden and are discovered through rehearsal.</td><td><span class="pill p-done">Text built</span> <span class="pill p-todo">Sketches + angles</span></td></tr>
-      <tr><td class="k">2 · Preparation</td><td>Walk the set freely while the rehearsal automatically loops. H pauses/resumes; comma/period select 0.5×, 1×, 2× or 4× speed. Wheel or arrow-key scrubbing pauses at the selected moment until H resumes. Place static, dolly and crane cameras, aim them, and set where each starts. Optionally spray numbered markers.</td><td><span class="pill p-done">Cameras + rehearsal transport built</span> <span class="pill p-nice">Markers</span></td></tr>
-      <tr><td class="k">3 · Shooting</td><td>Hit the clapperboard. Cut between cameras live; aim, smoothly zoom, drive dollies (with adjustable rail speed) and raise or lower cranes. The REC overlay and film look sell the shoot.</td><td><span class="pill p-done">Multi-cam cutting, smooth zoom, rail speed built</span> <span class="pill p-todo">Recording effect</span></td></tr>
+      <tr><td class="k">2 · Preparation</td><td>Walk the set freely while the rehearsal automatically loops. H pauses/resumes; comma/period select 0.5×, 1×, 2× or 4× speed. Wheel or arrow-key scrubbing pauses at the selected moment until H resumes. Place static and crane cameras, aim them, and set where each starts. Optionally spray numbered markers.</td><td><span class="pill p-done">Cameras + rehearsal transport built</span> <span class="pill p-nice">Markers</span></td></tr>
+      <tr><td class="k">3 · Shooting</td><td>Hit the clapperboard. Cut between cameras live; aim, smoothly zoom and move either camera with WASD within its placement radius. The REC overlay and film look sell the shoot.</td><td><span class="pill p-done">Multi-cam cutting, smooth zoom, local movement built</span> <span class="pill p-todo">Recording effect</span></td></tr>
       <tr><td class="k">4 · Evaluation</td><td>Watch the replay of your edited film, then see the grade: beats captured, missed beats listed by name, crew screen time, score and letter grade. Clear the stage to unlock the next one, or return to preparation with every camera kept.</td><td><span class="pill p-done">Results built</span> <span class="pill p-todo">Replay + letter grade</span></td></tr>
     </tbody>
   </table></div>
-  <p>Retry never reloads the map. Cameras, rails and markers persist between takes; actors, film crew, props, fire effects, clock and scores reset. Stages are played in order: The Promise (4 beats), The Raid (5 beats), The Broken Promise (6 beats).</p>
+  <p>Retry never reloads the map. Cameras and markers persist between takes; actors, film crew, props, fire effects, clock and scores reset. Stages are played in order: The Promise (4 beats), The Raid (5 beats), The Broken Promise (6 beats).</p>
 </section>
 
 <section id="controls">
@@ -165,15 +165,14 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
   <div class="table-wrap"><table>
     <thead><tr><th>Input</th><th>Preparation</th><th>Shooting</th></tr></thead>
     <tbody>
-      <tr><td class="k mono">WASD / Mouse</td><td>Walk and look. While looking through a camera: mouse aims, W/S moves a dolly or crane.</td><td>Mouse aims the live camera; W/S drives its dolly or crane</td></tr>
-      <tr><td class="k mono">T</td><td>Cycle camera type: static, dolly, crane</td><td>–</td></tr>
-      <tr><td class="k mono">LMB / RMB</td><td>Place camera or rail point / remove camera or last rail point</td><td>–</td></tr>
-      <tr><td class="k mono">F</td><td>Finish rail and mount the dolly camera</td><td>–</td></tr>
-      <tr><td class="k mono">Wheel</td><td>Stand or crane height; zoom while looking through a camera</td><td>Smooth zoom</td></tr>
+      <tr><td class="k mono">WASD / Mouse</td><td>Walk and look. While looking through a camera: mouse aims, WASD moves either camera horizontally within its radius.</td><td>Mouse aims the live camera; WASD moves it within its radius</td></tr>
+      <tr><td class="k mono">T</td><td>Cycle camera type: static / crane</td><td>–</td></tr>
+      <tr><td class="k mono">LMB / RMB</td><td>Place camera on clear ground / remove camera</td><td>–</td></tr>
+      <tr><td class="k mono">Wheel</td><td>Scrub rehearsal; Shift+Wheel zooms while looking through a camera</td><td>Smooth zoom</td></tr>
       <tr><td class="k mono">1–9 · [ ]</td><td>Look through a camera to aim it</td><td>Cut to a camera</td></tr>
       <tr><td class="k mono">← / →</td><td>Scrub the rehearsal</td><td>–</td></tr>
       <tr><td class="k mono">H · , .</td><td>Play/pause rehearsal · slower / faster (0.5×–4×). Space jumps on foot.</td><td>–</td></tr>
-      <tr><td class="k mono">E · Z / X</td><td>E: clapperboard / leave camera view · Z/X: dolly speed</td><td>Z/X: dolly speed down / up (0.25×–2×)</td></tr>
+      <tr><td class="k mono">Q / E</td><td>Lower / raise placement height; E leaves camera view</td><td>–</td></tr>
       <tr><td class="k mono">Enter · R · P · Tab</td><td>Action! · reset · pause · storyboard</td><td>– · restart take · pause · storyboard</td></tr>
     </tbody>
   </table></div>
@@ -181,13 +180,12 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
 
 <section id="cameras">
   <div class="eyebrow">Camera rigs</div>
-  <h2>As many cameras as you want, three kinds</h2>
+  <h2>As many cameras as you want, two kinds</h2>
   <div class="cols">
-    <div class="note"><h3>Static</h3><p>On a floor stand (40–320 cm), a wall or a ceiling. Its position is fixed after placement. Aim and zoom only.</p></div>
-    <div class="note"><h3>Dolly</h3><p>Lay rail points on any floor, wall or ceiling, then mount the camera. Rails cannot pass through scenery. Travel at an adjustable speed (base 600 cm/s).</p></div>
-    <div class="note"><h3>Crane</h3><p>Stands on the floor; the boom raises the lens from 40 to 800 cm. Great for looking over rooftops and fences, or linking the archer's upper landing to the lane below.</p></div>
+    <div class="note"><h3>Static</h3><p>Starts at eye level (170 cm). WASD moves horizontally within 200 cm of its placement centre at 120 cm/s; mouse aims.</p></div>
+    <div class="note"><h3>Crane</h3><p>Starts 700 cm above the ground, aimed down for a bird’s-eye view. WASD moves horizontally within 350 cm of its placement centre at 180 cm/s; mouse aims all the way to straight down. A mast and boom support the camera. No rail installation is needed.</p></div>
   </div>
-  <p>Whatever position and aim a camera has when you leave it during preparation is where it starts every take. Zoom runs from 20° to 90° horizontal field of view; zooming in extends the distance at which beats still count.</p>
+  <p>Position, angle and zoom save automatically during preparation. Press 1–9 to switch directly between cameras. During a take, each camera retains its last pose when switching away; retry restores all prepared presets. Movement stops at scenery; saving a preset does not expand the movement radius. Zoom runs from 20° to 90° horizontal field of view; zooming in extends the distance at which beats still count.</p>
 </section>
 
 <section id="rules">
@@ -340,7 +338,7 @@ Final score   = max(0, Beat points − Crew cost)   if every beat was captured
     <thead><tr><th>Class</th><th>Responsibility</th></tr></thead>
     <tbody>
       <tr><td class="k mono">DCZombieDirector</td><td>Phases (storyboard, rehearsal, planning, shooting, results), scene clock, scrubbing, intruder penalty (film crew), scoring. Holds the <b>Build Zombie Scene</b> button, which still builds the old blockout. <span class="pill p-todo">Needs</span> stage order, all-beats clear rule and missed-beat list.</td></tr>
-      <tr><td class="k mono">DCMultiCamDirector</td><td>Camera placement (static, dolly, crane, unlimited), live switching, scene capture rules.</td></tr>
+      <tr><td class="k mono">DCMultiCamDirector</td><td>Camera placement (static / crane, unlimited), live switching, scene capture rules.</td></tr>
       <tr><td class="k mono">DCMultiCam · DCRail</td><td>A placed camera and its mount; dolly rails on any surface.</td></tr>
       <tr><td class="k mono">DCPerformer · DCWaypoint</td><td>Story performers and film crew (crew use the <code>Ruins Shot</code> flag; raiders do not), with blocking as draggable waypoints: time, facing, lean, prop raise, tilt.</td></tr>
       <tr><td class="k mono">DCBeat</td><td>One storyboard beat: text, hidden window, hold, capture anchors, points. <span class="pill p-todo">Needs</span> a pose gate (hold enabled once the scored pose begins) and weapon-hand / fire-cue anchors.</td></tr>

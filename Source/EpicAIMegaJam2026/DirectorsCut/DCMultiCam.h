@@ -1,5 +1,4 @@
-// Director's Cut - a camera the player places on a stand, wall, or ceiling (static), or on a rail
-// (dolly). Its mount never moves after placement; aim, zoom, and the dolly's travel along its rail can.
+// Director's Cut - eye-level and elevated cameras with bounded local movement and saved presets.
 
 #pragma once
 
@@ -13,12 +12,13 @@ class UCameraComponent;
 class UStaticMeshComponent;
 class UTextRenderComponent;
 
-/** How a camera is mounted. Static cameras never move; dollies ride a rail. */
+/** How a camera is mounted. Rail rigs are retained for legacy scenes. */
 UENUM()
 enum class EDCCamRig : uint8
 {
 	Static,
-	Dolly
+	Dolly, // Legacy rail rigs remain loadable.
+	Crane
 };
 
 UCLASS()
@@ -34,8 +34,12 @@ public:
 	static constexpr float DefaultFOV = 75.f;
 	static constexpr float DollySpeed = 600.f;
 
-	/** Static camera. Number shown on the camera; 0 for the placement ghost. Surface is where the mount is bolted. */
-	void Setup(int32 InNumber, const FVector& Surface);
+	/** Static or crane camera. Number 0 is the placement ghost; Surface anchors the mount. */
+	void Setup(int32 InNumber, const FVector& Surface, EDCCamRig InRig = EDCCamRig::Static);
+	void MoveLocal(const FVector2D& Axis, float DeltaSeconds);
+	float GetMovementRadius() const { return Rig == EDCCamRig::Crane ? 350.f : 200.f; }
+	static constexpr float StaticHeight = 170.f;
+	static constexpr float CraneHeight = 700.f;
 
 	/** Dolly camera riding a rail (the rail's points are camera positions). The camera owns the rail. */
 	void SetupDolly(int32 InNumber, ADCRail* InRail);
@@ -73,7 +77,7 @@ public:
 	float GetRailSpeedScale() const;
 	void AdjustRailSpeed(int32 Direction);
 
-	/** The aim and zoom set during preparation; every take starts from them. */
+	/** The position, aim and zoom set during preparation; every take starts from them. */
 	void SaveHome();
 	void RestoreHome();
 
@@ -118,6 +122,9 @@ private:
 	TObjectPtr<UStaticMeshComponent> Mount;
 
 	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UStaticMeshComponent> Boom;
+
+	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UTextRenderComponent> Label;
 
 	UPROPERTY()
@@ -132,6 +139,9 @@ private:
 	void SetAimTarget(const FRotator& NewAim);
 	void SetNumberLabel();
 
+	FVector PlacementCenter = FVector::ZeroVector;
+	FVector MountSurface = FVector::ZeroVector;
+	FVector HomeLocation = FVector::ZeroVector;
 	int32 Number = 0;
 	EDCCamRig Rig = EDCCamRig::Static;
 	float RailDistance = 0.f;
