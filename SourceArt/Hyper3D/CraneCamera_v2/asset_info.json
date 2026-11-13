@@ -1,0 +1,16 @@
+{
+  "name": "CraneCamera",
+  "generation_id": "58c524cc-e61f-4ecb-8ffc-52395124b9bd",
+  "dimensions_m": [
+    1.350205421447754,
+    3.6604342460632324,
+    3.200000047683716
+  ],
+  "height_m": 3.2,
+  "pivot": "ground center",
+  "mesh_objects": 1,
+  "vertices": 28015,
+  "faces": 49486,
+  "static_mesh": true,
+  "rigged": false
+}

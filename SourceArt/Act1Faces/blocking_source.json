@@ -1,0 +1,733 @@
+{
+  "Romeo": {
+    "mesh": "/Game/DirectorsCut/Characters/SwordsmanAct1/SK_SwordsmanAct1.SK_SwordsmanAct1",
+    "mesh_offset": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.707107,W=0.707107),Translation=(X=0.000000,Y=0.000000,Z=0.000000),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))",
+    "bones": [
+      "rootSkeleton",
+      "pelvis_joint",
+      "waist_joint",
+      "chest_joint",
+      "neck_joint",
+      "head_joint",
+      "hair_joint0",
+      "hair_joint1",
+      "hair_joint2",
+      "hair_joint3",
+      "hair_joint4",
+      "topPonytail_joint1",
+      "topPonytail_joint2",
+      "topPonytail_joint3",
+      "L_Pigtail_joint1",
+      "L_Pigtail_joint2",
+      "L_Pigtail_joint3",
+      "R_Pigtail_joint1",
+      "R_Pigtail_joint2",
+      "R_Pigtail_joint3",
+      "L_eyebrow_joint",
+      "eyes_joint",
+      "mouth_joint",
+      "R_eyebrow_joint",
+      "cape_joint1",
+      "cape_joint2",
+      "cape_joint3",
+      "cape_joint4",
+      "cape_joint5",
+      "cape_joint6",
+      "L_clavicle_joint",
+      "L_shoulder_joint",
+      "L_elbow_joint",
+      "L_wrist_joint",
+      "L_midFinger_joint1",
+      "L_midFinger_joint2",
+      "L_midFinger_joint3",
+      "L_equip_joint",
+      "BowRig",
+      "bowJoint",
+      "stringJoint",
+      "L_indexFinger_joint1",
+      "L_indexFinger_joint2",
+      "L_indexFinger_joint3",
+      "L_ringFinger_joint1",
+      "L_ringFinger_joint2",
+      "L_ringFinger_joint3",
+      "L_pinkyFinger_joint1",
+      "L_pinkyFinger_joint2",
+      "L_pinkyFinger_joint3",
+      "L_thumbFinger_joint1",
+      "L_thumbFinger_joint2",
+      "L_thumbFinger_joint3",
+      "bosom_joint",
+      "R_clavicle_joint",
+      "R_shoulder_joint",
+      "R_elbow_joint",
+      "R_wrist_joint",
+      "R_midFinger_joint1",
+      "R_midFinger_joint2",
+      "R_midFinger_joint3",
+      "R_equip_joint",
+      "R_indexFinger_joint1",
+      "R_indexFinger_joint2",
+      "R_indexFinger_joint3",
+      "R_ringFinger_joint1",
+      "R_ringFinger_joint2",
+      "R_ringFinger_joint3",
+      "R_pinkyFinger_joint1",
+      "R_pinkyFinger_joint2",
+      "R_pinkyFinger_joint3",
+      "R_thumbFinger_joint1",
+      "R_thumbFinger_joint2",
+      "R_thumbFinger_joint3",
+      "L_thigh_joint",
+      "L_knee_joint",
+      "L_ankle_joint",
+      "L_ball_joint",
+      "L_toe_joint",
+      "Back_coatTail1",
+      "Back_coatTail2",
+      "Back_coatTail3",
+      "Back_coatTail4",
+      "Front_coatTail1",
+      "Front_coatTail2",
+      "Front_coatTail3",
+      "Front_oatTail4",
+      "R_thigh_joint",
+      "R_knee_joint",
+      "R_ankle_joint",
+      "R_ball_joint",
+      "R_toe_joint",
+      "L_coatTail_joint1",
+      "L_coatTail_joint2",
+      "L_coatTail_joint3",
+      "L_coatTail_joint4",
+      "R_coatTail_joint1",
+      "R_coatTail_joint2",
+      "R_coatTail_joint3",
+      "R_coatTail_joint4"
+    ],
+    "cues": [
+      {
+        "time": 0.0,
+        "animation": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_CarryWalk.A_Swordsman_CarryWalk",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      },
+      {
+        "time": 2.4000000953674316,
+        "animation": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_SetDown.A_Swordsman_SetDown",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": false
+      },
+      {
+        "time": 3.4000000953674316,
+        "animation": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_BreathingIdle.A_Swordsman_BreathingIdle",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      },
+      {
+        "time": 7.0,
+        "animation": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Unarmed_WalkForward.A_Swordsman_Unarmed_WalkForward",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      },
+      {
+        "time": 12.0,
+        "animation": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_BreathingIdle.A_Swordsman_BreathingIdle",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      },
+      {
+        "time": 16.0,
+        "animation": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_KissLean.A_Swordsman_KissLean",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": false
+      },
+      {
+        "time": 17.5,
+        "animation": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_ForeheadHold.A_Swordsman_ForeheadHold",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      }
+    ],
+    "waypoints": [
+      {
+        "time": 0.0,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=1.000000,W=0.000000),Translation=(X=-5850.000000,Y=-8870.000000,Z=1278.273727),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 2.4000000953674316,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.923880,W=0.382683),Translation=(X=-5900.000000,Y=-8850.000000,Z=1288.543906),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 7.0,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.000000,W=1.000000),Translation=(X=-5900.000000,Y=-8850.000000,Z=1288.543906),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 12.0,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.707107,W=0.707107),Translation=(X=-5000.000000,Y=-8850.000000,Z=1146.974232),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 16.0,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.707107,W=0.707107),Translation=(X=-5000.000000,Y=-8850.000000,Z=1146.974232),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 17.5,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.707107,W=0.707107),Translation=(X=-5000.000000,Y=-8830.000000,Z=1150.071647),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 20.0,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.707107,W=0.707107),Translation=(X=-5000.000000,Y=-8830.000000,Z=1150.071647),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 1.2000000476837158,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.980785,W=0.195090),Translation=(X=-5875.000000,Y=-8860.000000,Z=1283.640828),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 7.217391490936279,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.034141,W=0.999417),Translation=(X=-5860.869565,Y=-8850.000000,Z=1281.863596),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 7.4347825050354,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.068242,W=0.997669),Translation=(X=-5821.739130,Y=-8850.000000,Z=1274.900581),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 7.65217399597168,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.102264,W=0.994757),Translation=(X=-5782.608696,Y=-8850.000000,Z=1268.836643),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 7.869565010070801,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.136167,W=0.990686),Translation=(X=-5743.478261,Y=-8850.000000,Z=1262.925055),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 8.086956977844238,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.169910,W=0.985460),Translation=(X=-5704.347826,Y=-8850.000000,Z=1256.943728),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 8.30434799194336,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.203456,W=0.979084),Translation=(X=-5665.217391,Y=-8850.000000,Z=1251.377072),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 8.52173900604248,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.236764,W=0.971567),Translation=(X=-5626.086957,Y=-8850.000000,Z=1245.524492),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 8.739130020141602,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.269797,W=0.962917),Translation=(X=-5586.956522,Y=-8850.000000,Z=1239.950325),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 8.956521987915039,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.302515,W=0.953145),Translation=(X=-5547.826087,Y=-8850.000000,Z=1235.024180),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 9.17391300201416,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.334880,W=0.942261),Translation=(X=-5508.695652,Y=-8850.000000,Z=1230.206396),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 9.391304016113281,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.366854,W=0.930278),Translation=(X=-5469.565217,Y=-8850.000000,Z=1225.685801),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 9.608695983886719,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.398401,W=0.917211),Translation=(X=-5430.434783,Y=-8850.000000,Z=1222.139921),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 9.82608699798584,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.429483,W=0.903075),Translation=(X=-5391.304348,Y=-8850.000000,Z=1218.698110),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 10.043478012084961,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.460065,W=0.887885),Translation=(X=-5352.173913,Y=-8850.000000,Z=1215.081956),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 10.260869979858398,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.490110,W=0.871660),Translation=(X=-5313.043478,Y=-8850.000000,Z=1210.867133),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 10.47826099395752,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.519584,W=0.854419),Translation=(X=-5273.913043,Y=-8850.000000,Z=1205.154564),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 10.69565200805664,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.548452,W=0.836182),Translation=(X=-5234.782609,Y=-8850.000000,Z=1198.842790),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 10.913043022155762,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.576680,W=0.816970),Translation=(X=-5195.652174,Y=-8850.000000,Z=1191.552009),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 11.1304349899292,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.604236,W=0.796805),Translation=(X=-5156.521739,Y=-8850.000000,Z=1183.672215),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 11.34782600402832,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.631088,W=0.775711),Translation=(X=-5117.391304,Y=-8850.000000,Z=1175.280656),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 11.565217018127441,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.657204,W=0.753713),Translation=(X=-5078.260870,Y=-8850.000000,Z=1166.212644),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 11.782608985900879,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.682553,W=0.730836),Translation=(X=-5039.130435,Y=-8850.000000,Z=1156.906988),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      }
+    ]
+  },
+  "Mr. Smith": {
+    "mesh": "/Game/DirectorsCut/Characters/OldMan/SK_OldMan.SK_OldMan",
+    "mesh_offset": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.707107,W=0.707107),Translation=(X=0.000000,Y=0.000000,Z=0.000000),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))",
+    "bones": [
+      "rootSkeleton",
+      "pelvis_joint",
+      "waist_joint",
+      "chest_joint",
+      "neck_joint",
+      "head_joint",
+      "hair_joint0",
+      "hair_joint1",
+      "hair_joint2",
+      "hair_joint3",
+      "hair_joint4",
+      "topPonytail_joint1",
+      "topPonytail_joint2",
+      "topPonytail_joint3",
+      "L_Pigtail_joint1",
+      "L_Pigtail_joint2",
+      "L_Pigtail_joint3",
+      "R_Pigtail_joint1",
+      "R_Pigtail_joint2",
+      "R_Pigtail_joint3",
+      "L_eyebrow_joint",
+      "eyes_joint",
+      "mouth_joint",
+      "R_eyebrow_joint",
+      "cape_joint1",
+      "cape_joint2",
+      "cape_joint3",
+      "cape_joint4",
+      "cape_joint5",
+      "cape_joint6",
+      "L_clavicle_joint",
+      "L_shoulder_joint",
+      "L_elbow_joint",
+      "L_wrist_joint",
+      "L_midFinger_joint1",
+      "L_midFinger_joint2",
+      "L_midFinger_joint3",
+      "L_equip_joint",
+      "BowRig",
+      "bowJoint",
+      "stringJoint",
+      "L_indexFinger_joint1",
+      "L_indexFinger_joint2",
+      "L_indexFinger_joint3",
+      "L_ringFinger_joint1",
+      "L_ringFinger_joint2",
+      "L_ringFinger_joint3",
+      "L_pinkyFinger_joint1",
+      "L_pinkyFinger_joint2",
+      "L_pinkyFinger_joint3",
+      "L_thumbFinger_joint1",
+      "L_thumbFinger_joint2",
+      "L_thumbFinger_joint3",
+      "bosom_joint",
+      "R_clavicle_joint",
+      "R_shoulder_joint",
+      "R_elbow_joint",
+      "R_wrist_joint",
+      "R_midFinger_joint1",
+      "R_midFinger_joint2",
+      "R_midFinger_joint3",
+      "R_equip_joint",
+      "R_indexFinger_joint1",
+      "R_indexFinger_joint2",
+      "R_indexFinger_joint3",
+      "R_ringFinger_joint1",
+      "R_ringFinger_joint2",
+      "R_ringFinger_joint3",
+      "R_pinkyFinger_joint1",
+      "R_pinkyFinger_joint2",
+      "R_pinkyFinger_joint3",
+      "R_thumbFinger_joint1",
+      "R_thumbFinger_joint2",
+      "R_thumbFinger_joint3",
+      "L_thigh_joint",
+      "L_knee_joint",
+      "L_ankle_joint",
+      "L_ball_joint",
+      "L_toe_joint",
+      "Back_coatTail1",
+      "Back_coatTail2",
+      "Back_coatTail3",
+      "Back_coatTail4",
+      "Front_coatTail1",
+      "Front_coatTail2",
+      "Front_coatTail3",
+      "Front_oatTail4",
+      "R_thigh_joint",
+      "R_knee_joint",
+      "R_ankle_joint",
+      "R_ball_joint",
+      "R_toe_joint",
+      "L_coatTail_joint1",
+      "L_coatTail_joint2",
+      "L_coatTail_joint3",
+      "L_coatTail_joint4",
+      "R_coatTail_joint1",
+      "R_coatTail_joint2",
+      "R_coatTail_joint3",
+      "R_coatTail_joint4"
+    ],
+    "cues": [
+      {
+        "time": 0.0,
+        "animation": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_BreathingIdle.A_Swordsman_BreathingIdle",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      },
+      {
+        "time": 3.5,
+        "animation": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_ShoulderPat.A_Swordsman_ShoulderPat",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": false
+      },
+      {
+        "time": 5.0,
+        "animation": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_BreathingIdle.A_Swordsman_BreathingIdle",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      },
+      {
+        "time": 6.5,
+        "animation": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Wave.A_Swordsman_Wave",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": false
+      },
+      {
+        "time": 8.0,
+        "animation": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_BreathingIdle.A_Swordsman_BreathingIdle",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      }
+    ],
+    "waypoints": [
+      {
+        "time": 0.0,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.216440,W=0.976296),Translation=(X=-6070.000000,Y=-8710.000000,Z=1317.887809),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 20.0,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.216440,W=0.976296),Translation=(X=-6070.000000,Y=-8710.000000,Z=1317.887809),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      }
+    ]
+  },
+  "Juliet": {
+    "mesh": "/Game/DirectorsCut/Characters/ArcherAct1/SK_ArcherAct1.SK_ArcherAct1",
+    "mesh_offset": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.707107,W=0.707107),Translation=(X=0.000000,Y=0.000000,Z=0.000000),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))",
+    "bones": [
+      "rootSkeleton",
+      "pelvis_joint",
+      "waist_joint",
+      "chest_joint",
+      "neck_joint",
+      "head_joint",
+      "hair_joint0",
+      "hair_joint1",
+      "hair_joint2",
+      "hair_joint3",
+      "hair_joint4",
+      "topPonytail_joint1",
+      "topPonytail_joint2",
+      "topPonytail_joint3",
+      "L_Pigtail_joint1",
+      "L_Pigtail_joint2",
+      "L_Pigtail_joint3",
+      "R_Pigtail_joint1",
+      "R_Pigtail_joint2",
+      "R_Pigtail_joint3",
+      "L_eyebrow_joint",
+      "eyes_joint",
+      "mouth_joint",
+      "R_eyebrow_joint",
+      "cape_joint1",
+      "cape_joint2",
+      "cape_joint3",
+      "cape_joint4",
+      "cape_joint5",
+      "cape_joint6",
+      "L_clavicle_joint",
+      "L_shoulder_joint",
+      "L_elbow_joint",
+      "L_wrist_joint",
+      "L_midFinger_joint1",
+      "L_midFinger_joint2",
+      "L_midFinger_joint3",
+      "L_equip_joint",
+      "BowRig",
+      "bowJoint",
+      "stringJoint",
+      "L_indexFinger_joint1",
+      "L_indexFinger_joint2",
+      "L_indexFinger_joint3",
+      "L_ringFinger_joint1",
+      "L_ringFinger_joint2",
+      "L_ringFinger_joint3",
+      "L_pinkyFinger_joint1",
+      "L_pinkyFinger_joint2",
+      "L_pinkyFinger_joint3",
+      "L_thumbFinger_joint1",
+      "L_thumbFinger_joint2",
+      "L_thumbFinger_joint3",
+      "bosom_joint",
+      "R_clavicle_joint",
+      "R_shoulder_joint",
+      "R_elbow_joint",
+      "R_wrist_joint",
+      "R_midFinger_joint1",
+      "R_midFinger_joint2",
+      "R_midFinger_joint3",
+      "R_equip_joint",
+      "R_indexFinger_joint1",
+      "R_indexFinger_joint2",
+      "R_indexFinger_joint3",
+      "R_ringFinger_joint1",
+      "R_ringFinger_joint2",
+      "R_ringFinger_joint3",
+      "R_pinkyFinger_joint1",
+      "R_pinkyFinger_joint2",
+      "R_pinkyFinger_joint3",
+      "R_thumbFinger_joint1",
+      "R_thumbFinger_joint2",
+      "R_thumbFinger_joint3",
+      "L_thigh_joint",
+      "L_knee_joint",
+      "L_ankle_joint",
+      "L_ball_joint",
+      "L_toe_joint",
+      "Back_coatTail1",
+      "Back_coatTail2",
+      "Back_coatTail3",
+      "Back_coatTail4",
+      "Front_coatTail1",
+      "Front_coatTail2",
+      "Front_coatTail3",
+      "Front_oatTail4",
+      "R_thigh_joint",
+      "R_knee_joint",
+      "R_ankle_joint",
+      "R_ball_joint",
+      "R_toe_joint",
+      "L_coatTail_joint1",
+      "L_coatTail_joint2",
+      "L_coatTail_joint3",
+      "L_coatTail_joint4",
+      "R_coatTail_joint1",
+      "R_coatTail_joint2",
+      "R_coatTail_joint3",
+      "R_coatTail_joint4"
+    ],
+    "cues": [
+      {
+        "time": 0.0,
+        "animation": "/Game/DirectorsCut/Animations/Archer/A_Archer_BreathingIdle.A_Archer_BreathingIdle",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      },
+      {
+        "time": 4.0,
+        "animation": "/Game/DirectorsCut/Animations/Archer/A_Archer_Unarmed_WalkForward.A_Archer_Unarmed_WalkForward",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      },
+      {
+        "time": 6.0,
+        "animation": "/Game/DirectorsCut/Animations/Archer/A_Archer_BreathingIdle.A_Archer_BreathingIdle",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      },
+      {
+        "time": 7.0,
+        "animation": "/Game/DirectorsCut/Animations/Archer/A_Archer_Unarmed_WalkForward.A_Archer_Unarmed_WalkForward",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      },
+      {
+        "time": 12.5,
+        "animation": "/Game/DirectorsCut/Animations/Archer/A_Archer_BreathingIdle.A_Archer_BreathingIdle",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      },
+      {
+        "time": 16.0,
+        "animation": "/Game/DirectorsCut/Animations/Archer/A_Archer_KissLean.A_Archer_KissLean",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": false
+      },
+      {
+        "time": 17.5,
+        "animation": "/Game/DirectorsCut/Animations/Archer/A_Archer_ForeheadHold.A_Archer_ForeheadHold",
+        "rate": 1.0,
+        "offset": 0.0,
+        "loop": true
+      }
+    ],
+    "waypoints": [
+      {
+        "time": 0.0,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.906308,W=0.422618),Translation=(X=-5850.000000,Y=-8500.000000,Z=1301.251676),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 4.0,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.906308,W=0.422618),Translation=(X=-5850.000000,Y=-8500.000000,Z=1301.251676),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 6.0,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.707107,W=0.707107),Translation=(X=-5900.000000,Y=-8650.000000,Z=1301.162626),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 7.0,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.000000,W=1.000000),Translation=(X=-5900.000000,Y=-8650.000000,Z=1301.162626),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 11.5,
+        "transform": "(Rotation=(X=0.000000,Y=-0.000000,Z=0.000000,W=1.000000),Translation=(X=-5090.000000,Y=-8650.000000,Z=1192.323949),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 12.5,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.707107,W=0.707107),Translation=(X=-5000.000000,Y=-8750.000000,Z=1162.589516),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 16.0,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.707107,W=0.707107),Translation=(X=-5000.000000,Y=-8750.000000,Z=1162.589516),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 17.5,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.707107,W=0.707107),Translation=(X=-5000.000000,Y=-8760.000000,Z=1161.040809),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 20.0,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.707107,W=0.707107),Translation=(X=-5000.000000,Y=-8760.000000,Z=1161.040809),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 4.5,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.866025,W=0.500000),Translation=(X=-5862.500000,Y=-8537.500000,Z=1301.251676),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 5.0,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.819152,W=0.573576),Translation=(X=-5875.000000,Y=-8575.000000,Z=1301.534917),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 5.5,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.766044,W=0.642788),Translation=(X=-5887.500000,Y=-8612.500000,Z=1301.336433),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 7.214285850524902,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5861.428571,Y=-8650.000000,Z=1296.237554),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 7.4285712242126465,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5822.857143,Y=-8650.000000,Z=1289.928462),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 7.642857074737549,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5784.285714,Y=-8650.000000,Z=1283.912267),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 7.857142925262451,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5745.714286,Y=-8650.000000,Z=1278.688397),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 8.071428298950195,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5707.142857,Y=-8650.000000,Z=1272.538628),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 8.285714149475098,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5668.571429,Y=-8650.000000,Z=1267.352309),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 8.5,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5630.000000,Y=-8650.000000,Z=1261.560883),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 8.714285850524902,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5591.428571,Y=-8650.000000,Z=1255.892303),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 8.928571701049805,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5552.857143,Y=-8650.000000,Z=1251.120116),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 9.142857551574707,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5514.285714,Y=-8650.000000,Z=1247.288312),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 9.357142448425293,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5475.714286,Y=-8650.000000,Z=1242.681887),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 9.571428298950195,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5437.142857,Y=-8650.000000,Z=1238.719728),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 9.785714149475098,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5398.571429,Y=-8650.000000,Z=1235.699024),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 10.0,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5360.000000,Y=-8650.000000,Z=1232.188012),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 10.214285850524902,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5321.428571,Y=-8650.000000,Z=1228.094961),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 10.428571701049805,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5282.857143,Y=-8650.000000,Z=1223.628547),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 10.642857551574707,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5244.285714,Y=-8650.000000,Z=1218.751218),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 10.857142448425293,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5205.714286,Y=-8650.000000,Z=1212.640073),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 11.071428298950195,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5167.142857,Y=-8650.000000,Z=1206.179704),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 11.285714149475098,
+        "transform": "(Rotation=(X=0.000000,Y=0.000000,Z=0.000000,W=1.000000),Translation=(X=-5128.571429,Y=-8650.000000,Z=1199.550356),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 11.75,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.195090,W=0.980785),Translation=(X=-5067.500000,Y=-8675.000000,Z=1184.966113),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 12.0,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.382683,W=0.923880),Translation=(X=-5045.000000,Y=-8700.000000,Z=1177.732195),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      },
+      {
+        "time": 12.25,
+        "transform": "(Rotation=(X=-0.000000,Y=0.000000,Z=-0.555570,W=0.831470),Translation=(X=-5022.500000,Y=-8725.000000,Z=1170.569088),Scale3D=(X=1.000000,Y=1.000000,Z=1.000000))"
+      }
+    ]
+  }
+}

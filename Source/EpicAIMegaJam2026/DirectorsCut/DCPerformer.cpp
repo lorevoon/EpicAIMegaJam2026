@@ -233,6 +233,17 @@ void ADCPerformer::Evaluate(float SceneTime)
 		{
 			Prop->SetWorldTransform(SetDownTransform);
 		}
+		else if (SetDownTime >= 0.f && SetDownBlendDuration > KINDA_SMALL_NUMBER
+			&& SceneTime > SetDownTime - SetDownBlendDuration)
+		{
+			// Derive both endpoints from the scene clock, never the previous frame,
+			// so seeking and replay produce the same lowering motion.
+			const float Alpha = FMath::Clamp((SceneTime - SetDownTime + SetDownBlendDuration) / SetDownBlendDuration, 0.f, 1.f);
+			const float Weight = Alpha * Alpha * (3.f - 2.f * Alpha);
+			FTransform Placement;
+			Placement.Blend(CarryTransform * GetActorTransform(), SetDownTransform, Weight);
+			Prop->SetWorldTransform(Placement);
+		}
 		else
 		{
 			Prop->SetRelativeTransform(CarryTransform);
