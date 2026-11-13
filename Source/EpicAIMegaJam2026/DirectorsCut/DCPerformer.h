@@ -10,6 +10,27 @@
 
 class UStaticMeshComponent;
 class USplineComponent;
+class USkeletalMeshComponent;
+class USkeletalMesh;
+class UAnimSequence;
+
+/** A clip evaluated from the director clock, including backwards scrubbing. */
+USTRUCT(BlueprintType)
+struct FDCAnimationCue
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float StartTime = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	TObjectPtr<UAnimSequence> Animation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float PlayRate = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float StartOffset = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	bool bLoop = true;
+};
 
 UCLASS()
 class ADCPerformer : public AActor
@@ -37,14 +58,49 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Performer")
 	bool bHasProp = false;
 
+	/** Optional carried prop, placed at its destination when the scene clock reaches SetDownTime. */
+	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
+	TObjectPtr<UStaticMesh> CarriedMesh;
+	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
+	FTransform CarryTransform = FTransform::Identity;
+	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
+	float SetDownTime = -1.f;
+	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
+	FTransform SetDownTransform = FTransform::Identity;
+
 	/** Anything with this ticked (zombies) ruins the shot whenever the live camera can see it. */
 	UPROPERTY(EditAnywhere, Category = "Performer")
 	bool bRuinsShot = false;
+
+	/** Optional imported character. When unset, the original blockout remains visible. */
+	UPROPERTY(EditAnywhere, Category = "Performer|Skeletal")
+	TObjectPtr<USkeletalMesh> CharacterMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Performer|Skeletal")
+	FTransform MeshOffset = FTransform::Identity;
+
+	UPROPERTY(EditAnywhere, Category = "Performer|Skeletal")
+	TArray<FDCAnimationCue> AnimationCues;
+
+	UPROPERTY(EditAnywhere, Category = "Performer|Skeletal")
+	FName HeadBone = TEXT("Head");
+
+	UPROPERTY(EditAnywhere, Category = "Performer|Skeletal")
+	FName BodyBone = TEXT("Spine");
+
+	/** Enable waypoint Z values for sloped or elevated sets; legacy scenes retain their floor height. */
+	UPROPERTY(EditAnywhere, Category = "Performer")
+	bool bUseWaypointHeight = false;
+
+	/** Constant-speed travel between authored keys, useful with in-place walk cycles. */
+	UPROPERTY(EditAnywhere, Category = "Performer")
+	bool bLinearMovement = false;
 
 	/** Collects this performer's waypoints into keyframes. Call once before Evaluate. */
 	void BuildKeys();
 
 	/** Poses the performer deterministically for the given scene time. */
+	UFUNCTION(BlueprintCallable, Category = "Performer")
 	void Evaluate(float SceneTime);
 
 	USceneComponent* GetAnchor(EDCAnchorPart Part) const;
@@ -76,6 +132,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USplineComponent> Path;
+
+	UPROPERTY(VisibleAnywhere, Category = "Performer|Skeletal")
+	TObjectPtr<USkeletalMeshComponent> Character;
 
 	TArray<FDCKey> Keys;
 	bool bKeysBuilt = false;

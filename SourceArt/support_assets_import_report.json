@@ -1,0 +1,82 @@
+{
+  "armored_mesh": "/Game/DirectorsCut/Characters/OrcArmored/SK_OrcArmored.SK_OrcArmored",
+  "targets": {
+    "Archer": [
+      "/Game/DirectorsCut/Animations/Archer/A_Archer_Support_Run",
+      "/Game/DirectorsCut/Animations/Archer/A_Archer_Support_Walk",
+      "/Game/DirectorsCut/Animations/Archer/A_Archer_Support_Idle",
+      "/Game/DirectorsCut/Animations/Archer/A_Archer_Support_LookAround",
+      "/Game/DirectorsCut/Animations/Archer/A_Archer_Support_HitGut",
+      "/Game/DirectorsCut/Animations/Archer/A_Archer_Support_BowEquip",
+      "/Game/DirectorsCut/Animations/Archer/A_Archer_Support_BowDraw",
+      "/Game/DirectorsCut/Animations/Archer/A_Archer_Support_BowAim",
+      "/Game/DirectorsCut/Animations/Archer/A_Archer_Support_BowRelease",
+      "/Game/DirectorsCut/Animations/Archer/A_Archer_Support_DeathForward",
+      "/Game/DirectorsCut/Animations/Archer/A_Archer_Support_DeathBackward"
+    ],
+    "Swordsman": [
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_Run",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_Walk",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_Idle",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_LookAround",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_DrawWeapon",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_MeleeSlash",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_MeleeDownward",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_MeleeBackhand",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_MeleeCombo",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_Block",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_BlockHit",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_HitGut",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_DeathForward",
+      "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_Support_DeathBackward"
+    ],
+    "Goblin": [
+      "/Game/DirectorsCut/Animations/Goblin/A_Goblin_Support_Run",
+      "/Game/DirectorsCut/Animations/Goblin/A_Goblin_Support_Walk",
+      "/Game/DirectorsCut/Animations/Goblin/A_Goblin_Support_Idle",
+      "/Game/DirectorsCut/Animations/Goblin/A_Goblin_Support_LookAround",
+      "/Game/DirectorsCut/Animations/Goblin/A_Goblin_Support_MeleeSlash",
+      "/Game/DirectorsCut/Animations/Goblin/A_Goblin_Support_MeleeDownward",
+      "/Game/DirectorsCut/Animations/Goblin/A_Goblin_Support_HitGut",
+      "/Game/DirectorsCut/Animations/Goblin/A_Goblin_Support_DeathForward",
+      "/Game/DirectorsCut/Animations/Goblin/A_Goblin_Support_DeathBackward",
+      "/Game/DirectorsCut/Animations/Goblin/A_Goblin_Support_RaiderRoar",
+      "/Game/DirectorsCut/Animations/Goblin/A_Goblin_Support_RaiderRun",
+      "/Game/DirectorsCut/Animations/Goblin/A_Goblin_Support_RaiderSwipe"
+    ],
+    "Orc": [
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_Run",
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_Walk",
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_Idle",
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_LookAround",
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_DrawWeapon",
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_MeleeSlash",
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_MeleeDownward",
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_HitGut",
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_DeathForward",
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_DeathBackward",
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_RaiderRoar",
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_RaiderRun",
+      "/Game/DirectorsCut/Animations/Orc/A_Orc_Support_RaiderSwipe"
+    ],
+    "OrcArmored": [
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_Run",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_Walk",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_Idle",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_LookAround",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_DrawWeapon",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_MeleeSlash",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_MeleeDownward",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_MeleeBackhand",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_MeleeCombo",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_Block",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_BlockHit",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_HitGut",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_DeathForward",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_DeathBackward",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_RaiderRoar",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_RaiderRun",
+      "/Game/DirectorsCut/Animations/OrcArmored/A_OrcArmored_Support_RaiderSwipe"
+    ]
+  }
+}

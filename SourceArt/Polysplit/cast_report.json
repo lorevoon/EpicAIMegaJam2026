@@ -1,0 +1,46 @@
+{
+  "OldMan": {
+    "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\PolysplitGames\\LowPolyMedievalFantasyHeroes\\BasicHeroes\\M_Mage.fbx",
+    "meshes": [
+      "M_hair_8b_Bangs",
+      "M_eyebrows0",
+      "M_Mage_Top",
+      "M_hair_1",
+      "M_Mage_Bottom",
+      "facialHair_1",
+      "M_Head",
+      "M_hair_3b_Top",
+      "M_mouth0",
+      "M_Mage_SlingBag",
+      "M_eyes0"
+    ],
+    "bones": 99
+  },
+  "Crew": {
+    "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\PolysplitGames\\LowPolyMedievalFantasyHeroes\\BasicHeroes\\M_Rogue.fbx",
+    "meshes": [
+      "M_Rogue_Top",
+      "M_eyebrows0",
+      "M_Rogue_Bottom",
+      "facialHair_1",
+      "M_eyes0",
+      "M_hair_3b_Top",
+      "M_mouth0",
+      "M_hair_1",
+      "M_hair_8b_Bangs",
+      "M_Head",
+      "Headset_Earcup",
+      "Headset_Earcup.001",
+      "Headset_Band",
+      "Headset_Band.001",
+      "Headset_Band.002",
+      "Headset_Band.003",
+      "Headset_Band.004",
+      "Headset_Band.005",
+      "Headset_Band.006",
+      "Headset_Band.007",
+      "Headset_Band.008"
+    ],
+    "bones": 99
+  }
+}

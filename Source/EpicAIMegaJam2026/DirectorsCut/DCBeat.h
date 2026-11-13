@@ -42,6 +42,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Beat|Timing", meta = (ClampMin = "0", Units = "s"))
 	float WindowEnd = 10.f;
 
+	/** Earliest scene time at which the scored pose is readable. Zero preserves legacy windows. */
+	UPROPERTY(EditAnywhere, Category = "Beat|Timing", meta = (ClampMin = "0", Units = "s"))
+	float PoseReadyTime = 0.f;
+
+	float GetCaptureStartTime() const { return FMath::Max(WindowStart, PoseReadyTime); }
+
 	UPROPERTY(EditAnywhere, Category = "Beat|Timing", meta = (ClampMin = "0.1", Units = "s"))
 	float RequiredHold = 2.f;
 

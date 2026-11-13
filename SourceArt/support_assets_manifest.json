@@ -1,0 +1,215 @@
+{
+  "description": "Local Mixamo-format source clips reused from COMP 3329 POC. Combat clips are base motions; exact stabbing/paired kiss/carry/pat/mourning require authored overlays.",
+  "clips": [
+    {
+      "name": "A_Support_Run",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Melee Axe Pack\\unarmed run forward.fbx",
+      "targets": [
+        "Archer",
+        "Swordsman",
+        "Goblin",
+        "Orc",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_Walk",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Melee Axe Pack\\unarmed walk forward.fbx",
+      "targets": [
+        "Archer",
+        "Swordsman",
+        "Goblin",
+        "Orc",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_Idle",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Melee Axe Pack\\unarmed idle.fbx",
+      "targets": [
+        "Archer",
+        "Swordsman",
+        "Goblin",
+        "Orc",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_LookAround",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Melee Axe Pack\\unarmed idle looking ver. 1.fbx",
+      "targets": [
+        "Archer",
+        "Swordsman",
+        "Goblin",
+        "Orc",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_DrawWeapon",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Melee Axe Pack\\unarmed equip over shoulder.fbx",
+      "targets": [
+        "Swordsman",
+        "Orc",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_MeleeSlash",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Melee Axe Pack\\standing melee attack horizontal.fbx",
+      "targets": [
+        "Swordsman",
+        "Goblin",
+        "Orc",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_MeleeDownward",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Melee Axe Pack\\standing melee attack downward.fbx",
+      "targets": [
+        "Swordsman",
+        "Goblin",
+        "Orc",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_MeleeBackhand",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Melee Axe Pack\\standing melee attack backhand.fbx",
+      "targets": [
+        "Swordsman",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_MeleeCombo",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Melee Axe Pack\\standing melee combo attack ver. 1.fbx",
+      "targets": [
+        "Swordsman",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_Block",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Melee Axe Pack\\standing block idle.fbx",
+      "targets": [
+        "Swordsman",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_BlockHit",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Melee Axe Pack\\standing block react large.fbx",
+      "targets": [
+        "Swordsman",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_HitGut",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Melee Axe Pack\\standing react large gut.fbx",
+      "targets": [
+        "Archer",
+        "Swordsman",
+        "Goblin",
+        "Orc",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_BowEquip",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Longbow Pack\\standing equip bow.fbx",
+      "targets": [
+        "Archer"
+      ]
+    },
+    {
+      "name": "A_Support_BowDraw",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Longbow Pack\\standing draw arrow.fbx",
+      "targets": [
+        "Archer"
+      ]
+    },
+    {
+      "name": "A_Support_BowAim",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Longbow Pack\\standing aim overdraw.fbx",
+      "targets": [
+        "Archer"
+      ]
+    },
+    {
+      "name": "A_Support_BowRelease",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Longbow Pack\\standing aim recoil.fbx",
+      "targets": [
+        "Archer"
+      ]
+    },
+    {
+      "name": "A_Support_DeathForward",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Longbow Pack\\standing death forward 01.fbx",
+      "targets": [
+        "Archer",
+        "Swordsman",
+        "Goblin",
+        "Orc",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_DeathBackward",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Pro Longbow Pack\\standing death backward 01.fbx",
+      "targets": [
+        "Archer",
+        "Swordsman",
+        "Goblin",
+        "Orc",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_RaiderRoar",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Creature Pack\\mutant roaring.fbx",
+      "targets": [
+        "Goblin",
+        "Orc",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_RaiderRun",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Creature Pack\\mutant run.fbx",
+      "targets": [
+        "Goblin",
+        "Orc",
+        "OrcArmored"
+      ]
+    },
+    {
+      "name": "A_Support_RaiderSwipe",
+      "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\Animation\\Creature Pack\\mutant swiping.fbx",
+      "targets": [
+        "Goblin",
+        "Orc",
+        "OrcArmored"
+      ]
+    }
+  ],
+  "armored_orc": {
+    "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\PolysplitGames\\LowPolyMedievalFantasyBipedCreatures\\BipedCreatures\\Orc.fbx",
+    "retained_meshes": [
+      "Orc_Head",
+      "Orc_Top_underArmor",
+      "Orc_Top_Armor",
+      "Orc_Bottom_underArmor",
+      "Orc_Bottom_Armor",
+      "Orc_Sword"
+    ],
+    "excluded_meshes": [
+      "Orc_Top",
+      "Orc_Bottom",
+      "Orc_Skirt"
+    ],
+    "note": "Rigged armored configuration assembled from named modular parts. Source only provides a static armored prefab, no separate rigged armored preset. Excludes alternate exposed-body geometry to prevent overlap."
+  }
+}
