@@ -35,7 +35,8 @@ UENUM()
 enum class EDCCamTool : uint8
 {
 	Static,
-	Dolly
+	Dolly, // Legacy, no longer offered for placement.
+	Crane
 };
 
 /** Runtime state of one hidden beat. */
@@ -189,7 +190,7 @@ public:
 	virtual void HandleStartTake();
 	virtual void HandleRestart();
 	/** W/S while looking through a dolly camera: travel along its rail. */
-	void HandleRigMove(float Axis, float DeltaSeconds);
+	void HandleRigMove(FVector2D Axis, float DeltaSeconds);
 	void HandleCycleTool();
 	/** G: stabilizer off / light / heavy. Kept between takes; only active while shooting. */
 	void HandleCycleStabilizer();

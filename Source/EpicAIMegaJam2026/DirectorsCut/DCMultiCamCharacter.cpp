@@ -112,15 +112,12 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Input->BindAction(Height, ETriggerEvent::Triggered, this, &ADCMultiCamCharacter::OnPlacementHeight);
 	Input->BindAction(MapButton(EKeys::T), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleTool);
 	Input->BindAction(MapButton(EKeys::G), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleStabilizer);
-	Input->BindAction(MapButton(EKeys::F), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnFinishRail);
 	Input->BindAction(MapButton(EKeys::LeftBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, -1);
 	Input->BindAction(MapButton(EKeys::RightBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, 1);
 	UInputAction* JumpOrTransport = MapButton(EKeys::SpaceBar);
 	Input->BindAction(JumpOrTransport, ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTransportToggle);
 	Input->BindAction(JumpOrTransport, ETriggerEvent::Completed, this, &ADCMultiCamCharacter::StopJumping);
 	Input->BindAction(JumpOrTransport, ETriggerEvent::Canceled, this, &ADCMultiCamCharacter::StopJumping);
-	Input->BindAction(MapButton(EKeys::Z), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRailSpeed, -1);
-	Input->BindAction(MapButton(EKeys::X), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRailSpeed, 1);
 	Input->BindAction(MapButton(EKeys::H), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRehearsalToggle);
 	Input->BindAction(MapButton(EKeys::Comma), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRehearsalSpeed, -1);
 	Input->BindAction(MapButton(EKeys::Period), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRehearsalSpeed, 1);
@@ -187,10 +184,10 @@ void ADCMultiCamCharacter::OnMove(const FInputActionValue& Value)
 	const FVector2D Axis = Value.Get<FVector2D>();
 	if (IsLockedToCamera())
 	{
-		// W/S drive the dolly of the camera being looked through.
+		// WASD adjusts the active camera within its placement radius.
 		if (ADCMultiCamDirector* D = GetDirector())
 		{
-			D->HandleRigMove(Axis.Y, GetWorld()->GetDeltaSeconds());
+			D->HandleRigMove(Axis, GetWorld()->GetDeltaSeconds());
 		}
 		return;
 	}
