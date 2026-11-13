@@ -1,0 +1,15 @@
+{
+  "name": "07_light_medium_round",
+  "source": "Hyper3D Rodin via official CLI / MCP service",
+  "generation_id": "2b503bd5-dc28-49ad-b50c-78dafa5986e5",
+  "vertices": 4941,
+  "triangles": 8212,
+  "meshes": 1,
+  "units": "meters",
+  "pivot": "bottom center",
+  "formats": [
+    "glb",
+    "fbx"
+  ],
+  "rigged": false
+}

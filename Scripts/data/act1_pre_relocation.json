@@ -1,0 +1,5961 @@
+{
+  "actors": [
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.StaticMeshActor_54"
+      },
+      "label": "Mill-side bench seat",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 2010,
+          "z": 1656.0943813323975
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1.7,
+          "y": 0.48,
+          "z": 0.12
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.StaticMeshActor_55"
+      },
+      "label": "Bench leg",
+      "transform": {
+        "location": {
+          "x": 4040,
+          "y": 2010,
+          "z": 1630.0943813323975
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 0.12,
+          "y": 0.4,
+          "z": 0.42
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.StaticMeshActor_56"
+      },
+      "label": "Bench leg",
+      "transform": {
+        "location": {
+          "x": 4160,
+          "y": 2010,
+          "z": 1630.0943813323975
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 0.12,
+          "y": 0.4,
+          "z": 0.42
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.StaticMeshActor_57"
+      },
+      "label": "Bench back",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 2036,
+          "z": 1686.0943813323975
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1.7,
+          "y": 0.08,
+          "z": 0.48
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCPerformer_20"
+      },
+      "label": "Hero - BasicHero_M_Swordsman",
+      "transform": {
+        "location": {
+          "x": 3850,
+          "y": 1420,
+          "z": 1493.379150390625
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 62.000000000000014,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCPerformer_21"
+      },
+      "label": "Old villager - Mage",
+      "transform": {
+        "location": {
+          "x": 4136,
+          "y": 1940,
+          "z": 1609.8220138549805
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -134.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCPerformer_22"
+      },
+      "label": "Heroine - BasicHero_F_Archer",
+      "transform": {
+        "location": {
+          "x": 4550,
+          "y": 1620,
+          "z": 1662.7001953125
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 145,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.StaticMeshActor_58"
+      },
+      "label": "Lookout timber deck",
+      "transform": {
+        "location": {
+          "x": 3700,
+          "y": 3300,
+          "z": 1818.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 3.2,
+          "y": 2.6,
+          "z": 0.2
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.StaticMeshActor_59"
+      },
+      "label": "Lookout support",
+      "transform": {
+        "location": {
+          "x": 3570,
+          "y": 3190,
+          "z": 1828.389006614685
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 0.16,
+          "y": 0.16,
+          "z": 0.1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.StaticMeshActor_60"
+      },
+      "label": "Lookout support",
+      "transform": {
+        "location": {
+          "x": 3570,
+          "y": 3410,
+          "z": 1828.389006614685
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 0.16,
+          "y": 0.16,
+          "z": 0.1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.StaticMeshActor_61"
+      },
+      "label": "Lookout support",
+      "transform": {
+        "location": {
+          "x": 3830,
+          "y": 3190,
+          "z": 1828.389006614685
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 0.16,
+          "y": 0.16,
+          "z": 0.1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.StaticMeshActor_62"
+      },
+      "label": "Lookout support",
+      "transform": {
+        "location": {
+          "x": 3830,
+          "y": 3410,
+          "z": 1833.6729583740234
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 0.16,
+          "y": 0.16,
+          "z": 0.1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_144"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 0.24",
+      "transform": {
+        "location": {
+          "x": 3862.5,
+          "y": 1444,
+          "z": 1655.1492004394531
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 63.400001525878906,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_145"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 0.48",
+      "transform": {
+        "location": {
+          "x": 3875,
+          "y": 1468,
+          "z": 1503.025749206543
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 64.80000305175778,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_146"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 0.72",
+      "transform": {
+        "location": {
+          "x": 3887.5,
+          "y": 1492,
+          "z": 1507.7807693481445
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 66.19999694824216,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_147"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 0.96",
+      "transform": {
+        "location": {
+          "x": 3900,
+          "y": 1516,
+          "z": 1512.6137523651123
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 67.59999847412108,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_148"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 1.2",
+      "transform": {
+        "location": {
+          "x": 3912.5,
+          "y": 1540,
+          "z": 1517.4646167755127
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 69,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_149"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 1.44",
+      "transform": {
+        "location": {
+          "x": 3925,
+          "y": 1564,
+          "z": 1522.2883014678955
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 70.40000152587886,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_150"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 1.68",
+      "transform": {
+        "location": {
+          "x": 3937.5,
+          "y": 1588,
+          "z": 1527.378776550293
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 71.80000305175778,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_151"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 1.92",
+      "transform": {
+        "location": {
+          "x": 3950,
+          "y": 1612,
+          "z": 1532.4806957244873
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 73.19999694824216,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_152"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 2.16",
+      "transform": {
+        "location": {
+          "x": 3962.5,
+          "y": 1636,
+          "z": 1537.663438796997
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 74.5999984741211,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_153"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 2.4",
+      "transform": {
+        "location": {
+          "x": 3975,
+          "y": 1660,
+          "z": 1542.8533344268799
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 75.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_154"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 2.64",
+      "transform": {
+        "location": {
+          "x": 3987.5,
+          "y": 1684,
+          "z": 1548.32790184021
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 77.4000015258789,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_155"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 2.88",
+      "transform": {
+        "location": {
+          "x": 4000,
+          "y": 1708,
+          "z": 1553.8182048797607
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 78.80000305175781,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_156"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 3.12",
+      "transform": {
+        "location": {
+          "x": 4012.5,
+          "y": 1732,
+          "z": 1559.870698928833
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 80.19999694824219,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_157"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 3.36",
+      "transform": {
+        "location": {
+          "x": 4025,
+          "y": 1756,
+          "z": 1566.0176067352295
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 81.59999847412107,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_158"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 3.5999999999999996",
+      "transform": {
+        "location": {
+          "x": 4037.5,
+          "y": 1780,
+          "z": 1572.087266921997
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 82.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_159"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 3.84",
+      "transform": {
+        "location": {
+          "x": 4050,
+          "y": 1804,
+          "z": 1578.134038925171
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 84.4000015258789,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_160"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 4.08",
+      "transform": {
+        "location": {
+          "x": 4062.5,
+          "y": 1828,
+          "z": 1583.564260482788
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 85.80000305175781,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_161"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 4.32",
+      "transform": {
+        "location": {
+          "x": 4075,
+          "y": 1852,
+          "z": 1588.754156112671
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 87.19999694824219,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_162"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 4.56",
+      "transform": {
+        "location": {
+          "x": 4087.5,
+          "y": 1876,
+          "z": 1593.9454822540283
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 88.5999984741211,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_163"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 4.8",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 1900,
+          "z": 1599.1360931396484
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_164"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 6.8",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 1900,
+          "z": 1599.1360931396484
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_165"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 13.9",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 1900,
+          "z": 1599.1360931396484
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_166"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 14",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 1900,
+          "z": 1599.1360931396484
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_167"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 14.25",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 1937.5,
+          "z": 1603.42405128479
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 91.25000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_168"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 14.5",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 1975,
+          "z": 1607.7170162200928
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 92.50000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_169"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 14.75",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 2012.5,
+          "z": 1665.0941162109375
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 93.75000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_170"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 15.0",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 2050,
+          "z": 1617.0968799591064
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 95.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_171"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 15.25",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 2087.5,
+          "z": 1621.7610626220703
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 96.25000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_172"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 15.5",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 2125,
+          "z": 1626.222827911377
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 97.50000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_173"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 15.75",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 2162.5,
+          "z": 1630.2883415222168
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 98.75000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_174"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 16",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 2200,
+          "z": 1634.3531398773193
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 100.00000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_175"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 16.25",
+      "transform": {
+        "location": {
+          "x": 4090,
+          "y": 2237.5,
+          "z": 1637.3464851379395
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 98.75000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_176"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 16.5",
+      "transform": {
+        "location": {
+          "x": 4080,
+          "y": 2275,
+          "z": 1640.1259689331055
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 97.50000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_177"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 16.75",
+      "transform": {
+        "location": {
+          "x": 4070,
+          "y": 2312.5,
+          "z": 1643.0871276855469
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 96.25000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_178"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 17.0",
+      "transform": {
+        "location": {
+          "x": 4060,
+          "y": 2350,
+          "z": 1645.9553031921387
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 95.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_179"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 17.25",
+      "transform": {
+        "location": {
+          "x": 4050,
+          "y": 2387.5,
+          "z": 1649.094560623169
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 93.75000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_180"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 17.5",
+      "transform": {
+        "location": {
+          "x": 4040,
+          "y": 2425,
+          "z": 1652.4019031524658
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 92.50000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_181"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 17.75",
+      "transform": {
+        "location": {
+          "x": 4030,
+          "y": 2462.5,
+          "z": 1655.6949405670166
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 91.25000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_182"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 18",
+      "transform": {
+        "location": {
+          "x": 4020,
+          "y": 2500,
+          "z": 1659.5930843353271
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_183"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 23",
+      "transform": {
+        "location": {
+          "x": 3660,
+          "y": 3300,
+          "z": 1828.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_184"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 30.8",
+      "transform": {
+        "location": {
+          "x": 3660,
+          "y": 3300,
+          "z": 1828.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_185"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 34",
+      "transform": {
+        "location": {
+          "x": 3683,
+          "y": 3300,
+          "z": 1828.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_186"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 40",
+      "transform": {
+        "location": {
+          "x": 3683,
+          "y": 3300,
+          "z": 1828.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_187"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 10",
+      "transform": {
+        "location": {
+          "x": 4550,
+          "y": 1620,
+          "z": 1876.121738433838
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 145,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_188"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 10.236363636363636",
+      "transform": {
+        "location": {
+          "x": 4515.454545454545,
+          "y": 1641.8181818181818,
+          "z": 1656.4309387207031
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 148.18182373046875,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_189"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 10.472727272727273",
+      "transform": {
+        "location": {
+          "x": 4480.909090909091,
+          "y": 1663.6363636363637,
+          "z": 1649.897792816162
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 151.36363220214844,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_190"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 10.709090909090909",
+      "transform": {
+        "location": {
+          "x": 4446.363636363636,
+          "y": 1685.4545454545455,
+          "z": 1643.7666206359863
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 154.54545593261722,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_191"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 10.945454545454545",
+      "transform": {
+        "location": {
+          "x": 4411.818181818182,
+          "y": 1707.2727272727273,
+          "z": 1638.437250137329
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 157.72727966308594,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_192"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 11.181818181818182",
+      "transform": {
+        "location": {
+          "x": 4377.272727272727,
+          "y": 1729.090909090909,
+          "z": 1632.695177078247
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 160.90908813476562,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_193"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 11.418181818181818",
+      "transform": {
+        "location": {
+          "x": 4342.727272727273,
+          "y": 1750.909090909091,
+          "z": 1627.645471572876
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 164.09091186523438,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_194"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 11.654545454545454",
+      "transform": {
+        "location": {
+          "x": 4308.181818181818,
+          "y": 1772.7272727272727,
+          "z": 1622.6823120117188
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 167.27272033691406,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_195"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 11.89090909090909",
+      "transform": {
+        "location": {
+          "x": 4273.636363636364,
+          "y": 1794.5454545454545,
+          "z": 1618.2112483978271
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 170.4545440673828,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_196"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 12.127272727272727",
+      "transform": {
+        "location": {
+          "x": 4239.090909090909,
+          "y": 1816.3636363636365,
+          "z": 1613.8253002166748
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 173.63636779785156,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_197"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 12.363636363636363",
+      "transform": {
+        "location": {
+          "x": 4204.545454545455,
+          "y": 1838.1818181818182,
+          "z": 1609.7097187042236
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 176.81817626953125,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_198"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 12.6",
+      "transform": {
+        "location": {
+          "x": 4170,
+          "y": 1860,
+          "z": 1606.1062602996826
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 180,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_199"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 13.9",
+      "transform": {
+        "location": {
+          "x": 4170,
+          "y": 1860,
+          "z": 1606.1062602996826
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_200"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 14",
+      "transform": {
+        "location": {
+          "x": 4180,
+          "y": 1900,
+          "z": 1612.818935394287
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_201"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 14.25",
+      "transform": {
+        "location": {
+          "x": 4180,
+          "y": 1937.5,
+          "z": 1617.072561264038
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 91.25000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_202"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 14.5",
+      "transform": {
+        "location": {
+          "x": 4180,
+          "y": 1975,
+          "z": 1621.3655261993408
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 92.50000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_203"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 14.75",
+      "transform": {
+        "location": {
+          "x": 4180,
+          "y": 2012.5,
+          "z": 1665.0941162109375
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 93.75000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_204"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 15.0",
+      "transform": {
+        "location": {
+          "x": 4180,
+          "y": 2050,
+          "z": 1630.1002292633057
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 95.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_205"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 15.25",
+      "transform": {
+        "location": {
+          "x": 4180,
+          "y": 2087.5,
+          "z": 1634.2744617462158
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 96.25000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_206"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 15.5",
+      "transform": {
+        "location": {
+          "x": 4180,
+          "y": 2125,
+          "z": 1638.7147693634033
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 97.50000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_207"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 15.75",
+      "transform": {
+        "location": {
+          "x": 4180,
+          "y": 2162.5,
+          "z": 1642.7995948791504
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 98.75000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_208"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 16",
+      "transform": {
+        "location": {
+          "x": 4180,
+          "y": 2200,
+          "z": 1647.355058670044
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 100.00000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_209"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 16.25",
+      "transform": {
+        "location": {
+          "x": 4170,
+          "y": 2237.5,
+          "z": 1649.8956470489502
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 98.75000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_210"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 16.5",
+      "transform": {
+        "location": {
+          "x": 4160,
+          "y": 2275,
+          "z": 1653.0427722930908
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 97.50000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_211"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 16.75",
+      "transform": {
+        "location": {
+          "x": 4150,
+          "y": 2312.5,
+          "z": 1656.182029724121
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 96.25000000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_212"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 17.0",
+      "transform": {
+        "location": {
+          "x": 4140,
+          "y": 2350,
+          "z": 1659.2747955322266
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 95.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_213"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 17.25",
+      "transform": {
+        "location": {
+          "x": 4130,
+          "y": 2387.5,
+          "z": 1662.0256690979004
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 93.75000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_214"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 17.5",
+      "transform": {
+        "location": {
+          "x": 4120,
+          "y": 2425,
+          "z": 1664.9646549224854
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 92.50000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_215"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 17.75",
+      "transform": {
+        "location": {
+          "x": 4110,
+          "y": 2462.5,
+          "z": 1667.9186611175537
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 91.25000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_216"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 18",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 2500,
+          "z": 1671.5314178466797
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_217"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 23",
+      "transform": {
+        "location": {
+          "x": 3740,
+          "y": 3300,
+          "z": 1828.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 180,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_218"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 30.8",
+      "transform": {
+        "location": {
+          "x": 3740,
+          "y": 3300,
+          "z": 1828.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 180,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_219"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 34",
+      "transform": {
+        "location": {
+          "x": 3717,
+          "y": 3303,
+          "z": 1828.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 180,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_220"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 40",
+      "transform": {
+        "location": {
+          "x": 3717,
+          "y": 3303,
+          "z": 1828.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 180,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.StaticMeshActor_63"
+      },
+      "label": "Lookout access ramp",
+      "transform": {
+        "location": {
+          "x": 3760,
+          "y": 3000,
+          "z": 1753.0569505691528
+        },
+        "rotation": {
+          "pitch": 19.83820152282716,
+          "yaw": 106.69924163818364,
+          "roll": -1.690606899269024e-15
+        },
+        "scale": {
+          "x": 4.439591436449854,
+          "y": 1.8,
+          "z": 0.14
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_221"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 20",
+      "transform": {
+        "location": {
+          "x": 3820,
+          "y": 2800,
+          "z": 1677.724817276001
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_222"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 21",
+      "transform": {
+        "location": {
+          "x": 3760,
+          "y": 3000,
+          "z": 1753.0569505691528
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_223"
+      },
+      "label": "Hero - BasicHero_M_Swordsman @ 22",
+      "transform": {
+        "location": {
+          "x": 3700,
+          "y": 3200,
+          "z": 1828.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_224"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 20",
+      "transform": {
+        "location": {
+          "x": 3900,
+          "y": 2800,
+          "z": 1677.724817276001
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_225"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 21",
+      "transform": {
+        "location": {
+          "x": 3840,
+          "y": 3000,
+          "z": 1753.0569505691528
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_226"
+      },
+      "label": "Heroine - BasicHero_F_Archer @ 22",
+      "transform": {
+        "location": {
+          "x": 3780,
+          "y": 3200,
+          "z": 1828.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 89.99999999999999,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCPerformer_23"
+      },
+      "label": "Crew - sound assistant",
+      "transform": {
+        "location": {
+          "x": 4500,
+          "y": 2050,
+          "z": 1704.102783203125
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 180,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_227"
+      },
+      "label": "Crew - sound assistant @ 0.25",
+      "transform": {
+        "location": {
+          "x": 4487.5,
+          "y": 2040.5,
+          "z": 1698.63889503479
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -179,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_228"
+      },
+      "label": "Crew - sound assistant @ 0.5",
+      "transform": {
+        "location": {
+          "x": 4475,
+          "y": 2031,
+          "z": 1693.1757717132568
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -178.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_229"
+      },
+      "label": "Crew - sound assistant @ 0.75",
+      "transform": {
+        "location": {
+          "x": 4462.5,
+          "y": 2021.5,
+          "z": 1687.7126483917236
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -177.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_230"
+      },
+      "label": "Crew - sound assistant @ 1.0",
+      "transform": {
+        "location": {
+          "x": 4450,
+          "y": 2012,
+          "z": 1682.2831420898438
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -176.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_231"
+      },
+      "label": "Crew - sound assistant @ 1.25",
+      "transform": {
+        "location": {
+          "x": 4437.5,
+          "y": 2002.5,
+          "z": 1677.175500869751
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -175.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_232"
+      },
+      "label": "Crew - sound assistant @ 1.5",
+      "transform": {
+        "location": {
+          "x": 4425,
+          "y": 1993,
+          "z": 1672.0785884857178
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -174.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_233"
+      },
+      "label": "Crew - sound assistant @ 1.75",
+      "transform": {
+        "location": {
+          "x": 4412.5,
+          "y": 1983.5,
+          "z": 1666.9816761016846
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -173.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_234"
+      },
+      "label": "Crew - sound assistant @ 2.0",
+      "transform": {
+        "location": {
+          "x": 4400,
+          "y": 1974,
+          "z": 1662.1458320617676
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -172,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_235"
+      },
+      "label": "Crew - sound assistant @ 2.25",
+      "transform": {
+        "location": {
+          "x": 4387.5,
+          "y": 1964.5,
+          "z": 1658.6124687194824
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -171.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_236"
+      },
+      "label": "Crew - sound assistant @ 2.5",
+      "transform": {
+        "location": {
+          "x": 4375,
+          "y": 1955,
+          "z": 1655.184247970581
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -170,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_237"
+      },
+      "label": "Crew - sound assistant @ 2.75",
+      "transform": {
+        "location": {
+          "x": 4362.5,
+          "y": 1945.5,
+          "z": 1651.8096714019775
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -169,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_238"
+      },
+      "label": "Crew - sound assistant @ 3.0",
+      "transform": {
+        "location": {
+          "x": 4350,
+          "y": 1936,
+          "z": 1648.4343795776367
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -167.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_239"
+      },
+      "label": "Crew - sound assistant @ 3.25",
+      "transform": {
+        "location": {
+          "x": 4337.5,
+          "y": 1926.5,
+          "z": 1645.0598030090332
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -167.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_240"
+      },
+      "label": "Crew - sound assistant @ 3.5",
+      "transform": {
+        "location": {
+          "x": 4325,
+          "y": 1917,
+          "z": 1641.6852264404297
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -166.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_241"
+      },
+      "label": "Crew - sound assistant @ 3.75",
+      "transform": {
+        "location": {
+          "x": 4312.5,
+          "y": 1907.5,
+          "z": 1638.3099346160889
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -165.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_242"
+      },
+      "label": "Crew - sound assistant @ 4.0",
+      "transform": {
+        "location": {
+          "x": 4300,
+          "y": 1898,
+          "z": 1634.9003105163574
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -164.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_243"
+      },
+      "label": "Crew - sound assistant @ 4.25",
+      "transform": {
+        "location": {
+          "x": 4287.5,
+          "y": 1888.5,
+          "z": 1631.3175945281982
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -163,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_244"
+      },
+      "label": "Crew - sound assistant @ 4.5",
+      "transform": {
+        "location": {
+          "x": 4275,
+          "y": 1879,
+          "z": 1627.7341632843018
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -162.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_245"
+      },
+      "label": "Crew - sound assistant @ 4.75",
+      "transform": {
+        "location": {
+          "x": 4262.5,
+          "y": 1869.5,
+          "z": 1624.1507320404053
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -161,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_246"
+      },
+      "label": "Crew - sound assistant @ 5",
+      "transform": {
+        "location": {
+          "x": 4250,
+          "y": 1860,
+          "z": 1620.6023483276367
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -160.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_247"
+      },
+      "label": "Crew - sound assistant @ 5.25",
+      "transform": {
+        "location": {
+          "x": 4228.5,
+          "y": 1854,
+          "z": 1615.9181385040283
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -159.50000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_248"
+      },
+      "label": "Crew - sound assistant @ 5.5",
+      "transform": {
+        "location": {
+          "x": 4207,
+          "y": 1848,
+          "z": 1611.23392868042
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -159,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_249"
+      },
+      "label": "Crew - sound assistant @ 5.75",
+      "transform": {
+        "location": {
+          "x": 4185.5,
+          "y": 1842,
+          "z": 1606.5504341125488
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -158.5,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_250"
+      },
+      "label": "Crew - sound assistant @ 6.0",
+      "transform": {
+        "location": {
+          "x": 4164,
+          "y": 1836,
+          "z": 1602.0793704986572
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -158,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_251"
+      },
+      "label": "Crew - sound assistant @ 6.25",
+      "transform": {
+        "location": {
+          "x": 4142.5,
+          "y": 1830,
+          "z": 1597.6540832519531
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -157.5,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_252"
+      },
+      "label": "Crew - sound assistant @ 6.5",
+      "transform": {
+        "location": {
+          "x": 4121,
+          "y": 1824,
+          "z": 1593.228796005249
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -157.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_253"
+      },
+      "label": "Crew - sound assistant @ 6.75",
+      "transform": {
+        "location": {
+          "x": 4099.5,
+          "y": 1818,
+          "z": 1588.792064666748
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -156.5,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_254"
+      },
+      "label": "Crew - sound assistant @ 7.0",
+      "transform": {
+        "location": {
+          "x": 4078,
+          "y": 1812,
+          "z": 1584.2766551971436
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -156.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_255"
+      },
+      "label": "Crew - sound assistant @ 7.25",
+      "transform": {
+        "location": {
+          "x": 4056.5,
+          "y": 1806,
+          "z": 1579.6067504882812
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -155.50000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_256"
+      },
+      "label": "Crew - sound assistant @ 7.5",
+      "transform": {
+        "location": {
+          "x": 4035,
+          "y": 1800,
+          "z": 1574.7995166778564
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -155.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_257"
+      },
+      "label": "Crew - sound assistant @ 7.75",
+      "transform": {
+        "location": {
+          "x": 4013.5,
+          "y": 1794,
+          "z": 1570.09885597229
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -154.5,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_258"
+      },
+      "label": "Crew - sound assistant @ 8.0",
+      "transform": {
+        "location": {
+          "x": 3992,
+          "y": 1788,
+          "z": 1565.3981952667236
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -154,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_259"
+      },
+      "label": "Crew - sound assistant @ 8.25",
+      "transform": {
+        "location": {
+          "x": 3970.5,
+          "y": 1782,
+          "z": 1560.6975345611572
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -153.50000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_260"
+      },
+      "label": "Crew - sound assistant @ 8.5",
+      "transform": {
+        "location": {
+          "x": 3949,
+          "y": 1776,
+          "z": 1556.0354976654053
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -153.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_261"
+      },
+      "label": "Crew - sound assistant @ 8.75",
+      "transform": {
+        "location": {
+          "x": 3927.5,
+          "y": 1770,
+          "z": 1551.6037731170654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -152.50000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_262"
+      },
+      "label": "Crew - sound assistant @ 9.0",
+      "transform": {
+        "location": {
+          "x": 3906,
+          "y": 1764,
+          "z": 1547.1720485687256
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -152,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_263"
+      },
+      "label": "Crew - sound assistant @ 9.25",
+      "transform": {
+        "location": {
+          "x": 3884.5,
+          "y": 1758,
+          "z": 1542.8547649383545
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -151.50000000000006,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_264"
+      },
+      "label": "Crew - sound assistant @ 9.5",
+      "transform": {
+        "location": {
+          "x": 3863,
+          "y": 1752,
+          "z": 1538.5875492095947
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -151.00000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_265"
+      },
+      "label": "Crew - sound assistant @ 9.75",
+      "transform": {
+        "location": {
+          "x": 3841.5,
+          "y": 1746,
+          "z": 1534.3210487365723
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -150.50000000000006,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_266"
+      },
+      "label": "Crew - sound assistant @ 10",
+      "transform": {
+        "location": {
+          "x": 3820,
+          "y": 1740,
+          "z": 1530.0094871520996
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -150,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_267"
+      },
+      "label": "Crew - sound assistant @ 15",
+      "transform": {
+        "location": {
+          "x": 3820,
+          "y": 1740,
+          "z": 1530.0094871520996
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_268"
+      },
+      "label": "Crew - sound assistant @ 15.25",
+      "transform": {
+        "location": {
+          "x": 3837,
+          "y": 1754,
+          "z": 1534.8617820739746
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_269"
+      },
+      "label": "Crew - sound assistant @ 15.5",
+      "transform": {
+        "location": {
+          "x": 3854,
+          "y": 1768,
+          "z": 1539.714792251587
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_270"
+      },
+      "label": "Crew - sound assistant @ 15.75",
+      "transform": {
+        "location": {
+          "x": 3871,
+          "y": 1782,
+          "z": 1544.567087173462
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_271"
+      },
+      "label": "Crew - sound assistant @ 16.0",
+      "transform": {
+        "location": {
+          "x": 3888,
+          "y": 1796,
+          "z": 1549.415090560913
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_272"
+      },
+      "label": "Crew - sound assistant @ 16.25",
+      "transform": {
+        "location": {
+          "x": 3905,
+          "y": 1810,
+          "z": 1554.3038635253906
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_273"
+      },
+      "label": "Crew - sound assistant @ 16.5",
+      "transform": {
+        "location": {
+          "x": 3922,
+          "y": 1824,
+          "z": 1559.2162399291992
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_274"
+      },
+      "label": "Crew - sound assistant @ 16.75",
+      "transform": {
+        "location": {
+          "x": 3939,
+          "y": 1838,
+          "z": 1564.1064434051514
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_275"
+      },
+      "label": "Crew - sound assistant @ 17.0",
+      "transform": {
+        "location": {
+          "x": 3956,
+          "y": 1852,
+          "z": 1568.9966468811035
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_276"
+      },
+      "label": "Crew - sound assistant @ 17.25",
+      "transform": {
+        "location": {
+          "x": 3973,
+          "y": 1866,
+          "z": 1573.8868503570557
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_277"
+      },
+      "label": "Crew - sound assistant @ 17.5",
+      "transform": {
+        "location": {
+          "x": 3990,
+          "y": 1880,
+          "z": 1578.7770538330078
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_278"
+      },
+      "label": "Crew - sound assistant @ 17.75",
+      "transform": {
+        "location": {
+          "x": 4007,
+          "y": 1894,
+          "z": 1583.5857181549072
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_279"
+      },
+      "label": "Crew - sound assistant @ 18.0",
+      "transform": {
+        "location": {
+          "x": 4024,
+          "y": 1908,
+          "z": 1588.1926803588867
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_280"
+      },
+      "label": "Crew - sound assistant @ 18.25",
+      "transform": {
+        "location": {
+          "x": 4041,
+          "y": 1922,
+          "z": 1592.4427299499512
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_281"
+      },
+      "label": "Crew - sound assistant @ 18.5",
+      "transform": {
+        "location": {
+          "x": 4058,
+          "y": 1936,
+          "z": 1596.6076641082764
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_282"
+      },
+      "label": "Crew - sound assistant @ 18.75",
+      "transform": {
+        "location": {
+          "x": 4075,
+          "y": 1950,
+          "z": 1600.8176593780518
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_283"
+      },
+      "label": "Crew - sound assistant @ 19.0",
+      "transform": {
+        "location": {
+          "x": 4092,
+          "y": 1964,
+          "z": 1605.0734310150146
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_284"
+      },
+      "label": "Crew - sound assistant @ 19.25",
+      "transform": {
+        "location": {
+          "x": 4109,
+          "y": 1978,
+          "z": 1609.6045761108398
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_285"
+      },
+      "label": "Crew - sound assistant @ 19.5",
+      "transform": {
+        "location": {
+          "x": 4126,
+          "y": 1992,
+          "z": 1665.0941162109375
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_286"
+      },
+      "label": "Crew - sound assistant @ 19.75",
+      "transform": {
+        "location": {
+          "x": 4143,
+          "y": 2006,
+          "z": 1665.0941162109375
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_287"
+      },
+      "label": "Crew - sound assistant @ 20.0",
+      "transform": {
+        "location": {
+          "x": 4160,
+          "y": 2020,
+          "z": 1665.0941162109375
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_288"
+      },
+      "label": "Crew - sound assistant @ 20.25",
+      "transform": {
+        "location": {
+          "x": 4177,
+          "y": 2034,
+          "z": 1713.0942134857178
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_289"
+      },
+      "label": "Crew - sound assistant @ 20.5",
+      "transform": {
+        "location": {
+          "x": 4194,
+          "y": 2048,
+          "z": 1632.2767524719238
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_290"
+      },
+      "label": "Crew - sound assistant @ 20.75",
+      "transform": {
+        "location": {
+          "x": 4211,
+          "y": 2062,
+          "z": 1636.7485313415527
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_291"
+      },
+      "label": "Crew - sound assistant @ 21.0",
+      "transform": {
+        "location": {
+          "x": 4228,
+          "y": 2076,
+          "z": 1641.4763717651367
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_292"
+      },
+      "label": "Crew - sound assistant @ 21.25",
+      "transform": {
+        "location": {
+          "x": 4245,
+          "y": 2090,
+          "z": 1646.2042121887207
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_293"
+      },
+      "label": "Crew - sound assistant @ 21.5",
+      "transform": {
+        "location": {
+          "x": 4262,
+          "y": 2104,
+          "z": 1651.0557918548584
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_294"
+      },
+      "label": "Crew - sound assistant @ 21.75",
+      "transform": {
+        "location": {
+          "x": 4279,
+          "y": 2118,
+          "z": 1655.8844833374023
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_295"
+      },
+      "label": "Crew - sound assistant @ 22.0",
+      "transform": {
+        "location": {
+          "x": 4296,
+          "y": 2132,
+          "z": 1660.5915813446045
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_296"
+      },
+      "label": "Crew - sound assistant @ 22.25",
+      "transform": {
+        "location": {
+          "x": 4313,
+          "y": 2146,
+          "z": 1665.79935836792
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_297"
+      },
+      "label": "Crew - sound assistant @ 22.5",
+      "transform": {
+        "location": {
+          "x": 4330,
+          "y": 2160,
+          "z": 1671.2853698730469
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_298"
+      },
+      "label": "Crew - sound assistant @ 22.75",
+      "transform": {
+        "location": {
+          "x": 4347,
+          "y": 2174,
+          "z": 1677.4065284729004
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_299"
+      },
+      "label": "Crew - sound assistant @ 23.0",
+      "transform": {
+        "location": {
+          "x": 4364,
+          "y": 2188,
+          "z": 1683.941104888916
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_300"
+      },
+      "label": "Crew - sound assistant @ 23.25",
+      "transform": {
+        "location": {
+          "x": 4381,
+          "y": 2202,
+          "z": 1690.624454498291
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_301"
+      },
+      "label": "Crew - sound assistant @ 23.5",
+      "transform": {
+        "location": {
+          "x": 4398,
+          "y": 2216,
+          "z": 1697.5223808288574
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_302"
+      },
+      "label": "Crew - sound assistant @ 23.75",
+      "transform": {
+        "location": {
+          "x": 4415,
+          "y": 2230,
+          "z": 1706.6783695220947
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_303"
+      },
+      "label": "Crew - sound assistant @ 24.0",
+      "transform": {
+        "location": {
+          "x": 4432,
+          "y": 2244,
+          "z": 1716.4137153625488
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_304"
+      },
+      "label": "Crew - sound assistant @ 24.25",
+      "transform": {
+        "location": {
+          "x": 4449,
+          "y": 2258,
+          "z": 1726.1419086456299
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_305"
+      },
+      "label": "Crew - sound assistant @ 24.5",
+      "transform": {
+        "location": {
+          "x": 4466,
+          "y": 2272,
+          "z": 1736.7970733642578
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_306"
+      },
+      "label": "Crew - sound assistant @ 24.75",
+      "transform": {
+        "location": {
+          "x": 4483,
+          "y": 2286,
+          "z": 1747.7032928466797
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_307"
+      },
+      "label": "Crew - sound assistant @ 25",
+      "transform": {
+        "location": {
+          "x": 4500,
+          "y": 2300,
+          "z": 1758.6095123291016
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_308"
+      },
+      "label": "Crew - sound assistant @ 40",
+      "transform": {
+        "location": {
+          "x": 4500,
+          "y": 2300,
+          "z": 1758.6095123291016
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 180,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCPerformer_24"
+      },
+      "label": "Crew - hillside runner",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2850,
+          "z": 1646.2828369140625
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 69.99999999999996,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_309"
+      },
+      "label": "Crew - hillside runner @ 18",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2850,
+          "z": 1646.2828903198242
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 69.99999999999996,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_310"
+      },
+      "label": "Crew - hillside runner @ 18.25",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2864.5833333333335,
+          "z": 1648.8299160003662
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 68.54166412353513,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_311"
+      },
+      "label": "Crew - hillside runner @ 18.5",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2879.1666666666665,
+          "z": 1651.5657691955566
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 67.08333587646484,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_312"
+      },
+      "label": "Crew - hillside runner @ 18.75",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2893.75,
+          "z": 1654.3023376464844
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 65.62499999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_313"
+      },
+      "label": "Crew - hillside runner @ 19.0",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2908.3333333333335,
+          "z": 1657.0381908416748
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 64.16666412353513,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_314"
+      },
+      "label": "Crew - hillside runner @ 19.25",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2922.9166666666665,
+          "z": 1659.5802097320557
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 62.70833206176758,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_315"
+      },
+      "label": "Crew - hillside runner @ 19.5",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2937.5,
+          "z": 1662.0735912322998
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 61.25000000000002,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_316"
+      },
+      "label": "Crew - hillside runner @ 19.75",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2952.0833333333335,
+          "z": 1664.5662574768066
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 59.79166793823242,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_317"
+      },
+      "label": "Crew - hillside runner @ 20.0",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2966.6666666666665,
+          "z": 1667.1476154327393
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 58.333332061767585,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_318"
+      },
+      "label": "Crew - hillside runner @ 20.25",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2981.25,
+          "z": 1669.8834686279297
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 56.87500000000001,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_319"
+      },
+      "label": "Crew - hillside runner @ 20.5",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2995.8333333333335,
+          "z": 1672.6193218231201
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 55.416667938232436,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_320"
+      },
+      "label": "Crew - hillside runner @ 20.75",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3010.4166666666665,
+          "z": 1675.3358631134033
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 53.95833206176759,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_321"
+      },
+      "label": "Crew - hillside runner @ 21.0",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3025,
+          "z": 1677.8857498168945
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 52.50000000000001,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_322"
+      },
+      "label": "Crew - hillside runner @ 21.25",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3039.5833333333335,
+          "z": 1680.4392127990723
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 51.04166793823244,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_323"
+      },
+      "label": "Crew - hillside runner @ 21.5",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3054.1666666666665,
+          "z": 1682.99267578125
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 49.58333206176759,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_324"
+      },
+      "label": "Crew - hillside runner @ 21.75",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3068.75,
+          "z": 1685.6398372650146
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 48.125000000000014,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_325"
+      },
+      "label": "Crew - hillside runner @ 22.0",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3083.3333333333335,
+          "z": 1688.375690460205
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 46.66666793823244,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_326"
+      },
+      "label": "Crew - hillside runner @ 22.25",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3097.9166666666665,
+          "z": 1691.1115436553955
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 45.2083320617676,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_327"
+      },
+      "label": "Crew - hillside runner @ 22.5",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3112.5,
+          "z": 1693.812349319458
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 43.75000000000001,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_328"
+      },
+      "label": "Crew - hillside runner @ 22.75",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3127.0833333333335,
+          "z": 1696.5482025146484
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 42.29166793823244,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_329"
+      },
+      "label": "Crew - hillside runner @ 23.0",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3141.6666666666665,
+          "z": 1699.2847709655762
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 40.83333206176759,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_330"
+      },
+      "label": "Crew - hillside runner @ 23.25",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3156.25,
+          "z": 1702.0206241607666
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 39.375000000000036,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_331"
+      },
+      "label": "Crew - hillside runner @ 23.5",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3170.8333333333335,
+          "z": 1704.840877532959
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 37.916667938232436,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_332"
+      },
+      "label": "Crew - hillside runner @ 23.75",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3185.4166666666665,
+          "z": 1707.759120941162
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 36.45833206176758,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_333"
+      },
+      "label": "Crew - hillside runner @ 24",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 3200,
+          "z": 1710.6773643493652
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 35,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_334"
+      },
+      "label": "Crew - hillside runner @ 24.25",
+      "transform": {
+        "location": {
+          "x": 3509.375,
+          "y": 3220,
+          "z": 1716.1476402282715
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 34.687500000000014,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_335"
+      },
+      "label": "Crew - hillside runner @ 24.5",
+      "transform": {
+        "location": {
+          "x": 3518.75,
+          "y": 3240,
+          "z": 1721.5020446777344
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 34.375000000000014,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_336"
+      },
+      "label": "Crew - hillside runner @ 24.75",
+      "transform": {
+        "location": {
+          "x": 3528.125,
+          "y": 3260,
+          "z": 1726.8571643829346
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 34.062500000000014,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_337"
+      },
+      "label": "Crew - hillside runner @ 25.0",
+      "transform": {
+        "location": {
+          "x": 3537.5,
+          "y": 3280,
+          "z": 1732.8345565795898
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 33.75,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_338"
+      },
+      "label": "Crew - hillside runner @ 25.25",
+      "transform": {
+        "location": {
+          "x": 3546.875,
+          "y": 3300,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 33.437500000000014,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_339"
+      },
+      "label": "Crew - hillside runner @ 25.5",
+      "transform": {
+        "location": {
+          "x": 3556.25,
+          "y": 3320,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 33.12500000000002,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_340"
+      },
+      "label": "Crew - hillside runner @ 25.75",
+      "transform": {
+        "location": {
+          "x": 3565.625,
+          "y": 3340,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 32.812500000000014,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_341"
+      },
+      "label": "Crew - hillside runner @ 26.0",
+      "transform": {
+        "location": {
+          "x": 3575,
+          "y": 3360,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 32.5,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_342"
+      },
+      "label": "Crew - hillside runner @ 26.25",
+      "transform": {
+        "location": {
+          "x": 3584.375,
+          "y": 3380,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 32.18750000000002,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_343"
+      },
+      "label": "Crew - hillside runner @ 26.5",
+      "transform": {
+        "location": {
+          "x": 3593.75,
+          "y": 3400,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 31.87500000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_344"
+      },
+      "label": "Crew - hillside runner @ 26.75",
+      "transform": {
+        "location": {
+          "x": 3603.125,
+          "y": 3420,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 31.562500000000014,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_345"
+      },
+      "label": "Crew - hillside runner @ 27.0",
+      "transform": {
+        "location": {
+          "x": 3612.5,
+          "y": 3440,
+          "z": 1778.425672531128
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 31.25000000000003,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_346"
+      },
+      "label": "Crew - hillside runner @ 27.25",
+      "transform": {
+        "location": {
+          "x": 3621.875,
+          "y": 3460,
+          "z": 1784.0125350952148
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 30.937500000000004,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_347"
+      },
+      "label": "Crew - hillside runner @ 27.5",
+      "transform": {
+        "location": {
+          "x": 3631.25,
+          "y": 3480,
+          "z": 1789.9105339050293
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 30.625000000000018,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_348"
+      },
+      "label": "Crew - hillside runner @ 27.75",
+      "transform": {
+        "location": {
+          "x": 3640.625,
+          "y": 3500,
+          "z": 1795.8285598754883
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 30.31250000000002,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_349"
+      },
+      "label": "Crew - hillside runner @ 28",
+      "transform": {
+        "location": {
+          "x": 3650,
+          "y": 3520,
+          "z": 1801.1808185577393
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 30.000000000000025,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_350"
+      },
+      "label": "Crew - hillside runner @ 33",
+      "transform": {
+        "location": {
+          "x": 3650,
+          "y": 3520,
+          "z": 1801.1808185577393
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_351"
+      },
+      "label": "Crew - hillside runner @ 33.25",
+      "transform": {
+        "location": {
+          "x": 3644.6428571428573,
+          "y": 3496.0714285714284,
+          "z": 1796.2312488555908
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_352"
+      },
+      "label": "Crew - hillside runner @ 33.5",
+      "transform": {
+        "location": {
+          "x": 3639.285714285714,
+          "y": 3472.1428571428573,
+          "z": 1790.7116203308105
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_353"
+      },
+      "label": "Crew - hillside runner @ 33.75",
+      "transform": {
+        "location": {
+          "x": 3633.9285714285716,
+          "y": 3448.214285714286,
+          "z": 1785.4101448059082
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_354"
+      },
+      "label": "Crew - hillside runner @ 34.0",
+      "transform": {
+        "location": {
+          "x": 3628.5714285714284,
+          "y": 3424.285714285714,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_355"
+      },
+      "label": "Crew - hillside runner @ 34.25",
+      "transform": {
+        "location": {
+          "x": 3623.214285714286,
+          "y": 3400.3571428571427,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_356"
+      },
+      "label": "Crew - hillside runner @ 34.5",
+      "transform": {
+        "location": {
+          "x": 3617.8571428571427,
+          "y": 3376.4285714285716,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_357"
+      },
+      "label": "Crew - hillside runner @ 34.75",
+      "transform": {
+        "location": {
+          "x": 3612.5,
+          "y": 3352.5,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_358"
+      },
+      "label": "Crew - hillside runner @ 35.0",
+      "transform": {
+        "location": {
+          "x": 3607.1428571428573,
+          "y": 3328.5714285714284,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_359"
+      },
+      "label": "Crew - hillside runner @ 35.25",
+      "transform": {
+        "location": {
+          "x": 3601.785714285714,
+          "y": 3304.6428571428573,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_360"
+      },
+      "label": "Crew - hillside runner @ 35.5",
+      "transform": {
+        "location": {
+          "x": 3596.4285714285716,
+          "y": 3280.714285714286,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_361"
+      },
+      "label": "Crew - hillside runner @ 35.75",
+      "transform": {
+        "location": {
+          "x": 3591.0714285714284,
+          "y": 3256.785714285714,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_362"
+      },
+      "label": "Crew - hillside runner @ 36.0",
+      "transform": {
+        "location": {
+          "x": 3585.714285714286,
+          "y": 3232.857142857143,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_363"
+      },
+      "label": "Crew - hillside runner @ 36.25",
+      "transform": {
+        "location": {
+          "x": 3580.3571428571427,
+          "y": 3208.9285714285716,
+          "z": 1831.3889293670654
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_364"
+      },
+      "label": "Crew - hillside runner @ 36.5",
+      "transform": {
+        "location": {
+          "x": 3575,
+          "y": 3185,
+          "z": 1836.3892822265625
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_365"
+      },
+      "label": "Crew - hillside runner @ 36.75",
+      "transform": {
+        "location": {
+          "x": 3569.6428571428573,
+          "y": 3161.0714285714284,
+          "z": 1713.6378078460693
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_366"
+      },
+      "label": "Crew - hillside runner @ 37.0",
+      "transform": {
+        "location": {
+          "x": 3564.285714285714,
+          "y": 3137.1428571428573,
+          "z": 1707.9236297607422
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_367"
+      },
+      "label": "Crew - hillside runner @ 37.25",
+      "transform": {
+        "location": {
+          "x": 3558.9285714285716,
+          "y": 3113.214285714286,
+          "z": 1702.1465091705322
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_368"
+      },
+      "label": "Crew - hillside runner @ 37.5",
+      "transform": {
+        "location": {
+          "x": 3553.5714285714284,
+          "y": 3089.285714285714,
+          "z": 1696.842887878418
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_369"
+      },
+      "label": "Crew - hillside runner @ 37.75",
+      "transform": {
+        "location": {
+          "x": 3548.214285714286,
+          "y": 3065.3571428571427,
+          "z": 1691.6100769042969
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_370"
+      },
+      "label": "Crew - hillside runner @ 38.0",
+      "transform": {
+        "location": {
+          "x": 3542.8571428571427,
+          "y": 3041.4285714285716,
+          "z": 1686.4995746612549
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_371"
+      },
+      "label": "Crew - hillside runner @ 38.25",
+      "transform": {
+        "location": {
+          "x": 3537.5,
+          "y": 3017.5,
+          "z": 1681.3404350280762
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_372"
+      },
+      "label": "Crew - hillside runner @ 38.5",
+      "transform": {
+        "location": {
+          "x": 3532.1428571428573,
+          "y": 2993.5714285714284,
+          "z": 1676.1812953948975
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_373"
+      },
+      "label": "Crew - hillside runner @ 38.75",
+      "transform": {
+        "location": {
+          "x": 3526.785714285714,
+          "y": 2969.642857142857,
+          "z": 1671.0221557617188
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_374"
+      },
+      "label": "Crew - hillside runner @ 39.0",
+      "transform": {
+        "location": {
+          "x": 3521.4285714285716,
+          "y": 2945.714285714286,
+          "z": 1666.1226539611816
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_375"
+      },
+      "label": "Crew - hillside runner @ 39.25",
+      "transform": {
+        "location": {
+          "x": 3516.0714285714284,
+          "y": 2921.785714285714,
+          "z": 1661.362627029419
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_376"
+      },
+      "label": "Crew - hillside runner @ 39.5",
+      "transform": {
+        "location": {
+          "x": 3510.714285714286,
+          "y": 2897.857142857143,
+          "z": 1656.3780097961426
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_377"
+      },
+      "label": "Crew - hillside runner @ 39.75",
+      "transform": {
+        "location": {
+          "x": 3505.3571428571427,
+          "y": 2873.9285714285716,
+          "z": 1651.2188701629639
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCWaypoint_378"
+      },
+      "label": "Crew - hillside runner @ 40",
+      "transform": {
+        "location": {
+          "x": 3500,
+          "y": 2850,
+          "z": 1646.2828903198242
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": -139.99999999999997,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCBeat_16"
+      },
+      "label": "1.1 A small kindness",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 1900,
+          "z": 1599.1360931396484
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCBeat_17"
+      },
+      "label": "1.2 She sees his kindness",
+      "transform": {
+        "location": {
+          "x": 4100,
+          "y": 2200,
+          "z": 1634.3531398773193
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCBeat_18"
+      },
+      "label": "1.3 Always together",
+      "transform": {
+        "location": {
+          "x": 3700,
+          "y": 3300,
+          "z": 1828.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCBeat_19"
+      },
+      "label": "1.4 The kiss",
+      "transform": {
+        "location": {
+          "x": 3700,
+          "y": 3300,
+          "z": 1828.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCZombieDirector_4"
+      },
+      "label": "Stage 1 - The Promise (40 seconds)",
+      "transform": {
+        "location": {
+          "x": 4200,
+          "y": 1700,
+          "z": 1593.635061264038
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCStartMark_4"
+      },
+      "label": "Camera operator start",
+      "transform": {
+        "location": {
+          "x": 4550,
+          "y": 1700,
+          "z": 1765.186882019043
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 150,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.DCClapperboard_4"
+      },
+      "label": "Stage 1 clapperboard",
+      "transform": {
+        "location": {
+          "x": 4450,
+          "y": 1780,
+          "z": 1652.9097347259521
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.PointLight_5"
+      },
+      "label": "Mill-side sunset bounce",
+      "transform": {
+        "location": {
+          "x": 4350,
+          "y": 1800,
+          "z": 2050
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    },
+    {
+      "actor": {
+        "refPath": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise.L_DC_Act1_Promise:PersistentLevel.PointLight_6"
+      },
+      "label": "Lookout sunset bounce",
+      "transform": {
+        "location": {
+          "x": 3950,
+          "y": 3150,
+          "z": 2248.3890838623047
+        },
+        "rotation": {
+          "pitch": 0,
+          "yaw": 0,
+          "roll": 0
+        },
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      }
+    }
+  ]
+}

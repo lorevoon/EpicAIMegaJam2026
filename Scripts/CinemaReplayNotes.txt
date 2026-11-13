@@ -1,0 +1,31 @@
+Cinema replay
+=============
+L_DC_Cinema is a separate streamed presentation level. It contains DCCinemaReplay,
+which projects the actual recorded camera poses into a 1600x900 render target.
+The existing action and real-environment levels stay loaded: no take data is lost
+and returning to preparation preserves placed cameras. The auditorium is a
+resolution-independent Canvas presentation, matching the supplied silhouette reference.
+
+Play L_DC_Act1_Promise normally and finish a take. The curtains open before the
+film clock advances. Space pauses/resumes, the wheel scrubs, Enter skips to the
+animated evaluation, and R/Enter at results returns to the set. Space at results
+starts a fresh screening. Empty recordings reveal a no-footage evaluation.
+
+On each DCBeat, set Beat > Cinema > Replay Mood to Neutral, Love or Sad.
+Act 1 beats 1.2 through 1.4 are authored as Love. Sad draws a sobbing-face icon.
+Emoji artwork is drawn from geometry, avoiding platform-dependent font glyphs.
+Mood windows use original scene time; captured/missed reactions are mapped to
+edited film time so recording pauses and scrub/rewind remain synchronized.
+
+Future mission integration:
+  Director.SetReplayMissionOutcome(BeatId, bSucceeded)
+Call this during filming, before the take finishes. A captured storyboard beat
+with a successful (or not-yet-supplied) mission verdict produces thumbs up.
+A missed storyboard beat or explicit failed mission produces thumbs down.
+Outcome keys match DCBeat.BeatId (for example 1.3). Outcomes reset on a new take.
+This hook changes audience feedback only; mission scoring is intentionally left
+for the future timing system. Existing storyboard points and crew penalties remain.
+
+Authoring script: Scripts/build_cinema_replay.py (Unreal Python).
+Regression tests: DirectorsCut.Replay.Cinema and DirectorsCut.Replay.AlignedEnvironments.
+Cinema test screenshots: Saved/CinemaAudit/Screening.png and Results.png.

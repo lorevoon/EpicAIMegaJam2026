@@ -2,6 +2,7 @@
 
 #include "DCMultiCamDirector.h"
 #include "DCBeat.h"
+#include "DCCinemaReplay.h"
 #include "DCMultiCam.h"
 #include "DCMultiCamCharacter.h"
 #include "DCPerformer.h"
@@ -11,6 +12,8 @@
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/World.h"
+#include "Engine/LevelStreaming.h"
+#include "Engine/LevelStreamingDynamic.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -162,6 +165,14 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 	switch (Phase)
 	{
 	case EDCPhase::Preparation:
+		if (bRehearsalPlaying && TakeDuration > KINDA_SMALL_NUMBER)
+		{
+			SceneTime = FMath::Fmod(SceneTime + FMath::Max(0.f, DeltaSeconds) * RehearsalSpeed, TakeDuration);
+			for (ADCPerformer* Performer : Performers)
+			{
+				Performer->Evaluate(SceneTime);
+			}
+		}
 		UpdatePrepPreview();
 		break;
 
@@ -293,6 +304,11 @@ void ADCMultiCamDirector::HandleRestart()
 
 void ADCMultiCamDirector::ResetScene()
 {
+	bRehearsalPlaying = true;
+	RehearsalSpeed = 1.f;
+	if (Cinema) { Cinema->EndScreening(); Cinema->ClearMissionOutcomes(); }
+	ReplayMissionOutcomes.Reset();
+	SetReviewEnvironment(false);
 	Phase = EDCPhase::Preparation;
 	SceneTime = 0.f;
 	CountdownRemaining = 0.f;
@@ -412,6 +428,22 @@ void ADCMultiCamDirector::StartPremiere()
 {
 	APlayerController* PC = GetPC();
 	Phase = EDCPhase::Review;
+	SetReviewEnvironment(true);
+	SetRigsHidden(true);
+	if (!Cinema)
+	{
+		if (!CinemaLevel.IsNull())
+		{
+			bool bLoaded = false;
+			ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(this, CinemaLevel, FVector::ZeroVector, FRotator::ZeroRotator, bLoaded);
+			GetWorld()->FlushLevelStreaming(EFlushLevelStreamingType::Full);
+			for (TActorIterator<ADCCinemaReplay> It(GetWorld()); It; ++It) { Cinema = *It; break; }
+		}
+		// Legacy/custom maps can still premiere if their presentation asset is absent.
+		if (!Cinema) Cinema = GetWorld()->SpawnActor<ADCCinemaReplay>();
+	}
+	Cinema->BeginScreening(this);
+	for (const auto& Outcome : ReplayMissionOutcomes) Cinema->SetMissionOutcome(Outcome.Key, Outcome.Value);
 	if (Recording.Num() == 0 || !PC)
 	{
 		FinishPremiere(); // nothing was filmed: straight to the evaluation
@@ -426,6 +458,7 @@ void ADCMultiCamDirector::StartPremiere()
 
 void ADCMultiCamDirector::TickPremiere(float DeltaSeconds)
 {
+	if (Cinema && Cinema->IsOpening()) return;
 	if (bPremierePaused)
 	{
 		return;
@@ -460,6 +493,13 @@ void ADCMultiCamDirector::ShowPremiereFrame(float Time)
 		FQuat::Slerp(A.Rotation.Quaternion(), B.Rotation.Quaternion(), Alpha));
 	// The film is only what was inside the capture frame, so the playback lens shows just that part.
 	PlaybackCamera->GetCameraComponent()->SetFieldOfView(FMath::Lerp(A.FilmFOV, B.FilmFOV, Alpha));
+	if (Cinema) Cinema->ProjectFrame(PlaybackCamera);
+}
+
+void ADCMultiCamDirector::SetReplayMissionOutcome(FName BeatId, bool bSucceeded)
+{
+	ReplayMissionOutcomes.Add(BeatId, bSucceeded);
+	if (Cinema) Cinema->SetMissionOutcome(BeatId, bSucceeded);
 }
 
 void ADCMultiCamDirector::FinishPremiere()
@@ -472,6 +512,13 @@ void ADCMultiCamDirector::FinishPremiere()
 
 void ADCMultiCamDirector::HandleScrub(float DeltaSeconds)
 {
+	if (Phase == EDCPhase::Preparation)
+	{
+		bRehearsalPlaying = false;
+		SceneTime = FMath::Clamp(SceneTime + DeltaSeconds, 0.f, TakeDuration);
+		for (ADCPerformer* Performer : Performers) Performer->Evaluate(SceneTime);
+		return;
+	}
 	if (Phase == EDCPhase::Review)
 	{
 		SceneTime = FMath::Clamp(SceneTime + DeltaSeconds, 0.f, GetPremiereLength());
@@ -488,6 +535,7 @@ void ADCMultiCamDirector::HandleTransportToggle()
 	if (IsFilmFinished())
 	{
 		SceneTime = 0.f; // watch the film again
+		if (Cinema) Cinema->BeginScreening(this);
 		ShowPremiereFrame(SceneTime);
 		bPremierePaused = false;
 	}
@@ -497,14 +545,80 @@ void ADCMultiCamDirector::HandleTransportToggle()
 	}
 }
 
+void ADCMultiCamDirector::HandleRehearsalToggle()
+{
+	if (Phase == EDCPhase::Preparation)
+	{
+		bRehearsalPlaying = !bRehearsalPlaying;
+	}
+}
+
+void ADCMultiCamDirector::HandleRehearsalSpeed(int32 Direction)
+{
+	if (Phase == EDCPhase::Preparation && Direction != 0)
+	{
+		RehearsalSpeed = FMath::Clamp(RehearsalSpeed * (Direction > 0 ? 2.f : 0.5f), 0.5f, 4.f);
+	}
+}
+
 void ADCMultiCamDirector::SetRigsHidden(bool bHide)
 {
+	// Include unfinished rails as well as rails attached to a placed camera.
+	for (TActorIterator<ADCRail> It(GetWorld()); It; ++It)
+	{
+		It->SetActorHiddenInGame(bHide);
+	}
 	for (ADCMultiCam* Cam : Cameras)
 	{
 		if (Cam)
 		{
 			Cam->SetRigHidden(bHide);
 		}
+	}
+}
+
+void ADCMultiCamDirector::SetReviewEnvironment(bool bReview)
+{
+	if (StudioEnvironmentLevel.IsNone() || RealEnvironmentLevel.IsNone())
+	{
+		return; // Other acts retain their existing presentation.
+	}
+	ULevelStreaming* Studio = UGameplayStatics::GetStreamingLevel(this, StudioEnvironmentLevel);
+	ULevelStreaming* Real = UGameplayStatics::GetStreamingLevel(this, RealEnvironmentLevel);
+	if (!Studio || !Real)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Director replay requires both environment sublevels: %s / %s"),
+			*StudioEnvironmentLevel.ToString(), *RealEnvironmentLevel.ToString());
+		return;
+	}
+	// Load both during preparation, then change only visibility. Never travel to a new world:
+	// that would discard the recording, player cameras, beat references and deterministic clock.
+	Studio->SetShouldBeLoaded(true);
+	Real->SetShouldBeLoaded(true);
+	Studio->SetShouldBeVisible(!bReview);
+	Real->SetShouldBeVisible(bReview);
+	GetWorld()->FlushLevelStreaming(EFlushLevelStreamingType::Full);
+	if (bReview)
+	{
+		for (TActorIterator<AActor> It(GetWorld()); It; ++It)
+		{
+			if (It->ActorHasTag(TEXT("DC_SetOnly")))
+			{
+				SetOnlyHiddenStates.FindOrAdd(*It, It->IsHidden());
+				It->SetActorHiddenInGame(true);
+			}
+		}
+	}
+	else
+	{
+		for (const auto& Entry : SetOnlyHiddenStates)
+		{
+			if (AActor* Actor = Entry.Key.Get())
+			{
+				Actor->SetActorHiddenInGame(Entry.Value);
+			}
+		}
+		SetOnlyHiddenStates.Reset();
 	}
 }
 

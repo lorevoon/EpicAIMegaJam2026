@@ -1,0 +1,15 @@
+{
+  "name": "09_director_chair",
+  "source": "Hyper3D Rodin via official CLI / MCP service",
+  "generation_id": "6c67c6aa-3530-4cfe-ba7b-cf98f43c004d",
+  "vertices": 14599,
+  "triangles": 25784,
+  "meshes": 1,
+  "units": "meters",
+  "pivot": "bottom center",
+  "formats": [
+    "glb",
+    "fbx"
+  ],
+  "rigged": false
+}

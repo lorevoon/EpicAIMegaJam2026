@@ -1,0 +1,15 @@
+{
+  "name": "01_jib",
+  "source": "Hyper3D Rodin via official CLI / MCP service",
+  "generation_id": "60af38ff-c0fa-4c2e-97e4-75a17148bd7b",
+  "vertices": 7364,
+  "triangles": 12374,
+  "meshes": 1,
+  "units": "meters",
+  "pivot": "bottom center",
+  "formats": [
+    "glb",
+    "fbx"
+  ],
+  "rigged": false
+}

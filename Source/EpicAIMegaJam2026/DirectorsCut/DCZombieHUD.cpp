@@ -2,6 +2,7 @@
 
 #include "DCZombieHUD.h"
 #include "DCBeat.h"
+#include "DCCinemaReplay.h"
 #include "DCMultiCam.h"
 #include "DCSceneMarks.h"
 #include "DCZombieDirector.h"
@@ -143,6 +144,11 @@ void ADCZombieHUD::DrawHUD()
 	}
 	if (D->IsReviewing())
 	{
+		if (D->GetCinema())
+		{
+			D->GetCinema()->DrawCinema(this, Canvas, D);
+			return;
+		}
 		DrawPremiere(D);
 		if (D->IsFilmFinished())
 		{
@@ -295,7 +301,7 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 
 	Type(FString::Printf(TEXT("Film crew on camera cost %d points per second."), D->ZombiePenaltyPerSecond), 0.5f, 0.76f, InkRed, 0.75f, true);
 	Type(TEXT("Press Enter to start preparing"), 0.5f, 0.815f, Ink, 0.85f, true);
-	Type(TEXT("Scrub through the scene with the mouse wheel while you place cameras"), 0.5f, 0.87f, InkFaded, 0.65f, true);
+	Type(TEXT("H pause/play rehearsal   Wheel scrub   , / . rehearsal speed"), 0.5f, 0.87f, InkFaded, 0.65f, true);
 }
 
 void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
@@ -418,7 +424,8 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 	float Y = Canvas->ClipY * 0.48f;
 	const float Length = FMath::Max(D->TakeDuration, KINDA_SMALL_NUMBER);
 	const float Time = D->GetSceneTime();
-	Label(FString::Printf(TEXT("SCENE TIMELINE   %.1fs / %.0fs   (Wheel or Left/Right to scrub)"), Time, Length), CX, Y, Gold, 0.75f, true);
+	Label(FString::Printf(TEXT("REHEARSAL %s   %.1fx   %.1fs / %.0fs   H play/pause   ,/. speed   Wheel/arrows scrub"),
+		D->IsRehearsalPlaying() ? TEXT("PLAYING") : TEXT("PAUSED"), D->GetRehearsalSpeed(), Time, Length), CX, Y, Gold, 0.65f, true);
 	const float TW = 640.f * S;
 	const float X0 = CX - TW * 0.5f;
 	const float TY = Y + 32.f * S;
@@ -577,7 +584,7 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 			Lines.Add(TEXT("T camera type   LMB place   RMB remove   Q/E height   C clear"));
 			Lines.Add(TEXT("Dolly: click rail points, F starts a new rail   1-9 or [ ] look through"));
 			Lines.Add(D->IsNearClapper() ? TEXT("Enter: hit the clapperboard and call ACTION!")
-				: TEXT("Wheel scrub the scene   Tab storyboard   Shift sprint   Enter: Action!"));
+				: TEXT("Wheel scrub   H rehearsal   Tab storyboard   Shift sprint   Space jump   Enter: Action!"));
 		}
 		break;
 	case EDCPhase::Countdown:

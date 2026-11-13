@@ -7,6 +7,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "DCTypes.h"
+#include "DCCinemaReplay.h"
 #include "DCBeat.generated.h"
 
 class UBillboardComponent;
@@ -34,6 +35,10 @@ public:
 	/** Shown on the results screen once captured. */
 	UPROPERTY(EditAnywhere, Category = "Beat")
 	FString Caption;
+
+	/** Audience emotion during this beat's original scene-time window. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Beat|Cinema")
+	EDCCinemaMood ReplayMood = EDCCinemaMood::Neutral;
 
 	/** Mandatory beats must be captured for the take to be approved. Their names are in the studio brief. */
 	UPROPERTY(EditAnywhere, Category = "Beat")

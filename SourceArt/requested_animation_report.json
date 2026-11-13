@@ -1,0 +1,38 @@
+{
+  "clips": [
+    {
+      "path": "/Game/DirectorsCut/Animations/Swordsman/A_Swordsman_BreathingIdle",
+      "seconds": 9.933333396911621
+    },
+    {
+      "path": "/Game/DirectorsCut/Animations/Archer/A_Archer_BreathingIdle",
+      "seconds": 9.933333396911621
+    }
+  ],
+  "actors": [
+    {
+      "level": "/Game/DirectorsCut/Levels/L_DC_Act1_Promise",
+      "actor": "Juliet",
+      "changes": [
+        {
+          "time": 4.0,
+          "old": "A_Archer_XBotWalk",
+          "new": "A_Archer_Unarmed_WalkForward"
+        },
+        {
+          "time": 7.0,
+          "old": "A_Archer_XBotWalk",
+          "new": "A_Archer_Unarmed_WalkForward"
+        }
+      ]
+    }
+  ],
+  "verified": [
+    "/Game/DirectorsCut/Levels/L_DC_Act1_Promise:Romeo",
+    "/Game/DirectorsCut/Levels/L_DC_Act1_Promise:Mr. Smith",
+    "/Game/DirectorsCut/Levels/L_DC_Act1_Promise:Juliet",
+    "/Game/DirectorsCut/Levels/L_DC_Act1_Promise:Crew - sound assistant",
+    "/Game/DirectorsCut/Levels/L_DC_Act1_Promise:Crew - hillside runner"
+  ],
+  "walk_blocked": "Supplied X Bot.fbx contains only two frames (0.033 seconds); retained original female walk."
+}

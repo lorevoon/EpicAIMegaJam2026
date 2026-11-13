@@ -24,8 +24,7 @@ public class EpicAIMegaJam2026 : ModuleRules
 			"Slate"
 		});
 
-		// SlateCore: the HUD renders its text through Slate fonts so it stays sharp at any size.
-		PrivateDependencyModuleNames.AddRange(new string[] { "SlateCore" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "SlateCore", "RenderCore" });
 
 		PublicIncludePaths.AddRange(new string[] {
 			"EpicAIMegaJam2026",

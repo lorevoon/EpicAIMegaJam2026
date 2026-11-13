@@ -1,0 +1,15 @@
+{
+  "name": "05_ladder",
+  "source": "Hyper3D Rodin via official CLI / MCP service",
+  "generation_id": "45f3e2b3-f562-49ef-a0ae-a2dd56f85945",
+  "vertices": 13950,
+  "triangles": 24985,
+  "meshes": 1,
+  "units": "meters",
+  "pivot": "bottom center",
+  "formats": [
+    "glb",
+    "fbx"
+  ],
+  "rigged": false
+}

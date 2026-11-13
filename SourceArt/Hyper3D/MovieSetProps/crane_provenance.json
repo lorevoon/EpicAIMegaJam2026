@@ -1,0 +1,9 @@
+{
+  "source_generation_id": "60af38ff-c0fa-4c2e-97e4-75a17148bd7b",
+  "method": "Separate disconnected geometry by spatial region, preserving original UVs and materials",
+  "outputs": [
+    "01_jib",
+    "02_crane_camera",
+    "03_rails"
+  ]
+}

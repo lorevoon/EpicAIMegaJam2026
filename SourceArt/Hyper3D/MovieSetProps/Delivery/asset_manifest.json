@@ -1,0 +1,167 @@
+[
+  {
+    "name": "01_jib",
+    "source": "Hyper3D Rodin via official CLI / MCP service",
+    "generation_id": "60af38ff-c0fa-4c2e-97e4-75a17148bd7b",
+    "vertices": 7364,
+    "triangles": 12374,
+    "meshes": 1,
+    "units": "meters",
+    "pivot": "bottom center",
+    "formats": [
+      "glb",
+      "fbx"
+    ],
+    "rigged": false
+  },
+  {
+    "name": "02_crane_camera",
+    "source": "Hyper3D Rodin via official CLI / MCP service",
+    "generation_id": "60af38ff-c0fa-4c2e-97e4-75a17148bd7b",
+    "vertices": 1411,
+    "triangles": 2212,
+    "meshes": 1,
+    "units": "meters",
+    "pivot": "bottom center",
+    "formats": [
+      "glb",
+      "fbx"
+    ],
+    "rigged": false
+  },
+  {
+    "name": "03_rails",
+    "source": "Hyper3D Rodin via official CLI / MCP service",
+    "generation_id": "60af38ff-c0fa-4c2e-97e4-75a17148bd7b",
+    "vertices": 6426,
+    "triangles": 9965,
+    "meshes": 1,
+    "units": "meters",
+    "pivot": "bottom center",
+    "formats": [
+      "glb",
+      "fbx"
+    ],
+    "rigged": false
+  },
+  {
+    "name": "04_big_box",
+    "source": "Hyper3D Rodin via official CLI / MCP service",
+    "generation_id": "efb08f9c-d936-46da-ba29-e9c6a3d2e221",
+    "vertices": 24324,
+    "triangles": 24646,
+    "meshes": 1,
+    "units": "meters",
+    "pivot": "bottom center",
+    "formats": [
+      "glb",
+      "fbx"
+    ],
+    "rigged": false
+  },
+  {
+    "name": "05_ladder",
+    "source": "Hyper3D Rodin via official CLI / MCP service",
+    "generation_id": "45f3e2b3-f562-49ef-a0ae-a2dd56f85945",
+    "vertices": 13950,
+    "triangles": 24985,
+    "meshes": 1,
+    "units": "meters",
+    "pivot": "bottom center",
+    "formats": [
+      "glb",
+      "fbx"
+    ],
+    "rigged": false
+  },
+  {
+    "name": "06_light_tall_rectangular",
+    "source": "Hyper3D Rodin via official CLI / MCP service",
+    "generation_id": "2b503bd5-dc28-49ad-b50c-78dafa5986e5",
+    "vertices": 4966,
+    "triangles": 8458,
+    "meshes": 1,
+    "units": "meters",
+    "pivot": "bottom center",
+    "formats": [
+      "glb",
+      "fbx"
+    ],
+    "rigged": false
+  },
+  {
+    "name": "07_light_medium_round",
+    "source": "Hyper3D Rodin via official CLI / MCP service",
+    "generation_id": "2b503bd5-dc28-49ad-b50c-78dafa5986e5",
+    "vertices": 4941,
+    "triangles": 8212,
+    "meshes": 1,
+    "units": "meters",
+    "pivot": "bottom center",
+    "formats": [
+      "glb",
+      "fbx"
+    ],
+    "rigged": false
+  },
+  {
+    "name": "08_light_short_large",
+    "source": "Hyper3D Rodin via official CLI / MCP service",
+    "generation_id": "2b503bd5-dc28-49ad-b50c-78dafa5986e5",
+    "vertices": 4357,
+    "triangles": 7236,
+    "meshes": 1,
+    "units": "meters",
+    "pivot": "bottom center",
+    "formats": [
+      "glb",
+      "fbx"
+    ],
+    "rigged": false
+  },
+  {
+    "name": "09_director_chair",
+    "source": "Hyper3D Rodin via official CLI / MCP service",
+    "generation_id": "6c67c6aa-3530-4cfe-ba7b-cf98f43c004d",
+    "vertices": 14599,
+    "triangles": 25784,
+    "meshes": 1,
+    "units": "meters",
+    "pivot": "bottom center",
+    "formats": [
+      "glb",
+      "fbx"
+    ],
+    "rigged": false
+  },
+  {
+    "name": "10_director_megaphone",
+    "source": "Hyper3D Rodin via official CLI / MCP service",
+    "generation_id": "a7bc23e6-749f-4ebd-9721-74c2f53de722",
+    "vertices": 11985,
+    "triangles": 22278,
+    "meshes": 1,
+    "units": "meters",
+    "pivot": "bottom center",
+    "formats": [
+      "glb",
+      "fbx"
+    ],
+    "rigged": false
+  },
+  {
+    "name": "11_director_slate",
+    "source": "Hyper3D Rodin via official CLI / MCP service",
+    "generation_id": "52038575-1292-4de4-b220-d1e55e88f1ab",
+    "vertices": 12505,
+    "triangles": 23238,
+    "meshes": 1,
+    "units": "meters",
+    "pivot": "bottom center",
+    "formats": [
+      "glb",
+      "fbx"
+    ],
+    "rigged": false
+  }
+]
