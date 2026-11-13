@@ -68,10 +68,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
 	FTransform SetDownTransform = FTransform::Identity;
 
-	/** Anything with this ticked (zombies) ruins the shot whenever the live camera can see it. */
-	UPROPERTY(EditAnywhere, Category = "Performer")
-	bool bRuinsShot = false;
-
 	/** Optional imported character. When unset, the original blockout remains visible. */
 	UPROPERTY(EditAnywhere, Category = "Performer|Skeletal")
 	TObjectPtr<USkeletalMesh> CharacterMesh;

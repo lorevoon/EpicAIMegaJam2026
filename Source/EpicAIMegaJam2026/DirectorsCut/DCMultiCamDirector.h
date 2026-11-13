@@ -125,6 +125,18 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut", meta = (ClampMin = "0", Units = "s"))
 	float ReferenceCutLead = 1.f;
 
+	/** How much of the frame the action may fill in a reference shot; lower leaves more of the scenery around it. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut", meta = (ClampMin = "0.1", ClampMax = "0.9"))
+	float ReferenceActionShare = 0.35f;
+
+	/** The reference cut's lenses never go narrower than this (keeps shots wide). */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut", meta = (ClampMin = "20", ClampMax = "90", Units = "deg"))
+	float ReferenceMinFOV = 55.f;
+
+	/** Distance from the action the reference cut prefers when several spots work. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut", meta = (ClampMin = "100", Units = "cm"))
+	float ReferencePreferredDistance = 1200.f;
+
 	bool IsReferencePlaying() const { return bReferencePlaying; }
 	bool IsReferencePaused() const { return bReferencePaused; }
 	float GetReferenceTime() const { return ReferenceTime; }
@@ -332,8 +344,6 @@ protected:
 	bool GetFilmView(const TArray<FDCTakeSample>& Film, float Time, FVector& OutLocation, FQuat& OutRotation, float& OutFOV, float& OutScenePoint) const;
 	void EvaluatePerformers(float Time);
 
-	/** Whether something that ruins a shot (a zombie / crew member) would be on screen from this camera. */
-	virtual bool IsShotSpoiledFrom(const ADCMultiCam* Cam) const { return false; }
 
 	// Reference cut (DCReferenceCut.cpp)
 	void BuildReferenceCut();

@@ -167,14 +167,13 @@ void ADCZombieDirector::BuildZombieScene()
 		P->BodyColor = Body;
 		P->HeadColor = Head;
 		P->bHasProp = bProp;
-		P->bRuinsShot = bZombie;
 		return FinishPlace(P, Xf, Name, bZombie ? TEXT("DirectorsCut/Zombies") : TEXT("DirectorsCut/Cast"));
 	};
 	// Waypoint(Time, X, Y, Yaw, Lean, PropRaise, Tilt)
 	struct FWp { float T, X, Y, Yaw, Lean = 0.f, Raise = 0.f, Tilt = 0.f; };
 	auto Blocking = [World](ADCPerformer* P, std::initializer_list<FWp> Points)
 	{
-		const FString Folder = FString::Printf(TEXT("%s/%s_Blocking"), P->bRuinsShot ? TEXT("DirectorsCut/Zombies") : TEXT("DirectorsCut/Cast"), *P->DisplayName);
+		const FString Folder = FString::Printf(TEXT("%s/%s_Blocking"), *P->GetFolderPath().ToString(), *P->DisplayName);
 		for (const FWp& W : Points)
 		{
 			const FTransform Xf(FRotator(0.f, W.Yaw, 0.f), FVector(W.X, W.Y, 0.f));

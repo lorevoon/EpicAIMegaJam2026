@@ -23,11 +23,6 @@ public:
 
 	virtual void BeginPlay() override;
 
-	/** Crew (performers that ruin a shot) farther than this from the camera are too small to notice. The reference
-	 *  cut keeps them out of its shots; they don't affect the player's grade. */
-	UPROPERTY(EditAnywhere, Category = "Directors Cut|Zombies", meta = (Units = "cm"))
-	float ZombieSightRange = 4000.f;
-
 	UPROPERTY(EditAnywhere, Category = "Directors Cut")
 	FString MovieTitle = TEXT("Love in the Ruins");
 
@@ -55,13 +50,6 @@ public:
 	/** While planning and looking through a camera: storyboard beats it frames at the scrubbed time. */
 	void GetPlanPreview(TArray<FString>& OutFramedBeats) const;
 
-protected:
-	virtual bool IsShotSpoiledFrom(const ADCMultiCam* Cam) const override { return IsZombieVisible(Cam, nullptr); }
-
 private:
 	void EnterPreparation();
-	bool IsZombieVisible(const ADCMultiCam* Cam, FString* OutName) const;
-
-	UPROPERTY()
-	TArray<TObjectPtr<ADCPerformer>> Zombies;
 };

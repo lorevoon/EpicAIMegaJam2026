@@ -1,8 +1,8 @@
 // Director's Cut - the storyboard's reference cut.
 //
 // Before preparation the player watches a short film of the level shot well: one camera per storyboard beat, found by
-// replaying the scene and testing candidate spots with the game's own scoring (IsFramed + the "ruins the shot" check),
-// so every shot in it really would capture its beat. It plays through the same machinery as the review film.
+// replaying the scene and testing candidate spots with the game's own framing check (IsFramed), so every shot in it
+// really would capture its beat. Shots are kept wide, favouring views that show off the scenery. It plays through the same machinery as the review film.
 
 #include "DCMultiCamDirector.h"
 #include "DCBeat.h"
@@ -24,10 +24,8 @@ namespace
 	/** How finely the scene is replayed when testing shots, and the reference cut's frame rate. */
 	constexpr float SolveStep = 0.25f;
 	constexpr float FilmRate = 30.f;
-	/** Anchors are fitted into this share of the capture frame, leaving breathing room around the action. */
-	constexpr float FrameFill = 0.7f;
-	/** Distance the solver prefers when several spots work equally well. */
-	constexpr float PreferredDistance = 650.f;
+	/** How far the scenery check looks; anything this open or more counts as a full view of the landscape. */
+	constexpr float SceneryDepth = 6000.f;
 
 	FVector AnchorCentroid(const FDCMultiCamBeat& State)
 	{
@@ -91,7 +89,7 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 		? Ground.ImpactPoint.Z : Middle.Z - 100.f;
 
 	// Candidate spots: rings around the action at two lens heights, plus the beat's authored camera spot (preferred).
-	struct FCandidate { FVector Location; float FOV = ADCMultiCam::DefaultFOV; bool bAuthored = false; float Run = 0.f; float RunStart = 0.f; };
+	struct FCandidate { FVector Location; float FOV = ADCMultiCam::DefaultFOV; bool bAuthored = false; float Run = 0.f; float RunStart = 0.f; float Scenery = 0.f; };
 	TArray<FCandidate> Candidates;
 	if (Beat->bShowCameraSpot)
 	{
@@ -100,21 +98,23 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 			? Ground.ImpactPoint.Z : Spot.Z;
 		Candidates.Add({ FVector(Spot.X, Spot.Y, SpotFloor + 170.f), ADCMultiCam::DefaultFOV, true });
 	}
-	for (const float Radius : { 350.f, 550.f, 800.f, 1100.f })
+	// Out to 20 m, at heights the player's rigs reach: eye-level and raised stands, and the crane.
+	for (const float Radius : { 500.f, 800.f, 1100.f, 1500.f, 2000.f })
 	{
 		for (int32 a = 0; a < 16; ++a)
 		{
 			const float Angle = a * 2.f * PI / 16.f;
-			for (const float Height : { 150.f, 230.f })
+			for (const float Height : { 170.f, 300.f, ADCMultiCam::CraneHeight })
 			{
 				Candidates.Add({ FVector(Middle.X + Radius * FMath::Cos(Angle), Middle.Y + Radius * FMath::Sin(Angle), FloorZ + Height) });
 			}
 		}
 	}
 
-	// Drop spots inside the set, then fit a lens to each: the tightest that keeps every anchor in frame all window long.
+	// Drop spots inside the set, then fit a lens to each: wide enough that the action fills only ReferenceActionShare
+	// of the frame all window long (and never narrower than ReferenceMinFOV), so the shot shows its surroundings.
 	const FCollisionShape Probe = FCollisionShape::MakeSphere(25.f);
-	const float MinHalfTan = FMath::Tan(FMath::DegreesToRadians(ADCMultiCam::MinFOV * 0.5f));
+	const float MinHalfTan = FMath::Tan(FMath::DegreesToRadians(FMath::Max(ADCMultiCam::MinFOV, ReferenceMinFOV) * 0.5f));
 	const float MaxHalfTan = FMath::Tan(FMath::DegreesToRadians(ADCMultiCam::MaxFOV * 0.5f));
 	for (int32 c = Candidates.Num() - 1; c >= 0; --c)
 	{
@@ -132,8 +132,8 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 					bUsable = false;
 					break;
 				}
-				HalfTan = FMath::Max(HalfTan, FMath::Abs(Local.Y / Local.X) / (FrameFill * Frame.X));
-				HalfTan = FMath::Max(HalfTan, FMath::Abs(Local.Z / Local.X) * Aspect / (FrameFill * Frame.Y));
+				HalfTan = FMath::Max(HalfTan, FMath::Abs(Local.Y / Local.X) / (ReferenceActionShare * Frame.X));
+				HalfTan = FMath::Max(HalfTan, FMath::Abs(Local.Z / Local.X) * Aspect / (ReferenceActionShare * Frame.Y));
 			}
 		}
 		if (!bUsable || HalfTan > MaxHalfTan)
@@ -142,9 +142,27 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 			continue;
 		}
 		Cand.FOV = FMath::RadiansToDegrees(2.f * FMath::Atan(HalfTan));
+
+		// Scenery: how far the view reaches across the frame (open landscape beats a nearby wall).
+		const FRotator View = LookAt(Cand.Location, Middle);
+		const FVector Forward = View.Vector();
+		const FVector Right = FRotationMatrix(View).GetUnitAxis(EAxis::Y);
+		const FVector Up = FRotationMatrix(View).GetUnitAxis(EAxis::Z);
+		float Depth = 0.f;
+		for (const float U : { -0.8f, 0.f, 0.8f })
+		{
+			for (const float V : { -0.6f, 0.f, 0.6f })
+			{
+				const FVector Ray = (Forward + Right * (U * HalfTan * Frame.X) + Up * (V * HalfTan * Frame.Y / Aspect)).GetSafeNormal();
+				FHitResult Hit;
+				Depth += GetWorld()->LineTraceSingleByChannel(Hit, Cand.Location, Cand.Location + Ray * SceneryDepth, ECC_Visibility, Params)
+					? Hit.Distance : SceneryDepth;
+			}
+		}
+		Cand.Scenery = Depth / (9.f * SceneryDepth);
 	}
 
-	// Replay the window and test every spot with the real scoring checks; keep each spot's longest clean stretch.
+	// Replay the window and test every spot with the real framing check; keep each spot's longest clean stretch.
 	TArray<float> Current;
 	Current.SetNumZeroed(Candidates.Num());
 	for (int32 k = 0; k < NumTimes; ++k)
@@ -156,7 +174,7 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 			Ghost->SetActorLocation(Cand.Location);
 			Ghost->SetAim(LookAt(Cand.Location, Centroids[k]));
 			Ghost->SnapFOV(Cand.FOV);
-			if (IsFramed(State, Ghost) && !IsShotSpoiledFrom(Ghost))
+			if (IsFramed(State, Ghost))
 			{
 				Current[c] += SolveStep;
 				if (Current[c] > Cand.Run)
@@ -172,14 +190,14 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 		}
 	}
 
-	// Best: holds the shot cleanly (longer is safer, up to a point), then the authored spot, then a comfortable distance.
+	// Best: holds the shot (longer is safer, up to a point), then the authored spot, the most scenery, a comfortable distance.
 	const FCandidate* Best = nullptr;
 	float BestRating = -MAX_flt;
 	for (const FCandidate& Cand : Candidates)
 	{
 		const float Distance = FVector::Dist(Cand.Location, Middle);
 		const float Rating = FMath::Min(Cand.Run, Beat->RequiredHold + 2.f) * 10.f + (Cand.bAuthored ? 4.f : 0.f)
-			- FMath::Abs(Distance - PreferredDistance) / 200.f;
+			+ Cand.Scenery * 6.f - FMath::Abs(Distance - ReferencePreferredDistance) / 400.f;
 		if (Rating > BestRating)
 		{
 			BestRating = Rating;
