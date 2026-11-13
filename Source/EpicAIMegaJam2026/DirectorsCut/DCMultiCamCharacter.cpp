@@ -100,14 +100,18 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	FEnhancedActionKeyMapping& ScrubBack = Mapping->MapKey(Scrub, EKeys::Left);
 	ScrubBack.Modifiers.Add(NewObject<UInputModifierNegate>(this));
 	Input->BindAction(Scrub, ETriggerEvent::Triggered, this, &ADCMultiCamCharacter::OnScrub);
-	Input->BindAction(MapButton(EKeys::V), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRehearsal);
+
+	// Q lowers / E raises the next camera while placing (E still interacts when there's something to interact with).
+	UInputAction* Height = MakeAction(EInputActionValueType::Axis1D);
+	Mapping->MapKey(Height, EKeys::E);
+	FEnhancedActionKeyMapping& Lower = Mapping->MapKey(Height, EKeys::Q);
+	Lower.Modifiers.Add(NewObject<UInputModifierNegate>(this));
+	Input->BindAction(Height, ETriggerEvent::Triggered, this, &ADCMultiCamCharacter::OnPlacementHeight);
 	Input->BindAction(MapButton(EKeys::T), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleTool);
 	Input->BindAction(MapButton(EKeys::F), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnFinishRail);
 	Input->BindAction(MapButton(EKeys::LeftBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, -1);
 	Input->BindAction(MapButton(EKeys::RightBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, 1);
 	Input->BindAction(MapButton(EKeys::SpaceBar), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTransportToggle);
-	Input->BindAction(MapButton(EKeys::Comma), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTransportSpeed, -1);
-	Input->BindAction(MapButton(EKeys::Period), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTransportSpeed, 1);
 	Input->BindAction(MapButton(EKeys::Z), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRailSpeed, -1);
 	Input->BindAction(MapButton(EKeys::X), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRailSpeed, 1);
 
@@ -202,7 +206,7 @@ void ADCMultiCamCharacter::OnWheel(const FInputActionValue& Value)
 {
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
-		D->HandleWheel(Value.Get<float>());
+		D->HandleWheel(Value.Get<float>(), bSprintHeld); // Shift + wheel zooms in preparation
 	}
 }
 
@@ -242,14 +246,7 @@ void ADCMultiCamCharacter::OnStartTake()
 {
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
-		if (D->GetPhase() == EDCPhase::Results)
-		{
-			D->HandleRestart();
-		}
-		else
-		{
-			D->HandleStartTake();
-		}
+		D->HandleStartTake();
 	}
 }
 
@@ -286,6 +283,14 @@ void ADCMultiCamCharacter::OnScrub(const FInputActionValue& Value)
 	}
 }
 
+void ADCMultiCamCharacter::OnPlacementHeight(const FInputActionValue& Value)
+{
+	if (ADCMultiCamDirector* D = GetDirector())
+	{
+		D->HandlePlacementHeight(Value.Get<float>() * GetWorld()->GetDeltaSeconds());
+	}
+}
+
 void ADCMultiCamCharacter::OnCycleTool()
 {
 	if (ADCMultiCamDirector* D = GetDirector())
@@ -318,27 +323,11 @@ void ADCMultiCamCharacter::OnTransportToggle()
 	}
 }
 
-void ADCMultiCamCharacter::OnTransportSpeed(int32 Direction)
-{
-	if (ADCMultiCamDirector* D = GetDirector())
-	{
-		D->HandleTransportSpeed(Direction);
-	}
-}
-
 void ADCMultiCamCharacter::OnRailSpeed(int32 Direction)
 {
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleRailSpeed(Direction);
-	}
-}
-
-void ADCMultiCamCharacter::OnRehearsal()
-{
-	if (ADCMultiCamDirector* D = GetDirector())
-	{
-		D->HandleRehearsal();
 	}
 }
 

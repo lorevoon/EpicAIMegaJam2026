@@ -88,9 +88,13 @@ void ADCZombieHUD::DrawHUD()
 		DrawStoryboardCard(D);
 		return;
 	}
-	if (D->GetPhase() == EDCPhase::Premiere)
+	if (D->IsReviewing())
 	{
 		DrawPremiere(D);
+		if (D->IsFilmFinished())
+		{
+			DrawResults(D);
+		}
 		return;
 	}
 
@@ -119,7 +123,7 @@ void ADCZombieHUD::DrawHUD()
 	}
 
 	DrawHeader(D);
-	if (D->bShowNotebook && D->GetPhase() != EDCPhase::Results)
+	if (D->bShowNotebook)
 	{
 		DrawStoryboardPanel(D);
 	}
@@ -167,17 +171,8 @@ void ADCZombieHUD::DrawHUD()
 		}
 	}
 
-	if (D->GetPhase() == EDCPhase::Results)
-	{
-		DrawResults(D);
-	}
-	else
-	{
-		{
-			DrawSwitcher(D);
-		}
-		DrawHelp(D);
-	}
+	DrawSwitcher(D);
+	DrawHelp(D);
 
 	if (UGameplayStatics::IsGamePaused(this))
 	{
@@ -192,7 +187,7 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 	DrawRect(FLinearColor(0.02f, 0.02f, 0.03f, 0.92f), 0.f, 0.f, Canvas->ClipX, Canvas->ClipY);
 	const float CX = Canvas->ClipX * 0.5f;
 	float Y = Canvas->ClipY * 0.12f;
-	Label(TEXT("STORYBOARD"), CX, Y, Muted, 0.8f, true);
+	Label(TEXT("1/4 STORYBOARD"), CX, Y, Muted, 0.8f, true);
 	Y += 40.f * S;
 	Label(D->MovieTitle, CX, Y, Rose, 2.2f, true);
 	Y += 90.f * S;
@@ -212,7 +207,7 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 	Y += 30.f * S;
 	Label(FString::Printf(TEXT("Film crew on camera cost %d points per second."), D->ZombiePenaltyPerSecond), CX, Y, ZombieGreen, 0.8f, true);
 	Y += 60.f * S;
-	Label(TEXT("Press Enter to start preparing - the rehearsal plays while you place cameras"), CX, Y, FLinearColor::White, 1.f, true);
+	Label(TEXT("Press Enter to start preparing - scrub through the scene with the mouse wheel while you place cameras"), CX, Y, FLinearColor::White, 1.f, true);
 }
 
 void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
@@ -223,10 +218,9 @@ void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
 	FLinearColor PhaseColor = FLinearColor::White;
 	switch (D->GetPhase())
 	{
-	case EDCPhase::Preparation: PhaseText = TEXT("PREPARATION"); PhaseColor = Gold; break;
-	case EDCPhase::Countdown:   PhaseText = TEXT("STAND BY");   PhaseColor = Gold; break;
-	case EDCPhase::Filming:     PhaseText = TEXT("SHOOTING");   PhaseColor = Bad;  break;
-	case EDCPhase::Results:     PhaseText = TEXT("RESULTS");    PhaseColor = Rose; break;
+	case EDCPhase::Preparation: PhaseText = TEXT("2/4 PREPARATION");      PhaseColor = Gold; break;
+	case EDCPhase::Countdown:   PhaseText = TEXT("3/4 SHOOTING - STAND BY"); PhaseColor = Gold; break;
+	case EDCPhase::Filming:     PhaseText = TEXT("3/4 SHOOTING");         PhaseColor = Bad;  break;
 	default: break;
 	}
 	Label(PhaseText, 24.f * S, 18.f * S, PhaseColor, 1.2f);
@@ -321,8 +315,17 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 {
 	const float CX = Canvas->ClipX * 0.5f;
 	float Y = Canvas->ClipY * 0.62f;
-	Label(FString::Printf(TEXT("REHEARSAL  %s %gx   %.1fs   (Space play/pause   , . speed   Left/Right scrub)"),
-		D->IsRehearsalPlaying() ? TEXT("PLAYING") : TEXT("PAUSED"), D->GetRehearsalSpeed(), D->GetSceneTime()), CX, Y, Gold, 0.75f, true);
+	const float Length = FMath::Max(D->TakeDuration, KINDA_SMALL_NUMBER);
+	const float Time = D->GetSceneTime();
+	Label(FString::Printf(TEXT("SCENE TIMELINE   %.1fs / %.0fs   (Wheel or Left/Right to scrub)"), Time, Length), CX, Y, Gold, 0.75f, true);
+	const float TW = 640.f * S;
+	const float X0 = CX - TW * 0.5f;
+	const float TY = Y + 32.f * S;
+	const float TH = 6.f * S;
+	DrawRect(FLinearColor(1.f, 1.f, 1.f, 0.25f), X0, TY, TW, TH);
+	DrawRect(Gold, X0, TY, TW * Time / Length, TH);
+	DrawRect(FLinearColor::White, X0 + TW * Time / Length - 1.5f, TY - 6.f * S, 3.f, TH + 12.f * S);
+	Y = TY + 4.f * S;
 	if (!D->IsViewingCamera())
 	{
 		return;
@@ -437,7 +440,7 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 	case EDCPhase::Preparation:
 		if (D->IsViewingCamera())
 		{
-			Lines.Add(TEXT("AIMING: mouse to turn, wheel to zoom, W/S move dolly or crane, Z/X dolly speed"));
+			Lines.Add(TEXT("AIMING: mouse to turn, Shift+Wheel zoom, Wheel scrub the scene, W/S move dolly or crane, Z/X dolly speed"));
 			Lines.Add(TEXT("This is where the camera starts every take.   [ / ] other cameras   E or the same number to step back"));
 		}
 		else
@@ -446,8 +449,8 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 			{
 				Lines.Add(TEXT("E: hit the clapperboard and call ACTION!"));
 			}
-			Lines.Add(TEXT("T camera type   LMB place (dolly: rail points, F new rail)   RMB remove   Wheel height   1-9 or [ ] look through   C clear"));
-			Lines.Add(TEXT("V rehearsal from the top   Enter / clapperboard: Action!   Tab storyboard   Shift sprint"));
+			Lines.Add(TEXT("T camera type   LMB place (dolly: rail points, F new rail)   RMB remove   Q/E height   1-9 or [ ] look through   C clear"));
+			Lines.Add(TEXT("Wheel or Left/Right scrub the scene   Enter / clapperboard: Action!   Tab storyboard   Shift sprint"));
 		}
 		break;
 	case EDCPhase::Countdown:
@@ -501,7 +504,7 @@ void ADCZombieHUD::DrawResults(ADCZombieDirector* D)
 		: D->GetZombieSeconds() > 5.f ? TEXT("The crew distracted the audience. Rehearse their routes and try another take.")
 		: TEXT("A few crew members slipped into frame. Watch their routes on the next take."), CX, Y, Muted, 0.7f, true);
 	Y += 44.f * S;
-	Label(TEXT("Space watch the film again   R / Enter back to planning (cameras kept)   V rewatch rehearsal"), CX, Y, FLinearColor::White, 0.72f, true);
+	Label(TEXT("Space watch the film again   Wheel scrub the film   R / Enter back to preparation (cameras kept)"), CX, Y, FLinearColor::White, 0.72f, true);
 }
 
 void ADCZombieHUD::DrawPremiere(ADCZombieDirector* D)
@@ -542,17 +545,35 @@ void ADCZombieHUD::DrawPremiere(ADCZombieDirector* D)
 		bSpoiledNow |= Time >= T0 && Time <= T1;
 	}
 	DrawRect(Rose, X0, TY, TW * Time / Length, TH);
+	// Gold marks where each storyboard scene made it into the film; a caption as the film reaches it.
+	FString JustCaptured;
+	for (const FDCMultiCamBeat& State : D->GetBeats())
+	{
+		if (State.Status != EDCShotStatus::Captured)
+		{
+			continue;
+		}
+		DrawRect(Gold, X0 + TW * State.CapturedFilmTime / Length - 2.f, TY - 8.f * S, 4.f, TH + 16.f * S);
+		if (!D->IsFilmFinished() && Time >= State.CapturedFilmTime && Time - State.CapturedFilmTime < 2.5f)
+		{
+			JustCaptured = FString::Printf(TEXT("IN THE CAN: %s  +%d"), *State.Beat->DisplayName, State.Beat->Points);
+		}
+	}
 	DrawRect(FLinearColor::White, X0 + TW * Time / Length - 1.5f, TY - 6.f, 3.f, TH + 12.f);
+	if (!JustCaptured.IsEmpty())
+	{
+		Label(JustCaptured, W * 0.5f, H - Bar - 50.f * S, Gold, 0.85f, true);
+	}
 
 	Label(FString::Printf(TEXT("%02d:%04.1f / %02d:%04.1f"), int32(Time) / 60, FMath::Fmod(Time, 60.f), int32(Length) / 60, FMath::Fmod(Length, 60.f)),
 		24.f * S, TY - 10.f * S, Muted, 0.7f);
-	Label(TEXT("Space pause   Left/Right scrub   Enter skip to results"), W - 24.f * S - 420.f * S, TY - 10.f * S, Muted, 0.6f);
+	Label(TEXT("4/4 REVIEW   Space pause   Wheel scrub   Enter skip to evaluation"), W - 24.f * S - 520.f * S, TY - 10.f * S, Muted, 0.6f);
 	Label(D->MovieTitle, W * 0.5f, Bar * 0.35f, Rose, 0.8f, true);
 	if (bSpoiledNow)
 	{
 		Label(TEXT("zombie in shot"), W - 220.f * S, Bar * 0.35f, ZombieGreen, 0.7f);
 	}
-	if (D->IsPremierePaused())
+	if (D->IsPremierePaused() && !D->IsFilmFinished())
 	{
 		Label(TEXT("PAUSED"), W * 0.5f, H * 0.5f - 20.f * S, FLinearColor::White, 1.4f, true);
 	}
