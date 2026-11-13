@@ -10,6 +10,8 @@
 #include "DCBeat.generated.h"
 
 class UBillboardComponent;
+class UMaterialInstanceDynamic;
+class UStaticMeshComponent;
 class UTextRenderComponent;
 
 UCLASS()
@@ -21,6 +23,7 @@ public:
 	ADCBeat();
 
 	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, Category = "Beat")
 	FString BeatId = TEXT("X01");
@@ -64,10 +67,35 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Beat")
 	int32 Points = 250;
 
+	/** Shows a glowing circle on the ground where a camera gets this scene well, while its window is on the timeline. */
+	UPROPERTY(EditAnywhere, Category = "Beat|Camera Spot")
+	bool bShowCameraSpot = false;
+
+	/** Where the hint circle goes, relative to this actor (drag the diamond in the viewport). Snapped to the ground below. */
+	UPROPERTY(EditAnywhere, Category = "Beat|Camera Spot", meta = (MakeEditWidget = true, EditCondition = "bShowCameraSpot"))
+	FVector CameraSpot = FVector(-400.f, 0.f, 0.f);
+
+	UPROPERTY(EditAnywhere, Category = "Beat|Camera Spot", meta = (ClampMin = "20", Units = "cm", EditCondition = "bShowCameraSpot"))
+	float CameraSpotRadius = 70.f;
+
+	/** 0 hides the circle; the director sets this from the phase and the timeline. */
+	void SetCameraSpotOpacity(float Opacity);
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USceneComponent> Root;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UTextRenderComponent> Label;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UStaticMeshComponent> SpotMarker;
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> SpotMaterial;
+
+	float SpotOpacity = -1.f;
+
+	/** Puts the circle on the ground under CameraSpot. */
+	void PlaceSpotMarker();
 };

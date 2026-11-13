@@ -297,7 +297,7 @@ void ADCZombieDirector::BuildZombieScene()
 		return Ref;
 	};
 	auto Beat = [World](const TCHAR* Id, const TCHAR* Story, const TCHAR* Caption, bool bMandatory, float Start, float End, float Hold,
-		int32 Points, float LabelX, float LabelY, TArray<FDCAnchorRef> Anchors)
+		int32 Points, float LabelX, float LabelY, FVector2D Spot, TArray<FDCAnchorRef> Anchors)
 	{
 		const FTransform Xf(FVector(LabelX, LabelY, 260.f));
 		ADCBeat* B = BeginPlace<ADCBeat>(World, Xf);
@@ -311,24 +311,26 @@ void ADCZombieDirector::BuildZombieScene()
 		B->Points = Points;
 		B->MaxDistance = 2000.f;
 		B->Anchors = MoveTemp(Anchors);
+		B->bShowCameraSpot = true;
+		B->CameraSpot = FVector(Spot.X - LabelX, Spot.Y - LabelY, -260.f);
 		FinishPlace(B, Xf, FString::Printf(TEXT("Beat_%s"), Id), TEXT("DirectorsCut/Storyboard"));
 	};
 	using EP = EDCAnchorPart;
 
 	Beat(TEXT("S1"), TEXT("Sam scavenges a can of peaches from a wrecked car."), TEXT("A man, alone, and very hungry."),
-		false, 7.f, 13.f, 2.f, 200, -900, -830, { Anchor(Sam, EP::Prop) });
+		false, 7.f, 13.f, 2.f, 200, -900, -830, { -1200, -830 }, { Anchor(Sam, EP::Prop) });
 	Beat(TEXT("S2"), TEXT("Ellie watches him from behind a barricade."), TEXT("She's been watching him for days."),
-		false, 9.f, 15.f, 2.f, 200, 760, -650, { Anchor(Ellie, EP::Head, true) });
+		false, 9.f, 15.f, 2.f, 200, 760, -650, { 400, -900 }, { Anchor(Ellie, EP::Head, true) });
 	Beat(TEXT("S3"), TEXT("They meet at the fountain - she aims her crossbow, he raises his hands."), TEXT("Love at first standoff."),
-		false, 19.f, 25.f, 2.f, 250, -100, -280, { Anchor(Ellie, EP::Prop), Anchor(Sam, EP::Head) });
+		false, 19.f, 25.f, 2.f, 250, -100, -280, { -90, -1030 }, { Anchor(Ellie, EP::Prop), Anchor(Sam, EP::Head) });
 	Beat(TEXT("S4"), TEXT("He offers her the peaches."), TEXT("The most romantic gift in the apocalypse."),
-		false, 26.f, 32.f, 2.f, 250, -50, -280, { Anchor(Sam, EP::Prop), Anchor(Ellie, EP::Head, true) });
+		false, 26.f, 32.f, 2.f, 250, -50, -280, { -700, -450 }, { Anchor(Sam, EP::Prop), Anchor(Ellie, EP::Head, true) });
 	Beat(TEXT("S5"), TEXT("They share a laugh by the fountain."), TEXT("For a moment, the world isn't ending."),
-		false, 33.f, 39.f, 2.f, 250, 0, -280, { Anchor(Sam, EP::Head), Anchor(Ellie, EP::Head) });
+		false, 33.f, 39.f, 2.f, 250, 0, -280, { 450, -750 }, { Anchor(Sam, EP::Head), Anchor(Ellie, EP::Head) });
 	Beat(TEXT("S6"), TEXT("The kiss."), TEXT("The studio's essential shot."),
-		true, 41.f, 47.f, 2.5f, 1000, 0, -300, { Anchor(Sam, EP::Head), Anchor(Ellie, EP::Head) });
+		true, 41.f, 47.f, 2.5f, 1000, 0, -300, { 700, -800 }, { Anchor(Sam, EP::Head), Anchor(Ellie, EP::Head) });
 	Beat(TEXT("S7"), TEXT("They walk off together toward the sunset."), TEXT("Roll credits."),
-		false, 50.f, 58.f, 2.f, 300, 700, 0, { Anchor(Sam, EP::Body), Anchor(Ellie, EP::Body) });
+		false, 50.f, 58.f, 2.f, 300, 700, 0, { 300, -900 }, { Anchor(Sam, EP::Body), Anchor(Ellie, EP::Body) });
 
 	// --- Player marks ---------------------------------------------------------------------
 	Place<ADCStartMark>(World, FTransform(FRotator::ZeroRotator, FVector(-1300, -150, 0)), TEXT("StartMark"), TEXT("DirectorsCut/Marks"));

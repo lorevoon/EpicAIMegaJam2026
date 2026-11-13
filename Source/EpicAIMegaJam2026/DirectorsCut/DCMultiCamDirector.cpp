@@ -149,6 +149,8 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		}
 	}
 
+	UpdateCameraSpots();
+
 	switch (Phase)
 	{
 	case EDCPhase::Preparation:
@@ -986,6 +988,25 @@ void ADCMultiCamDirector::HandleCycleTool()
 	Tool = Tool == EDCCamTool::Static ? EDCCamTool::Dolly : EDCCamTool::Static;
 	Flash(Tool == EDCCamTool::Static ? TEXT("STATIC camera: stand, wall, or ceiling")
 		: TEXT("DOLLY camera: click rail points on any surface; the camera appears at the second point. F starts a new rail."), 2.5f);
+}
+
+void ADCMultiCamDirector::UpdateCameraSpots()
+{
+	constexpr float FadeSeconds = 0.4f;
+	const bool bShooting = Phase == EDCPhase::Countdown || Phase == EDCPhase::Filming;
+	const float PhaseOpacity = Phase == EDCPhase::Preparation ? 1.f : bShooting ? ShootingCameraSpotOpacity : 0.f;
+	for (const FDCMultiCamBeat& State : Beats)
+	{
+		// Only scenes still to get: a captured or missed beat's circle goes away mid-take.
+		float Opacity = 0.f;
+		if (PhaseOpacity > 0.f && State.Status == EDCShotStatus::Pending)
+		{
+			const float FadeIn = (SceneTime - (State.Beat->WindowStart - CameraSpotLeadTime)) / FadeSeconds;
+			const float FadeOut = (State.Beat->WindowEnd - SceneTime) / FadeSeconds;
+			Opacity = PhaseOpacity * FMath::Clamp(FadeIn, 0.f, 1.f) * FMath::Clamp(FadeOut, 0.f, 1.f);
+		}
+		State.Beat->SetCameraSpotOpacity(Opacity);
+	}
 }
 
 void ADCMultiCamDirector::HandleCycleStabilizer()

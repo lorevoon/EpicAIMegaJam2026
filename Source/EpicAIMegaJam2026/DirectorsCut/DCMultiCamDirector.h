@@ -121,6 +121,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Stabilizer", meta = (ClampMin = "0.1"))
 	float HeavyDollyEase = 1.5f;
 
+	/** Camera-spot hint circles (beats with Show Camera Spot): how strongly they show while shooting (1 = as in preparation). */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Camera Spots", meta = (ClampMin = "0", ClampMax = "1"))
+	float ShootingCameraSpotOpacity = 0.3f;
+
+	/** A beat's circle appears this long before its window opens, so there's time to get the camera there. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Camera Spots", meta = (ClampMin = "0", Units = "s"))
+	float CameraSpotLeadTime = 1.5f;
+
 	/** How far one mouse-wheel notch scrubs the timeline in preparation and review. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0.05", Units = "s"))
 	float WheelScrubSeconds = 0.5f;
@@ -224,6 +232,8 @@ protected:
 	void SetRigsHidden(bool bHide);
 	/** Hands every camera the stabilizer strength for the current phase (none outside shooting). */
 	void ApplyStabilizer();
+	/** Shows each pending beat's camera-spot circle around its window: full in preparation, faint while shooting, never in review. */
+	void UpdateCameraSpots();
 
 	/** Whether the live shot is spoiled right now (zombie in frame); recorded with each sample. */
 	virtual bool IsLiveShotSpoiled() const { return false; }
