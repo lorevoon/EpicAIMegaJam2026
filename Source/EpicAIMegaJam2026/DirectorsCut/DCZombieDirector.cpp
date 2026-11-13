@@ -199,7 +199,9 @@ bool ADCZombieDirector::IsZombieVisible(const ADCMultiCam* Cam, FString* OutName
 			{
 				continue;
 			}
-			if (FMath::Abs((Local.Y / Local.X) / HalfTan) > 1.f || FMath::Abs((Local.Z / Local.X) / (HalfTan / Aspect)) > 1.f)
+			// Only the capture frame is recorded; zombies in the dimmed margin around it don't count.
+			if (FMath::Abs((Local.Y / Local.X) / HalfTan) > DCFrame::CaptureFraction
+				|| FMath::Abs((Local.Z / Local.X) / (HalfTan / Aspect)) > DCFrame::CaptureFraction)
 			{
 				continue;
 			}
@@ -220,7 +222,8 @@ bool ADCZombieDirector::IsZombieVisible(const ADCMultiCam* Cam, FString* OutName
 void ADCZombieDirector::EvaluateBeats(float PrevTime, float NowTime)
 {
 	FString Name;
-	bZombieInShot = IsZombieVisible(GetCameraSlot(ViewingSlot), &Name);
+	// A paused recording films nothing, so nothing on screen can ruin it.
+	bZombieInShot = !IsRecordingPaused() && IsZombieVisible(GetCameraSlot(ViewingSlot), &Name);
 	if (bZombieInShot)
 	{
 		ZombieSeconds += NowTime - PrevTime;

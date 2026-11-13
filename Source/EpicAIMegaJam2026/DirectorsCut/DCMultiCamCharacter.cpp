@@ -84,7 +84,9 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	UInputAction* Sprint = MapButton(EKeys::LeftShift);
 	Input->BindAction(Sprint, ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnSprintPressed);
 	Input->BindAction(Sprint, ETriggerEvent::Completed, this, &ADCMultiCamCharacter::OnSprintReleased);
-	Input->BindAction(MapButton(EKeys::LeftMouseButton), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnPrimary);
+	UInputAction* Primary = MapButton(EKeys::LeftMouseButton);
+	Input->BindAction(Primary, ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnPrimary);
+	Input->BindAction(Primary, ETriggerEvent::Completed, this, &ADCMultiCamCharacter::OnPrimaryReleased);
 	Input->BindAction(MapButton(EKeys::RightMouseButton), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnSecondary);
 	Input->BindAction(MapButton(EKeys::E), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnInteract);
 	Input->BindAction(MapButton(EKeys::Enter), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnStartTake);
@@ -209,6 +211,14 @@ void ADCMultiCamCharacter::OnPrimary()
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandlePrimaryPressed();
+	}
+}
+
+void ADCMultiCamCharacter::OnPrimaryReleased()
+{
+	if (ADCMultiCamDirector* D = GetDirector())
+	{
+		D->HandlePrimaryReleased();
 	}
 }
 

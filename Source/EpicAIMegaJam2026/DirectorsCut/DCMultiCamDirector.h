@@ -47,7 +47,12 @@ struct FDCMultiCamBeat
 /** One frame of the take as it went out live: replaying these re-shoots the film exactly. */
 struct FDCTakeSample
 {
+	/** Scene time this frame was filmed at. */
 	float Time = 0.f;
+	/** Position in the finished film: scene time minus every second the recording was paused. */
+	float FilmTime = 0.f;
+	/** First frame after a recording pause: playback jump-cuts here instead of blending from the previous frame. */
+	bool bJumpCut = false;
 	/** Camera slot that was live; a change between samples is a cut. */
 	int32 Slot = INDEX_NONE;
 	FVector Location = FVector::ZeroVector;
@@ -98,6 +103,7 @@ public:
 
 	// Player commands. Look/zoom return true when they were applied to a camera instead of the walking view.
 	void HandlePrimaryPressed();
+	void HandlePrimaryReleased();
 	void HandleSecondaryPressed();
 	virtual void HandleInteract();
 	virtual void HandleStartTake();
@@ -152,7 +158,9 @@ public:
 	/** Premiere or results: the take is over and only being reviewed. */
 	bool IsReviewing() const { return Phase == EDCPhase::Premiere || Phase == EDCPhase::Results; }
 	const TArray<FDCTakeSample>& GetRecording() const { return Recording; }
-	float GetPremiereLength() const { return Recording.Num() > 0 ? Recording.Last().Time : 0.f; }
+	float GetPremiereLength() const { return Recording.Num() > 0 ? Recording.Last().FilmTime : 0.f; }
+	/** Left click held during the take: nothing is recorded, captured, or penalized until it's released. */
+	bool IsRecordingPaused() const { return Phase == EDCPhase::Filming && bRecordingPauseHeld; }
 	bool IsPremierePaused() const { return bPremierePaused; }
 
 	bool bShowNotebook = true;
@@ -176,7 +184,8 @@ protected:
 
 	/** Whether the live shot is spoiled right now (zombie in frame); recorded with each sample. */
 	virtual bool IsLiveShotSpoiled() const { return false; }
-	void RecordSample();
+	/** Appends what went out live this frame, or skips it (and marks a jump cut) while recording is paused. */
+	void RecordSample(float DeltaSeconds);
 	void StartPremiere();
 	void TickPremiere(float DeltaSeconds);
 	/** Re-shoots the recording at Time: performers to that moment, playback camera to the recorded pose. */
@@ -220,6 +229,9 @@ protected:
 
 	TArray<FDCTakeSample> Recording;
 	bool bPremierePaused = false;
+	bool bRecordingPauseHeld = false;
+	float PausedSeconds = 0.f;
+	bool bJumpCutPending = false;
 
 	TArray<FDCMultiCamBeat> Beats;
 	FString SetupProblem;

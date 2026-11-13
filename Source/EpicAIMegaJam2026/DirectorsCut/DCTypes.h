@@ -8,6 +8,22 @@
 class USceneComponent;
 class ADCPerformer;
 
+namespace DCFrame
+{
+	/**
+	 * The recorded picture is the central part of each camera's view: this fraction of its width and height.
+	 * Scenes must sit inside it, zombies only count inside it, the HUD dims everything outside it, and the
+	 * premiere plays back only this part. (M_DCRig's in-frame fade uses the same 0.15-0.85 bounds.)
+	 */
+	constexpr float CaptureFraction = 0.70f;
+
+	/** Field of view that shows exactly the capture frame of a camera with the given horizontal FOV. */
+	inline float CaptureFOV(float FullFOVDegrees)
+	{
+		return FMath::RadiansToDegrees(2.f * FMath::Atan(CaptureFraction * FMath::Tan(FMath::DegreesToRadians(FullFOVDegrees * 0.5f))));
+	}
+}
+
 UENUM()
 enum class EDCAnchorPart : uint8
 {

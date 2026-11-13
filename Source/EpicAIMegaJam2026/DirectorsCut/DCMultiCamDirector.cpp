@@ -17,7 +17,6 @@
 
 namespace
 {
-	constexpr float SafeFrameFraction = 0.70f;
 	constexpr float PlaceRange = 1500.f;
 	constexpr float PickRadius = 80.f;
 	constexpr float FaceDot = 0.25f;
@@ -304,6 +303,9 @@ void ADCMultiCamDirector::ResetScene()
 	SetRigsHidden(false);
 	Recording.Reset();
 	bPremierePaused = false;
+	bRecordingPauseHeld = false;
+	PausedSeconds = 0.f;
+	bJumpCutPending = false;
 	if (ADCMultiCamCharacter* Player = GetPlayer())
 	{
 		Player->ResetToStart(StartTransform);
@@ -357,8 +359,15 @@ void ADCMultiCamDirector::EndTake()
 // Recording and premiere: the take is re-shot from the recorded camera poses (the scene is driven
 // purely by the scene clock, so replaying the clock replays the performance exactly).
 
-void ADCMultiCamDirector::RecordSample()
+void ADCMultiCamDirector::RecordSample(float DeltaSeconds)
 {
+	if (IsRecordingPaused())
+	{
+		// Paused footage never makes it into the film; the next frame recorded is a jump cut.
+		PausedSeconds += DeltaSeconds;
+		bJumpCutPending = true;
+		return;
+	}
 	const ADCMultiCam* Live = GetCameraSlot(ViewingSlot);
 	if (!Live)
 	{
@@ -367,6 +376,9 @@ void ADCMultiCamDirector::RecordSample()
 	const UCameraComponent* Lens = Live->GetCamera();
 	FDCTakeSample Sample;
 	Sample.Time = SceneTime;
+	Sample.FilmTime = SceneTime - PausedSeconds;
+	Sample.bJumpCut = bJumpCutPending;
+	bJumpCutPending = false;
 	Sample.Slot = ViewingSlot;
 	Sample.Location = Lens->GetComponentLocation();
 	Sample.Rotation = Lens->GetComponentRotation();
@@ -411,20 +423,22 @@ void ADCMultiCamDirector::ShowPremiereFrame(float Time)
 	{
 		return;
 	}
-	for (ADCPerformer* Performer : Performers)
-	{
-		Performer->Evaluate(Time);
-	}
-
-	const int32 Next = Algo::UpperBoundBy(Recording, Time, &FDCTakeSample::Time);
+	// Time is film time; paused stretches of the take are not in the film at all.
+	const int32 Next = Algo::UpperBoundBy(Recording, Time, &FDCTakeSample::FilmTime);
 	const FDCTakeSample& A = Recording[FMath::Clamp(Next - 1, 0, Recording.Num() - 1)];
 	const FDCTakeSample& B = Recording.IsValidIndex(Next) ? Recording[Next] : A;
-	// Blend between frames of the same camera; a change of camera is a hard cut.
-	const bool bBlend = B.Slot == A.Slot && B.Time > A.Time;
-	const float Alpha = bBlend ? FMath::Clamp((Time - A.Time) / (B.Time - A.Time), 0.f, 1.f) : 0.f;
+	// Blend between frames of the same camera; a change of camera or a recording pause is a hard cut.
+	const bool bBlend = B.Slot == A.Slot && !B.bJumpCut && B.FilmTime > A.FilmTime;
+	const float Alpha = bBlend ? FMath::Clamp((Time - A.FilmTime) / (B.FilmTime - A.FilmTime), 0.f, 1.f) : 0.f;
+	const float ScenePoint = bBlend ? FMath::Lerp(A.Time, B.Time, Alpha) : A.Time + FMath::Max(0.f, Time - A.FilmTime);
+	for (ADCPerformer* Performer : Performers)
+	{
+		Performer->Evaluate(ScenePoint);
+	}
 	PlaybackCamera->SetActorLocationAndRotation(FMath::Lerp(A.Location, B.Location, Alpha),
 		FQuat::Slerp(A.Rotation.Quaternion(), B.Rotation.Quaternion(), Alpha));
-	PlaybackCamera->GetCameraComponent()->SetFieldOfView(FMath::Lerp(A.FOV, B.FOV, Alpha));
+	// The film is only what was inside the capture frame, so the playback lens shows just that part.
+	PlaybackCamera->GetCameraComponent()->SetFieldOfView(DCFrame::CaptureFOV(FMath::Lerp(A.FOV, B.FOV, Alpha)));
 }
 
 void ADCMultiCamDirector::FinishPremiere()
@@ -474,7 +488,7 @@ void ADCMultiCamDirector::SetRigsHidden(bool bHide)
 void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 {
 	// Record what went out live this frame (before the take can end below).
-	RecordSample();
+	RecordSample(NowTime - PrevTime);
 
 	const ADCMultiCam* Live = GetCameraSlot(ViewingSlot);
 
@@ -486,7 +500,7 @@ void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 		}
 		const ADCBeat* Beat = State.Beat;
 		const float Eligible = FMath::Max(0.f, FMath::Min(NowTime, Beat->WindowEnd) - FMath::Max(PrevTime, Beat->WindowStart));
-		if (Live && Eligible > 0.f && IsFramed(State, Live))
+		if (Live && Eligible > 0.f && !IsRecordingPaused() && IsFramed(State, Live))
 		{
 			State.Hold += Eligible;
 			State.LastProgressTime = NowTime;
@@ -551,7 +565,7 @@ bool ADCMultiCamDirector::IsFramed(const FDCMultiCamBeat& State, const ADCMultiC
 		}
 		const float NdcX = (Local.Y / Local.X) / HalfTan;
 		const float NdcY = (Local.Z / Local.X) / (HalfTan / Aspect);
-		if (FMath::Abs(NdcX) > SafeFrameFraction || FMath::Abs(NdcY) > SafeFrameFraction)
+		if (FMath::Abs(NdcX) > DCFrame::CaptureFraction || FMath::Abs(NdcY) > DCFrame::CaptureFraction)
 		{
 			return false;
 		}
@@ -767,6 +781,12 @@ void ADCMultiCamDirector::UpdatePrepPreview()
 
 void ADCMultiCamDirector::HandlePrimaryPressed()
 {
+	if (Phase == EDCPhase::Countdown || Phase == EDCPhase::Filming)
+	{
+		// Holding left click during the take pauses the recording until it's released.
+		bRecordingPauseHeld = true;
+		return;
+	}
 	if (Phase != EDCPhase::Preparation || IsViewingCamera())
 	{
 		return;
@@ -839,6 +859,11 @@ void ADCMultiCamDirector::HandlePrimaryPressed()
 	Cameras[Slot] = Cam;
 	Flash(FString::Printf(TEXT("CAM %d placed - look through it with %s to aim"), Slot + 1,
 		Slot < 9 ? *FString::Printf(TEXT("%d"), Slot + 1) : TEXT("[ / ]")));
+}
+
+void ADCMultiCamDirector::HandlePrimaryReleased()
+{
+	bRecordingPauseHeld = false;
 }
 
 int32 ADCMultiCamDirector::FindFreeSlot()

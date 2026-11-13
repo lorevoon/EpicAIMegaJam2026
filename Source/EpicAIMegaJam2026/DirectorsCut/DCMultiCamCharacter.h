@@ -47,6 +47,7 @@ private:
 	void OnSprintPressed() { bSprintHeld = true; }
 	void OnSprintReleased() { bSprintHeld = false; }
 	void OnPrimary();
+	void OnPrimaryReleased();
 	void OnSecondary();
 	void OnInteract();
 	void OnStartTake();

@@ -109,7 +109,8 @@ void ADCZombieHUD::DrawHUD()
 	{
 		const float W = Canvas->ClipX;
 		const float H = Canvas->ClipY;
-		const float L = W * 0.15f, R = W * 0.85f, T = H * 0.15f, B = H * 0.85f;
+		const float Margin = (1.f - DCFrame::CaptureFraction) * 0.5f;
+		const float L = W * Margin, R = W * (1.f - Margin), T = H * Margin, B = H * (1.f - Margin);
 		const FLinearColor Mask(0.f, 0.f, 0.f, 0.5f);
 		DrawRect(Mask, 0.f, 0.f, W, T);
 		DrawRect(Mask, 0.f, B, W, H - B);
@@ -278,7 +279,8 @@ void ADCZombieHUD::DrawFraming(ADCZombieDirector* D)
 	}
 	const FLinearColor BracketColor = bRolling ? Good : FLinearColor(1.f, 1.f, 1.f, 0.45f);
 
-	const float L = W * 0.15f, R = W * 0.85f, T = H * 0.15f, B = H * 0.85f;
+	const float Margin = (1.f - DCFrame::CaptureFraction) * 0.5f;
+	const float L = W * Margin, R = W * (1.f - Margin), T = H * Margin, B = H * (1.f - Margin);
 	const float Arm = 40.f * S;
 	const float Th = 3.f;
 	DrawLine(L, T, L + Arm, T, BracketColor, Th); DrawLine(L, T, L, T + Arm, BracketColor, Th);
@@ -286,6 +288,25 @@ void ADCZombieHUD::DrawFraming(ADCZombieDirector* D)
 	DrawLine(L, B, L + Arm, B, BracketColor, Th); DrawLine(L, B, L, B - Arm, BracketColor, Th);
 	DrawLine(R, B, R - Arm, B, BracketColor, Th); DrawLine(R, B, R, B - Arm, BracketColor, Th);
 	DrawRect(BracketColor, W * 0.5f - 2.f, H * 0.5f - 2.f, 4.f, 4.f);
+
+	// Recording state in the frame's top-right corner: a pause symbol while paused, a blinking REC otherwise.
+	if (D->GetPhase() == EDCPhase::Filming)
+	{
+		const float IconX = R - 110.f * S;
+		const float IconY = T + 18.f * S;
+		if (D->IsRecordingPaused())
+		{
+			const float BarW = 14.f * S;
+			const float BarH = 44.f * S;
+			DrawRect(FLinearColor::White, IconX, IconY, BarW, BarH);
+			DrawRect(FLinearColor::White, IconX + BarW + 12.f * S, IconY, BarW, BarH);
+			Label(TEXT("PAUSED"), IconX + 20.f * S, IconY + BarH + 6.f * S, FLinearColor::White, 0.65f, true);
+		}
+		else if (FMath::Fmod(GetWorld()->GetTimeSeconds(), 1.f) < 0.6f)
+		{
+			Label(TEXT("* REC"), IconX, IconY, Bad, 1.f);
+		}
+	}
 
 	if (const ADCMultiCam* Cam = D->GetCameraSlot(D->GetViewingSlot()))
 	{
@@ -431,7 +452,7 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 		break;
 	case EDCPhase::Countdown:
 	case EDCPhase::Filming:
-		Lines.Add(TEXT("1-9 or [ ] cut camera   Mouse aims   W/S dolly or crane   Z/X dolly speed   Wheel zooms   R restart   P pause"));
+		Lines.Add(TEXT("1-9 or [ ] cut camera   hold LMB pause recording   Mouse aims   W/S dolly or crane   Z/X dolly speed   Wheel zooms   R restart   P pause"));
 		break;
 	default:
 		break;
@@ -515,9 +536,10 @@ void ADCZombieHUD::DrawPremiere(ADCZombieDirector* D)
 		{
 			continue;
 		}
-		const float T1 = Rec.IsValidIndex(i + 1) ? Rec[i + 1].Time : Rec[i].Time;
-		DrawRect(Bad, X0 + TW * Rec[i].Time / Length, TY - 2.f, FMath::Max(TW * (T1 - Rec[i].Time) / Length, 1.f), TH + 4.f);
-		bSpoiledNow |= Time >= Rec[i].Time && Time <= T1;
+		const float T0 = Rec[i].FilmTime;
+		const float T1 = Rec.IsValidIndex(i + 1) ? Rec[i + 1].FilmTime : T0;
+		DrawRect(Bad, X0 + TW * T0 / Length, TY - 2.f, FMath::Max(TW * (T1 - T0) / Length, 1.f), TH + 4.f);
+		bSpoiledNow |= Time >= T0 && Time <= T1;
 	}
 	DrawRect(Rose, X0, TY, TW * Time / Length, TH);
 	DrawRect(FLinearColor::White, X0 + TW * Time / Length - 1.5f, TY - 6.f, 3.f, TH + 12.f);
