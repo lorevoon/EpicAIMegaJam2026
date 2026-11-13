@@ -139,7 +139,14 @@ void ADCZombieHUD::DrawHUD()
 
 	if (D->GetPhase() == EDCPhase::Storyboard)
 	{
-		DrawStoryboardCard(D);
+		if (D->IsReferencePlaying())
+		{
+			DrawReferenceCut(D);
+		}
+		else
+		{
+			DrawStoryboardCard(D);
+		}
 		return;
 	}
 	if (D->IsReviewing())
@@ -301,7 +308,54 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 
 	Type(FString::Printf(TEXT("Film crew on camera cost %d points per second."), D->ZombiePenaltyPerSecond), 0.5f, 0.76f, InkRed, 0.75f, true);
 	Type(TEXT("Press Enter to start preparing"), 0.5f, 0.815f, Ink, 0.85f, true);
-	Type(TEXT("H pause/play rehearsal   Wheel scrub   , / . rehearsal speed"), 0.5f, 0.87f, InkFaded, 0.65f, true);
+	Type(D->bShowReferenceCut ? TEXT("Space: watch the reference cut again")
+		: TEXT("H pause/play rehearsal   Wheel scrub   , / . rehearsal speed"), 0.5f, 0.87f, InkFaded, 0.65f, true);
+}
+
+void ADCZombieHUD::DrawReferenceCut(ADCZombieDirector* D)
+{
+	// The reference cut: the level shot well, for the player to study and try to match.
+	const float W = Canvas->ClipX;
+	const float H = Canvas->ClipY;
+	const float Bar = FMath::Max((H - W / DCFrame::FilmAspect) * 0.5f, 40.f * S);
+	const float Time = D->GetReferenceTime();
+	const float Length = FMath::Max(D->GetReferenceLength(), KINDA_SMALL_NUMBER);
+	DrawRect(FLinearColor::Black, 0.f, 0.f, W, Bar);
+	DrawRect(FLinearColor::Black, 0.f, H - Bar, W, Bar);
+
+	Label(TEXT("REFERENCE CUT"), 24.f * S, Bar * 0.25f, Gold, 0.75f);
+	Label(D->MovieTitle, W * 0.5f, Bar * 0.25f, Rose, 0.75f, true);
+	Label(TEXT("Study it - then try to shoot it yourself"), W * 0.5f, Bar * 0.25f + 30.f * S, Muted, 0.5f, true);
+
+	// The storyboard line for the beat on screen, as a subtitle.
+	if (const ADCBeat* Beat = D->GetReferenceBeat())
+	{
+		Label(Beat->DisplayName, W * 0.5f, H - Bar - 64.f * S, FLinearColor::White, 1.f, true);
+	}
+
+	// Timeline with a gold tick where each beat becomes capturable.
+	const float X0 = W * 0.2f;
+	const float TW = W * 0.6f;
+	const float TY = H - Bar * 0.62f;
+	const float TH = 6.f * S;
+	DrawRect(FLinearColor(1.f, 1.f, 1.f, 0.2f), X0, TY, TW, TH);
+	for (const FDCMultiCamBeat& State : D->GetBeats())
+	{
+		DrawRect(Gold, X0 + TW * State.Beat->GetCaptureStartTime() / Length - 2.f, TY - 8.f * S, 4.f, TH + 16.f * S);
+	}
+	DrawRect(Rose, X0, TY, TW * Time / Length, TH);
+	DrawRect(FLinearColor::White, X0 + TW * Time / Length - 1.5f, TY - 6.f, 3.f, TH + 12.f);
+	Label(FString::Printf(TEXT("%04.1f / %04.1f"), Time, Length), 24.f * S, TY - 10.f * S, Muted, 0.6f);
+	{
+		const FString Hint = TEXT("Space pause   Wheel scrub   Enter storyboard");
+		float HintW = 0.f, HintH = 0.f;
+		GetTextSize(Hint, HintW, HintH, GetTextFont(), 0.6f * S);
+		Label(Hint, W - 24.f * S - HintW, TY - 10.f * S, Muted, 0.6f);
+	}
+	if (D->IsReferencePaused())
+	{
+		Label(TEXT("PAUSED"), W * 0.5f, H * 0.5f - 20.f * S, FLinearColor::White, 1.4f, true);
+	}
 }
 
 void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)

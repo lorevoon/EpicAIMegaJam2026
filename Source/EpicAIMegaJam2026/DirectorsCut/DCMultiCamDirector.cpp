@@ -208,6 +208,10 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		TickPremiere(DeltaSeconds);
 		break;
 
+	case EDCPhase::Storyboard:
+		TickReferenceCut(DeltaSeconds);
+		break;
+
 	default:
 		break;
 	}
@@ -473,14 +477,20 @@ void ADCMultiCamDirector::TickPremiere(float DeltaSeconds)
 
 void ADCMultiCamDirector::ShowPremiereFrame(float Time)
 {
-	if (Recording.Num() == 0)
+	ShowFilmFrame(Recording, Time);
+	if (Cinema && Recording.Num() > 0) Cinema->ProjectFrame(PlaybackCamera);
+}
+
+void ADCMultiCamDirector::ShowFilmFrame(const TArray<FDCTakeSample>& Film, float Time)
+{
+	if (Film.Num() == 0)
 	{
 		return;
 	}
 	// Time is film time; paused stretches of the take are not in the film at all.
-	const int32 Next = Algo::UpperBoundBy(Recording, Time, &FDCTakeSample::FilmTime);
-	const FDCTakeSample& A = Recording[FMath::Clamp(Next - 1, 0, Recording.Num() - 1)];
-	const FDCTakeSample& B = Recording.IsValidIndex(Next) ? Recording[Next] : A;
+	const int32 Next = Algo::UpperBoundBy(Film, Time, &FDCTakeSample::FilmTime);
+	const FDCTakeSample& A = Film[FMath::Clamp(Next - 1, 0, Film.Num() - 1)];
+	const FDCTakeSample& B = Film.IsValidIndex(Next) ? Film[Next] : A;
 	// Blend between frames of the same camera; a change of camera or a recording pause is a hard cut.
 	const bool bBlend = B.Slot == A.Slot && !B.bJumpCut && B.FilmTime > A.FilmTime;
 	const float Alpha = bBlend ? FMath::Clamp((Time - A.FilmTime) / (B.FilmTime - A.FilmTime), 0.f, 1.f) : 0.f;
@@ -493,7 +503,6 @@ void ADCMultiCamDirector::ShowPremiereFrame(float Time)
 		FQuat::Slerp(A.Rotation.Quaternion(), B.Rotation.Quaternion(), Alpha));
 	// The film is only what was inside the capture frame, so the playback lens shows just that part.
 	PlaybackCamera->GetCameraComponent()->SetFieldOfView(FMath::Lerp(A.FilmFOV, B.FilmFOV, Alpha));
-	if (Cinema) Cinema->ProjectFrame(PlaybackCamera);
 }
 
 void ADCMultiCamDirector::SetReplayMissionOutcome(FName BeatId, bool bSucceeded)
@@ -524,10 +533,19 @@ void ADCMultiCamDirector::HandleScrub(float DeltaSeconds)
 		SceneTime = FMath::Clamp(SceneTime + DeltaSeconds, 0.f, GetPremiereLength());
 		ShowPremiereFrame(SceneTime);
 	}
+	else if (Phase == EDCPhase::Storyboard)
+	{
+		ScrubReferenceCut(DeltaSeconds);
+	}
 }
 
 void ADCMultiCamDirector::HandleTransportToggle()
 {
+	if (Phase == EDCPhase::Storyboard)
+	{
+		ToggleReferenceCut(); // pause/resume, or watch it again from the storyboard page
+		return;
+	}
 	if (Phase != EDCPhase::Review)
 	{
 		return;
@@ -860,7 +878,7 @@ void ADCMultiCamDirector::HandleWheel(float Delta, bool bZoom)
 			Cam->SaveHome();
 		}
 	}
-	else if (Phase == EDCPhase::Preparation || Phase == EDCPhase::Review)
+	else if (Phase == EDCPhase::Preparation || Phase == EDCPhase::Review || Phase == EDCPhase::Storyboard)
 	{
 		HandleScrub(Delta * WheelScrubSeconds);
 	}

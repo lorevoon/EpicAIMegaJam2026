@@ -236,6 +236,12 @@ void ADCMultiCam::SetFOV(float NewFOV)
 	TargetFOV = FMath::Clamp(NewFOV, MinFOV, MaxFOV);
 }
 
+void ADCMultiCam::SnapFOV(float NewFOV)
+{
+	SetFOV(NewFOV);
+	Camera->SetFieldOfView(TargetFOV);
+}
+
 void ADCMultiCam::UpdateZoom(float DeltaSeconds)
 {
 	// Ease toward the target so wheel zooms read as a smooth push in / pull out.

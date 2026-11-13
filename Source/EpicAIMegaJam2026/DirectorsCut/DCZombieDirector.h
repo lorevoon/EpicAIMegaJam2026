@@ -22,7 +22,6 @@ public:
 	ADCZombieDirector();
 
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
 
 	/** Points lost per second while any zombie is visible on the live camera. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Zombies", meta = (ClampMin = "0"))
@@ -71,6 +70,7 @@ protected:
 	virtual void EndTake() override;
 	virtual void ResetScene() override;
 	virtual bool IsLiveShotSpoiled() const override { return bZombieInShot; }
+	virtual bool IsShotSpoiledFrom(const ADCMultiCam* Cam) const override { return IsZombieVisible(Cam, nullptr); }
 
 private:
 	void EnterPreparation();

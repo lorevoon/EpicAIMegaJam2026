@@ -111,6 +111,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Directors Cut|Replay")
 	void SetReplayMissionOutcome(FName BeatId, bool bSucceeded);
 
+	/**
+	 * The storyboard opens on a reference cut: a short film of this level shot well, one camera per beat, computed at
+	 * play time with the game's own framing and "ruins the shot" checks (see DCReferenceCut.cpp).
+	 */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut")
+	bool bShowReferenceCut = true;
+
+	/** The reference cut cuts to each beat's camera this long before the beat can be captured. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut", meta = (ClampMin = "0", Units = "s"))
+	float ReferenceCutLead = 1.f;
+
+	bool IsReferencePlaying() const { return bReferencePlaying; }
+	bool IsReferencePaused() const { return bReferencePaused; }
+	float GetReferenceTime() const { return ReferenceTime; }
+	float GetReferenceLength() const { return ReferenceCut.Num() > 0 ? ReferenceCut.Last().FilmTime : 0.f; }
+	/** The storyboard beat the reference cut is showing right now (null between beats). */
+	const ADCBeat* GetReferenceBeat() const;
+
 	/** How many cameras the player may place; 0 = unlimited. Keys 1-9 pick the first nine, [ and ] step through all. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0"))
 	int32 MaxCameras = 4;
@@ -272,6 +290,30 @@ protected:
 	void TickPremiere(float DeltaSeconds);
 	/** Re-shoots the recording at Time: performers to that moment, playback camera to the recorded pose. */
 	void ShowPremiereFrame(float Time);
+	/** Shows any film (the recording or the reference cut) at film time Time through the playback camera. */
+	void ShowFilmFrame(const TArray<FDCTakeSample>& Film, float Time);
+	void EvaluatePerformers(float Time);
+
+	/** Whether something that ruins a shot (a zombie / crew member) would be on screen from this camera. */
+	virtual bool IsShotSpoiledFrom(const ADCMultiCam* Cam) const { return false; }
+
+	// Reference cut (DCReferenceCut.cpp)
+	void BuildReferenceCut();
+	/** Best spot and lens for one beat; false if even the best can't hold it long enough to capture. */
+	bool FindReferenceShot(const FDCMultiCamBeat& State, FVector& OutLocation, float& OutFOV, float& OutCleanFrom);
+	void StartReferenceCut();
+	void StopReferenceCut();
+	void TickReferenceCut(float DeltaSeconds);
+	void ScrubReferenceCut(float DeltaSeconds);
+	void ToggleReferenceCut();
+	TArray<FDCTakeSample> ReferenceCut;
+	/** Beat index (into Beats) for each reference shot (FDCTakeSample::Slot). */
+	TArray<int32> ReferenceShotBeats;
+	bool bReferencePlaying = false;
+	bool bReferencePaused = false;
+	/** Set by a director that opens on the storyboard: the reference cut starts on its first tick. */
+	bool bReferenceAutoStart = false;
+	float ReferenceTime = 0.f;
 	void FinishPremiere();
 	void Flash(const FString& Text, float Seconds = 2.5f);
 	FCollisionQueryParams MakeTraceParams(const FName& Tag) const;

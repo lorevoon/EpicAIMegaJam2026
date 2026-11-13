@@ -28,19 +28,10 @@ void ADCZombieDirector::BeginPlay()
 		}
 	}
 
-	// Open on the storyboard.
+	// Open on the storyboard, which starts with the reference cut (built once the crew list above is known).
 	Phase = EDCPhase::Storyboard;
+	bReferenceAutoStart = true;
 	Flash(FString(), 0.f);
-}
-
-void ADCZombieDirector::Tick(float DeltaSeconds)
-{
-	if (Phase == EDCPhase::Storyboard)
-	{
-		AActor::Tick(DeltaSeconds);
-		return;
-	}
-	Super::Tick(DeltaSeconds);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -56,7 +47,15 @@ void ADCZombieDirector::HandleStartTake()
 {
 	if (Phase == EDCPhase::Storyboard)
 	{
-		EnterPreparation();
+		// Enter skips the reference cut to the storyboard page, then starts preparing.
+		if (IsReferencePlaying())
+		{
+			StopReferenceCut();
+		}
+		else
+		{
+			EnterPreparation();
+		}
 		return;
 	}
 	Super::HandleStartTake();

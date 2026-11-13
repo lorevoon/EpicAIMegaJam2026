@@ -68,6 +68,8 @@ public:
 	/** Where the zoom is heading; the lens eases toward it every frame. */
 	float GetTargetFOV() const { return TargetFOV; }
 	void SetFOV(float NewFOV);
+	/** Sets the lens immediately, without the eased zoom. */
+	void SnapFOV(float NewFOV);
 	void UpdateZoom(float DeltaSeconds);
 
 	float GetRailSpeedScale() const;
