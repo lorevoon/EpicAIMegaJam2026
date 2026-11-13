@@ -1133,23 +1133,11 @@ bool ADCMultiCamDirector::IsNearClapper() const
 
 void ADCMultiCamDirector::HandleInteract()
 {
-	switch (Phase)
+	// E only steps back out of a camera. It doubles as "raise camera" while placing, so it never
+	// advances the game - Enter alone moves from one phase to the next.
+	if (Phase == EDCPhase::Preparation && IsViewingCamera())
 	{
-	case EDCPhase::Review:
-		HandleStartTake(); // skip to the evaluation, then back to preparation
-		break;
-	case EDCPhase::Preparation:
-		if (IsViewingCamera())
-		{
-			ViewWalking();
-		}
-		else if (IsNearClapper())
-		{
-			HandleStartTake();
-		}
-		break;
-	default:
-		break;
+		ViewWalking();
 	}
 }
 

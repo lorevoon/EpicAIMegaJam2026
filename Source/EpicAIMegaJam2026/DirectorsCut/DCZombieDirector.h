@@ -50,7 +50,6 @@ public:
 #endif
 
 	// Player commands
-	virtual void HandleInteract() override;
 	virtual void HandleStartTake() override;
 	virtual void HandleRestart() override;
 	virtual void HandleScrub(float DeltaSeconds) override;

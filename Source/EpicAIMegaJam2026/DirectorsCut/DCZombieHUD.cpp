@@ -103,7 +103,7 @@ void ADCZombieHUD::DrawHUD()
 		FVector2D P;
 		if (D->GetClapperboard() && ProjectVisible(D->GetClapperboard()->GetActorLocation() + FVector(0.f, 0.f, 170.f), P))
 		{
-			Label(TEXT("CLAPPERBOARD - E to call Action!"), P.X, P.Y, FLinearColor::White, 0.7f, true);
+			Label(TEXT("CLAPPERBOARD - Enter to call Action!"), P.X, P.Y, FLinearColor::White, 0.7f, true);
 		}
 	}
 
@@ -447,7 +447,7 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 		{
 			if (D->IsNearClapper())
 			{
-				Lines.Add(TEXT("E: hit the clapperboard and call ACTION!"));
+				Lines.Add(TEXT("Enter: hit the clapperboard and call ACTION!"));
 			}
 			Lines.Add(TEXT("T camera type   LMB place (dolly: rail points, F new rail)   RMB remove   Q/E height   1-9 or [ ] look through   C clear"));
 			Lines.Add(TEXT("Wheel or Left/Right scrub the scene   Enter / clapperboard: Action!   Tab storyboard   Shift sprint"));

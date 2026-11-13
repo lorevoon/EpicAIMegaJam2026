@@ -62,16 +62,6 @@ void ADCZombieDirector::HandleStartTake()
 	Super::HandleStartTake();
 }
 
-void ADCZombieDirector::HandleInteract()
-{
-	if (Phase == EDCPhase::Storyboard)
-	{
-		EnterPreparation();
-		return;
-	}
-	Super::HandleInteract();
-}
-
 void ADCZombieDirector::HandleRestart()
 {
 	if (Phase != EDCPhase::Storyboard)
