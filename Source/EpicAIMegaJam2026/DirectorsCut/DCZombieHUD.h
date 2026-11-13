@@ -7,6 +7,7 @@
 #include "DCZombieHUD.generated.h"
 
 class ADCZombieDirector;
+class UFont;
 class UTexture2D;
 
 UCLASS()
@@ -18,6 +19,14 @@ public:
 	ADCZombieHUD();
 
 	virtual void DrawHUD() override;
+
+	/** Overall size of the HUD (text, panels, and spacing) on top of scaling with the screen height. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI", meta = (ClampMin = "0.5", ClampMax = "3"))
+	float UIScale = 1.5f;
+
+	/** Typeface for all HUD text (a runtime font, so it stays sharp at any size). Falls back to the engine font. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
+	TObjectPtr<UFont> TextFont;
 
 	/** Camera-type icons on the switcher buttons. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
@@ -54,7 +63,9 @@ private:
 	void DrawResults(ADCZombieDirector* D);
 	void DrawPremiere(ADCZombieDirector* D);
 
-	void Label(const FString& Text, float X, float Y, const FLinearColor& Color, float Scale = 1.f, bool bCenter = false, bool bShadow = true);
+	/** Draws text; a line too long for MaxWidth (or, by default, the screen) shrinks to fit instead of running off. */
+	void Label(const FString& Text, float X, float Y, const FLinearColor& Color, float Scale = 1.f, bool bCenter = false, bool bShadow = true, float MaxWidth = 0.f);
+	UFont* GetTextFont() const;
 	bool ProjectVisible(const FVector& World, FVector2D& OutScreen) const;
 	/** The capture frame on the canvas (DCFrame::CaptureExtent for this screen). */
 	void GetCaptureRect(float& L, float& T, float& R, float& B) const;

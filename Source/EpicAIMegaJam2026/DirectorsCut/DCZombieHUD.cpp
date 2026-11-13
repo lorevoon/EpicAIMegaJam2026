@@ -12,6 +12,8 @@
 #include "Engine/Texture2D.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
+#include "CanvasItem.h"
+#include "Fonts/SlateFontInfo.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -36,6 +38,8 @@ ADCZombieHUD::ADCZombieHUD()
 {
 	static ConstructorHelpers::FObjectFinder<UTexture2D> StaticIcon(TEXT("/Game/DirectorsCut/UI/Icons/Vintage_Film_Camera_Rotation_Icon-1.Vintage_Film_Camera_Rotation_Icon-1"));
 	static ConstructorHelpers::FObjectFinder<UTexture2D> DollyIcon(TEXT("/Game/DirectorsCut/UI/Icons/Vintage_Film_Camera_on_Rails-2.Vintage_Film_Camera_on_Rails-2"));
+	static ConstructorHelpers::FObjectFinder<UFont> Bree(TEXT("/Game/DirectorsCut/UI/Fonts/Bree_Serif__1_/BreeSerif-Regular_Font.BreeSerif-Regular_Font"));
+	TextFont = Bree.Object;
 	static ConstructorHelpers::FObjectFinder<UTexture2D> Paper(TEXT("/Game/DirectorsCut/UI/Vintage_Script_Paper_UI_Element.Vintage_Script_Paper_UI_Element"));
 	static ConstructorHelpers::FObjectFinder<UTexture2D> Monitor(TEXT("/Game/DirectorsCut/UI/SMALLHD_Monitor_Rig_Assembly.SMALLHD_Monitor_Rig_Assembly"));
 	MonitorFrame = Monitor.Object;
@@ -57,21 +61,38 @@ ADCZombieDirector* ADCZombieHUD::FindDirector()
 	return Director.Get();
 }
 
-void ADCZombieHUD::Label(const FString& Text, float X, float Y, const FLinearColor& Color, float Scale, bool bCenter, bool bShadow)
+UFont* ADCZombieHUD::GetTextFont() const
 {
-	UFont* Font = GEngine->GetLargeFont();
-	const float FinalScale = Scale * S;
+	return TextFont ? TextFont.Get() : GEngine->GetLargeFont();
+}
+
+void ADCZombieHUD::Label(const FString& Text, float X, float Y, const FLinearColor& Color, float Scale, bool bCenter, bool bShadow, float MaxWidth)
+{
+	UFont* Font = GetTextFont();
+	float FinalScale = Scale * S;
+	float W = 0.f, H = 0.f;
+	GetTextSize(Text, W, H, Font, FinalScale);
+	// Long lines shrink to fit their room (by default the screen) rather than running off it.
+	constexpr float EdgeMargin = 16.f;
+	const float Room = MaxWidth > 0.f ? MaxWidth : bCenter ? Canvas->ClipX - 2.f * EdgeMargin : Canvas->ClipX - EdgeMargin - X;
+	if (W > Room && Room > 0.f)
+	{
+		FinalScale *= Room / W;
+		W = Room;
+	}
 	if (bCenter)
 	{
-		float W = 0.f, H = 0.f;
-		GetTextSize(Text, W, H, Font, FinalScale);
 		X -= W * 0.5f;
 	}
+	// Ask for the glyphs at the size they're shown. Plain DrawText renders the font once at its base size and stretches
+	// that bitmap by the scale, which is what made larger text look pixelated.
+	const FSlateFontInfo FontInfo(Font, FMath::Max(Font->LegacyFontSize * FinalScale, 6.f));
+	FCanvasTextItem Item(FVector2D(X, Y), FText::FromString(Text), FontInfo, Color);
 	if (bShadow)
 	{
-		DrawText(Text, FLinearColor(0.f, 0.f, 0.f, 0.8f), X + 2.f, Y + 2.f, Font, FinalScale);
+		Item.EnableShadow(FLinearColor(0.f, 0.f, 0.f, 0.8f), FVector2D(2.f, 2.f));
 	}
-	DrawText(Text, Color, X, Y, Font, FinalScale);
+	Canvas->DrawItem(Item);
 }
 
 void ADCZombieHUD::GetCaptureRect(float& L, float& T, float& R, float& B) const
@@ -111,7 +132,7 @@ void ADCZombieHUD::DrawHUD()
 	{
 		return;
 	}
-	S = FMath::Max(Canvas->ClipY / 1080.f, 0.6f);
+	S = FMath::Max(Canvas->ClipY / 1080.f, 0.6f) * UIScale;
 	const float CX = Canvas->ClipX * 0.5f;
 	const float CY = Canvas->ClipY * 0.5f;
 
@@ -252,10 +273,10 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 	}
 
 	// Everything below is placed in page fractions and sized with the page, in ink (no drop shadow).
-	const float K = PH / (1000.f * S);
+	const float K = PH / (800.f * S);
 	auto Type = [&](const FString& Text, float FX, float FY, const FLinearColor& Color, float Scale, bool bCenter)
 	{
-		Label(Text, PX + PW * FX, PY + PH * FY, Color, Scale * K, bCenter, false);
+		Label(Text, PX + PW * FX, PY + PH * FY, Color, Scale * K, bCenter, false, PW * (bCenter ? 0.78f : 0.92f - FX));
 	};
 	Type(TEXT("STORYBOARD   1/4"), 0.14f, 0.052f, InkFaded, 0.7f, false);
 	Type(D->MovieTitle, 0.5f, 0.12f, InkRed, 2.f, true);
@@ -273,7 +294,8 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 	}
 
 	Type(FString::Printf(TEXT("Film crew on camera cost %d points per second."), D->ZombiePenaltyPerSecond), 0.5f, 0.76f, InkRed, 0.75f, true);
-	Type(TEXT("Press Enter to start preparing - scrub through the scene with the mouse wheel while you place cameras"), 0.5f, 0.83f, Ink, 0.75f, true);
+	Type(TEXT("Press Enter to start preparing"), 0.5f, 0.815f, Ink, 0.85f, true);
+	Type(TEXT("Scrub through the scene with the mouse wheel while you place cameras"), 0.5f, 0.87f, InkFaded, 0.65f, true);
 }
 
 void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
@@ -310,19 +332,29 @@ void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
 void ADCZombieHUD::DrawStoryboardPanel(ADCZombieDirector* D)
 {
 	const TArray<FDCMultiCamBeat>& Beats = D->GetBeats();
-	const float X = Canvas->ClipX - 520.f * S;
+	TArray<FString> Lines;
+	float Widest = 0.f;
+	for (int32 i = 0; i < Beats.Num(); ++i)
+	{
+		const FDCMultiCamBeat& State = Beats[i];
+		const TCHAR* Mark = State.Status == EDCShotStatus::Captured ? TEXT("[OK]") : State.Status == EDCShotStatus::Missed ? TEXT("[--]") : TEXT("[  ]");
+		Lines.Add(FString::Printf(TEXT("%s %d. %s"), Mark, i + 1, *State.Beat->DisplayName));
+		float LineW = 0.f, LineH = 0.f;
+		GetTextSize(Lines.Last(), LineW, LineH, GetTextFont(), 0.58f * S);
+		Widest = FMath::Max(Widest, LineW);
+	}
+	const float X = Canvas->ClipX - Widest - 36.f * S;
 	float Y = 130.f * S;
 	const float RowH = 28.f * S;
-	DrawRect(Panel, X - 12.f * S, Y - 10.f * S, 510.f * S, RowH * Beats.Num() + 48.f * S);
+	DrawRect(Panel, X - 12.f * S, Y - 10.f * S, Widest + 36.f * S, RowH * Beats.Num() + 48.f * S);
 	Label(TEXT("STORYBOARD (Tab)"), X, Y, Muted, 0.7f);
 	Y += 32.f * S;
 	for (int32 i = 0; i < Beats.Num(); ++i)
 	{
 		const FDCMultiCamBeat& State = Beats[i];
-		const TCHAR* Mark = State.Status == EDCShotStatus::Captured ? TEXT("[OK]") : State.Status == EDCShotStatus::Missed ? TEXT("[--]") : TEXT("[  ]");
 		const FLinearColor Color = State.Status == EDCShotStatus::Captured ? Good : State.Status == EDCShotStatus::Missed ? Muted
 			: State.Beat->bMandatory ? Gold : FLinearColor::White;
-		Label(FString::Printf(TEXT("%s %d. %s"), Mark, i + 1, *State.Beat->DisplayName), X, Y, Color, 0.58f);
+		Label(Lines[i], X, Y, Color, 0.58f);
 		Y += RowH;
 	}
 }
@@ -383,7 +415,7 @@ void ADCZombieHUD::DrawFraming(ADCZombieDirector* D)
 void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 {
 	const float CX = Canvas->ClipX * 0.5f;
-	float Y = Canvas->ClipY * 0.62f;
+	float Y = Canvas->ClipY * 0.48f;
 	const float Length = FMath::Max(D->TakeDuration, KINDA_SMALL_NUMBER);
 	const float Time = D->GetSceneTime();
 	Label(FString::Printf(TEXT("SCENE TIMELINE   %.1fs / %.0fs   (Wheel or Left/Right to scrub)"), Time, Length), CX, Y, Gold, 0.75f, true);
@@ -422,7 +454,7 @@ void ADCZombieHUD::DrawGauges(ADCZombieDirector* D)
 {
 	const float BarW = 340.f * S;
 	const float BarH = 12.f * S;
-	float Y = Canvas->ClipY * 0.58f;
+	float Y = Canvas->ClipY * 0.52f;
 	const float X = Canvas->ClipX * 0.5f - BarW * 0.5f;
 
 	for (const FDCMultiCamBeat& State : D->GetBeats())
@@ -536,22 +568,22 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 	case EDCPhase::Preparation:
 		if (D->IsViewingCamera())
 		{
-			Lines.Add(TEXT("AIMING: mouse to turn, Shift+Wheel zoom, Wheel scrub the scene, W/S move dolly, Z/X dolly speed"));
-			Lines.Add(TEXT("This is where the camera starts every take.   [ / ] other cameras   E or the same number to step back"));
+			Lines.Add(TEXT("AIMING - this is where the camera starts every take"));
+			Lines.Add(TEXT("Mouse turn   Shift+Wheel zoom   Wheel scrub the scene"));
+			Lines.Add(TEXT("W/S move dolly   Z/X dolly speed   [ / ] other cameras   E step back"));
 		}
 		else
 		{
-			if (D->IsNearClapper())
-			{
-				Lines.Add(TEXT("Enter: hit the clapperboard and call ACTION!"));
-			}
-			Lines.Add(TEXT("T camera type   LMB place (dolly: rail points, F new rail)   RMB remove   Q/E height   1-9 or [ ] look through   C clear"));
-			Lines.Add(TEXT("Wheel or Left/Right scrub the scene   Enter / clapperboard: Action!   Tab storyboard   Shift sprint"));
+			Lines.Add(TEXT("T camera type   LMB place   RMB remove   Q/E height   C clear"));
+			Lines.Add(TEXT("Dolly: click rail points, F starts a new rail   1-9 or [ ] look through"));
+			Lines.Add(D->IsNearClapper() ? TEXT("Enter: hit the clapperboard and call ACTION!")
+				: TEXT("Wheel scrub the scene   Tab storyboard   Shift sprint   Enter: Action!"));
 		}
 		break;
 	case EDCPhase::Countdown:
 	case EDCPhase::Filming:
-		Lines.Add(TEXT("1-9 or [ ] cut camera   hold LMB pause recording   Mouse aims   W/S dolly   Z/X dolly speed   G stabilizer   Wheel zooms   R restart   P pause"));
+		Lines.Add(TEXT("1-9 or [ ] cut camera   Mouse aims   Wheel zooms   hold LMB pause recording"));
+		Lines.Add(TEXT("W/S dolly   Z/X dolly speed   G stabilizer   R restart   P pause"));
 		break;
 	default:
 		break;
@@ -586,7 +618,7 @@ void ADCZombieHUD::DrawResults(ADCZombieDirector* D)
 		const FString Line = bGot
 			? FString::Printf(TEXT("[OK] %d. %s   +%d  (CAM %d)"), i + 1, *State.Beat->DisplayName, State.Beat->Points, State.CapturedBy)
 			: FString::Printf(TEXT("[--] %d. %s"), i + 1, *State.Beat->DisplayName);
-		Label(Line, X + 40.f * S, Y, bGot ? Good : State.Beat->bMandatory ? Bad : Muted, 0.62f);
+		Label(Line, X + 40.f * S, Y, bGot ? Good : State.Beat->bMandatory ? Bad : Muted, 0.62f, false, true, W - 80.f * S);
 		Y += 34.f * S;
 	}
 
@@ -663,7 +695,12 @@ void ADCZombieHUD::DrawPremiere(ADCZombieDirector* D)
 
 	Label(FString::Printf(TEXT("%02d:%04.1f / %02d:%04.1f"), int32(Time) / 60, FMath::Fmod(Time, 60.f), int32(Length) / 60, FMath::Fmod(Length, 60.f)),
 		24.f * S, TY - 10.f * S, Muted, 0.7f);
-	Label(TEXT("4/4 REVIEW   Space pause   Wheel scrub   Enter skip to evaluation"), W - 24.f * S - 520.f * S, TY - 10.f * S, Muted, 0.6f);
+	{
+		const FString Hint = TEXT("4/4 REVIEW   Space pause   Wheel scrub   Enter skip to evaluation");
+		float HintW = 0.f, HintH = 0.f;
+		GetTextSize(Hint, HintW, HintH, GetTextFont(), 0.6f * S);
+		Label(Hint, W - 24.f * S - HintW, TY - 10.f * S, Muted, 0.6f);
+	}
 	Label(D->MovieTitle, W * 0.5f, Bar * 0.35f, Rose, 0.8f, true);
 	if (bSpoiledNow)
 	{
