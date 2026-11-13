@@ -7,10 +7,15 @@
 #include "DCMultiCamDirector.h"
 #include "DCBeat.h"
 #include "DCMultiCam.h"
+#include "DCMultiCamCharacter.h"
 #include "DCPerformer.h"
+#include "DCRail.h"
 #include "Algo/BinarySearch.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
+#include "Components/SceneCaptureComponent2D.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "EngineUtils.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 
@@ -197,6 +202,7 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 
 void ADCMultiCamDirector::BuildReferenceCut()
 {
+	bReferenceCutBuilt = true;
 	ReferenceCut.Reset();
 	ReferenceShotBeats.Reset();
 	if (Beats.Num() == 0 || !Ghost || !PlaybackCamera)
@@ -276,7 +282,7 @@ void ADCMultiCamDirector::StartReferenceCut()
 	{
 		return;
 	}
-	if (ReferenceCut.Num() == 0)
+	if (!bReferenceCutBuilt)
 	{
 		BuildReferenceCut();
 	}
@@ -354,16 +360,73 @@ void ADCMultiCamDirector::ToggleReferenceCut()
 
 const ADCBeat* ADCMultiCamDirector::GetReferenceBeat() const
 {
-	if (!bReferencePlaying || ReferenceCut.Num() == 0)
+	return bReferencePlaying ? GetReferenceBeatAt(ReferenceTime) : nullptr;
+}
+
+const ADCBeat* ADCMultiCamDirector::GetReferenceBeatAt(float Time) const
+{
+	if (ReferenceCut.Num() == 0)
 	{
 		return nullptr;
 	}
-	const int32 Next = Algo::UpperBoundBy(ReferenceCut, ReferenceTime, &FDCTakeSample::FilmTime);
+	const int32 Next = Algo::UpperBoundBy(ReferenceCut, Time, &FDCTakeSample::FilmTime);
 	const FDCTakeSample& Frame = ReferenceCut[FMath::Clamp(Next - 1, 0, ReferenceCut.Num() - 1)];
 	if (!ReferenceShotBeats.IsValidIndex(Frame.Slot))
 	{
 		return nullptr;
 	}
 	const ADCBeat* Beat = Beats[ReferenceShotBeats[Frame.Slot]].Beat;
-	return ReferenceTime >= Beat->WindowStart && ReferenceTime <= Beat->WindowEnd ? Beat : nullptr;
+	return Time >= Beat->WindowStart && Time <= Beat->WindowEnd ? Beat : nullptr;
+}
+
+UTextureRenderTarget2D* ADCMultiCamDirector::GetReferenceInset() const
+{
+	return Phase == EDCPhase::Preparation && bShowReferenceInset && ReferenceCut.Num() > 0 ? ReferenceInsetTarget.Get() : nullptr;
+}
+
+void ADCMultiCamDirector::UpdateReferenceInset()
+{
+	if (!bShowReferenceInset || !ReferenceCapture)
+	{
+		return;
+	}
+	if (!bReferenceCutBuilt)
+	{
+		BuildReferenceCut(); // e.g. the storyboard's reference cut was switched off or skipped
+	}
+	// The reference cut has no recording pauses, so its film time is the rehearsal's scene time.
+	FVector Location;
+	FQuat Rotation;
+	float FOV = 0.f, ScenePoint = 0.f;
+	if (!GetFilmView(ReferenceCut, SceneTime, Location, Rotation, FOV, ScenePoint))
+	{
+		return;
+	}
+	if (!ReferenceInsetTarget)
+	{
+		ReferenceInsetTarget = NewObject<UTextureRenderTarget2D>(this);
+		ReferenceInsetTarget->InitCustomFormat(640, FMath::RoundToInt(640.f / DCFrame::FilmAspect), PF_B8G8R8A8, false);
+		ReferenceCapture->TextureTarget = ReferenceInsetTarget;
+	}
+
+	// Only the scene: no player rigs, placement ghost, director on foot, or hint circles.
+	ReferenceCapture->HiddenActors.Reset();
+	ReferenceCapture->HiddenActors.Add(Ghost);
+	ReferenceCapture->HiddenActors.Add(GetPlayer());
+	for (ADCMultiCam* Cam : Cameras)
+	{
+		ReferenceCapture->HiddenActors.Add(Cam);
+	}
+	for (TActorIterator<ADCRail> It(GetWorld()); It; ++It)
+	{
+		ReferenceCapture->HiddenActors.Add(*It);
+	}
+	for (const FDCMultiCamBeat& State : Beats)
+	{
+		ReferenceCapture->HiddenActors.Add(State.Beat);
+	}
+
+	ReferenceCapture->SetWorldLocationAndRotation(Location, Rotation);
+	ReferenceCapture->FOVAngle = FOV;
+	ReferenceCapture->CaptureScene();
 }

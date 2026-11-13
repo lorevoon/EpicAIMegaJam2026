@@ -11,6 +11,7 @@
 #include "Algo/BinarySearch.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
+#include "Components/SceneCaptureComponent2D.h"
 #include "Engine/World.h"
 #include "Engine/LevelStreaming.h"
 #include "Engine/LevelStreamingDynamic.h"
@@ -52,6 +53,14 @@ ADCMultiCamDirector::ADCMultiCamDirector()
 	PrimaryActorTick.TickGroup = TG_PostUpdateWork;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+
+	// Renders the reference cut for the preparation inset; captured by hand only while that inset is showing.
+	ReferenceCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("ReferenceInsetCapture"));
+	ReferenceCapture->SetupAttachment(RootComponent);
+	ReferenceCapture->bCaptureEveryFrame = false;
+	ReferenceCapture->bCaptureOnMovement = false;
+	ReferenceCapture->bAlwaysPersistRenderingState = true; // keeps exposure history between captures
+	ReferenceCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
 }
 
 void ADCMultiCamDirector::BeginPlay()
@@ -174,6 +183,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 			}
 		}
 		UpdatePrepPreview();
+		UpdateReferenceInset();
 		break;
 
 	case EDCPhase::Countdown:
@@ -481,11 +491,11 @@ void ADCMultiCamDirector::ShowPremiereFrame(float Time)
 	if (Cinema && Recording.Num() > 0) Cinema->ProjectFrame(PlaybackCamera);
 }
 
-void ADCMultiCamDirector::ShowFilmFrame(const TArray<FDCTakeSample>& Film, float Time)
+bool ADCMultiCamDirector::GetFilmView(const TArray<FDCTakeSample>& Film, float Time, FVector& OutLocation, FQuat& OutRotation, float& OutFOV, float& OutScenePoint) const
 {
 	if (Film.Num() == 0)
 	{
-		return;
+		return false;
 	}
 	// Time is film time; paused stretches of the take are not in the film at all.
 	const int32 Next = Algo::UpperBoundBy(Film, Time, &FDCTakeSample::FilmTime);
@@ -494,15 +504,26 @@ void ADCMultiCamDirector::ShowFilmFrame(const TArray<FDCTakeSample>& Film, float
 	// Blend between frames of the same camera; a change of camera or a recording pause is a hard cut.
 	const bool bBlend = B.Slot == A.Slot && !B.bJumpCut && B.FilmTime > A.FilmTime;
 	const float Alpha = bBlend ? FMath::Clamp((Time - A.FilmTime) / (B.FilmTime - A.FilmTime), 0.f, 1.f) : 0.f;
-	const float ScenePoint = bBlend ? FMath::Lerp(A.Time, B.Time, Alpha) : A.Time + FMath::Max(0.f, Time - A.FilmTime);
-	for (ADCPerformer* Performer : Performers)
+	OutScenePoint = bBlend ? FMath::Lerp(A.Time, B.Time, Alpha) : A.Time + FMath::Max(0.f, Time - A.FilmTime);
+	OutLocation = FMath::Lerp(A.Location, B.Location, Alpha);
+	OutRotation = FQuat::Slerp(A.Rotation.Quaternion(), B.Rotation.Quaternion(), Alpha);
+	// The film is only what was inside the capture frame, so the lens shows just that part.
+	OutFOV = FMath::Lerp(A.FilmFOV, B.FilmFOV, Alpha);
+	return true;
+}
+
+void ADCMultiCamDirector::ShowFilmFrame(const TArray<FDCTakeSample>& Film, float Time)
+{
+	FVector Location;
+	FQuat Rotation;
+	float FOV = 0.f, ScenePoint = 0.f;
+	if (!GetFilmView(Film, Time, Location, Rotation, FOV, ScenePoint))
 	{
-		Performer->Evaluate(ScenePoint);
+		return;
 	}
-	PlaybackCamera->SetActorLocationAndRotation(FMath::Lerp(A.Location, B.Location, Alpha),
-		FQuat::Slerp(A.Rotation.Quaternion(), B.Rotation.Quaternion(), Alpha));
-	// The film is only what was inside the capture frame, so the playback lens shows just that part.
-	PlaybackCamera->GetCameraComponent()->SetFieldOfView(FMath::Lerp(A.FilmFOV, B.FilmFOV, Alpha));
+	EvaluatePerformers(ScenePoint);
+	PlaybackCamera->SetActorLocationAndRotation(Location, Rotation);
+	PlaybackCamera->GetCameraComponent()->SetFieldOfView(FOV);
 }
 
 void ADCMultiCamDirector::SetReplayMissionOutcome(FName BeatId, bool bSucceeded)

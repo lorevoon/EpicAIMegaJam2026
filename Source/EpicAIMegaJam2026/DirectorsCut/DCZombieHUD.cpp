@@ -11,6 +11,7 @@
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
 #include "Engine/Texture2D.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
 #include "CanvasItem.h"
@@ -29,6 +30,8 @@ namespace
 	const FLinearColor Panel(0.f, 0.f, 0.f, 0.6f);
 	const FLinearColor Live(0.9f, 0.08f, 0.08f);
 	constexpr float GaugeLinger = 1.5f;
+	/** Width of the preparation reference-cut inset, as a share of the screen width. */
+	constexpr float InsetShare = 0.24f;
 	// Typewriter ink on the storyboard page.
 	const FLinearColor Ink(0.12f, 0.09f, 0.07f);
 	const FLinearColor InkFaded(0.38f, 0.3f, 0.22f);
@@ -247,6 +250,7 @@ void ADCZombieHUD::DrawHUD()
 		}
 	}
 
+	DrawReferenceInset(D);
 	DrawSwitcher(D);
 	DrawHelp(D);
 
@@ -310,6 +314,27 @@ void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 	Type(TEXT("Press Enter to start preparing"), 0.5f, 0.815f, Ink, 0.85f, true);
 	Type(D->bShowReferenceCut ? TEXT("Space: watch the reference cut again")
 		: TEXT("H pause/play rehearsal   Wheel scrub   , / . rehearsal speed"), 0.5f, 0.87f, InkFaded, 0.65f, true);
+}
+
+void ADCZombieHUD::DrawReferenceInset(ADCZombieDirector* D)
+{
+	UTextureRenderTarget2D* Inset = D->GetReferenceInset();
+	if (!Inset)
+	{
+		return;
+	}
+	// Flush in the bottom-right corner, in the film's own 2.12:1 shape (the help lines move left of it).
+	const float W = Canvas->ClipX * InsetShare;
+	const float H = W / DCFrame::FilmAspect;
+	const float X = Canvas->ClipX - W;
+	const float Y = Canvas->ClipY - H;
+	DrawRect(FLinearColor::Black, X - 4.f * S, Y - 30.f * S, W + 4.f * S, H + 30.f * S);
+	Label(TEXT("REFERENCE CUT"), X, Y - 27.f * S, Gold, 0.5f, false, true, W);
+	DrawTexture(Inset, X, Y, W, H, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, BLEND_Opaque);
+	if (const ADCBeat* Beat = D->GetReferenceBeatAt(D->GetSceneTime()))
+	{
+		Label(Beat->DisplayName, X + W * 0.5f, Y + H - 28.f * S, FLinearColor::White, 0.5f, true, true, W - 12.f * S);
+	}
 }
 
 void ADCZombieHUD::DrawReferenceCut(ADCZombieDirector* D)
@@ -649,10 +674,13 @@ void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 	default:
 		break;
 	}
+	// With the reference inset in the bottom-right corner, centre the help in the space to its left.
+	const float Room = D->GetReferenceInset() ? Canvas->ClipX * (1.f - InsetShare) - 24.f * S : Canvas->ClipX - 32.f;
+	const float CenterX = D->GetReferenceInset() ? Room * 0.5f : Canvas->ClipX * 0.5f;
 	float Y = Canvas->ClipY - (Lines.Num() * 30.f + 20.f) * S;
 	for (const FString& Line : Lines)
 	{
-		Label(Line, Canvas->ClipX * 0.5f, Y, FLinearColor::White, 0.72f, true);
+		Label(Line, CenterX, Y, FLinearColor::White, 0.72f, true, true, Room);
 		Y += 30.f * S;
 	}
 }

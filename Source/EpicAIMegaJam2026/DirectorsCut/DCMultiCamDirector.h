@@ -17,6 +17,8 @@ class ADCPerformer;
 class ADCMultiCamCharacter;
 class ADCRail;
 class ACameraActor;
+class USceneCaptureComponent2D;
+class UTextureRenderTarget2D;
 class APlayerController;
 class UMaterialParameterCollection;
 
@@ -129,6 +131,15 @@ public:
 	float GetReferenceLength() const { return ReferenceCut.Num() > 0 ? ReferenceCut.Last().FilmTime : 0.f; }
 	/** The storyboard beat the reference cut is showing right now (null between beats). */
 	const ADCBeat* GetReferenceBeat() const;
+	/** The beat the reference cut shows at scene time Time (null between beats). */
+	const ADCBeat* GetReferenceBeatAt(float Time) const;
+
+	/** During preparation the reference cut also plays in a corner inset, in step with the rehearsal timeline. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut")
+	bool bShowReferenceInset = true;
+
+	/** The inset picture during preparation; null when there's nothing to show. */
+	UTextureRenderTarget2D* GetReferenceInset() const;
 
 	/** How many cameras the player may place; 0 = unlimited. Keys 1-9 pick the first nine, [ and ] step through all. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0"))
@@ -293,6 +304,8 @@ protected:
 	void ShowPremiereFrame(float Time);
 	/** Shows any film (the recording or the reference cut) at film time Time through the playback camera. */
 	void ShowFilmFrame(const TArray<FDCTakeSample>& Film, float Time);
+	/** Where a film's camera is at film time Time (blended within a shot), and the scene time that frame shows. */
+	bool GetFilmView(const TArray<FDCTakeSample>& Film, float Time, FVector& OutLocation, FQuat& OutRotation, float& OutFOV, float& OutScenePoint) const;
 	void EvaluatePerformers(float Time);
 
 	/** Whether something that ruins a shot (a zombie / crew member) would be on screen from this camera. */
@@ -307,7 +320,16 @@ protected:
 	void TickReferenceCut(float DeltaSeconds);
 	void ScrubReferenceCut(float DeltaSeconds);
 	void ToggleReferenceCut();
+	/** Renders the reference cut's camera into the preparation inset at the current rehearsal time. */
+	void UpdateReferenceInset();
 	TArray<FDCTakeSample> ReferenceCut;
+	bool bReferenceCutBuilt = false;
+
+	UPROPERTY()
+	TObjectPtr<USceneCaptureComponent2D> ReferenceCapture;
+
+	UPROPERTY()
+	TObjectPtr<UTextureRenderTarget2D> ReferenceInsetTarget;
 	/** Beat index (into Beats) for each reference shot (FDCTakeSample::Slot). */
 	TArray<int32> ReferenceShotBeats;
 	bool bReferencePlaying = false;

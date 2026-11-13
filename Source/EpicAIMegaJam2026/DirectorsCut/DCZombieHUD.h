@@ -64,6 +64,8 @@ private:
 	void DrawPremiere(ADCZombieDirector* D);
 	/** Storyboard: the reference cut, letterboxed, with each beat's storyboard line as a subtitle. */
 	void DrawReferenceCut(ADCZombieDirector* D);
+	/** Preparation: the reference cut in the bottom-right corner, in step with the rehearsal timeline. */
+	void DrawReferenceInset(ADCZombieDirector* D);
 
 	/** Draws text; a line too long for MaxWidth (or, by default, the screen) shrinks to fit instead of running off. */
 	void Label(const FString& Text, float X, float Y, const FLinearColor& Color, float Scale = 1.f, bool bCenter = false, bool bShadow = true, float MaxWidth = 0.f);
