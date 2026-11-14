@@ -59,13 +59,13 @@ void ADCMultiCamDirector::Coach(FName Key, EDCDirectorMood Mood, std::initialize
 
 void ADCMultiCamDirector::UpdateCoach()
 {
-	if (!bShowDirectorCoach)
-	{
-		return;
-	}
+	LiveLikeness = -1.f;
 	if (IsRecordingPaused())
 	{
-		Coach(TEXT("Paused"), EDCDirectorMood::Almost, { TEXT("We're not rolling! Let go and keep filming."), TEXT("Paused?! The actors are still acting!") });
+		if (bShowDirectorCoach)
+		{
+			Coach(TEXT("Paused"), EDCDirectorMood::Almost, { TEXT("We're not rolling! Let go and keep filming."), TEXT("Paused?! The actors are still acting!") });
+		}
 		return;
 	}
 	const ADCMultiCam* Live = GetCameraSlot(ViewingSlot);
@@ -83,9 +83,14 @@ void ADCMultiCamDirector::UpdateCoach()
 	const FDCFrameReading Shot = ReadFrame(Points, Lens->GetComponentLocation(), Lens->GetComponentQuat(),
 		DCFrame::CaptureFOV(Lens->FieldOfView, GetViewAspect()));
 
-	// How alike the pictures are, the same way the grade measures it - that's his mood.
-	const float Likeness = CompareFrames(Shot, Ref).Overall;
-	const EDCDirectorMood Mood = Likeness >= 0.85f ? EDCDirectorMood::Joy : Likeness >= 0.6f ? EDCDirectorMood::Almost : EDCDirectorMood::Disgust;
+	// How alike the pictures are, the same way the grade measures it - that's his mood (and the frame's vignette).
+	LiveLikeness = CompareFrames(Shot, Ref).Overall;
+	if (!bShowDirectorCoach)
+	{
+		return;
+	}
+	const EDCDirectorMood Mood = LiveLikeness >= PerfectLikeness ? EDCDirectorMood::Joy
+		: LiveLikeness >= 0.6f ? EDCDirectorMood::Almost : EDCDirectorMood::Disgust;
 
 	// 1. Wrong camera: another of the player's cameras sees the characters from much nearer the reference's side.
 	const float LiveView = AngleBetween(Shot.ViewDir, Ref.ViewDir);

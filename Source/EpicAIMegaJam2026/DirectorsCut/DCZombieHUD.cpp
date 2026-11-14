@@ -35,6 +35,14 @@ namespace
 	constexpr float InsetShare = 0.24f;
 	/** Height of the top bar during preparation and shooting (layout units). */
 	constexpr float HeaderHeight = 86.f;
+	/** How long the perfect-shot burst plays, and the least time between two of them. */
+	constexpr float PerfectBurstLength = 1.6f;
+	constexpr float PerfectBurstCooldown = 2.f;
+	/** Below the perfect threshold by this much before the shot stops counting as perfect. */
+	constexpr float PerfectGive = 0.06f;
+	const FLinearColor FarColor(1.f, 0.08f, 0.06f);
+	const FLinearColor CloseColor(0.1f, 0.55f, 1.f);
+	const FLinearColor PerfectGlow(0.55f, 0.85f, 1.f);
 
 	FLinearColor WithAlpha(FLinearColor Color, float Alpha)
 	{
@@ -205,6 +213,11 @@ void ADCZombieHUD::DrawHUD()
 			DrawTexture(MonitorFrame, L - MonitorScreenMin.X * ScaleX, T - MonitorScreenMin.Y * ScaleY,
 				MonitorFrame->GetSurfaceWidth() * ScaleX, MonitorFrame->GetSurfaceHeight() * ScaleY, 0.f, 0.f, 1.f, 1.f);
 		}
+		DrawLikenessVignette(D);
+	}
+	else
+	{
+		ResetLikenessVignette();
 	}
 
 	DrawHeader(D);
@@ -551,6 +564,116 @@ void ADCZombieHUD::DrawFraming(ADCZombieDirector* D)
 			Cam->GetRig() == EDCCamRig::Crane ? TEXT("CRANE") : TEXT("STATIC"), Cam->GetMovementRadius() / 100.f),
 			L, T - Px(Small) * 1.45f, D->GetPhase() == EDCPhase::Filming ? DCUI::Rec : DCUI::Ivory, Small, EAlign::Left, true, R - L);
 	}
+}
+
+void ADCZombieHUD::ResetLikenessVignette()
+{
+	VignetteFade = 0.f;
+	bPerfectShot = false;
+	LastVignetteTime = -1.f;
+}
+
+void ADCZombieHUD::DrawLikenessVignette(ADCZombieDirector* D)
+{
+	const float Now = GetWorld()->GetRealTimeSeconds();
+	const float Dt = LastVignetteTime < 0.f ? 0.f : FMath::Clamp(Now - LastVignetteTime, 0.f, 0.1f);
+	LastVignetteTime = Now;
+
+	const float Likeness = D->GetPhase() == EDCPhase::Filming ? D->GetLiveLikeness() : -1.f;
+	const bool bReading = Likeness >= 0.f;
+	if (bReading)
+	{
+		// Snap to the first reading, then ease, so the colour sweeps instead of flickering.
+		ShownLikeness = VignetteFade <= 0.f ? Likeness : FMath::FInterpTo(ShownLikeness, Likeness, Dt, 5.f);
+	}
+	VignetteFade = FMath::FInterpConstantTo(VignetteFade, bReading ? 1.f : 0.f, Dt, 3.f);
+
+	// Perfect from the director's threshold; it takes a clear slip below it to lose it again.
+	const float Perfect = D->PerfectLikeness;
+	const bool bWasPerfect = bPerfectShot;
+	bPerfectShot = bReading && Likeness >= (bPerfectShot ? Perfect - PerfectGive : Perfect);
+	if (bPerfectShot && !bWasPerfect && Now - PerfectBurstStart > PerfectBurstCooldown)
+	{
+		PerfectBurstStart = Now;
+		++PerfectBurstCount;
+	}
+
+	if (VignetteFade > 0.f)
+	{
+		// Around the whole screen, so it frames the monitor rather than crowding the shot.
+		const float W = Canvas->ClipX;
+		const float H = Canvas->ClipY;
+		// 0 = far off (red), 1 = there (blue), by way of magenta and violet (HSV) so it stays vivid in between.
+		const float Close = FMath::SmoothStep(0.3f, Perfect, ShownLikeness);
+		const FLinearColor Color = FLinearColor::LerpUsingHSV(FarColor, CloseColor, Close);
+		// Strong and throbbing while it's wrong, calmer as it closes in, a slow breath once perfect.
+		const float Throb = 1.f + 0.18f * (1.f - Close) * FMath::Sin(Now * 7.f);
+		const float Breath = bPerfectShot ? 0.85f + 0.15f * FMath::Sin(Now * 3.f) : 1.f;
+		const float Alpha = VignetteStrength * FMath::Lerp(1.f, 0.6f, Close) * Throb * Breath * VignetteFade;
+		const float Depth = H * VignetteDepth * FMath::Lerp(1.f, 0.75f, Close);
+		// A wide soft layer plus a tight one: falls off like a lens vignette rather than a straight ramp.
+		DCUI::Vignette(Canvas, 0.f, 0.f, W, H, Depth, WithAlpha(Color, Alpha * 0.55f));
+		DCUI::Vignette(Canvas, 0.f, 0.f, W, H, Depth * 0.35f, WithAlpha(Color, Alpha * 0.6f));
+	}
+	const float Age = Now - PerfectBurstStart;
+	if (Age < PerfectBurstLength)
+	{
+		float L, T, R, B;
+		GetCaptureRect(L, T, R, B);
+		DrawPerfectBurst(L, T, R, B, Age);
+	}
+}
+
+void ADCZombieHUD::DrawPerfectBurst(float L, float T, float R, float B, float Age)
+{
+	auto Ease = [](float Alpha, float Exp) { return FMath::InterpEaseOut(0.f, 1.f, FMath::Clamp(Alpha, 0.f, 1.f), Exp); };
+	const float Fade = 1.f - FMath::Clamp((Age - (PerfectBurstLength - 0.4f)) / 0.4f, 0.f, 1.f);
+
+	// 1. A camera flash over the frame.
+	const float Flash = 1.f - FMath::Clamp(Age / 0.3f, 0.f, 1.f);
+	if (Flash > 0.f)
+	{
+		DCUI::Rect(Canvas, L, T, R - L, B - T, FLinearColor(0.8f, 0.93f, 1.f, 0.4f * Flash * Flash));
+	}
+
+	// 2. A shockwave: the frame's outline racing outward.
+	const float Wave = FMath::Clamp(Age / 0.6f, 0.f, 1.f);
+	if (Wave < 1.f)
+	{
+		const float Grow = 90.f * S * Ease(Wave, 2.f);
+		DCUI::Outline(Canvas, L - Grow, T - Grow, R - L + 2.f * Grow, B - T + 2.f * Grow, FMath::Max(10.f * S * (1.f - Wave), 1.f),
+			WithAlpha(PerfectGlow, 1.f - Wave));
+	}
+
+	// 3. The viewfinder corners snap in, lit up.
+	const float Pad = 40.f * S * (1.f - Ease(Age / 0.25f, 3.f));
+	DCUI::Corners(Canvas, L - Pad, T - Pad, R - L + 2.f * Pad, B - T + 2.f * Pad, 72.f * S, FMath::Max(6.f * S, 3.f), WithAlpha(PerfectGlow, Fade));
+
+	// 4. Sparkles bursting out of the stamp: fast at first, slowing, drifting down. Seeded per burst so they hold their paths.
+	const FVector2D Origin((L + R) * 0.5f, T + (B - T) * 0.3f);
+	const FLinearColor Tints[3] = { DCUI::Gold, DCUI::Ivory, PerfectGlow };
+	FRandomStream Rng(PerfectBurstCount * 7919);
+	constexpr int32 Count = 28;
+	for (int32 i = 0; i < Count; ++i)
+	{
+		const float Angle = 2.f * PI * (i + Rng.FRand() * 0.6f) / Count;
+		const float Speed = Rng.FRandRange(260.f, 620.f) * S;
+		const float Life = Rng.FRandRange(0.8f, PerfectBurstLength);
+		const float Radius = Rng.FRandRange(8.f, 18.f) * S;
+		const float K = Age / Life;
+		if (K >= 1.f)
+		{
+			continue;
+		}
+		const float Dist = Speed * Life * 0.5f * (1.f - FMath::Square(1.f - K));
+		const FVector2D P = Origin + FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * Dist + FVector2D(0.f, 120.f * S * Age * Age);
+		const float Twinkle = 0.8f + 0.2f * FMath::Sin(Age * 30.f + i);
+		DCUI::Sparkle(Canvas, P, Radius * (1.f - 0.6f * K) * Twinkle, WithAlpha(Tints[i % 3], 1.f - K * K));
+	}
+
+	// 5. The stamp: PERFECT! pops in big and settles.
+	const float Size = Title * 1.2f * (1.f + 0.6f * (1.f - Ease(Age / 0.3f, 3.f)));
+	Label(TEXT("PERFECT!"), Origin.X, Origin.Y - Px(Size) * 0.6f, WithAlpha(FLinearColor(0.78f, 0.93f, 1.f), Fade), Size, EAlign::Center);
 }
 
 void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)

@@ -429,6 +429,7 @@ void ADCMultiCamDirector::ResetScene()
 	SetRigsHidden(false);
 	ApplyStabilizer();
 	Recording.Reset();
+	LiveLikeness = -1.f;
 	CoachLine.Reset();
 	CoachKey = NAME_None;
 	CoachMood = EDCDirectorMood::Default;

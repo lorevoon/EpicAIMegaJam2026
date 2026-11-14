@@ -205,6 +205,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Director Coach", meta = (ClampMin = "0.5", Units = "s"))
 	float CoachLineSeconds = 2.2f;
 
+	/** Live likeness (0-1) from which a shot counts as perfect: the director cheers and the frame celebrates. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Director Coach", meta = (ClampMin = "0.5", ClampMax = "1"))
+	float PerfectLikeness = 0.85f;
+
+	/** While shooting: how alike the live shot is to the reference cut right now (0-1); negative when there's nothing to compare. */
+	float GetLiveLikeness() const { return LiveLikeness; }
+
 	const FString& GetCoachLine() const { return CoachLine; }
 	EDCDirectorMood GetCoachMood() const { return CoachMood; }
 	/** Real time the current line started (for the HUD's typewriter). */
@@ -469,6 +476,7 @@ protected:
 	void UpdateCoach();
 	/** Changes the director's line (one of Variants, {cam} replaced by Camera) unless it was just said or is too new to replace. */
 	void Coach(FName Key, EDCDirectorMood Mood, std::initializer_list<const TCHAR*> Variants, int32 Camera = 0, bool bForce = false);
+	float LiveLikeness = -1.f;
 	FString CoachLine;
 	EDCDirectorMood CoachMood = EDCDirectorMood::Default;
 	FName CoachKey;

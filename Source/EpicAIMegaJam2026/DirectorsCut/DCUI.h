@@ -40,6 +40,12 @@ namespace DCUI
 	/** Pie slice from StartDeg (0 = right, clockwise), sweeping SweepDeg. */
 	void Wedge(UCanvas* Canvas, const FVector2D& Center, float Radius, float StartDeg, float SweepDeg, const FLinearColor& Color, int32 Segments = 64);
 
+	/** A soft glow along the inside of a rectangle: Color at the edges, fading to clear Depth pixels in. */
+	void Vignette(UCanvas* Canvas, float L, float T, float R, float B, float Depth, const FLinearColor& Color);
+
+	/** A four-pointed sparkle. */
+	void Sparkle(UCanvas* Canvas, const FVector2D& Center, float Radius, const FLinearColor& Color);
+
 	/** Translucent panel with a hairline edge and gold viewfinder marks in its corners. Unit scales the marks. */
 	void Panel(UCanvas* Canvas, float X, float Y, float W, float H, float Unit, const FLinearColor& Fill = DCUI::Fill);
 	/** Viewfinder corner marks only. */

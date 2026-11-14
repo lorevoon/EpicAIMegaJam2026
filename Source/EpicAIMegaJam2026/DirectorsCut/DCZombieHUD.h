@@ -58,6 +58,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
 	FVector2D MonitorScreenMax = FVector2D(1066.f, 559.f);
 
+	/** Shooting: how far the vignette reaches in from the screen edges, as a share of the screen height. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI", meta = (ClampMin = "0.05", ClampMax = "0.5"))
+	float VignetteDepth = 0.3f;
+
+	/** Shooting: opacity of the vignette at the screen edges when the shot is far off (it softens as the shot improves). */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI", meta = (ClampMin = "0", ClampMax = "1"))
+	float VignetteStrength = 0.65f;
+
 	UFont* GetTextFont() const;
 
 private:
@@ -99,9 +107,26 @@ private:
 	float CoachRight() const;
 	float CoachTop() const;
 
+	/**
+	 * Shooting: a vignette around the screen, red while the shot is far from the reference cut and turning blue
+	 * as it gets close; reaching a perfect shot sets off a burst (flash, shockwave, sparkles and a PERFECT! stamp).
+	 */
+	void DrawLikenessVignette(ADCZombieDirector* D);
+	void DrawPerfectBurst(float L, float T, float R, float B, float Age);
+	/** Fades the vignette out when there's nothing to compare (between shots, paused, not filming). */
+	void ResetLikenessVignette();
+
 	ADCZombieDirector* FindDirector();
 
 	TWeakObjectPtr<ADCZombieDirector> Director;
+	/** The likeness shown (eased toward the live one so the colour doesn't flicker), and the vignette's fade. */
+	float ShownLikeness = 0.f;
+	float VignetteFade = 0.f;
+	float LastVignetteTime = -1.f;
+	/** In the perfect zone right now (with some give, so it doesn't flicker in and out at the edge). */
+	bool bPerfectShot = false;
+	float PerfectBurstStart = -100.f;
+	int32 PerfectBurstCount = 0;
 	/** Layout unit: 1 at 1080p, times UIScale. */
 	float S = 1.f;
 };

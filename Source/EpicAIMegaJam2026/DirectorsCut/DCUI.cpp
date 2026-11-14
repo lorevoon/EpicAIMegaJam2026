@@ -123,6 +123,44 @@ void DCUI::Wedge(UCanvas* Canvas, const FVector2D& Center, float Radius, float S
 	}
 }
 
+void DCUI::Vignette(UCanvas* Canvas, float L, float T, float R, float B, float Depth, const FLinearColor& Color)
+{
+	// One trapezoid per side, coloured at its outer edge and clear at its inner one: the GPU blends the gradient.
+	Depth = FMath::Clamp(Depth, 0.f, FMath::Min(R - L, B - T) * 0.5f);
+	const FLinearColor Clear(Color.R, Color.G, Color.B, 0.f);
+	const FVector2D Outer[4] = { { L, T }, { R, T }, { R, B }, { L, B } };
+	const FVector2D Inner[4] = { { L + Depth, T + Depth }, { R - Depth, T + Depth }, { R - Depth, B - Depth }, { L + Depth, B - Depth } };
+	TArray<FCanvasUVTri> Tris;
+	Tris.Reserve(8);
+	auto Add = [&Tris](const FVector2D& A, const FLinearColor& CA, const FVector2D& B, const FLinearColor& CB, const FVector2D& C, const FLinearColor& CC)
+	{
+		FCanvasUVTri& Tri = Tris.AddDefaulted_GetRef();
+		Tri.V0_Pos = A; Tri.V0_Color = CA;
+		Tri.V1_Pos = B; Tri.V1_Color = CB;
+		Tri.V2_Pos = C; Tri.V2_Color = CC;
+	};
+	for (int32 i = 0; i < 4; ++i)
+	{
+		const int32 j = (i + 1) % 4;
+		Add(Outer[i], Color, Outer[j], Color, Inner[j], Clear);
+		Add(Outer[i], Color, Inner[j], Clear, Inner[i], Clear);
+	}
+	FCanvasTriangleItem Item(Tris, GWhiteTexture);
+	Item.BlendMode = SE_BLEND_Translucent;
+	Canvas->DrawItem(Item);
+}
+
+void DCUI::Sparkle(UCanvas* Canvas, const FVector2D& Center, float Radius, const FLinearColor& Color)
+{
+	const float Waist = Radius * 0.22f;
+	const FVector2D Up(0.f, -Radius), Right(Radius, 0.f);
+	const FVector2D WaistX(Waist, 0.f), WaistY(0.f, Waist);
+	Triangle(Canvas, Center + Up, Center + WaistX, Center - WaistX, Color);
+	Triangle(Canvas, Center - Up, Center + WaistX, Center - WaistX, Color);
+	Triangle(Canvas, Center + Right, Center + WaistY, Center - WaistY, Color);
+	Triangle(Canvas, Center - Right, Center + WaistY, Center - WaistY, Color);
+}
+
 void DCUI::Corners(UCanvas* Canvas, float X, float Y, float W, float H, float Arm, float Thickness, const FLinearColor& Color)
 {
 	const float R = X + W, B = Y + H;
