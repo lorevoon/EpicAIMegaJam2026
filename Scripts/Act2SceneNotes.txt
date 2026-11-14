@@ -100,3 +100,10 @@ Individual scene testing
 - The title asset remains available to reconnect later; it is not the default startup map.
 - Cached lighting uses r.EyeAdaptation.CachedLightingPreExposure=8 (EV -4..16).
 - Regression: DirectorsCut.SceneEntry covers all four Set/Real entry maps.
+
+Studio repair (2026-11-14):
+- Act2 Set now has SM_Act2_StudioGround_Final, sampled at 50 cm from shared landscape and offset down 2 cm. Studio-only, no collision, so recording/replay blocking stays unchanged.
+- Side walls and roof extended to join front wall at Y=-11050; practical foundations/support risers added.
+- Stage 2 camera operator start marker remains at its original spawn position but hidden geometry removes its white disc.
+- Both MI_Act2_OrcOpaque materials explicitly enable skeletal-mesh usage. Without this UE5.8 substituted default materials. Rebuild script preserves the flag.
+- Validation: Saved/Act2/StudioRepair/validation.json; editor set and actual opening PIE screenshots in same folder. All five orc material assignments verified after reload.

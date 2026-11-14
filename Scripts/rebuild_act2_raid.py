@@ -25,7 +25,11 @@ for mesh,role,old in [(orc_mesh,'Orc',orc_old),(romeo_mesh,'Hero',romeo_old)]:
   if role=='Orc':
    path=FOLDER+'/MI_Act2_OrcOpaque_'+kind
    mat=load(path) if eal.does_asset_exist(path) else eal.duplicate_asset(mat.get_path_name(),path)
-   override=u.MaterialInstanceBasePropertyOverrides();props(override,override_blend_mode=True,blend_mode=u.BlendMode.BLEND_OPAQUE,override_two_sided=True,two_sided=True);mat.set_editor_property('base_property_overrides',override);assert eal.save_loaded_asset(mat,False)
+   override=u.MaterialInstanceBasePropertyOverrides();props(override,override_blend_mode=True,blend_mode=u.BlendMode.BLEND_OPAQUE,override_two_sided=True,two_sided=True);mat.set_editor_property('base_property_overrides',override)
+   # UE5.8 instances need their own persisted skeletal shader usage after base overrides.
+   usage=getattr(u.MaterialUsage,next(n for n in dir(u.MaterialUsage) if 'SKELETAL' in n))
+   u.MaterialEditingLibrary.set_material_usage_override(mat,usage,True,True);u.MaterialEditingLibrary.update_material_instance(mat)
+   assert eal.save_loaded_asset(mat,False)
   slot.material_interface=mat;slots[i]=slot
  mesh.materials=slots;assert mesh.skeleton;assert eal.save_loaded_asset(mesh,False)
 romeo_gasp=imp('A_Romeo_Gasp.fbx','A_Raid_RomeoGasp',romeo_mesh.skeleton);juliet_gasp=imp('A_Juliet_Gasp.fbx','A_Raid_JulietGasp',juliet_mesh.skeleton)
