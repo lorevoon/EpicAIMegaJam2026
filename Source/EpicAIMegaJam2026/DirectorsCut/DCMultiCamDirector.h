@@ -192,6 +192,19 @@ public:
 	const ADCBeat* GetReferenceBeatAt(float Time) const;
 	/** Whether a placed camera stands near the reference cut's camera for this scene (index into GetBeats). */
 	bool IsSceneCovered(int32 BeatIndex) const { return SceneCovered.IsValidIndex(BeatIndex) && SceneCovered[BeatIndex]; }
+	/** Real time the scene was last ticked off, for the storyboard's animation (negative if it never was). */
+	float GetSceneCoveredTime(int32 BeatIndex) const { return SceneCoveredTime.IsValidIndex(BeatIndex) ? SceneCoveredTime[BeatIndex] : -1.f; }
+
+	/** Preparation: how long the director's praise stays up once he has popped up (a scene was ticked off). */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Director Coach", meta = (ClampMin = "1", Units = "s"))
+	float CheerSeconds = 2.8f;
+
+	const FString& GetCheerLine() const { return CheerLine; }
+	/** Real time the current praise started (its typewriter), and since when he's been up (he stays up through praise in a row). */
+	float GetCheerLineStart() const { return CheerLineStart; }
+	float GetCheerUpSince() const { return CheerUpSince; }
+	/** Counts praise lines; the HUD alternates his two delighted faces by it. */
+	int32 GetCheerCount() const { return CheerCount; }
 
 	/** During preparation and shooting the reference cut also plays in a corner inset, in step with the scene clock. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut")
@@ -461,6 +474,8 @@ protected:
 	TArray<FVector> ReferenceShotLocations;
 	/** Per beat: a placed camera is near its reference camera. Updated in preparation. */
 	TArray<bool> SceneCovered;
+	/** Per beat: real time it was last ticked off (negative if never). */
+	TArray<float> SceneCoveredTime;
 	/** Ticks scenes off (and announces it) as cameras are placed near their reference spots. */
 	void UpdateCoveredScenes();
 	bool bReferencePlaying = false;
@@ -482,6 +497,12 @@ protected:
 	FName CoachKey;
 	float CoachLineStart = 0.f;
 	int32 CoachLineCount = 0;
+	/** Preparation: the director pops up to praise a scene that just got its camera (BeatIndex into Beats). */
+	void Cheer(int32 BeatIndex);
+	FString CheerLine;
+	float CheerLineStart = -100.f;
+	float CheerUpSince = -100.f;
+	int32 CheerCount = 0;
 	FCollisionQueryParams MakeTraceParams(const FName& Tag) const;
 
 	ADCMultiCamCharacter* GetPlayer() const;

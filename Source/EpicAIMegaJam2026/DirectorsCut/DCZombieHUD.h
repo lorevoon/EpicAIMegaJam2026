@@ -51,6 +51,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
 	TObjectPtr<UTexture2D> DirectorJoy;
 
+	/** Preparation: he pops up to praise a scene that got its camera, alternating this face with DirectorJoy. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
+	TObjectPtr<UTexture2D> DirectorThatsIt;
+
 	/** The monitor art's screen opening, in texture pixels (top-left and bottom-right, inclusive). */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
 	FVector2D MonitorScreenMin = FVector2D(155.f, 130.f);
@@ -73,6 +77,8 @@ private:
 	void DrawReferenceCut(ADCZombieDirector* D);
 	void DrawHeader(ADCZombieDirector* D);
 	void DrawStoryboardPanel(ADCZombieDirector* D);
+	/** A storyboard scene being ticked off: its name swells and is struck through, with a ring and sparkles from its box. */
+	void DrawTickOff(const FString& Name, float TextX, float MidY, const FVector2D& Box, float Age);
 	void DrawFraming(ADCZombieDirector* D);
 	void DrawPlanPreview(ADCZombieDirector* D);
 	void DrawGauges(ADCZombieDirector* D);
@@ -102,6 +108,10 @@ private:
 
 	/** Shooting: the director's portrait (bottom-left) and his chat bubble along the bottom of the screen. */
 	void DrawCoach(ADCZombieDirector* D);
+	/** Preparation: the director pops up from below to praise a scene that just got its camera, then sinks away. */
+	void DrawCheer(ADCZombieDirector* D);
+	/** The director's portrait (bottom-left) and his bubble, typing Line out; Drop moves them both down (off screen when large). */
+	void DrawDirectorSpeech(ADCZombieDirector* D, UTexture2D* Portrait, const FString& Line, const FLinearColor& Accent, float Since, float Drop);
 	bool ShowsCoach(ADCZombieDirector* D) const;
 	/** Where the coach's area ends: the portrait's right edge, and the top of his bubble. */
 	float CoachRight() const;

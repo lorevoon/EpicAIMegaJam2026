@@ -538,12 +538,17 @@ void ADCMultiCamDirector::UpdateCoveredScenes()
 			}
 		}
 	}
-	// Announce each scene as it gets ticked off.
+	// Each scene ticked off gets its moment: the storyboard animates it and the director pops up to praise it.
+	if (SceneCoveredTime.Num() != Now.Num())
+	{
+		SceneCoveredTime.Init(-1.f, Now.Num());
+	}
 	for (int32 i = 0; i < Now.Num(); ++i)
 	{
 		if (Now[i] && !(SceneCovered.IsValidIndex(i) && SceneCovered[i]))
 		{
-			Flash(FString::Printf(TEXT("SC %d  -  %s: camera on its spot"), i + 1, *Beats[i].Beat->DisplayName), 2.f);
+			SceneCoveredTime[i] = GetWorld()->GetRealTimeSeconds();
+			Cheer(i);
 		}
 	}
 	SceneCovered = MoveTemp(Now);

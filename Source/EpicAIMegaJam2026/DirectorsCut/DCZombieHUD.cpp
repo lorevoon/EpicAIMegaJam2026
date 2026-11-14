@@ -40,6 +40,8 @@ namespace
 	constexpr float PerfectBurstCooldown = 2.f;
 	/** Below the perfect threshold by this much before the shot stops counting as perfect. */
 	constexpr float PerfectGive = 0.06f;
+	/** How long a storyboard scene's tick-off animation plays. */
+	constexpr float TickOffSeconds = 1.2f;
 	const FLinearColor FarColor(1.f, 0.08f, 0.06f);
 	const FLinearColor CloseColor(0.1f, 0.55f, 1.f);
 	const FLinearColor PerfectGlow(0.55f, 0.85f, 1.f);
@@ -65,6 +67,8 @@ ADCZombieHUD::ADCZombieHUD()
 	DirectorAlmost = DirAlmost.Object;
 	DirectorDisgust = DirDisgust.Object;
 	DirectorJoy = DirJoy.Object;
+	static ConstructorHelpers::FObjectFinder<UTexture2D> DirThatsIt(TEXT("/Game/DirectorsCut/UI/Director/Director_ThatsIt.Director_ThatsIt"));
+	DirectorThatsIt = DirThatsIt.Object;
 }
 
 ADCZombieDirector* ADCZombieHUD::FindDirector()
@@ -267,6 +271,7 @@ void ADCZombieHUD::DrawHUD()
 	DrawCoach(D);
 	DrawSwitcher(D);
 	DrawHelp(D);
+	DrawCheer(D); // over the help: it's brief
 
 	if (UGameplayStatics::IsGamePaused(this))
 	{
@@ -486,20 +491,33 @@ void ADCZombieHUD::DrawStoryboardPanel(ADCZombieDirector* D)
 	Label(TEXT("STORYBOARD"), X + 16.f * S, Y, DCUI::Gold, Small);
 	Label(TEXT("Tab"), X + W - 16.f * S, Y, DCUI::Muted, Small, EAlign::Right);
 	Y += Px(Small) * 1.5f;
+	// A scene just ticked off: its name swells and is struck through, drawn last so it sits over its neighbours.
+	struct FTickOff { FString Name; float TextX, MidY, Age; FVector2D Box; };
+	TArray<FTickOff, TInlineAllocator<2>> TickOffs;
+	const float Now = GetWorld()->GetRealTimeSeconds();
 	for (int32 i = 0; i < Beats.Num(); ++i)
 	{
 		const FDCMultiCamBeat& State = Beats[i];
 		// Ticked off (struck through, like a to-do list) once a camera stands on the scene's reference spot.
 		const bool bCovered = D->IsSceneCovered(i);
-		const float Box = Px(Small) * 0.6f;
+		const float Age = Now - D->GetSceneCoveredTime(i);
+		const bool bTicking = bCovered && State.Status == EDCShotStatus::Pending && D->GetSceneCoveredTime(i) >= 0.f && Age < TickOffSeconds;
+		// The box stamps down: big, then snapping to size.
+		const float Box = Px(Small) * 0.6f * (bTicking ? 1.f + 0.9f * FMath::Square(1.f - FMath::Clamp(Age / 0.25f, 0.f, 1.f)) : 1.f);
+		const float NormalBox = Px(Small) * 0.6f;
+		const float BX = X + 16.f * S - (Box - NormalBox) * 0.5f;
 		const float BY = Y + (RowH - Box) * 0.5f;
+		if (bTicking)
+		{
+			DCUI::Rect(Canvas, X + 4.f * S, Y, W - 8.f * S, RowH, WithAlpha(DCUI::Gold, 0.35f * FMath::Clamp(1.f - Age / 0.6f, 0.f, 1.f)));
+		}
 		if (State.Status == EDCShotStatus::Captured)
 		{
 			DCUI::Rect(Canvas, X + 16.f * S, BY, Box, Box, DCUI::Good);
 		}
 		else if (bCovered && State.Status == EDCShotStatus::Pending)
 		{
-			DCUI::Rect(Canvas, X + 16.f * S, BY, Box, Box, DCUI::Gold);
+			DCUI::Rect(Canvas, BX, BY, Box, Box, DCUI::Gold);
 		}
 		else if (State.Status == EDCShotStatus::Missed)
 		{
@@ -511,14 +529,69 @@ void ADCZombieHUD::DrawStoryboardPanel(ADCZombieDirector* D)
 		}
 		const FLinearColor Color = State.Status == EDCShotStatus::Captured ? DCUI::Good : State.Status == EDCShotStatus::Missed ? DCUI::Muted
 			: bCovered ? DCUI::Muted : DCUI::Ivory;
-		const float TextX = X + 16.f * S + Box + 12.f * S;
+		const float TextX = X + 16.f * S + NormalBox + 12.f * S;
 		const float TextY = Y + (RowH - Px(Small) * 1.2f) * 0.5f;
-		const FVector2D Size = Label(FString::Printf(TEXT("%d. %s"), i + 1, *State.Beat->DisplayName), TextX, TextY, Color, Small, EAlign::Left, true, W - Box - 44.f * S);
-		if (bCovered)
+		const FString Name = FString::Printf(TEXT("%d. %s"), i + 1, *State.Beat->DisplayName);
+		if (bTicking)
 		{
-			DCUI::Rect(Canvas, TextX - 4.f * S, TextY + Size.Y * 0.52f, Size.X + 8.f * S, FMath::Max(2.f * S, 1.5f), DCUI::Gold);
+			TickOffs.Add({ Name, TextX, Y + RowH * 0.5f, Age, FVector2D(X + 16.f * S + NormalBox * 0.5f, Y + RowH * 0.5f) });
+		}
+		else
+		{
+			const FVector2D Size = Label(Name, TextX, TextY, Color, Small, EAlign::Left, true, W - NormalBox - 44.f * S);
+			if (bCovered)
+			{
+				DCUI::Rect(Canvas, TextX - 4.f * S, TextY + Size.Y * 0.52f, Size.X + 8.f * S, FMath::Max(2.f * S, 1.5f), DCUI::Gold);
+			}
 		}
 		Y += RowH;
+	}
+	for (const FTickOff& Tick : TickOffs)
+	{
+		DrawTickOff(Tick.Name, Tick.TextX, Tick.MidY, Tick.Box, Tick.Age);
+	}
+}
+
+void ADCZombieHUD::DrawTickOff(const FString& Name, float TextX, float MidY, const FVector2D& Box, float Age)
+{
+	auto Ease = [](float Alpha, float Exp) { return FMath::InterpEaseOut(0.f, 1.f, FMath::Clamp(Alpha, 0.f, 1.f), Exp); };
+
+	// A ring and a spray of sparkles out of the checkbox.
+	const float Ring = FMath::Clamp(Age / 0.5f, 0.f, 1.f);
+	if (Ring < 1.f)
+	{
+		DCUI::Ring(Canvas, Box, Px(Small) * (0.4f + 1.6f * Ease(Ring, 2.f)), FMath::Max(5.f * S * (1.f - Ring), 1.f), WithAlpha(DCUI::Gold, 1.f - Ring), 40);
+	}
+	const FLinearColor Tints[2] = { DCUI::Gold, DCUI::Ivory };
+	FRandomStream Rng(FCrc::StrCrc32(*Name));
+	constexpr int32 Count = 14;
+	for (int32 i = 0; i < Count; ++i)
+	{
+		const float Angle = 2.f * PI * (i + Rng.FRand() * 0.7f) / Count;
+		const float Reach = Rng.FRandRange(50.f, 120.f) * S;
+		const float Life = Rng.FRandRange(0.5f, 0.9f);
+		const float Radius = Rng.FRandRange(6.f, 12.f) * S;
+		const float K = Age / Life;
+		if (K < 1.f)
+		{
+			const FVector2D P = Box + FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * Reach * Ease(K, 2.f);
+			DCUI::Sparkle(Canvas, P, Radius * (1.f - 0.7f * K), WithAlpha(Tints[i % 2], 1.f - K * K));
+		}
+	}
+
+	// The name swells up fast, holds, and settles back while a gold stroke strikes it through.
+	const float Swell = Age < 0.2f ? Ease(Age / 0.2f, 3.f) : 1.f - FMath::SmoothStep(0.55f, TickOffSeconds, Age);
+	const float Size = Small * (1.f + 0.75f * Swell);
+	const FVector2D Measured = DCUI::Measure(Canvas, GetTextFont(), Name, Px(Size));
+	// Grown names shift left so they stay on screen.
+	const float NameX = FMath::Min(TextX, Canvas->ClipX - 16.f * S - Measured.X);
+	const float NameY = MidY - Px(Size) * 0.6f;
+	const FLinearColor Color = FLinearColor::LerpUsingHSV(DCUI::Muted, DCUI::Gold, Swell);
+	const FVector2D Drawn = Label(Name, NameX, NameY, Color, Size, EAlign::Left, true, Canvas->ClipX - 32.f * S);
+	const float Strike = Ease((Age - 0.15f) / 0.35f, 2.f);
+	if (Strike > 0.f)
+	{
+		DCUI::Rect(Canvas, NameX - 4.f * S, NameY + Drawn.Y * 0.52f, (Drawn.X + 8.f * S) * Strike, FMath::Max(3.f * S * (1.f + Swell), 1.5f), DCUI::Gold);
 	}
 }
 
@@ -899,18 +972,43 @@ void ADCZombieHUD::DrawCoach(ADCZombieDirector* D)
 	{
 		Portrait = DirectorDefault;
 	}
-	const float Since = GetWorld()->GetRealTimeSeconds() - D->GetCoachLineStart();
 	const FLinearColor Accent = Mood == EDCDirectorMood::Joy ? DCUI::Good : Mood == EDCDirectorMood::Disgust ? DCUI::Rec
 		: Mood == EDCDirectorMood::Almost ? DCUI::Gold : DCUI::Ivory;
+	DrawDirectorSpeech(D, Portrait, D->GetCoachLine(), Accent, GetWorld()->GetRealTimeSeconds() - D->GetCoachLineStart(), 0.f);
+}
 
+void ADCZombieHUD::DrawCheer(ADCZombieDirector* D)
+{
+	constexpr float RiseSeconds = 0.4f;
+	constexpr float SinkSeconds = 0.35f;
+	const float Now = GetWorld()->GetRealTimeSeconds();
+	const float Up = Now - D->GetCheerUpSince();
+	const float Left = D->GetCheerLineStart() + D->CheerSeconds - Now;
+	if (D->GetPhase() != EDCPhase::Preparation || D->GetCheerLine().IsEmpty() || Up < 0.f || Left < -SinkSeconds)
+	{
+		return;
+	}
+	// Springs up past his spot and settles (back-out ease), then drops away once he's said his piece.
+	const float T = FMath::Clamp(Up / RiseSeconds, 0.f, 1.f) - 1.f;
+	constexpr float Overshoot = 1.70158f;
+	const float Rise = 1.f + (Overshoot + 1.f) * T * T * T + Overshoot * T * T;
+	const float Sink = Left < 0.f ? FMath::Square(-Left / SinkSeconds) : 0.f;
+	const float Travel = Canvas->ClipY * PortraitShare * 1.1f;
+	UTexture2D* Face = D->GetCheerCount() % 2 == 1 ? DirectorThatsIt : DirectorJoy;
+	DrawDirectorSpeech(D, Face ? Face : DirectorJoy.Get(), D->GetCheerLine(), DCUI::Gold, Now - D->GetCheerLineStart(),
+		(1.f - Rise + Sink) * Travel);
+}
+
+void ADCZombieHUD::DrawDirectorSpeech(ADCZombieDirector* D, UTexture2D* Portrait, const FString& Line, const FLinearColor& Accent, float Since, float Drop)
+{
 	// The bubble runs along the bottom, from the director to the reference inset (or the screen edge).
 	const float PortraitW = CoachRight();
 	const float Pad = 22.f * S;
 	const float X = PortraitW * 0.8f;
 	const float Right = D->GetReferenceInset() ? Canvas->ClipX * (1.f - InsetShare) - 16.f * S : Canvas->ClipX - 24.f * S;
-	const float Y = CoachTop() + 12.f * S;
+	const float Y = CoachTop() + 12.f * S + Drop;
 	const float W = FMath::Max(Right - X, 200.f * S);
-	const float H = Canvas->ClipY - 20.f * S - Y;
+	const float H = Canvas->ClipY - 20.f * S - (Y - Drop);
 	const FLinearColor Paper(0.96f, 0.93f, 0.86f, 0.97f);
 	const FLinearColor InkColor(0.08f, 0.07f, 0.07f);
 	// Tail pointing back at the director's face.
@@ -921,7 +1019,6 @@ void ADCZombieHUD::DrawCoach(ADCZombieDirector* D)
 	Label(TEXT("THE DIRECTOR"), X + Pad, Y + Pad * 0.6f, FLinearColor(0.55f, 0.08f, 0.06f), Small, EAlign::Left, false, W - 2.f * Pad);
 
 	// The line types itself out.
-	const FString& Line = D->GetCoachLine();
 	const int32 Shown = FMath::Clamp(FMath::FloorToInt(Since * TypewriterRate), 0, Line.Len());
 	// Size the line for the whole sentence so the text doesn't shrink as it types.
 	const FVector2D Full = DCUI::Measure(Canvas, GetTextFont(), Line, Px(CoachTextSize));
@@ -934,7 +1031,7 @@ void ADCZombieHUD::DrawCoach(ADCZombieDirector* D)
 		const float Pop = 1.f + 0.05f * FMath::Clamp(1.f - Since / 0.2f, 0.f, 1.f);
 		const float PH = Canvas->ClipY * PortraitShare * Pop;
 		const float PW = PortraitW * Pop;
-		DrawTexture(Portrait, 0.f, Canvas->ClipY - PH, PW, PH, 0.f, 0.f, 1.f, 1.f);
+		DrawTexture(Portrait, 0.f, Canvas->ClipY - PH + Drop, PW, PH, 0.f, 0.f, 1.f, 1.f);
 	}
 }
 

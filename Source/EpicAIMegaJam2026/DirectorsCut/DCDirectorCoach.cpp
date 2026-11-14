@@ -6,6 +6,7 @@
 // up long enough to read. Size is asked for as "bigger"/"smaller": getting closer and zooming in both do it.
 
 #include "DCMultiCamDirector.h"
+#include "DCBeat.h"
 #include "DCMultiCam.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/World.h"
@@ -55,6 +56,29 @@ void ADCMultiCamDirector::Coach(FName Key, EDCDirectorMood Mood, std::initialize
 	CoachMood = Mood;
 	CoachLine = MoveTemp(Line);
 	CoachLineStart = Now;
+}
+
+void ADCMultiCamDirector::Cheer(int32 BeatIndex)
+{
+	static const TCHAR* const Lines[] = {
+		TEXT("THAT'S IT! That's my spot for scene {n}!"),
+		TEXT("Yes, YES! \"{scene}\" is going to look gorgeous!"),
+		TEXT("Now THAT is a camera position! Scene {n}, sorted."),
+		TEXT("Bravo! I can already see scene {n} on the big screen!"),
+		TEXT("Magnificent! Scene {n} has its camera!"),
+	};
+	const float Now = GetWorld()->GetRealTimeSeconds();
+	// Already up from the last one? Then he just keeps talking instead of popping up again.
+	if (Now - CheerLineStart >= CheerSeconds)
+	{
+		CheerUpSince = Now;
+	}
+	FString Line = Lines[CheerCount % UE_ARRAY_COUNT(Lines)];
+	Line.ReplaceInline(TEXT("{n}"), *FString::FromInt(BeatIndex + 1));
+	Line.ReplaceInline(TEXT("{scene}"), Beats.IsValidIndex(BeatIndex) && Beats[BeatIndex].Beat ? *Beats[BeatIndex].Beat->DisplayName : TEXT(""));
+	CheerLine = MoveTemp(Line);
+	CheerLineStart = Now;
+	++CheerCount;
 }
 
 void ADCMultiCamDirector::UpdateCoach()
