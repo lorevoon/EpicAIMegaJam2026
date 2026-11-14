@@ -85,6 +85,7 @@ class ADCMultiCamDirector : public AActor
 	GENERATED_BODY()
 	friend class FDCDualSceneReplayTest;
 	friend class FDCDialoguePlaybackTest;
+	friend class FDCAuthoredReferenceTest;
 	friend class FDCCinemaReplayTest;
 
 public:
@@ -356,6 +357,8 @@ protected:
 
 	// Reference cut (DCReferenceCut.cpp)
 	void BuildReferenceCut();
+	/** Inverse of the reference film's scene-time mapping, including slow motion. */
+	float ReferenceFilmTimeAtSceneTime(float Time) const;
 	/** Grades the recording against the reference cut (sets Match). */
 	void ComputeMatch();
 	/** Best spot and lens for one beat; false if even the best can't hold it long enough to capture. */

@@ -260,6 +260,14 @@ void ADCMultiCamDirector::UpdateSceneDialogue(float DeltaSeconds)
 	{
 		bPlaying = bReferencePlaying && !bReferencePaused
 			&& GetFilmView(ReferenceCut, ReferenceTime, Location, Rotation, FOV, Position);
+		// The soundtrack must run at the same scene-time rate as the slowed image.
+		const int32 Next = Algo::UpperBoundBy(ReferenceCut, ReferenceTime, &FDCTakeSample::FilmTime);
+		if (Next > 0 && ReferenceCut.IsValidIndex(Next))
+		{
+			const FDCTakeSample& A = ReferenceCut[Next - 1];
+			const FDCTakeSample& B = ReferenceCut[Next];
+			if (B.FilmTime > A.FilmTime) Rate = (B.Time - A.Time) / (B.FilmTime - A.FilmTime);
+		}
 	}
 	else if (Phase == EDCPhase::Review)
 	{
@@ -274,10 +282,12 @@ void ADCMultiCamDirector::UpdateSceneDialogue(float DeltaSeconds)
 		DialoguePosition = -1.f;
 		return;
 	}
+	// Ignore floating-point slope noise in densely sampled reference timestamps.
+	if (FMath::IsNearlyEqual(Rate, DialogueRate, .005f)) Rate = DialogueRate;
 	// Seek after a scrub, loop, retry, phase switch, speed change or a cut over omitted footage.
 	const float Expected = DialoguePosition + FMath::Max(0.f, DeltaSeconds) * DialogueRate;
 	const bool bSeek = DialoguePosition < 0.f || DialoguePhase != Phase
-		|| !FMath::IsNearlyEqual(Rate, DialogueRate)
+		|| !FMath::IsNearlyEqual(Rate, DialogueRate, .005f)
 		|| FMath::Abs(Position - Expected) > .08f;
 	Audio->SetPitchMultiplier(Rate);
 	if (bSeek || !Audio->IsPlaying())
@@ -545,7 +555,11 @@ bool ADCMultiCamDirector::GetFilmView(const TArray<FDCTakeSample>& Film, float T
 	// Blend between frames of the same camera; a change of camera or a recording pause is a hard cut.
 	const bool bBlend = B.Slot == A.Slot && !B.bJumpCut && B.FilmTime > A.FilmTime;
 	const float Alpha = bBlend ? FMath::Clamp((Time - A.FilmTime) / (B.FilmTime - A.FilmTime), 0.f, 1.f) : 0.f;
-	OutScenePoint = bBlend ? FMath::Lerp(A.Time, B.Time, Alpha) : A.Time + FMath::Max(0.f, Time - A.FilmTime);
+	// A camera cut is spatial, not temporal. Continue the scene-time interpolation
+	// across it so a slowed reference shot does not briefly return to normal speed.
+	const bool bTimeBlend = !B.bJumpCut && B.FilmTime > A.FilmTime;
+	const float TimeAlpha = bTimeBlend ? FMath::Clamp((Time - A.FilmTime) / (B.FilmTime - A.FilmTime), 0.f, 1.f) : 0.f;
+	OutScenePoint = bTimeBlend ? FMath::Lerp(A.Time, B.Time, TimeAlpha) : A.Time + FMath::Max(0.f, Time - A.FilmTime);
 	OutLocation = FMath::Lerp(A.Location, B.Location, Alpha);
 	OutRotation = FQuat::Slerp(A.Rotation.Quaternion(), B.Rotation.Quaternion(), Alpha);
 	// The film is only what was inside the capture frame, so the lens shows just that part.

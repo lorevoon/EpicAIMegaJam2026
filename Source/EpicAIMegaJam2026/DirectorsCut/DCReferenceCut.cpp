@@ -17,7 +17,11 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "EngineUtils.h"
 #include "Engine/World.h"
+#include "Engine/LevelStreaming.h"
 #include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
+#include "Misc/ScopeExit.h"
+#include "String/LexFromString.h"
 
 namespace
 {
@@ -40,6 +44,22 @@ namespace
 			}
 		}
 		return Count > 0 ? Sum / Count : FVector::ZeroVector;
+	}
+
+	FString TagValue(const AActor* Actor, const TCHAR* Key)
+	{
+		const FString Prefix = FString(Key) + TEXT("=");
+		for (const FName Tag : Actor->Tags)
+		{
+			const FString Text = Tag.ToString();
+			if (Text.StartsWith(Prefix)) return Text.Mid(Prefix.Len());
+		}
+		return FString();
+	}
+
+	bool TagFloat(const AActor* Actor, const TCHAR* Key, float& Value)
+	{
+		return LexTryParseString(Value, *TagValue(Actor, Key)) && FMath::IsFinite(Value);
 	}
 
 	FRotator LookAt(const FVector& From, const FVector& To)
@@ -228,34 +248,82 @@ void ADCMultiCamDirector::BuildReferenceCut()
 		return;
 	}
 
-	// One shot per beat, in story order.
+	// The reference film is shown in the real environment. Solve against its
+	// buildings and dressing, not the empty green-screen volume they replace.
+	// Inset generation can also call this during preparation, so restore the
+	// previous environment on every exit without touching the recorded take.
+	const ULevelStreaming* Real = UGameplayStatics::GetStreamingLevel(this, RealEnvironmentLevel);
+	const bool bWasRealVisible = Real && Real->IsLevelVisible();
+	SetReviewEnvironment(true);
+	ON_SCOPE_EXIT { SetReviewEnvironment(bWasRealVisible); };
+
+	// Authored cameras let a scene use several angles without adding scoring beats.
+	// Levels without these tags retain the original automatic reference solver.
 	struct FShot { int32 Beat = INDEX_NONE; FVector Location; float FOV = 0.f; float CleanFrom = 0.f; float Cut = 0.f; };
+	struct FSpeedWindow { float Start = 0.f; float End = 0.f; float Rate = 1.f; };
 	TArray<FShot> Shots;
-	for (int32 i = 0; i < Beats.Num(); ++i)
+	TArray<FSpeedWindow> SpeedWindows;
+	for (TActorIterator<ACameraActor> It(GetWorld()); It; ++It)
 	{
+		const ACameraActor* Camera = *It;
+		if (!Camera->ActorHasTag(TEXT("DCReferenceShot"))) continue;
 		FShot Shot;
-		Shot.Beat = i;
-		if (!FindReferenceShot(Beats[i], Shot.Location, Shot.FOV, Shot.CleanFrom) && Shot.FOV <= 0.f)
+		const FString BeatId = TagValue(Camera, TEXT("DCBeat"));
+		Shot.Beat = Beats.IndexOfByPredicate([&BeatId](const FDCMultiCamBeat& B) { return B.Beat && B.Beat->BeatId == BeatId; });
+		if (Shot.Beat == INDEX_NONE || !TagFloat(Camera, TEXT("DCStart"), Shot.Cut)
+			|| Shot.Cut < 0.f || Shot.Cut >= TakeDuration)
 		{
-			continue; // no usable spot at all
+			UE_LOG(LogTemp, Warning, TEXT("Invalid authored reference tags on %s"), *Camera->GetName());
+			continue;
 		}
+		Shot.Location = Camera->GetActorLocation();
+		Shot.FOV = Camera->GetCameraComponent()->FieldOfView;
+		float TaggedFOV = Shot.FOV;
+		if (TagFloat(Camera, TEXT("DCFOV"), TaggedFOV)) Shot.FOV = TaggedFOV;
+		Shot.FOV = FMath::Clamp(Shot.FOV, ADCMultiCam::MinFOV, ADCMultiCam::MaxFOV);
 		Shots.Add(Shot);
+		FSpeedWindow Speed;
+		if (TagFloat(Camera, TEXT("DCSlowStart"), Speed.Start) && TagFloat(Camera, TEXT("DCSlowEnd"), Speed.End)
+			&& TagFloat(Camera, TEXT("DCSlowRate"), Speed.Rate) && Speed.Start >= 0.f && Speed.End > Speed.Start
+			&& Speed.End <= TakeDuration && Speed.Rate >= .25f && Speed.Rate <= 2.f)
+		{
+			SpeedWindows.Add(Speed);
+		}
 	}
-	Shots.Sort([this](const FShot& A, const FShot& B) { return Beats[A.Beat].Beat->GetCaptureStartTime() < Beats[B.Beat].Beat->GetCaptureStartTime(); });
-	if (Shots.Num() == 0)
+	const bool bAuthored = !Shots.IsEmpty();
+	if (bAuthored)
+	{
+		Shots.Sort([](const FShot& A, const FShot& B) { return A.Cut < B.Cut; });
+		Shots[0].Cut = 0.f;
+		for (const FShot& Shot : Shots)
+		{
+			UE_LOG(LogTemp, Log, TEXT("Authored reference camera: beat %s at %.2fs, %s, %.1f deg"),
+				*Beats[Shot.Beat].Beat->BeatId, Shot.Cut, *Shot.Location.ToCompactString(), Shot.FOV);
+		}
+	}
+	else
+	{
+		for (int32 i = 0; i < Beats.Num(); ++i)
+		{
+			FShot Shot;
+			Shot.Beat = i;
+			if (!FindReferenceShot(Beats[i], Shot.Location, Shot.FOV, Shot.CleanFrom) && Shot.FOV <= 0.f) continue;
+			Shots.Add(Shot);
+		}
+		Shots.Sort([this](const FShot& A, const FShot& B) { return Beats[A.Beat].Beat->GetCaptureStartTime() < Beats[B.Beat].Beat->GetCaptureStartTime(); });
+		for (int32 i = 1; i < Shots.Num(); ++i)
+		{
+			const FShot& Prev = Shots[i - 1];
+			FShot& Shot = Shots[i];
+			const float Wanted = Beats[Shot.Beat].Beat->GetCaptureStartTime() - ReferenceCutLead;
+			const float PrevDone = Prev.CleanFrom + Beats[Prev.Beat].Beat->RequiredHold + SolveStep;
+			Shot.Cut = FMath::Clamp(FMath::Max(Wanted, PrevDone), Prev.Cut + .5f, FMath::Max(Shot.CleanFrom, Prev.Cut + .5f));
+		}
+	}
+	if (Shots.IsEmpty())
 	{
 		EvaluatePerformers(SceneTime);
 		return;
-	}
-
-	// Cut to each shot a moment before its beat, but never before the previous shot has held its beat long enough.
-	for (int32 i = 1; i < Shots.Num(); ++i)
-	{
-		const FShot& Prev = Shots[i - 1];
-		FShot& Shot = Shots[i];
-		const float Wanted = Beats[Shot.Beat].Beat->GetCaptureStartTime() - ReferenceCutLead;
-		const float PrevDone = Prev.CleanFrom + Beats[Prev.Beat].Beat->RequiredHold + SolveStep;
-		Shot.Cut = FMath::Clamp(FMath::Max(Wanted, PrevDone), Prev.Cut + 0.5f, FMath::Max(Shot.CleanFrom, Prev.Cut + 0.5f));
 	}
 
 	// Shoot it: each camera stays put and pans smoothly with its beat's action, like a stabilized player camera.
@@ -264,6 +332,7 @@ void ADCMultiCamDirector::BuildReferenceCut()
 	ReferenceCut.Reserve(NumFrames);
 	FRotator Aim = FRotator::ZeroRotator;
 	int32 ShotIndex = -1;
+	float FilmTime = 0.f;
 	for (int32 n = 0; n < NumFrames; ++n)
 	{
 		const float Time = FMath::Min(n / FilmRate, TakeDuration);
@@ -280,11 +349,27 @@ void ADCMultiCamDirector::BuildReferenceCut()
 
 		FDCTakeSample& Sample = ReferenceCut.AddDefaulted_GetRef();
 		Sample.Time = Time;
-		Sample.FilmTime = Time;
+		if (n > 0)
+		{
+			const float StepStart = ReferenceCut[n - 1].Time;
+			const float Midpoint = (StepStart + Time) * .5f;
+			float Rate = 1.f;
+			for (const FSpeedWindow& Speed : SpeedWindows)
+				if (Midpoint >= Speed.Start && Midpoint < Speed.End) Rate = FMath::Min(Rate, Speed.Rate);
+			FilmTime += (Time - StepStart) / Rate;
+		}
+		Sample.FilmTime = FilmTime;
 		Sample.Slot = Active;
 		Sample.Location = Shot.Location;
 		Sample.Rotation = Aim;
 		Sample.FilmFOV = DCFrame::CaptureFOV(Shot.FOV, Aspect);
+	}
+	// Preserve the stage's total running time: brief impact slow-motion is balanced
+	// by a small speed-up elsewhere. All scene samples, including the ending, remain.
+	if (!SpeedWindows.IsEmpty() && FilmTime > 0.f)
+	{
+		const float Scale = TakeDuration / FilmTime;
+		for (FDCTakeSample& Sample : ReferenceCut) Sample.FilmTime *= Scale;
 	}
 	for (const FShot& Shot : Shots)
 	{
@@ -378,7 +463,9 @@ void ADCMultiCamDirector::ToggleReferenceCut()
 
 const ADCBeat* ADCMultiCamDirector::GetReferenceBeat() const
 {
-	return bReferencePlaying ? GetReferenceBeatAt(ReferenceTime) : nullptr;
+	if (!bReferencePlaying) return nullptr;
+	FVector Location; FQuat Rotation; float FOV = 0.f, ScenePoint = 0.f;
+	return GetFilmView(ReferenceCut, ReferenceTime, Location, Rotation, FOV, ScenePoint) ? GetReferenceBeatAt(ScenePoint) : nullptr;
 }
 
 const ADCBeat* ADCMultiCamDirector::GetReferenceBeatAt(float Time) const
@@ -387,7 +474,7 @@ const ADCBeat* ADCMultiCamDirector::GetReferenceBeatAt(float Time) const
 	{
 		return nullptr;
 	}
-	const int32 Next = Algo::UpperBoundBy(ReferenceCut, Time, &FDCTakeSample::FilmTime);
+	const int32 Next = Algo::UpperBoundBy(ReferenceCut, Time, &FDCTakeSample::Time);
 	const FDCTakeSample& Frame = ReferenceCut[FMath::Clamp(Next - 1, 0, ReferenceCut.Num() - 1)];
 	if (!ReferenceShotBeats.IsValidIndex(Frame.Slot))
 	{
@@ -395,6 +482,16 @@ const ADCBeat* ADCMultiCamDirector::GetReferenceBeatAt(float Time) const
 	}
 	const ADCBeat* Beat = Beats[ReferenceShotBeats[Frame.Slot]].Beat;
 	return Time >= Beat->WindowStart && Time <= Beat->WindowEnd ? Beat : nullptr;
+}
+
+float ADCMultiCamDirector::ReferenceFilmTimeAtSceneTime(float Time) const
+{
+	if (ReferenceCut.IsEmpty()) return 0.f;
+	const int32 Next = Algo::UpperBoundBy(ReferenceCut, Time, &FDCTakeSample::Time);
+	const FDCTakeSample& A = ReferenceCut[FMath::Clamp(Next - 1, 0, ReferenceCut.Num() - 1)];
+	const FDCTakeSample& B = ReferenceCut.IsValidIndex(Next) ? ReferenceCut[Next] : A;
+	const float Alpha = B.Time > A.Time ? FMath::Clamp((Time - A.Time) / (B.Time - A.Time), 0.f, 1.f) : 0.f;
+	return FMath::Lerp(A.FilmTime, B.FilmTime, Alpha);
 }
 
 UTextureRenderTarget2D* ADCMultiCamDirector::GetReferenceInset() const
@@ -413,11 +510,11 @@ void ADCMultiCamDirector::UpdateReferenceInset()
 	{
 		BuildReferenceCut(); // e.g. the storyboard's reference cut was switched off or skipped
 	}
-	// The reference cut has no recording pauses, so its film time is the rehearsal's scene time.
+	// Slow-motion changes film time; the inset must still follow rehearsal scene time.
 	FVector Location;
 	FQuat Rotation;
 	float FOV = 0.f, ScenePoint = 0.f;
-	if (!GetFilmView(ReferenceCut, SceneTime, Location, Rotation, FOV, ScenePoint))
+	if (!GetFilmView(ReferenceCut, ReferenceFilmTimeAtSceneTime(SceneTime), Location, Rotation, FOV, ScenePoint))
 	{
 		return;
 	}
@@ -474,7 +571,7 @@ void ADCMultiCamDirector::ComputeMatch()
 		FQuat RefRotation;
 		float RefFOV = 0.f, ScenePoint = 0.f;
 		const int32 Next = Algo::UpperBoundBy(Recording, Time, &FDCTakeSample::Time);
-		if (Next == 0 || !GetFilmView(ReferenceCut, Time, RefLocation, RefRotation, RefFOV, ScenePoint))
+		if (Next == 0 || !GetFilmView(ReferenceCut, ReferenceFilmTimeAtSceneTime(Time), RefLocation, RefRotation, RefFOV, ScenePoint))
 		{
 			continue;
 		}
