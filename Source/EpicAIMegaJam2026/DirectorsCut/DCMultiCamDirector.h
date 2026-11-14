@@ -21,6 +21,7 @@ class USceneCaptureComponent2D;
 class UTextureRenderTarget2D;
 class APlayerController;
 class UMaterialParameterCollection;
+class UAudioComponent;
 
 class ADCCinemaReplay;
 
@@ -114,6 +115,7 @@ class ADCMultiCamDirector : public AActor
 {
 	GENERATED_BODY()
 	friend class FDCDualSceneReplayTest;
+	friend class FDCDialoguePlaybackTest;
 	friend class FDCCinemaReplayTest;
 
 public:
@@ -368,6 +370,13 @@ public:
 	bool bShowNotebook = true;
 
 protected:
+	/** The optional DCSceneDialogue-tagged ambient sound follows the visible scene clock. */
+	void UpdateSceneDialogue(float DeltaSeconds);
+	TWeakObjectPtr<UAudioComponent> SceneDialogue;
+	float DialoguePosition = -1.f;
+	float DialogueRate = 1.f;
+	EDCPhase DialoguePhase = EDCPhase::Storyboard;
+
 	void GatherScene();
 	void BeginFilming();
 	virtual void EvaluateBeats(float PrevTime, float NowTime);
