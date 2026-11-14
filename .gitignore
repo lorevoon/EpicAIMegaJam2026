@@ -76,3 +76,7 @@ DerivedDataCache/*
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Python authoring-tool caches
+__pycache__/
+*.py[cod]
