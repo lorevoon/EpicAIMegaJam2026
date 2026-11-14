@@ -194,6 +194,10 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	TickFade(DeltaSeconds);
+	if (bInMainMenu && !bMenuCursorShown)
+	{
+		SetMenuCursor(true);
+	}
 
 	for (ADCMultiCam* Cam : Cameras)
 	{

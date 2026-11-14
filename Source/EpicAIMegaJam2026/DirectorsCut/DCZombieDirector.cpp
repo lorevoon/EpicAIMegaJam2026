@@ -19,17 +19,48 @@ void ADCZombieDirector::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Open on the director, out of black: he recruits the player, then shows them the reference cut.
+	// Open out of black on the main menu - or straight on the director's intro.
 	Phase = EDCPhase::Storyboard;
 	Flash(FString(), 0.f);
+	if (bShowMainMenu)
+	{
+		bInMainMenu = true;
+		FadeInFromBlack();
+	}
+	else
+	{
+		if (bShowCutscenes && IntroCutscene.Num() > 0)
+		{
+			FadeInFromBlack();
+		}
+		PlayIntro();
+	}
+}
+
+void ADCZombieDirector::StartFromMenu()
+{
+	if (!bInMainMenu || FadeDirection > 0)
+	{
+		return;
+	}
+	FadeThrough([this]()
+	{
+		bInMainMenu = false;
+		SetMenuCursor(false);
+		PlayIntro();
+	});
+}
+
+void ADCZombieDirector::PlayIntro()
+{
+	// The director recruits the player, then shows them the reference cut.
 	if (bShowCutscenes && IntroCutscene.Num() > 0)
 	{
-		FadeInFromBlack();
 		PlayCutscene(IntroCutscene, [this]() { StartReferenceCut(); });
 	}
 	else
 	{
-		bReferenceAutoStart = true; // the player controller isn't ready until the first tick
+		bReferenceAutoStart = true; // the player controller may not be ready until the next tick
 	}
 }
 
@@ -59,6 +90,11 @@ void ADCZombieDirector::EnterPreparation()
 
 void ADCZombieDirector::HandleStartTake()
 {
+	if (bInMainMenu)
+	{
+		StartFromMenu(); // Enter works as well as clicking START
+		return;
+	}
 	if (HandleCutsceneInput())
 	{
 		return;

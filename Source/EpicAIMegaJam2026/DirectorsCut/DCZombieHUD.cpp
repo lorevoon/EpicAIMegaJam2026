@@ -69,6 +69,8 @@ ADCZombieHUD::ADCZombieHUD()
 	DirectorJoy = DirJoy.Object;
 	static ConstructorHelpers::FObjectFinder<UTexture2D> DirThatsIt(TEXT("/Game/DirectorsCut/UI/Director/Director_ThatsIt.Director_ThatsIt"));
 	DirectorThatsIt = DirThatsIt.Object;
+	static ConstructorHelpers::FObjectFinder<UTexture2D> Menu(TEXT("/Game/DirectorsCut/UI/MainMenu.MainMenu"));
+	MainMenuImage = Menu.Object;
 }
 
 ADCZombieDirector* ADCZombieHUD::FindDirector()
@@ -156,7 +158,11 @@ void ADCZombieHUD::DrawHUD()
 		return;
 	}
 	S = FMath::Max(Canvas->ClipY / 1080.f, 0.6f) * UIScale;
-	if (D->IsInCutscene())
+	if (D->IsInMainMenu())
+	{
+		DrawMainMenu(D);
+	}
+	else if (D->IsInCutscene())
 	{
 		DrawCutscene(D);
 	}
@@ -301,6 +307,85 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 
 // ---------------------------------------------------------------------------------------------
 // Storyboard
+
+namespace
+{
+	const FName StartButton(TEXT("Start"));
+}
+
+void ADCZombieHUD::NotifyHitBoxClick(FName BoxName)
+{
+	Super::NotifyHitBoxClick(BoxName);
+	ADCZombieDirector* D = FindDirector();
+	if (BoxName == StartButton && D && D->IsInMainMenu())
+	{
+		D->StartFromMenu();
+	}
+}
+
+void ADCZombieHUD::DrawMainMenu(ADCZombieDirector* D)
+{
+	const float W = Canvas->ClipX;
+	const float H = Canvas->ClipY;
+	const float Now = GetWorld()->GetRealTimeSeconds();
+	DCUI::Rect(Canvas, 0.f, 0.f, W, H, FLinearColor::Black);
+
+	// The background covers the screen (cropped, never stretched), breathing in and out very slowly.
+	if (MainMenuImage && MainMenuImage->GetSurfaceWidth() > 0.f && MainMenuImage->GetSurfaceHeight() > 0.f)
+	{
+		const float IW = MainMenuImage->GetSurfaceWidth();
+		const float IH = MainMenuImage->GetSurfaceHeight();
+		const float Cover = FMath::Max(W / IW, H / IH) * (1.04f + 0.02f * FMath::Sin(Now * 0.15f));
+		DrawTexture(MainMenuImage, (W - IW * Cover) * 0.5f, (H - IH * Cover) * 0.5f, IW * Cover, IH * Cover, 0.f, 0.f, 1.f, 1.f);
+	}
+	const FDCMainMenuLayout& Layout = D->MainMenu;
+	if (Layout.VignetteStrength > 0.f)
+	{
+		DCUI::Vignette(Canvas, 0.f, 0.f, W, H, H * 0.45f, FLinearColor(0.f, 0.f, 0.f, Layout.VignetteStrength));
+	}
+
+	// The title, centred on its position, with a gold rule under it.
+	if (!Layout.Title.IsEmpty())
+	{
+		const float TitleY = H * Layout.TitlePosition.Y - Px(Layout.TitleSize) * 0.6f;
+		const FVector2D Drawn = Label(Layout.Title, W * Layout.TitlePosition.X, TitleY, Layout.TitleColor, Layout.TitleSize, EAlign::Center, true);
+		if (Layout.bTitleUnderline)
+		{
+			const float RuleW = FMath::Min(Drawn.X * 0.6f, W * 0.6f);
+			DCUI::Rect(Canvas, W * Layout.TitlePosition.X - RuleW * 0.5f, TitleY + Drawn.Y * 1.05f, RuleW, FMath::Max(4.f * S, 2.f), DCUI::Gold);
+		}
+	}
+
+	// START: a slate-style button that lifts and lights up gold under the mouse.
+	float MouseX = 0.f, MouseY = 0.f;
+	const bool bMouse = PlayerOwner && PlayerOwner->GetMousePosition(MouseX, MouseY);
+	const float BaseW = Layout.StartSize.X * S, BaseH = Layout.StartSize.Y * S;
+	const float CenterX = W * Layout.StartPosition.X, CenterY = H * Layout.StartPosition.Y;
+	const float BaseX = CenterX - BaseW * 0.5f, BaseY = CenterY - BaseH * 0.5f;
+	const bool bHover = bMouse && MouseX >= BaseX && MouseX <= BaseX + BaseW && MouseY >= BaseY && MouseY <= BaseY + BaseH;
+	StartHover = FMath::FInterpTo(StartHover, bHover ? 1.f : 0.f, GetWorld()->GetDeltaSeconds(), 14.f);
+	const float Grow = 1.f + 0.06f * StartHover;
+	const float BW = BaseW * Grow, BH = BaseH * Grow;
+	const float BX = CenterX - BW * 0.5f, BY = CenterY - BH * 0.5f;
+	const float Stripe = BH * 0.17f;
+	DCUI::ClapperStripes(Canvas, BX, BY, BW, Stripe);
+	const FLinearColor ButtonFill = FMath::Lerp(FLinearColor(0.02f, 0.02f, 0.03f, 0.85f), FLinearColor(1.f, 0.74f, 0.3f, 0.95f), StartHover);
+	const float Gap = 2.f * S;
+	DCUI::Rect(Canvas, BX, BY + Stripe + Gap, BW, BH - Stripe - Gap, ButtonFill);
+	DCUI::Outline(Canvas, BX, BY + Stripe + Gap, BW, BH - Stripe - Gap, FMath::Max(2.5f * S, 2.f), DCUI::Gold);
+	// The label fills about half the button's face.
+	const float TextSize = (BH - Stripe) * 0.5f / FMath::Max(S * TextScale, KINDA_SMALL_NUMBER);
+	const float TextY = BY + Stripe + (BH - Stripe - Px(TextSize) * 1.2f) * 0.5f;
+	Label(Layout.StartText, CenterX, TextY, FMath::Lerp(DCUI::Ivory, FLinearColor(0.08f, 0.07f, 0.07f), StartHover), TextSize, EAlign::Center,
+		StartHover < 0.5f, BW - 16.f * S);
+	AddHitBox(FVector2D(BaseX, BaseY), FVector2D(BaseW, BaseH), StartButton, true);
+
+	if (Layout.bShowEnterHint)
+	{
+		const float HintW = KeyHint(TEXT("ENTER"), TEXT("Start"), 0.f, 0.f, Small, DCUI::Ivory, false);
+		KeyHint(TEXT("ENTER"), TEXT("Start"), CenterX - HintW * 0.5f, BaseY + BaseH + 28.f * S, Small, WithAlpha(DCUI::Ivory, 0.8f));
+	}
+}
 
 void ADCZombieHUD::DrawCutscene(ADCZombieDirector* D)
 {

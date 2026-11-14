@@ -6,6 +6,7 @@
 
 #include "DCMultiCamDirector.h"
 #include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 
 void ADCMultiCamDirector::PlayCutscene(const TArray<FDCCutsceneLine>& Lines, TFunction<void()> OnDone)
 {
@@ -91,4 +92,27 @@ void ADCMultiCamDirector::TickFade(float DeltaSeconds)
 	{
 		FadeDirection = 0;
 	}
+}
+
+void ADCMultiCamDirector::SetMenuCursor(bool bShow)
+{
+	APlayerController* PC = GetPC();
+	if (!PC)
+	{
+		return; // not possessed yet: the next tick tries again
+	}
+	PC->bShowMouseCursor = bShow;
+	PC->bEnableClickEvents = bShow; // clicks reach the HUD's buttons
+	if (bShow)
+	{
+		FInputModeGameAndUI Mode;
+		Mode.SetHideCursorDuringCapture(false);
+		Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		PC->SetInputMode(Mode);
+	}
+	else
+	{
+		PC->SetInputMode(FInputModeGameOnly());
+	}
+	bMenuCursorShown = bShow;
 }

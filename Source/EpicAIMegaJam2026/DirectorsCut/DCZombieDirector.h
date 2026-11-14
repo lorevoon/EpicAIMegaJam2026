@@ -47,6 +47,8 @@ public:
 
 
 	// HUD
+	/** The main menu's START: fades out of the menu into the intro. */
+	void StartFromMenu();
 	/** While planning and looking through a camera: storyboard beats it frames at the scrubbed time. */
 	void GetPlanPreview(TArray<FString>& OutFramedBeats) const;
 
@@ -55,6 +57,8 @@ protected:
 
 private:
 	void EnterPreparation();
+	/** The intro cutscene (if any), then the reference cut. */
+	void PlayIntro();
 	/** The director's briefing cutscene, then preparation. */
 	void BriefAndPrepare();
 };

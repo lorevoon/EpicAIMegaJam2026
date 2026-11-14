@@ -24,6 +24,49 @@ class UMaterialParameterCollection;
 class UAudioComponent;
 class UTexture2D;
 
+/**
+ * Where things sit on the main menu. Positions are the centre of each element as a share of the screen (0,0 top-left,
+ * 1,1 bottom-right); sizes are in pixels at 1080p and scale with the screen.
+ */
+USTRUCT()
+struct FDCMainMenuLayout
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Title")
+	FString Title = TEXT("Cinematographer Simulator");
+
+	UPROPERTY(EditAnywhere, Category = "Title")
+	FVector2D TitlePosition = FVector2D(0.5f, 0.25f);
+
+	UPROPERTY(EditAnywhere, Category = "Title", meta = (ClampMin = "10"))
+	float TitleSize = 120.f;
+
+	UPROPERTY(EditAnywhere, Category = "Title")
+	FLinearColor TitleColor = FLinearColor(0.96f, 0.93f, 0.86f);
+
+	/** A gold line under the title. */
+	UPROPERTY(EditAnywhere, Category = "Title")
+	bool bTitleUnderline = true;
+
+	UPROPERTY(EditAnywhere, Category = "Start Button")
+	FString StartText = TEXT("START");
+
+	UPROPERTY(EditAnywhere, Category = "Start Button")
+	FVector2D StartPosition = FVector2D(0.5f, 0.73f);
+
+	UPROPERTY(EditAnywhere, Category = "Start Button")
+	FVector2D StartSize = FVector2D(400.f, 116.f);
+
+	/** "ENTER Start" under the button. */
+	UPROPERTY(EditAnywhere, Category = "Start Button")
+	bool bShowEnterHint = true;
+
+	/** How dark the screen's edges are over the background image (0 = none). */
+	UPROPERTY(EditAnywhere, Category = "Background", meta = (ClampMin = "0", ClampMax = "1"))
+	float VignetteStrength = 0.65f;
+};
+
 /** One line of a director cutscene: his face, and what he says. */
 USTRUCT()
 struct FDCCutsceneLine
@@ -224,6 +267,16 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Director Coach", meta = (ClampMin = "0.5", Units = "s"))
 	float CoachLineSeconds = 2.2f;
 
+	/** The game opens on the main menu (title and a start button), before the intro cutscene. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
+	bool bShowMainMenu = true;
+
+	/** Main menu layout; the HUD reads it every frame, so changes show up straight away. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Main Menu", meta = (ShowOnlyInnerProperties))
+	FDCMainMenuLayout MainMenu;
+
+	bool IsInMainMenu() const { return bInMainMenu; }
+
 	/** Between phases the director talks to the player in a short cutscene; Enter or click moves on. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
 	bool bShowCutscenes = true;
@@ -248,8 +301,8 @@ public:
 	static constexpr float CutsceneTypeRate = 40.f;
 
 	bool IsInCutscene() const { return Cutscene != nullptr; }
-	/** A cutscene is up or the screen is fading: player input only moves the cutscene on. */
-	bool IsInputBlocked() const { return IsInCutscene() || FadeDirection != 0; }
+	/** The main menu or a cutscene is up, or the screen is fading: player input only moves those on. */
+	bool IsInputBlocked() const { return bInMainMenu || IsInCutscene() || FadeDirection != 0; }
 	/** The cutscene line being said (null outside cutscenes), its index and count, and the real time it started. */
 	const FDCCutsceneLine* GetCutsceneLine() const { return Cutscene && Cutscene->IsValidIndex(CutsceneLine) ? &(*Cutscene)[CutsceneLine] : nullptr; }
 	int32 GetCutsceneLineIndex() const { return CutsceneLine; }
@@ -555,6 +608,10 @@ protected:
 	float FadeAlpha = 0.f;
 	/** +1 fading to black, -1 fading back in, 0 not fading. */
 	int32 FadeDirection = 0;
+	bool bInMainMenu = false;
+	bool bMenuCursorShown = false;
+	/** The main menu needs the mouse cursor and HUD clicks; the game itself doesn't. */
+	void SetMenuCursor(bool bShow);
 	/** Preparation's checks passed: the take starts (after the action cutscene). */
 	void StartCountdown();
 	float CheerUpSince = -100.f;
