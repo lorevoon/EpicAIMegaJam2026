@@ -1,0 +1,35 @@
+{
+  "Orc": {
+    "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\PolysplitGames\\LowPolyMedievalFantasyBipedCreatures\\BipedCreatures\\Orc.fbx",
+    "meshes": [
+      "Orc_Top",
+      "Orc_Top_Armor",
+      "Orc_Bottom_Armor",
+      "Orc_Bottom",
+      "Orc_Head",
+      "Orc_Sword"
+    ],
+    "vertices": 2553,
+    "bones": 99
+  },
+  "Romeo": {
+    "source": "C:\\Unity Projects\\COMP 3329 POC\\Assets\\PolysplitGames\\LowPolyMedievalFantasyHeroes\\BasicHeroes\\M_Swordsman.fbx",
+    "meshes": [
+      "M_Swordsman_SkullCap",
+      "M_eyebrows0",
+      "M_Swordsman_SkullCap_ChainCoif",
+      "M_hair_8b_Bangs",
+      "M_eyes0",
+      "M_Swordsman_Top",
+      "M_hair_1",
+      "M_Swordsman_Bottom",
+      "facialHair_1",
+      "M_Head",
+      "M_mouth0",
+      "M_Swordsman_Sword",
+      "M_hair_3b_Top"
+    ],
+    "vertices": 2454,
+    "bones": 99
+  }
+}

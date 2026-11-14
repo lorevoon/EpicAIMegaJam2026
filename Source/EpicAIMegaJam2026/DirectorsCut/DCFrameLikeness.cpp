@@ -16,7 +16,8 @@ void ADCMultiCamDirector::GetSubjectPoints(float Time, TArray<FVector>& OutPoint
 		return;
 	}
 	// The subjects are the characters of the beat the reference cut is filming at this moment.
-	const int32 Next = Algo::UpperBoundBy(ReferenceCut, Time, &FDCTakeSample::FilmTime);
+	// Callers supply rehearsal scene time, not the slowed reference's film time.
+	const int32 Next = Algo::UpperBoundBy(ReferenceCut, Time, &FDCTakeSample::Time);
 	const FDCTakeSample& Frame = ReferenceCut[FMath::Clamp(Next - 1, 0, ReferenceCut.Num() - 1)];
 	if (!ReferenceShotBeats.IsValidIndex(Frame.Slot))
 	{

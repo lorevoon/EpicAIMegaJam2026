@@ -1,0 +1,120 @@
+Act 2: The Orc Raid / Broken Promise
+
+Open /Game/DirectorsCut/Levels/L_DC_Act2_BrokenPromise and press Play.
+38 seconds, five required beats, eight performers (five orcs and three villagers).
+Act 1 and the startup map remain unchanged.
+
+Environment layers
+- L_DC_Act2_Set: copy of Act 1's soundstage, including the windmill, large house and
+  smaller house at the Act 1 transforms. The front wall and equipment clear the raid lane;
+  the platform sits below the shared sloping terrain. No fire prop or Niagara fire.
+- L_DC_Act2_Real: copy of Act 1's village, with 46 Niagara fire systems including
+  large flames, smoke, burning roofs and a curtain of fire behind the raiders.
+  Red-black procedural ash clouds replace the daylight cloud cards and blue atmosphere.
+- The persistent map keeps the same cast, waypoint clock, terrain and practical props.
+  Preparation/filming show the studio. Reference/review show the village. Recorded lens
+  position, rotation, FOV, cuts and scene time are replayed by the existing director.
+
+Revised storyboard
+0-6: Five orcs advance through the open southern lane, clear of the mill and houses.
+6-10: The lead raider kills Mr. Smith.
+10-19: Both play the supplied Surprised motion; Romeo runs to Mr. Smith.
+19-29: Romeo strikes/orc guards at 19; orc strikes/Romeo guards at 22;
+  both strike at 25 and fall together at 26. Juliet plays Terrified during the fight.
+29-38: Romeo plays the supplied Laying Hand Gesture at 29.2, aligned to his fallen pose.
+  Juliet approaches and plays Holding Down from 31; Romeo becomes still by 33.
+Capture gates: 3, 8.5, 11, 27.5, 31 seconds. Holds: 1, 1, 1, 1, 2 seconds.
+
+Continuity and assets
+Romeo begins at (-5000, -8824.5, 1150.9456); Juliet at (-5000, -8790.5, 1156.3405).
+These are the exact Act 1 end positions. They step apart before their shocked reaction.
+SK_Act2_OrcComplete includes the source torso, legs, head, armour and original sword.
+Its material instances explicitly use opaque, two-sided shading.
+SK_Act2_RomeoArmed retains the source sword's original wrist bind; custom block swords
+have been removed. Source assets come from the supplied COMP 3329 POC Polysplit folders.
+The deaths are terrain-aligned. Supplied reactions are animated, unvoiced.
+All walking/running animation root travel is removed from the baked poses; the paths
+provide planar movement, eliminating the original 1.4-metre backward loop snap.
+The four supplied source FBXs are preserved under SourceArt/Act2/Revision2.
+
+Editable current sequence: /Game/DirectorsCut/Act2/LS_DC_Act2_OrcRaid
+Earlier sequences are retained as previous drafts and no longer describe the current story.
+
+Authoring scripts (run with affected assets unloaded in the interactive editor)
+Environment conversion: build_act2_dual_scene.py, refine_act2_fire.py,
+  tune_act2_fire_live.py (existing editor MCP), apply_act2_inferno.py.
+Character FBX preparation in Blender: prepare_act2_raid_characters.py, author_act2_gasps.py.
+Act 1 continuity snapshot: inspect_act1_continuity.py (Unreal Python).
+Raid authoring: rebuild_act2_raid.py, finish_act2_raid.py, refine_act2_raid_framing.py (Unreal Python).
+The mourning capture targets Juliet's head and Romeo's torso so she can cradle his head.
+Reference cameras solve against the real village, then restore the previous environment.
+Validation: validate_act2_stage.py. Reports are in Saved/Act2.
+Build scripts are one-time conversion steps; do not rerun a completed conversion blindly.
+
+Latest revision: import_act2_revision2.py, prepare_act2_revision2_environment.py,
+rebuild_act2_revision2.py, refine_act2_revision2_set.py, refine_act2_revision2_visuals.py,
+clear_act2_daylight_clouds.py, remove_act2_blue_fog.py, finish_act2_revision2.py,
+finalize_act2_revision2_timing.py. Validation and preview checkpoints
+are in Saved/Act2/Revision2. The current editable sequence retains its original name.
+
+Final visual review: southern ending reference camera at (-5750, -10100, 1230.87), 57-degree lens; both ending gestures visible. Runtime reference validation reports 7.25 seconds clear from 31 seconds.
+
+Act 2 audio and facial performance (2026-11-14)
+- SourceArt/Act2/Audio/Originals preserves all 19 supplied files.
+- SourceArt/Act2/Audio/timing.json is the cue sheet and speech energy envelope.
+- SW_Act2_Soundtrack is a 38-second stereo mix under /Game/DirectorsCut/Act2/AudioFaces.
+- The DCSceneDialogue actor follows rehearsal, reference film, recording and replay scene time.
+- The editable LS_DC_Act2_OrcRaid also contains the same soundtrack audio track.
+- Smith warning 0.25, death 7.50; Romeo calls Smith 9.00, Run Juliet 17.00;
+  Juliet refuses 18.65, Romeo sword cry 19.35, Juliet calls Romeo 26.15;
+  Romeo goodbye 28.25, Juliet whisper 33.15; sobbing underlays the ending from 26.40.
+- Sword clashes 19.60, 22.60 and 25.55/25.70; entrance growls 0.40, 2.50, 4.35;
+  orc attacks 6.65, 22.15, 25.10; orc death pain 26.00.
+- Speech energy gates mouth opening/closing; frightened eyebrows, crying closed eyes,
+  and dead characters' closed eyes are baked into separate Speaking assets.
+- Long sobbing overlaps the final dialogue at reduced volume. Fire and music duck for speech.
+- The legacy village ambience is disabled in Act 2 Real. No Act 1 assets changed.
+- Authoring: prepare_act2_audio.py, author_act2_audio_faces.py, finalize_act2_audio.py.
+- Saved binding, pose, replay-alignment and no-clipping checks passed; reports in Saved/Act2/AudioFaces.
+
+Revision 3: continuous raid and six-camera reference cut
+- Smith begins in Terrified. Couple reaction10-13 and Juliet's fight reaction17-29 use Reacting.fbx.
+- Four background raiders march continuously0-38 with planar root motion removed and clear routes in both environments.
+- Bench moved to(-6150,-8800), away from Smith's complete falling body.
+- NOO10.000-11.449 -> RunJuliet11.489-13.119 -> NotLeaving13.159-15.239.
+- YouPromised audio removed. Final beat renamed A final goodbye; sobbing remains.
+- Six authored cameras: entrance0, Smith6, gasp/run10, combat18 and23.5, ending29.
+- Five story beats remain. Reference-only slow motion on7.3-8.3 and25-27;
+  film timestamps normalize to38seconds. Runtime recording remains38seconds at original action pace.
+- Audio rate, reference inset, captions and grading map reference film time to original scene time.
+- Current performance assets: Act2/Revision3 and Act2/AudioFacesV3. AudioV3 contains the latest mix.
+- Scripts: reblock_act2_revision3.py, import_act2_revision3.py, patch_act2_revision3_reactions.py,
+  finish_act2_revision3.py, author_act2_audio_faces.py, validate_act2_revision3.py.
+
+Revision3 final framing: reaction and combat beats target head anchors; combat lenses widened to60degrees to keep faces and weapons visible. Bench clearance,153 motion samples per raider, six-camera coverage and facial/body preservation validation passed. Engine tests DirectorsCut.Reference.AuthoredRaid and DirectorsCut.Dialogue.SceneClock passed.
+
+Individual scene testing
+- Editor and game startup now open L_DC_Act2_BrokenPromise directly, with no title-screen connection.
+- Pressing Play from either act's Set or Real environment map opens its complete parent act.
+  This avoids spawning an empty director in an environment-only level and keeps shared cast/replay layers intact.
+- The title asset remains available to reconnect later; it is not the default startup map.
+- Cached lighting uses r.EyeAdaptation.CachedLightingPreExposure=8 (EV -4..16).
+- Regression: DirectorsCut.SceneEntry covers all four Set/Real entry maps.
+
+Studio repair (2026-11-14):
+- Act2 Set now has SM_Act2_StudioGround_Final, sampled at 50 cm from shared landscape and offset down 2 cm. Studio-only, no collision, so recording/replay blocking stays unchanged.
+- Side walls and roof extended to join front wall at Y=-11050; practical foundations/support risers added.
+- Stage 2 camera operator start marker remains at its original spawn position but hidden geometry removes its white disc.
+- Both MI_Act2_OrcOpaque materials explicitly enable skeletal-mesh usage. Without this UE5.8 substituted default materials. Rebuild script preserves the flag.
+- Validation: Saved/Act2/StudioRepair/validation.json; editor set and actual opening PIE screenshots in same folder. All five orc material assignments verified after reload.
+
+Acting/camera/audio revision 4 (2026-11-14):
+- Smith opening root height is corrected per frame through7s from actual toe/landscape contact; starts97.84cm higher. Original death transforms resume7.2s. Box lifted28.28cm.
+- Romeo/Juliet Reacting head/neck aim stays on Smith10–13s. Reaction camera moved northeast to(-4550,-8500,1430), viewing their backs.
+- Four camera angles cover five scenes. Fight/fall/Juliet approach share(-5750,-10100,1231); ending follows smoothly over29-30.5s without a position cut. Editable sequence has4camera cuts.
+- Authored DCZoomStart/DCZoomEnd/DCEndFOV provide eased entrance push-in, running/fall zoom-outs, final push-in.
+- Slow impact windows7.0–7.3 and25.0–25.9. DCDialogue=start:end tags protect all voiced intervals at exactly1x; duration compensation occurs only during unvoiced action.26–38 entirely natural speed.
+- Juliet supplied you-promised-agony.mp3 plays33.01–37.86 after Romeo goodbye. Only initial nonverbal sobs shortened(raw3.45–8.30 retained), no time-stretch. Total38s. New AudioFacesV4 soundtrack/Juliet mouth rig; other corrected bones and closed eyes preserved.
+- Regenerate in order: author_act2_continuous_camera.py then finish_act2_revision4.py. Validate with validate_act2_revision4.py and DirectorsCut.Reference.AuthoredRaid; optional -Act2VisualQA renders runtime evidence.
+
+Validation completed: C++ build succeeded; DirectorsCut.Reference.AuthoredRaid and DirectorsCut.Dialogue.SceneClock passed; saved-asset validation passed. Runtime screenshots: Saved/Act2/ActingRevision4/reference_*.png.

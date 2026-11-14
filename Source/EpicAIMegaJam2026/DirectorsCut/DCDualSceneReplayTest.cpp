@@ -115,6 +115,11 @@ bool FDCDualSceneReplayTest::RunTest(const FString& Parameters)
 		TestFalse(TEXT("Real hidden during preparation"), Real->IsLevelVisible());
 		TestTrue(TEXT("Real preloaded"), Real->IsLevelLoaded());
 		TestTrue(TEXT("Both layers at identical world origin"), Studio->LevelTransform.Equals(FTransform::Identity) && Real->LevelTransform.Equals(FTransform::Identity));
+		const FTransform BeforeReferenceSolve = Romeo->GetActorTransform();
+		D->BuildReferenceCut();
+		TestTrue(TEXT("Reference solve restores studio preparation"), Studio->IsLevelVisible() && !Real->IsLevelVisible());
+		TestTrue(TEXT("Reference solve restores the rehearsal pose"), Romeo->GetActorTransform().Equals(BeforeReferenceSolve, .01));
+		TestTrue(TEXT("Reference solve produces camera samples"), !D->ReferenceCut.IsEmpty());
 		ADCMultiCam* Cam = D->SpawnCamera(FVector(1000,-1200,250));
 		D->Cameras.Add(Cam);
 		D->ViewingSlot = D->Cameras.Num()-1;

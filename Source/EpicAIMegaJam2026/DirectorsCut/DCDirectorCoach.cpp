@@ -98,7 +98,7 @@ void ADCMultiCamDirector::UpdateCoach()
 	float RefFOV = 0.f, ScenePoint = 0.f;
 	TArray<FVector> Points;
 	GetSubjectPoints(SceneTime, Points);
-	if (!Live || Points.Num() == 0 || !GetFilmView(ReferenceCut, SceneTime, RefLocation, RefQuat, RefFOV, ScenePoint))
+	if (!Live || Points.Num() == 0 || !GetFilmView(ReferenceCut, ReferenceFilmTimeAtSceneTime(SceneTime), RefLocation, RefQuat, RefFOV, ScenePoint))
 	{
 		return;
 	}
