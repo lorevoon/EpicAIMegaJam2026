@@ -22,8 +22,18 @@ report={'lines':[{k:v for k,v in l.items() if k!='mouth_gate'} for l in manifest
 for who in ['Romeo','Juliet','Mr. Smith']:
  p=cast[who];mesh=p.get_editor_property('character_mesh');slug=who.replace(' ','').replace('.','')
  source=u.load_asset(BASE+'/Animations/Act1Faces/A_Act1_'+slug+'_FacePerformance');assert source
+ if who=='Mr. Smith' and u.EditorAssetLibrary.does_asset_exist(BASE+'/Animations/Act1Bow/A_Act1_MrSmith_BowPerformance'):
+  source=u.load_asset(BASE+'/Animations/Act1Bow/A_Act1_MrSmith_BowPerformance')
  path=BASE+'/Animations/Act1Dialogue/A_Act1_'+slug+'_Speaking'
  anim=u.load_asset(path) or u.EditorAssetLibrary.duplicate_asset(source.get_path_name(),path);assert anim
+ if who=='Mr. Smith':
+  # Refresh the underlying gesture as well as the mouth when the bow source changes.
+  bones=json.loads((ROOT/'SourceArt/Act1Faces/blocking_source.json').read_text())[who]['bones']
+  body=[u.AnimationLibrary.get_bone_poses_for_time(source,bones,f/FPS,False,mesh) for f in range(601)]
+  controller=anim.get_editor_property('controller');controller.open_bracket('Preserve current Smith gesture',False)
+  for i,bone in enumerate(bones):
+   assert controller.set_bone_track_keys(bone,[p[i].translation for p in body],[p[i].rotation for p in body],[p[i].scale3d for p in body],False)
+  controller.close_bracket(False)
  poses=[u.AnimationLibrary.get_bone_poses_for_time(source,['mouth_joint'],f/FPS,False,mesh)[0] for f in range(601)]
  lines=[l for l in manifest['lines'] if l['speaker']==who]
  scales=[];amounts=[]
