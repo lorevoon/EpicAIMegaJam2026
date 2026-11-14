@@ -59,15 +59,15 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
     MinimumRate = FMath::Min(MinimumRate, Rate); MaximumRate = FMath::Max(MaximumRate, Rate);
     if (S.Time >= 26.05f && S.Time <= 37.8f)
      TestTrue(TEXT("Death scream and final dialogue stay at natural speed"), FMath::IsNearlyEqual(Rate, 1.f, .001f));
-    if (S.Time > 18.1f)
-     TestTrue(TEXT("Fight, fall and Juliet approach retain one camera position"), S.Location.Equals(D->ReferenceCut[550].Location, .01f));
-    if (S.Time > 28.9f && S.Time < 29.2f)
-     TestTrue(TEXT("Following Juliet creates no camera snap"), S.Rotation.Quaternion().AngularDistance(P.Rotation.Quaternion()) < FMath::DegreesToRadians(4.f));
+    if (S.Time > 18.1f && S.Time < 28.9f)
+     TestTrue(TEXT("Fight and fall retain one camera position"), S.Location.Equals(D->ReferenceCut[550].Location, .01f));
    }
   }
   TestEqual(TEXT("All five story sections used"), Slots.Num(), 5);
-  if (Positions.Num() == 5)
-   TestTrue(TEXT("Ending continues the combat angle"), Positions[3].Equals(Positions[4], .01f));
+  // Every scene cuts to a camera of its own, too far from the others for one placed camera to stand on two spots.
+  for (int32 i = 0; i < Positions.Num(); ++i)
+   for (int32 j = i + 1; j < Positions.Num(); ++j)
+    TestTrue(TEXT("Each scene has its own camera spot"), FVector::Dist2D(Positions[i], Positions[j]) > D->ReferenceSpotRadius);
   TestTrue(TEXT("Fall zoom opens the frame"), D->ReferenceCut[850].FilmFOV > D->ReferenceCut[580].FilmFOV + 3.f);
   TestTrue(TEXT("Ending zoom moves closer"), D->ReferenceCut[1100].FilmFOV < D->ReferenceCut[880].FilmFOV - 5.f);
   TestTrue(TEXT("Impact is slowed"), MinimumRate < .85f && MinimumRate >= .25f);

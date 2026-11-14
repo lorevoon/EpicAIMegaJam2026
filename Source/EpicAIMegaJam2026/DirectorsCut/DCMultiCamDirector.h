@@ -546,7 +546,12 @@ protected:
 	/** How alike two readings look. */
 	FDCMatch CompareFrames(const FDCFrameReading& Shot, const FDCFrameReading& Ref) const;
 	/** Best spot and lens for one beat; false if even the best can't hold it long enough to capture. */
-	bool FindReferenceShot(const FDCMultiCamBeat& State, FVector& OutLocation, float& OutFOV, float& OutCleanFrom);
+	bool FindReferenceShot(const FDCMultiCamBeat& State, const TArray<FVector>& Taken, FVector& OutLocation, float& OutFOV, float& OutCleanFrom);
+	/**
+	 * How far apart (across the ground) two scenes' reference cameras must be: more than two spot radii, so the film
+	 * visibly cuts between scenes and no single placed camera stands on two scenes' spots.
+	 */
+	float GetReferenceShotSpacing() const { return 2.f * ReferenceSpotRadius + 100.f; }
 	void StartReferenceCut();
 	void StopReferenceCut();
 	/** The reference cut played to its end (or was skipped). By default, back to the storyboard page. */
@@ -560,6 +565,12 @@ protected:
 	void UpdateReferenceInset(float DeltaSeconds);
 	TArray<FDCTakeSample> ReferenceCut;
 	bool bReferenceCutBuilt = false;
+	/**
+	 * Where the player can stand a camera in preparation: inside the studio set's walls (StudioEnvironmentLevel's
+	 * solid parts), across the ground. Reference cameras are kept in it. Invalid when the level has no studio.
+	 */
+	FBox2D ReferenceStageBounds = FBox2D(ForceInit);
+	FBox2D GetStudioBounds() const;
 
 	UPROPERTY()
 	TObjectPtr<USceneCaptureComponent2D> ReferenceCapture;

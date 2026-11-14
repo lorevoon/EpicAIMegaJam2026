@@ -16,6 +16,8 @@
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "EngineUtils.h"
+#include "Engine/Brush.h"
+#include "Engine/Level.h"
 #include "Engine/World.h"
 #include "Engine/LevelStreaming.h"
 #include "GameFramework/PlayerController.h"
@@ -76,7 +78,7 @@ void ADCMultiCamDirector::EvaluatePerformers(float Time)
 	}
 }
 
-bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVector& OutLocation, float& OutFOV, float& OutCleanFrom)
+bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, const TArray<FVector>& Taken, FVector& OutLocation, float& OutFOV, float& OutCleanFrom)
 {
 	const ADCBeat* Beat = State.Beat;
 	const float T0 = Beat->GetCaptureStartTime();
@@ -144,7 +146,9 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 	for (int32 c = Candidates.Num() - 1; c >= 0; --c)
 	{
 		FCandidate& Cand = Candidates[c];
-		bool bUsable = !GetWorld()->OverlapAnyTestByChannel(Cand.Location, FQuat::Identity, ECC_Visibility, Probe, Params);
+		// Reachable in preparation (inside the studio) and not inside the real set's geometry.
+		bool bUsable = (!ReferenceStageBounds.bIsValid || ReferenceStageBounds.IsInside(FVector2D(Cand.Location)))
+			&& !GetWorld()->OverlapAnyTestByChannel(Cand.Location, FQuat::Identity, ECC_Visibility, Probe, Params);
 		float HalfTan = MinHalfTan;
 		for (int32 k = 0; bUsable && k < NumTimes; ++k)
 		{
@@ -215,13 +219,22 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 		}
 	}
 
-	// Best: holds the shot (longer is safer, up to a point), then the authored spot, the most scenery, a comfortable distance.
+	// Best: a spot that can capture the scene comes first, then one well away from the other scenes' cameras (Taken),
+	// then holding the shot longer (up to a point), the authored spot, the most scenery, a comfortable distance.
+	const float Spacing = GetReferenceShotSpacing();
 	const FCandidate* Best = nullptr;
 	float BestRating = -MAX_flt;
 	for (const FCandidate& Cand : Candidates)
 	{
+		float Crowding = 0.f;
+		for (const FVector& Other : Taken)
+		{
+			Crowding = FMath::Max(Crowding, Spacing - FVector::Dist2D(Cand.Location, Other));
+		}
+		const bool bCanCapture = Cand.Run >= Beat->RequiredHold + SolveStep;
 		const float Distance = FVector::Dist(Cand.Location, Middle);
-		const float Rating = FMath::Min(Cand.Run, Beat->RequiredHold + 2.f) * 10.f + (Cand.bAuthored ? 4.f : 0.f)
+		const float Rating = (bCanCapture ? 10000.f : 0.f) + (Crowding <= 0.f ? 5000.f : -Crowding)
+			+ FMath::Min(Cand.Run, Beat->RequiredHold + 2.f) * 10.f + (Cand.bAuthored ? 4.f : 0.f)
 			+ Cand.Scenery * 6.f - FMath::Abs(Distance - ReferencePreferredDistance) / 400.f;
 		if (Rating > BestRating)
 		{
@@ -237,10 +250,44 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 	OutFOV = Best->FOV;
 	OutCleanFrom = Best->RunStart;
 	const bool bCaptures = Best->Run >= Beat->RequiredHold + SolveStep;
-	UE_LOG(LogTemp, Log, TEXT("Reference cut: beat %s '%s' from %s, %.0f deg lens, clean %.2fs from %.2fs%s"),
+	float Nearest = MAX_flt;
+	for (const FVector& Other : Taken)
+	{
+		Nearest = FMath::Min(Nearest, FVector::Dist2D(Best->Location, Other));
+	}
+	UE_LOG(LogTemp, Log, TEXT("Reference cut: beat %s '%s' from %s, %.0f deg lens, clean %.2fs from %.2fs%s%s"),
 		*Beat->BeatId, *Beat->DisplayName, *Best->Location.ToCompactString(), Best->FOV, Best->Run, Best->RunStart,
-		bCaptures ? TEXT("") : TEXT(" - NOT ENOUGH to capture it"));
+		bCaptures ? TEXT("") : TEXT(" - NOT ENOUGH to capture it"),
+		Nearest < Spacing ? *FString::Printf(TEXT(" - only %.0f cm from another scene's camera"), Nearest) : TEXT(""));
 	return bCaptures;
+}
+
+FBox2D ADCMultiCamDirector::GetStudioBounds() const
+{
+	// The studio's walls are the outermost solid parts of its set level; lights and other non-colliding dressing,
+	// brushes and volumes don't count.
+	FBox2D Bounds(ForceInit);
+	const ULevelStreaming* Studio = UGameplayStatics::GetStreamingLevel(this, StudioEnvironmentLevel);
+	const ULevel* Level = Studio ? Studio->GetLoadedLevel() : nullptr;
+	if (!Level)
+	{
+		return Bounds;
+	}
+	for (const AActor* Actor : Level->Actors)
+	{
+		if (!Actor || Actor->IsA<ABrush>() || Actor->IsA<AWorldSettings>())
+		{
+			continue;
+		}
+		const FBox Box = Actor->GetComponentsBoundingBox(false);
+		if (Box.IsValid)
+		{
+			Bounds += FBox2D(FVector2D(Box.Min), FVector2D(Box.Max));
+		}
+	}
+	// Keep clear of the walls themselves.
+	constexpr float WallMargin = 100.f;
+	return Bounds.bIsValid && Bounds.GetSize().GetMin() > 4.f * WallMargin ? Bounds.ExpandBy(-WallMargin) : FBox2D(ForceInit);
 }
 
 void ADCMultiCamDirector::BuildReferenceCut()
@@ -258,6 +305,7 @@ void ADCMultiCamDirector::BuildReferenceCut()
 	// buildings and dressing, not the empty green-screen volume they replace.
 	// Inset generation can also call this during preparation, so restore the
 	// previous environment on every exit without touching the recorded take.
+	ReferenceStageBounds = GetStudioBounds(); // before the studio is swapped out
 	const ULevelStreaming* Real = UGameplayStatics::GetStreamingLevel(this, RealEnvironmentLevel);
 	const bool bWasRealVisible = Real && Real->IsLevelVisible();
 	SetReviewEnvironment(true);
@@ -333,12 +381,21 @@ void ADCMultiCamDirector::BuildReferenceCut()
 	}
 	else
 	{
+		// In film order, each scene's camera picked clear of the ones already chosen.
+		TArray<int32> Order;
 		for (int32 i = 0; i < Beats.Num(); ++i)
+		{
+			Order.Add(i);
+		}
+		Order.Sort([this](int32 A, int32 B) { return Beats[A].Beat->GetCaptureStartTime() < Beats[B].Beat->GetCaptureStartTime(); });
+		TArray<FVector> Taken;
+		for (const int32 i : Order)
 		{
 			FShot Shot;
 			Shot.Beat = i;
-			if (!FindReferenceShot(Beats[i], Shot.Location, Shot.FOV, Shot.CleanFrom) && Shot.FOV <= 0.f) continue;
+			if (!FindReferenceShot(Beats[i], Taken, Shot.Location, Shot.FOV, Shot.CleanFrom) && Shot.FOV <= 0.f) continue;
 			Shots.Add(Shot);
+			Taken.Add(Shot.Location);
 		}
 		Shots.Sort([this](const FShot& A, const FShot& B) { return Beats[A.Beat].Beat->GetCaptureStartTime() < Beats[B.Beat].Beat->GetCaptureStartTime(); });
 		for (int32 i = 1; i < Shots.Num(); ++i)
@@ -668,18 +725,36 @@ void ADCMultiCamDirector::UpdateCoveredScenes()
 	{
 		BuildReferenceCut();
 	}
+	// Each placed camera ticks off at most one scene, and each scene needs its own camera: pair cameras with the
+	// reference spots they stand on, closest pairs first.
+	struct FPair { int32 Camera; int32 Beat; float Distance; };
+	TArray<FPair> Pairs;
+	for (int32 Slot = 0; Slot < Cameras.Num(); ++Slot)
+	{
+		const ADCMultiCam* Cam = Cameras[Slot];
+		if (!Cam || Slot == PendingPlacementSlot)
+		{
+			continue;
+		}
+		for (int32 Shot = 0; Shot < ReferenceShotBeats.Num(); ++Shot)
+		{
+			const FVector Offset = Cam->GetActorLocation() - ReferenceShotLocations[Shot];
+			if (Offset.Size2D() <= ReferenceSpotRadius && FMath::Abs(Offset.Z) <= ReferenceSpotHeightTolerance)
+			{
+				Pairs.Add({ Slot, ReferenceShotBeats[Shot], float(Offset.Size2D()) });
+			}
+		}
+	}
+	Pairs.Sort([](const FPair& A, const FPair& B) { return A.Distance < B.Distance; });
 	TArray<bool> Now;
 	Now.SetNumZeroed(Beats.Num());
-	for (int32 Shot = 0; Shot < ReferenceShotBeats.Num(); ++Shot)
+	TSet<int32> UsedCameras;
+	for (const FPair& Pair : Pairs)
 	{
-		for (const ADCMultiCam* Cam : Cameras)
+		if (!Now[Pair.Beat] && !UsedCameras.Contains(Pair.Camera))
 		{
-			const FVector Offset = Cam ? Cam->GetActorLocation() - ReferenceShotLocations[Shot] : FVector::ZeroVector;
-			if (Cam && Cam != GetCameraSlot(PendingPlacementSlot) && Offset.Size2D() <= ReferenceSpotRadius && FMath::Abs(Offset.Z) <= ReferenceSpotHeightTolerance)
-			{
-				Now[ReferenceShotBeats[Shot]] = true;
-				break;
-			}
+			Now[Pair.Beat] = true;
+			UsedCameras.Add(Pair.Camera);
 		}
 	}
 	// Each scene ticked off gets its moment: the storyboard animates it and the director pops up to praise it.
