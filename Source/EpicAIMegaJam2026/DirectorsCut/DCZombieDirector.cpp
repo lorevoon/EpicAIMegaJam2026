@@ -34,7 +34,7 @@ void ADCZombieDirector::BeginPlay()
 	LoadActScript();
 
 	// Open out of black: the film's first act on the main menu, later acts straight on their intro.
-	Phase = EDCPhase::Storyboard;
+	Phase = EDCPhase::Reference;
 	Flash(FString(), 0.f);
 	FadeInFromBlack();
 	if (bShowMainMenu && ActIndex <= 0)
@@ -66,7 +66,14 @@ void ADCZombieDirector::PlayIntro()
 	// The director recruits the player, then shows them the reference cut.
 	if (bShowCutscenes && IntroCutscene.Num() > 0)
 	{
-		PlayCutscene(IntroCutscene, [this]() { StartReferenceCut(); });
+		PlayCutscene(IntroCutscene, [this]()
+		{
+			StartReferenceCut();
+			if (!IsReferencePlaying())
+			{
+				OnReferenceCutFinished(); // no reference film to show
+			}
+		});
 	}
 	else
 	{
@@ -75,27 +82,16 @@ void ADCZombieDirector::PlayIntro()
 }
 
 // ---------------------------------------------------------------------------------------------
-// Phase flow: intro cutscene -> reference cut -> briefing cutscene -> preparation (scrub the timeline)
-// -> action cutscene -> shooting -> review
+// Phase flow: (main menu) -> intro cutscene -> reference film -> briefing cutscene -> preparation
+// -> action cutscene -> shooting -> review -> outro cutscene -> the next act (DCActs.cpp)
 
 void ADCZombieDirector::OnReferenceCutFinished()
 {
 	FadeThrough([this]()
 	{
-		StopReferenceCut();
-		BriefAndPrepare();
+		StopReferenceCut(); // into preparation, with the briefing over it
+		PlayCutscene(BriefingCutscene, []() {});
 	});
-}
-
-void ADCZombieDirector::BriefAndPrepare()
-{
-	PlayCutscene(BriefingCutscene, [this]() { EnterPreparation(); });
-}
-
-void ADCZombieDirector::EnterPreparation()
-{
-	ResetScene();
-	Flash(TEXT("Rehearsal is playing. H pauses/resumes, comma/period change speed. Hold Q/E to scrub (and pause)."), 7.f);
 }
 
 void ADCZombieDirector::HandleStartTake()
@@ -109,17 +105,9 @@ void ADCZombieDirector::HandleStartTake()
 	{
 		return;
 	}
-	if (Phase == EDCPhase::Storyboard)
+	if (Phase == EDCPhase::Reference)
 	{
-		// Enter skips the reference cut (or leaves the storyboard page) for the briefing.
-		if (IsReferencePlaying())
-		{
-			OnReferenceCutFinished();
-		}
-		else
-		{
-			FadeThrough([this]() { BriefAndPrepare(); });
-		}
+		OnReferenceCutFinished(); // skipping the film goes on to the briefing
 		return;
 	}
 	Super::HandleStartTake();
@@ -127,7 +115,7 @@ void ADCZombieDirector::HandleStartTake()
 
 void ADCZombieDirector::HandleRestart()
 {
-	if (Phase != EDCPhase::Storyboard)
+	if (Phase != EDCPhase::Reference)
 	{
 		Super::HandleRestart();
 	}

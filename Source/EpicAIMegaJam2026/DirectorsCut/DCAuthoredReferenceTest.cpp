@@ -1,4 +1,4 @@
-#if WITH_DEV_AUTOMATION_TESTS
+#if WITH_DEV_AUTOMATION_TESTS && WITH_EDITOR
 #include "Misc/AutomationTest.h"
 #include "Tests/AutomationCommon.h"
 #include "DCMultiCamDirector.h"
@@ -98,7 +98,7 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
      TestTrue(TEXT("Scoring subjects switch on the scene clock"), Points.ContainsByPredicate([P](const FVector& Point)
       { return Point.Equals(P->GetAnchor(EDCAnchorPart::Head)->GetComponentLocation(), .01f); }));
   }
-  D->Phase = EDCPhase::Storyboard; D->bReferencePlaying = true; D->bReferencePaused = false;
+  D->Phase = EDCPhase::Reference; D->bReferencePlaying = true; D->bReferencePaused = false;
   D->ReferenceTime = D->ReferenceFilmTimeAtSceneTime(25.5f); D->UpdateSceneDialogue(0.f);
   if (TestNotNull(TEXT("Synchronized raid audio"), D->SceneDialogue.Get()))
    TestTrue(TEXT("Sound slows with the fatal strike"), D->SceneDialogue->PitchMultiplier > .25f && D->SceneDialogue->PitchMultiplier < .85f);
@@ -139,7 +139,7 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
       for (TActorIterator<ADCMultiCamDirector> It(C.World()); It; ++It)
       {
        ADCMultiCamDirector* D = *It;
-       D->Phase = EDCPhase::Storyboard;
+       D->Phase = EDCPhase::Reference;
        D->StartReferenceCut(); D->bReferencePaused = true;
        D->ReferenceTime = D->ReferenceFilmTimeAtSceneTime(Moment);
        D->ShowFilmFrame(D->ReferenceCut, D->ReferenceTime);

@@ -165,6 +165,7 @@ class ADCMultiCamDirector : public AActor
 	friend class FDCDualSceneReplayTest;
 	friend class FDCDialoguePlaybackTest;
 	friend class FDCAuthoredReferenceTest;
+	friend class FDCSharedUITest;
 	friend class FDCCinemaReplayTest;
 
 public:
@@ -297,8 +298,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
 	TArray<FDCCutsceneLine> OutroCutscene;
 
-	/** What Enter does on the evaluation screen, for its key hints. */
-	virtual FString GetEvaluationHint() const { return TEXT("R / ENTER  Back to the set"); }
 
 	/** Length of each half of a fade through black between phases. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes", meta = (ClampMin = "0.05", Units = "s"))
@@ -406,6 +405,10 @@ public:
 
 	// Player commands. Look/zoom return true when they were applied to a camera instead of the walking view.
 	void HandlePrimaryPressed();
+	void HandleCameraCancel();
+	void HandleCameraInteract();
+	int32 GetNearbyCameraSlot() const;
+	bool IsPlacementPending() const { return PendingPlacementSlot != INDEX_NONE; }
 	/** Right Mouse: removes the camera aimed at while walking, or steps back out of the camera being looked through. */
 	void HandleSecondaryPressed();
 	virtual void HandleStartTake();
@@ -478,7 +481,6 @@ public:
 	float GetPremiereLength() const { return Recording.Num() > 0 ? Recording.Last().FilmTime : 0.f; }
 	bool IsPremierePaused() const { return bPremierePaused; }
 
-	bool bShowNotebook = true;
 
 protected:
 	/** The optional DCSceneDialogue-tagged ambient sound follows the visible scene clock. */
@@ -486,7 +488,7 @@ protected:
 	TWeakObjectPtr<UAudioComponent> SceneDialogue;
 	float DialoguePosition = -1.f;
 	float DialogueRate = 1.f;
-	EDCPhase DialoguePhase = EDCPhase::Storyboard;
+	EDCPhase DialoguePhase = EDCPhase::Reference;
 
 	void GatherScene();
 	void BeginFilming();
@@ -577,7 +579,7 @@ protected:
 	void UpdateCoveredScenes();
 	bool bReferencePlaying = false;
 	bool bReferencePaused = false;
-	/** Set by a director that opens on the storyboard: the reference cut starts on its first tick. */
+	/** Set by a director that opens on the reference film: the reference cut starts on its first tick. */
 	bool bReferenceAutoStart = false;
 	float ReferenceTime = 0.f;
 	void FinishPremiere();
@@ -680,6 +682,7 @@ protected:
 
 	EDCPhase Phase = EDCPhase::Preparation;
 	int32 ViewingSlot = INDEX_NONE;
+	int32 PendingPlacementSlot = INDEX_NONE;
 	float PendingHeight = 170.f;
 	float SceneTime = 0.f;
 	float CountdownRemaining = 0.f;

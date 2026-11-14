@@ -53,7 +53,7 @@ bool FDCDialoguePlaybackTest::RunTest(const FString& Parameters)
   TestEqual(TEXT("Review dialogue follows scene time across omitted footage"), D->DialoguePosition, 8.25f);
   D->bPremierePaused=true; D->UpdateSceneDialogue(.1f);
   TestFalse(TEXT("Paused review stops audio"), Audio->IsPlaying());
-  D->Phase=EDCPhase::Storyboard; D->ReferenceCut=D->Recording;
+  D->Phase=EDCPhase::Reference; D->ReferenceCut=D->Recording;
   D->bReferencePlaying=true; D->bReferencePaused=false; D->ReferenceTime=1.5f;
   D->UpdateSceneDialogue(0.f);
   TestEqual(TEXT("Reference film uses mapped scene time"),D->DialoguePosition,8.5f);

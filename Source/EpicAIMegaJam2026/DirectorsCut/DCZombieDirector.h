@@ -1,7 +1,7 @@
 // Director's Cut - "Love in the Ruins": a romance shot in a zombie apocalypse.
 // Built on the multi-camera director, with unlimited static and dolly cameras.
 //
-//   Storyboard  the scenes are listed in order (from the DCBeat display names) - no times, no places
+//   Reference   watch the example film, then enter preparation directly.
 //   Preparation place as many static / dolly cameras as you like; the scene only moves when the
 //               player scrubs its timeline (mouse wheel or arrows), so cameras can be tested at any moment
 //   Shooting    cut between cameras; storyboard beats on the live camera score, zombies on it cost points
@@ -46,8 +46,6 @@ public:
 	virtual void HandleScrub(float DeltaSeconds) override;
 
 
-	virtual FString GetEvaluationHint() const override;
-
 	// HUD
 	/** The main menu's START: fades out of the menu into the intro. */
 	void StartFromMenu();
@@ -72,9 +70,6 @@ private:
 	UPROPERTY()
 	TArray<TObjectPtr<UTexture2D>> Faces;
 
-	void EnterPreparation();
 	/** The intro cutscene (if any), then the reference cut. */
 	void PlayIntro();
-	/** The director's briefing cutscene, then preparation. */
-	void BriefAndPrepare();
 };

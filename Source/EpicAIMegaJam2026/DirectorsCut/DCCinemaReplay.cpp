@@ -22,13 +22,13 @@ namespace
  // Draw at a fixed design size, uniformly fitted for ultrawide and small windows alike.
  struct FScreen
  {
-  AHUD* HUD; UCanvas* Canvas; UFont* Font; float Scale, OX, OY;
+  AHUD* HUD; UCanvas* Canvas; UFont* Font; float Scale, OX, OY, TextScale;
   // Text is drawn larger than the original design sizes, in the HUD's typeface.
   static constexpr float TextBoost=1.7f;
-  FScreen(AHUD* H,UCanvas* C):HUD(H),Canvas(C)
+  FScreen(ADCZombieHUD* H,UCanvas* C):HUD(H),Canvas(C)
   {
-   const ADCZombieHUD* DCHUD=Cast<ADCZombieHUD>(H);
-   Font=DCHUD?DCHUD->GetTextFont():nullptr;
+   Font=H->GetTextFont();
+   TextScale=H->TextScale;
    Scale=FMath::Min(C->ClipX/1920.f,C->ClipY/1080.f);
    OX=(C->ClipX-1920*Scale)*.5f; OY=(C->ClipY-1080*Scale)*.5f;
   }
@@ -53,7 +53,7 @@ namespace
   // Crisp text (glyphs rasterized at the size shown), shrunk to MaxWidth when needed.
   void Text(const FString& T,float X,float Y,float Size,FLinearColor C,float MaxWidth=1700,bool Center=true,bool Right=false) const
   {
-   DCUI::Text(Canvas,Font,T,OX+X*Scale,OY+Y*Scale,Size*32.f*TextBoost*Scale,C,
+   DCUI::Text(Canvas,Font,T,OX+X*Scale,OY+Y*Scale,Size*32.f*TextBoost*Scale*TextScale,C,
     Right?DCUI::EAlign::Right:Center?DCUI::EAlign::Center:DCUI::EAlign::Left,true,MaxWidth*Scale);
   }
   void Stripes(float X,float Y,float W,float H) const { DCUI::ClapperStripes(Canvas,OX+X*Scale,OY+Y*Scale,W*Scale,H*Scale); }
@@ -185,7 +185,7 @@ float ADCCinemaReplay::SceneToFilmTime(const ADCMultiCamDirector* Film,float Sec
  return FMath::Lerp(A.FilmTime,B.FilmTime,FMath::Clamp((Seconds-A.Time)/FMath::Max(B.Time-A.Time,SMALL_NUMBER),0.f,1.f));
 }
 
-void ADCCinemaReplay::DrawCinema(AHUD* HUD,UCanvas* Canvas,ADCZombieDirector* Film)
+void ADCCinemaReplay::DrawCinema(ADCZombieHUD* HUD,UCanvas* Canvas,ADCZombieDirector* Film)
 {
  FScreen P(HUD,Canvas);
  HUD->DrawRect(FLinearColor::Black,0,0,Canvas->ClipX,Canvas->ClipY);
@@ -201,22 +201,12 @@ void ADCCinemaReplay::DrawCinema(AHUD* HUD,UCanvas* Canvas,ADCZombieDirector* Fi
   P.Box(i*30,0,30,820,FLinearColor(Shade,.005f,.012f));
   P.Box(i*30,0,3,820,FLinearColor(.045f,.008f,.014f));
  }
- P.Box(190,67,1540,714,FLinearColor(.025f,.022f,.027f));
- P.Box(205,80,1510,686,Gold*.42f);
- P.Box(211,86,1498,674,FLinearColor::Black);
+ P.Box(190,67,1540,714,FLinearColor::Black);
  // The projected picture retains its 16:9 lens framing; it is never stretched.
  const float SX=382.2f,SY=96,SW=1155.6f,SH=650;
  if(FilmTexture && !Film->GetRecording().IsEmpty())
   HUD->DrawTexture(FilmTexture,P.OX+SX*P.Scale,P.OY+SY*P.Scale,SW*P.Scale,SH*P.Scale,0,0,1,1,FLinearColor::White,BLEND_Opaque);
  else P.Text(TEXT("NO FOOTAGE RECORDED"),960,380,1.1f,Ivory,950);
- for(int Side=0;Side<2;++Side)
- {
-  const float X=Side?1808:112;
-  for(int i=4;i>0;--i) P.Oval(X,390,11+i*12,18+i*13,FLinearColor(1,.55f,.18f,.018f));
-  P.Oval(X,390,9,17,FLinearColor(1,.83f,.48f));
-  P.Box(X-20,418,40,3,Gold);
- }
- P.Text(TEXT("D I R E C T O R ' S   C U T   /   P R E M I E R E"),960,28,.5f,Gold,1250);
  // Curtains physically part from the middle; the film clock waits until this ends.
  if(Open<1)
  {
@@ -226,14 +216,14 @@ void ADCCinemaReplay::DrawCinema(AHUD* HUD,UCanvas* Canvas,ADCZombieDirector* Fi
    const float CX=Side?SX+SW-CW:SX;
    P.Box(CX,SY,CW,SH,FLinearColor(.24f,.012f,.032f));
    for(float X=0;X<CW;X+=18) P.Box(CX+X,SY,FMath::Min(7.f,CW-X),SH,FLinearColor(.12f,.006f,.016f));
-   P.Box(Side?CX:CX+CW-3,SY,3,SH,Gold);
+   P.Box(Side?CX:CX+CW-3,SY,3,SH,FLinearColor::Black);
   }
   const float A=1-FMath::SmoothStep(.7f,2.5f,PresentationTime);
   P.Text(Film->MovieTitle,960,337,1.6f,FLinearColor(.96f,.91f,.8f,A),1000);
   P.Text(TEXT("A FILM BY YOU"),960,408,.55f,FLinearColor(.88f,.65f,.3f,A),800);
  }
  // Resolve reactions deterministically from film time, including scrubs and hard pause cuts.
- int Verdict=-1, Mood=-1; float VerdictAge=100, MoodAge=100; FString Caption;
+ int Verdict=-1, Mood=-1; float VerdictAge=100, MoodAge=100;
  for(const auto& State:Film->GetBeats())
  {
   if(!State.Beat) continue;
@@ -243,7 +233,7 @@ void ADCCinemaReplay::DrawCinema(AHUD* HUD,UCanvas* Canvas,ADCZombieDirector* Fi
   if(Age>=0 && Age<ReactionDuration && Age<VerdictAge)
   {
    Verdict=HasPositiveReaction(FName(*State.Beat->BeatId),Captured)?0:1;
-   VerdictAge=Age; Caption=State.Beat->DisplayName;
+   VerdictAge=Age;
   }
   const float Start=SceneToFilmTime(Film,State.Beat->GetCaptureStartTime());
   const float End=SceneToFilmTime(Film,State.Beat->WindowEnd);
@@ -280,9 +270,7 @@ void ADCCinemaReplay::DrawCinema(AHUD* HUD,UCanvas* Canvas,ADCZombieDirector* Fi
    }
   }
  }
- if(!Finished && Verdict>=0 && Open>=1)
-  P.Text((Verdict==0?TEXT("CAPTURED  /  "):TEXT("MISSED  /  "))+Caption,960,751,.48f,Verdict==0?Green:Red,1100);
- // House lights and evaluation rise in stages over the screen, keeping the cinema visible.
+ // Evaluation rises over the screen after playback.
  if(Finished)
  {
   // The evaluation arrives on a clapperboard: striped stick, then the slate with the grade, the match and the scenes.
@@ -331,18 +319,8 @@ void ADCCinemaReplay::DrawCinema(AHUD* HUD,UCanvas* Canvas,ADCZombieDirector* Fi
   for(int i=0;i<Beats.Num();++i)
   {
    const auto& B=Beats[i]; if(!B.Beat || Age<1.4f+i*.14f) continue;
-   const bool Got=B.Status==EDCShotStatus::Captured;
-   const bool Liked=HasPositiveReaction(FName(*B.Beat->BeatId),Got);
    const float RY=Y+468+i*RowH;
-   P.Text(FString::Printf(TEXT("SC %d   %s"),i+1,*B.Beat->DisplayName),MX,RY,FMath::Min(.44f,RowH/62),Got?Ivory:Red,MW*.68f,false);
-   P.Text(Got?(Liked?TEXT("IN THE CAN"):TEXT("MISSION MISSED")):TEXT("MISSED"),MX+MW,RY,FMath::Min(.42f,RowH/62),Liked?Green:Red,MW*.3f,false,true);
+   P.Text(FString::Printf(TEXT("SC %d   %s"),i+1,*B.Beat->DisplayName),MX,RY,FMath::Min(.44f,RowH/62),Ivory,MW,false);
   }
-  P.Text(TEXT("SPACE  Watch again        ")+Film->GetEvaluationHint(),CX,Y+H+16,.5f,Ivory,1300);
  }
- else if(Film->IsPremierePaused() && Open>=1) P.Text(TEXT("P A U S E D"),960,688,.55f,Ivory,900);
- const float Length=Film->GetPremiereLength();
- P.Box(570,1035,780,2,FLinearColor(.25f,.20f,.18f));
- P.Box(570,1035,780*(Length>0?Time/Length:0),2,Gold);
- P.Text(FString::Printf(TEXT("%02d:%02d  /  %02d:%02d"),int(Time)/60,int(Time)%60,int(Length)/60,int(Length)%60),960,1003,.44f,Gold,700);
- if(!Finished) P.Text(TEXT("SPACE  Pause     WHEEL  Scrub     ENTER  Skip to results"),960,1050,.40f,Ivory,1600);
 }

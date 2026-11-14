@@ -6,6 +6,7 @@
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Engine/LocalPlayer.h"
 #include "EngineUtils.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
@@ -13,6 +14,10 @@
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
 #include "Kismet/GameplayStatics.h"
+#if WITH_EDITOR
+#include "Framework/Commands/InputBindingManager.h"
+#include "Framework/Commands/UICommandInfo.h"
+#endif
 
 ADCMultiCamCharacter::ADCMultiCamCharacter()
 {
@@ -36,6 +41,20 @@ ADCMultiCamCharacter::ADCMultiCamCharacter()
 	GetCharacterMovement()->MaxStepHeight = 45.f;
 }
 
+void ADCMultiCamCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+#if WITH_EDITOR
+	if (bRestoreEditorEscape)
+	{
+		const auto Stop = FInputBindingManager::Get().FindCommandInContext(FName("PlayWorld"), FName("StopPlaySession"));
+		if (Stop.IsValid() && *Stop->GetActiveChord(EMultipleKeyBindingIndex::Primary) == FInputChord(EModifierKey::Shift, EKeys::Escape))
+			Stop->SetActiveChord(FInputChord(EKeys::Escape), EMultipleKeyBindingIndex::Primary);
+		bRestoreEditorEscape = false;
+	}
+#endif
+	Super::EndPlay(EndPlayReason);
+}
+
 UInputAction* ADCMultiCamCharacter::MakeAction(EInputActionValueType Type, bool bWhenPaused)
 {
 	UInputAction* Action = NewObject<UInputAction>(this);
@@ -55,6 +74,18 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 		return;
 	}
 
+#if WITH_EDITOR
+	// Let gameplay receive Escape in PIE. Restore the editor shortcut when this play session ends.
+	if (GetWorld()->WorldType == EWorldType::PIE)
+	{
+		const auto Stop = FInputBindingManager::Get().FindCommandInContext(FName("PlayWorld"), FName("StopPlaySession"));
+		if (Stop.IsValid() && *Stop->GetActiveChord(EMultipleKeyBindingIndex::Primary) == FInputChord(EKeys::Escape))
+		{
+			Stop->SetActiveChord(FInputChord(EModifierKey::Shift, EKeys::Escape), EMultipleKeyBindingIndex::Primary);
+			bRestoreEditorEscape = true;
+		}
+	}
+#endif
 	Mapping = NewObject<UInputMappingContext>(this);
 	Actions.Reset();
 
@@ -90,10 +121,11 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	UInputAction* Primary = MapButton(EKeys::LeftMouseButton);
 	Input->BindAction(Primary, ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnPrimary);
 	Input->BindAction(MapButton(EKeys::RightMouseButton), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnSecondary);
+	Input->BindAction(MapButton(EKeys::Escape), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCameraCancel);
+	Input->BindAction(MapButton(EKeys::F), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCameraInteract);
 	Input->BindAction(MapButton(EKeys::Enter), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnStartTake);
 	Input->BindAction(MapButton(EKeys::R), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRestart);
 	Input->BindAction(MapButton(EKeys::C), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnClearCameras);
-	Input->BindAction(MapButton(EKeys::Tab), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnToggleNotebook);
 	Input->BindAction(MapButton(EKeys::P, true), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTogglePause);
 
 	// Hold E (or Right) to scrub the timeline forward, Q (or Left) to scrub back.
@@ -236,6 +268,24 @@ void ADCMultiCamCharacter::OnPrimary()
 	}
 }
 
+void ADCMultiCamCharacter::OnCameraCancel()
+{
+	if (IsInputBlocked())
+	{
+		return;
+	}
+	if (ADCMultiCamDirector* D = GetDirector()) D->HandleCameraCancel();
+}
+
+void ADCMultiCamCharacter::OnCameraInteract()
+{
+	if (IsInputBlocked())
+	{
+		return;
+	}
+	if (ADCMultiCamDirector* D = GetDirector()) D->HandleCameraInteract();
+}
+
 void ADCMultiCamCharacter::OnSecondary()
 {
 	if (IsInputBlocked())
@@ -374,18 +424,6 @@ void ADCMultiCamCharacter::OnRehearsalSpeed(int32 Direction)
 		return;
 	}
 	if (ADCMultiCamDirector* D = GetDirector()) D->HandleRehearsalSpeed(Direction);
-}
-
-void ADCMultiCamCharacter::OnToggleNotebook()
-{
-	if (IsInputBlocked())
-	{
-		return;
-	}
-	if (ADCMultiCamDirector* D = GetDirector())
-	{
-		D->bShowNotebook = !D->bShowNotebook;
-	}
 }
 
 void ADCMultiCamCharacter::OnTogglePause()

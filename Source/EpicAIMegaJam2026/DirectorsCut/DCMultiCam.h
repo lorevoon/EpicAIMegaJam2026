@@ -43,6 +43,8 @@ public:
 	void SetupDolly(int32 InNumber, ADCRail* InRail);
 
 	EDCCamRig GetRig() const { return Rig; }
+	/** Ground-level position under the camera, where the player stands to use it. */
+	FVector GetInteractionPoint() const { return FVector(GetActorLocation().X, GetActorLocation().Y, MountSurface.Z); }
 	ADCRail* GetRail() const { return Rail; }
 	float GetRailProgress() const;
 
@@ -120,6 +122,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> Mount;
+
+	/** Authored camera and tripod, used by static rigs. */
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UStaticMeshComponent> Tripod;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UTextRenderComponent> Label;

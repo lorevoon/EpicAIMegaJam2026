@@ -1,5 +1,5 @@
 // Director's Cut - canvas HUD, styled like a film set: slates, viewfinder marks, timecode, film-leader countdown.
-// Storyboard (slate + reference cut), preparation, shooting (field monitor), review (film + evaluation).
+// Reference film, preparation missions, shooting (field monitor), review (film + evaluation).
 
 #pragma once
 
@@ -88,10 +88,8 @@ private:
 	 * on each new face) and his line typing out in a speech bubble, with Enter to continue once it's typed.
 	 */
 	void DrawCutscene(ADCZombieDirector* D);
-	void DrawStoryboardCard(ADCZombieDirector* D);
 	void DrawReferenceCut(ADCZombieDirector* D);
-	void DrawHeader(ADCZombieDirector* D);
-	void DrawStoryboardPanel(ADCZombieDirector* D);
+	void DrawMissionPanel(ADCZombieDirector* D);
 	/** A storyboard scene being ticked off: its name swells and is struck through, with a ring and sparkles from its box. */
 	void DrawTickOff(const FString& Name, float TextX, float MidY, const FVector2D& Box, float Age);
 	void DrawFraming(ADCZombieDirector* D);
@@ -101,7 +99,6 @@ private:
 	/** A pop-up message on a little clapperboard. */
 	void DrawSlatePopup(const FString& Message);
 	void DrawSwitcher(ADCZombieDirector* D);
-	void DrawHelp(ADCZombieDirector* D);
 	/** Preparation and shooting: the reference cut in the bottom-right corner, in step with the scene clock. */
 	void DrawReferenceInset(ADCZombieDirector* D);
 	void DrawResults(ADCZombieDirector* D);
@@ -114,12 +111,9 @@ private:
 	float Px(float Size) const { return Size * S * TextScale; }
 	/** A key in a little outlined box followed by what it does; returns the total width. */
 	float KeyHint(const FString& Key, const FString& Action, float X, float Y, float Size, const FLinearColor& Color, bool bDraw = true);
-	/** The help lines for the current phase (key, action pairs per line). */
-	void GetHelpLines(ADCZombieDirector* D, TArray<TArray<TPair<FString, FString>>>& OutLines) const;
 	bool ProjectVisible(const FVector& World, FVector2D& OutScreen) const;
 	/** The capture frame on the canvas (DCFrame::CaptureExtent for this screen). */
 	void GetCaptureRect(float& L, float& T, float& R, float& B) const;
-	float HelpTop(ADCZombieDirector* D) const;
 
 	/** Shooting: the director's portrait (bottom-left) and his chat bubble along the bottom of the screen. */
 	void DrawCoach(ADCZombieDirector* D);

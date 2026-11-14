@@ -13,14 +13,20 @@
 #include "UnrealClient.h"
 #include "Misc/Paths.h"
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDCCinemaReplayTest,"DirectorsCut.Replay.Cinema",
+IMPLEMENT_COMPLEX_AUTOMATION_TEST(FDCCinemaReplayTest,"DirectorsCut.Replay.Cinema",
  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+void FDCCinemaReplayTest::GetTests(TArray<FString>& Names,TArray<FString>& Commands) const
+{
+ Names.Add(TEXT("Act1")); Commands.Add(TEXT("L_DC_Act1_Promise"));
+ Names.Add(TEXT("Act2")); Commands.Add(TEXT("L_DC_Act2_BrokenPromise"));
+}
 
 bool FDCCinemaReplayTest::RunTest(const FString& Parameters)
 {
- AutomationOpenMap(TEXT("/Game/DirectorsCut/Levels/L_DC_Act1_Promise"));
+ AutomationOpenMap(TEXT("/Game/DirectorsCut/Levels/")+Parameters);
  const double Deadline=FPlatformTime::Seconds()+90;
- ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this,Deadline]()
+ ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this,Deadline,Parameters]()
  {
   UWorld* W=nullptr;
   for(const auto& C:GEngine->GetWorldContexts()) if(C.WorldType==EWorldType::PIE) { W=C.World(); break; }
@@ -33,12 +39,15 @@ bool FDCCinemaReplayTest::RunTest(const FString& Parameters)
   for(TActorIterator<ADCMultiCamDirector> It(W);It;++It) { D=*It; break; }
   if(!TestNotNull(TEXT("Director exists"),D)) return true;
   D->ResetScene();
+  D->BuildReferenceCut();
   for(int i=0;i<=200;++i)
   {
    FDCTakeSample A; A.Time=i*.1f; A.FilmTime=A.Time;
    A.Location=FVector(650,-1300,210);
    const float TargetY=FMath::Lerp(300.f,-600.f,FMath::Clamp((A.Time-7.f)/5.f,0.f,1.f));
    A.Rotation=(FVector(1150,TargetY,105)-A.Location).Rotation(); A.FilmFOV=DCFrame::CaptureFOV(90.f,16.f/9.f); A.Slot=0;
+   if(!D->ReferenceCut.IsEmpty())
+   { A.Location=D->ReferenceCut[0].Location; A.Rotation=D->ReferenceCut[0].Rotation; A.FilmFOV=D->ReferenceCut[0].FilmFOV; }
    D->Recording.Add(A);
   }
   TestEqual(TEXT("Scene to film maps exact recorded time"),ADCCinemaReplay::SceneToFilmTime(D,5.f),5.f);
@@ -72,9 +81,9 @@ bool FDCCinemaReplayTest::RunTest(const FString& Parameters)
   D->SceneTime=11.f; D->ShowPremiereFrame(11.f);
   if(!D->Beats.IsEmpty()) {D->Beats[0].CapturedFilmTime=10.5f; D->Beats[0].Status=EDCShotStatus::Captured;}
   ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(2.f));
-  ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([D]()
+  ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([D,Parameters]()
   {
-   FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/TEXT("CinemaAudit/Screening.png"),false,false);
+   FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/TEXT("CinemaAudit")/(Parameters+TEXT("_screening.png")),false,false);
    return true;
   }));
   ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(1.f));
@@ -86,9 +95,9 @@ bool FDCCinemaReplayTest::RunTest(const FString& Parameters)
    return true;
   }));
   ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(1.f));
-  ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([]()
+  ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([Parameters]()
   {
-   FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/TEXT("CinemaAudit/Results.png"),false,false); return true;
+   FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir()/TEXT("CinemaAudit")/(Parameters+TEXT("_results.png")),false,false); return true;
   }));
   ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(1.f));
   ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this,D,Cinema]()

@@ -66,8 +66,8 @@ struct FDCAnchorRef
 UENUM()
 enum class EDCPhase : uint8
 {
-	/** 1. Reading the storyboard. */
-	Storyboard,
+	/** 1. Watching the reference film. */
+	Reference,
 	/** 2. Placing cameras and scrubbing the scene's timeline to test them. */
 	Preparation,
 	/** 3. Shooting: the count-in, then the take itself. */

@@ -119,12 +119,3 @@ void ADCZombieDirector::GoToNextAct()
 	// Opened while the screen is black; the next act's director fades in from black.
 	UGameplayStatics::OpenLevel(this, FName(ActLevels[(ActIndex + 1) % NumActs]));
 }
-
-FString ADCZombieDirector::GetEvaluationHint() const
-{
-	if (ActIndex == INDEX_NONE)
-	{
-		return Super::GetEvaluationHint();
-	}
-	return ActIndex + 1 < NumActs ? TEXT("R  Retake        ENTER  Next act") : TEXT("R  Retake        ENTER  Finish the film");
-}
