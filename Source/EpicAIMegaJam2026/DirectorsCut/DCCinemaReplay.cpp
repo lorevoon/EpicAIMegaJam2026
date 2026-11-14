@@ -9,6 +9,7 @@
 #include "Engine/Engine.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "GameFramework/HUD.h"
+#include "Kismet/GameplayStatics.h"
 #include "CanvasItem.h"
 #include "Algo/BinarySearch.h"
 
@@ -101,6 +102,11 @@ ADCCinemaReplay::ADCCinemaReplay()
 void ADCCinemaReplay::BeginScreening(ADCMultiCamDirector* InDirector)
 {
 	if (Director) RemoveTickPrerequisiteActor(Director);
+	if (!bActive)
+	{
+		bPreviousWorldRenderingEnabled = UGameplayStatics::GetEnableWorldRendering(this);
+		bOwnsWorldRenderingOverride = true;
+	}
  Director=InDirector; PresentationTime=0; ResultAge=-1; bActive=true;
 	AddTickPrerequisiteActor(InDirector);
  if(!FilmTexture)
@@ -111,12 +117,25 @@ void ADCCinemaReplay::BeginScreening(ADCMultiCamDirector* InDirector)
   FilmTexture->UpdateResourceImmediate(true);
  }
  Projector->TextureTarget=FilmTexture;
+	// DrawCinema covers the viewport with an opaque presentation. Rendering the same world beneath it
+	// duplicated the projector's most expensive lighting and post-processing work every frame.
+	UGameplayStatics::SetEnableWorldRendering(this, false);
 }
 void ADCCinemaReplay::EndScreening()
 {
 	if (Director) RemoveTickPrerequisiteActor(Director);
  bActive=false; Director=nullptr; Projector->TextureTarget=nullptr; ResultAge=-1;
 	FramesToSettle=0;
+	if (bOwnsWorldRenderingOverride)
+	{
+		UGameplayStatics::SetEnableWorldRendering(this, bPreviousWorldRenderingEnabled);
+		bOwnsWorldRenderingOverride = false;
+	}
+}
+void ADCCinemaReplay::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	EndScreening();
+	Super::EndPlay(EndPlayReason);
 }
 void ADCCinemaReplay::Tick(float DeltaSeconds)
 {
@@ -139,7 +158,9 @@ void ADCCinemaReplay::ProjectFrame(ACameraActor* Camera)
  Projector->FOVAngle=Camera->GetCameraComponent()->FieldOfView;
  Projector->PostProcessSettings=Camera->GetCameraComponent()->PostProcessSettings;
  Projector->PostProcessBlendWeight=Camera->GetCameraComponent()->PostProcessBlendWeight;
- FramesToSettle=48; // Let temporal AA / lighting converge even when the transport is paused.
+ // Active playback requests a frame every tick. Two trailing captures are enough to refresh temporal
+ // history after a pause, scrub, or cut without rendering a static result for almost another second.
+ FramesToSettle=2;
 }
 void ADCCinemaReplay::SetMissionOutcome(FName BeatId,bool bSucceeded) { MissionOutcomes.Add(BeatId,bSucceeded); }
 bool ADCCinemaReplay::HasPositiveReaction(FName BeatId,bool bStoryboardCaptured) const

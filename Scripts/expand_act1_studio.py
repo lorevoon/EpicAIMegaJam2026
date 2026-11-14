@@ -73,7 +73,7 @@ for a in list(aes.get_all_level_actors()):
 for x in [-1600,0,1600]:
  for y in [-1300,900]:
   a=spawn(u.RectLight,'Ceiling soft light',(x,y,2500));a.set_actor_rotation(u.Rotator(pitch=-90),False)
-  c=a.get_component_by_class(u.RectLightComponent);c.set_mobility(u.ComponentMobility.MOVABLE);c.set_intensity(18000);props(c,attenuation_radius=6000.,source_width=1000.,source_height=800.)
+  c=a.get_component_by_class(u.RectLightComponent);c.set_mobility(u.ComponentMobility.MOVABLE);c.set_intensity(18000);props(c,attenuation_radius=6000.,source_width=1000.,source_height=800.,cast_shadows=False,affect_translucent_lighting=False)
 for a in aes.get_all_level_actors():
  if isinstance(a,u.PostProcessVolume):
   settings=a.get_editor_property('settings');props(settings,override_auto_exposure_min_brightness=True,override_auto_exposure_max_brightness=True,auto_exposure_min_brightness=5.,auto_exposure_max_brightness=5.);a.set_editor_property('settings',settings)

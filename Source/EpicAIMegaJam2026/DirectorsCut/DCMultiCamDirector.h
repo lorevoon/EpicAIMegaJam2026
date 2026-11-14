@@ -356,8 +356,8 @@ protected:
 	void TickReferenceCut(float DeltaSeconds);
 	void ScrubReferenceCut(float DeltaSeconds);
 	void ToggleReferenceCut();
-	/** Renders the reference cut's camera into the preparation inset at the current rehearsal time. */
-	void UpdateReferenceInset();
+	/** Renders the reference cut's camera into the preparation inset at 15 Hz while its scene time changes. */
+	void UpdateReferenceInset(float DeltaSeconds);
 	TArray<FDCTakeSample> ReferenceCut;
 	bool bReferenceCutBuilt = false;
 
@@ -366,6 +366,8 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UTextureRenderTarget2D> ReferenceInsetTarget;
+	float ReferenceInsetCaptureElapsed = 1.f;
+	float LastReferenceInsetSceneTime = -TNumericLimits<float>::Max();
 	/** Beat index (into Beats) for each reference shot (FDCTakeSample::Slot). */
 	TArray<int32> ReferenceShotBeats;
 	bool bReferencePlaying = false;

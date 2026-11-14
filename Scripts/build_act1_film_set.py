@@ -143,6 +143,7 @@ for x,y,yaw in [(-1250,-650,30),(1250,-650,150),(0,900,-90)]:
     a.set_actor_rotation(u.Rotator(pitch=-35,yaw=yaw),False)
     c=a.get_component_by_class(u.RectLightComponent);c.set_mobility(u.ComponentMobility.MOVABLE);c.set_intensity(25000);c.set_editor_property('attenuation_radius',3000.)
     c.set_editor_property('source_width',160.);c.set_editor_property('source_height',100.)
+    c.set_cast_shadows(False);c.set_editor_property('affect_translucent_lighting',False)
 fill=spawn(u.DirectionalLight,'Studio broad fill',(0,0,1400));fill.set_actor_rotation(u.Rotator(pitch=-60,yaw=-25),False)
 fill.get_component_by_class(u.DirectionalLightComponent).set_intensity(3.)
 for x in [-70,70]:block('Dolly rail',(x,-650,6),(6,700,12),metal)

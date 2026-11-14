@@ -15,6 +15,7 @@ for a in actors:
             a.set_actor_rotation(u.Rotator(pitch=-15,yaw=180),False)
             c=a.get_component_by_class(u.RectLightComponent)
             c.set_editor_property('source_width',70.);c.set_editor_property('source_height',80.)
+            c.set_cast_shadows(False);c.set_editor_property('affect_translucent_lighting',False)
             a.set_actor_label('Production fill - practical illumination')
 black=u.load_asset('/Game/DirectorsCut/Materials/M_Studio_Charcoal')
 for label,p,size in [('Equipment power cable - perimeter',(-5200,-10405,1081),(1570,2,2)),('Equipment power cable - key light',(-5650,-10250,1081),(2,305,2))]:

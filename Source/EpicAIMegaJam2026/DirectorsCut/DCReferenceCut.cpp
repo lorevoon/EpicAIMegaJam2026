@@ -403,21 +403,33 @@ UTextureRenderTarget2D* ADCMultiCamDirector::GetReferenceInset() const
 	return bPhase && bShowReferenceInset && ReferenceCut.Num() > 0 ? ReferenceInsetTarget.Get() : nullptr;
 }
 
-void ADCMultiCamDirector::UpdateReferenceInset()
+void ADCMultiCamDirector::UpdateReferenceInset(float DeltaSeconds)
 {
+	constexpr float CaptureInterval = 1.f / 15.f;
 	if (!bShowReferenceInset || !ReferenceCapture)
 	{
+		ReferenceInsetCaptureElapsed = CaptureInterval;
+		LastReferenceInsetSceneTime = -TNumericLimits<float>::Max();
 		return;
 	}
+	ReferenceInsetCaptureElapsed += FMath::Max(0.f, DeltaSeconds);
+	bool bBuiltNow = false;
 	if (!bReferenceCutBuilt)
 	{
 		BuildReferenceCut(); // e.g. the storyboard's reference cut was switched off or skipped
+		bBuiltNow = true;
 	}
 	// The reference cut has no recording pauses, so its film time is the rehearsal's scene time.
 	FVector Location;
 	FQuat Rotation;
 	float FOV = 0.f, ScenePoint = 0.f;
 	if (!GetFilmView(ReferenceCut, SceneTime, Location, Rotation, FOV, ScenePoint))
+	{
+		return;
+	}
+	const bool bFirstCapture = !ReferenceInsetTarget;
+	const bool bSceneChanged = !FMath::IsNearlyEqual(SceneTime, LastReferenceInsetSceneTime, .001f);
+	if (!bFirstCapture && !bBuiltNow && (!bSceneChanged || ReferenceInsetCaptureElapsed < CaptureInterval))
 	{
 		return;
 	}
@@ -448,6 +460,8 @@ void ADCMultiCamDirector::UpdateReferenceInset()
 	ReferenceCapture->SetWorldLocationAndRotation(Location, Rotation);
 	ReferenceCapture->FOVAngle = FOV;
 	ReferenceCapture->CaptureScene();
+	ReferenceInsetCaptureElapsed = 0.f;
+	LastReferenceInsetSceneTime = SceneTime;
 }
 
 void ADCMultiCamDirector::ComputeMatch()

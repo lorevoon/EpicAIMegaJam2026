@@ -9,6 +9,7 @@
 #include "Engine/World.h"
 #include "Engine/Level.h"
 #include "EngineUtils.h"
+#include "Kismet/GameplayStatics.h"
 #include "UnrealClient.h"
 #include "Misc/Paths.h"
 
@@ -52,11 +53,13 @@ bool FDCCinemaReplayTest::RunTest(const FString& Parameters)
    B.CapturedFilmTime=ADCCinemaReplay::SceneToFilmTime(D,B.Beat->GetCaptureStartTime());
   }
   D->SetReplayMissionOutcome(TEXT("future-test"),false);
+  TestTrue(TEXT("World rendering starts enabled"),UGameplayStatics::GetEnableWorldRendering(W));
   D->StartPremiere();
   ADCCinemaReplay* Cinema=D->GetCinema();
   if(!TestNotNull(TEXT("Cinema loaded"),Cinema)) return true;
   TestTrue(TEXT("Cinema lives in a separate streamed scene"),Cinema->GetLevel()!=W->PersistentLevel);
   TestTrue(TEXT("Opening holds the recorded film"),Cinema->IsOpening());
+  TestFalse(TEXT("Opaque cinema skips the hidden viewport world"),UGameplayStatics::GetEnableWorldRendering(W));
   D->TickPremiere(1.f); TestEqual(TEXT("First movie second not consumed by title"),D->SceneTime,0.f);
   TestTrue(TEXT("Captured storyboard applauded"),Cinema->HasPositiveReaction(TEXT("unknown"),true));
   TestFalse(TEXT("Missing storyboard disapproved"),Cinema->HasPositiveReaction(TEXT("unknown"),false));
@@ -97,6 +100,7 @@ bool FDCCinemaReplayTest::RunTest(const FString& Parameters)
    Cinema->SetMissionOutcome(TEXT("future-test"),false);
    D->ResetScene();
    TestFalse(TEXT("Retry stops projector"),Cinema->IsActive());
+   TestTrue(TEXT("Retry restores viewport world rendering"),UGameplayStatics::GetEnableWorldRendering(D));
    TestTrue(TEXT("Retry clears mission verdicts"),Cinema->HasPositiveReaction(TEXT("future-test"),true));
    D->StartPremiere(); TestTrue(TEXT("Empty recording goes to results"),D->IsFilmFinished());
    D->ResetScene(); return true;

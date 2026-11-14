@@ -23,6 +23,7 @@ class ADCCinemaReplay : public AActor
 public:
 	ADCCinemaReplay();
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	void BeginScreening(ADCMultiCamDirector* InDirector);
 	void EndScreening();
 	void ProjectFrame(ACameraActor* Camera);
@@ -50,5 +51,7 @@ private:
 	float PresentationTime = 0.f;
 	float ResultAge = -1.f;
 	bool bActive = false;
+	bool bPreviousWorldRenderingEnabled = true;
+	bool bOwnsWorldRenderingOverride = false;
 	int32 FramesToSettle = 0;
 };

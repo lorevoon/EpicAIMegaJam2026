@@ -60,6 +60,13 @@ ADCMultiCamDirector::ADCMultiCamDirector()
 	ReferenceCapture->bCaptureOnMovement = false;
 	ReferenceCapture->bAlwaysPersistRenderingState = true; // keeps exposure history between captures
 	ReferenceCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+	// This is a small composition guide, not the final film. Avoid paying for a second full-quality
+	// Lumen/VSM render in every preparation frame.
+	ReferenceCapture->ShowFlags.SetLumenGlobalIllumination(false);
+	ReferenceCapture->ShowFlags.SetLumenReflections(false);
+	ReferenceCapture->ShowFlags.SetDynamicShadows(false);
+	ReferenceCapture->ShowFlags.SetAmbientOcclusion(false);
+	ReferenceCapture->ShowFlags.SetScreenSpaceAO(false);
 }
 
 void ADCMultiCamDirector::BeginPlay()
@@ -176,7 +183,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 			}
 		}
 		UpdatePrepPreview();
-		UpdateReferenceInset();
+		UpdateReferenceInset(DeltaSeconds);
 		break;
 
 	case EDCPhase::Countdown:
@@ -185,7 +192,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 			return;
 		}
 		CountdownRemaining -= DeltaSeconds;
-		UpdateReferenceInset();
+		UpdateReferenceInset(DeltaSeconds);
 		if (CountdownRemaining <= 0.f)
 		{
 			BeginFilming();
@@ -204,7 +211,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		{
 			Performer->Evaluate(SceneTime);
 		}
-		UpdateReferenceInset(); // before EvaluateBeats, which can end the take
+		UpdateReferenceInset(DeltaSeconds); // before EvaluateBeats, which can end the take
 		EvaluateBeats(Prev, SceneTime);
 		break;
 	}
