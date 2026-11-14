@@ -85,10 +85,8 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 	}
 	const FVector Middle = Centroids[NumTimes / 2];
 	FHitResult Ground;
-	const float FloorZ = GetWorld()->LineTraceSingleByChannel(Ground, Middle + FVector(0.f, 0.f, 200.f), Middle - FVector(0.f, 0.f, 2000.f), ECC_Visibility, Params)
-		? Ground.ImpactPoint.Z : Middle.Z - 100.f;
 
-	// Candidate spots: rings around the action at two lens heights, plus the beat's authored camera spot (preferred).
+	// Candidate spots: rings around the action, plus the beat's authored camera spot (preferred).
 	struct FCandidate { FVector Location; float FOV = ADCMultiCam::DefaultFOV; bool bAuthored = false; float Run = 0.f; float RunStart = 0.f; float Scenery = 0.f; };
 	TArray<FCandidate> Candidates;
 	if (Beat->bShowCameraSpot)
@@ -98,15 +96,22 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 			? Ground.ImpactPoint.Z : Spot.Z;
 		Candidates.Add({ FVector(Spot.X, Spot.Y, SpotFloor + 170.f), ADCMultiCam::DefaultFOV, true });
 	}
-	// Out to 20 m, at heights the player's rigs reach: eye-level and raised stands, and the crane.
+	// Out to 20 m, at heights the player's rigs reach above the ground right under each spot (a stand at eye level,
+	// a raised stand, a crane) - measured from that ground, so every reference camera can be copied by a placed one.
+	const float RaisedStand = FMath::Min(300.f, MaxStandHeight);
 	for (const float Radius : { 500.f, 800.f, 1100.f, 1500.f, 2000.f })
 	{
 		for (int32 a = 0; a < 16; ++a)
 		{
 			const float Angle = a * 2.f * PI / 16.f;
-			for (const float Height : { 170.f, 300.f, ADCMultiCam::CraneHeight })
+			const FVector Above(Middle.X + Radius * FMath::Cos(Angle), Middle.Y + Radius * FMath::Sin(Angle), Middle.Z + 1500.f);
+			if (!GetWorld()->LineTraceSingleByChannel(Ground, Above, Above - FVector(0.f, 0.f, 5000.f), ECC_Visibility, Params))
 			{
-				Candidates.Add({ FVector(Middle.X + Radius * FMath::Cos(Angle), Middle.Y + Radius * FMath::Sin(Angle), FloorZ + Height) });
+				continue; // no ground to stand a camera on
+			}
+			for (const float Height : { ADCMultiCam::StaticHeight, RaisedStand, ADCMultiCam::CraneHeight })
+			{
+				Candidates.Add({ Ground.ImpactPoint + FVector(0.f, 0.f, Height) });
 			}
 		}
 	}
@@ -223,6 +228,7 @@ void ADCMultiCamDirector::BuildReferenceCut()
 	bReferenceCutBuilt = true;
 	ReferenceCut.Reset();
 	ReferenceShotBeats.Reset();
+	ReferenceShotLocations.Reset();
 	if (Beats.Num() == 0 || !Ghost || !PlaybackCamera)
 	{
 		return;
@@ -289,6 +295,7 @@ void ADCMultiCamDirector::BuildReferenceCut()
 	for (const FShot& Shot : Shots)
 	{
 		ReferenceShotBeats.Add(Shot.Beat);
+		ReferenceShotLocations.Add(Shot.Location);
 	}
 	EvaluatePerformers(SceneTime);
 }
@@ -511,4 +518,35 @@ void ADCMultiCamDirector::ComputeMatch()
 	const float Weights = MatchPositionWeight + MatchAngleWeight + MatchZoomWeight;
 	Match.Overall = Weights > 0.f
 		? (Match.Position * MatchPositionWeight + Match.Angle * MatchAngleWeight + Match.Zoom * MatchZoomWeight) / Weights : 0.f;
+}
+
+void ADCMultiCamDirector::UpdateCoveredScenes()
+{
+	if (!bReferenceCutBuilt)
+	{
+		BuildReferenceCut();
+	}
+	TArray<bool> Now;
+	Now.SetNumZeroed(Beats.Num());
+	for (int32 Shot = 0; Shot < ReferenceShotBeats.Num(); ++Shot)
+	{
+		for (const ADCMultiCam* Cam : Cameras)
+		{
+			const FVector Offset = Cam ? Cam->GetActorLocation() - ReferenceShotLocations[Shot] : FVector::ZeroVector;
+			if (Cam && Offset.Size2D() <= ReferenceSpotRadius && FMath::Abs(Offset.Z) <= ReferenceSpotHeightTolerance)
+			{
+				Now[ReferenceShotBeats[Shot]] = true;
+				break;
+			}
+		}
+	}
+	// Announce each scene as it gets ticked off.
+	for (int32 i = 0; i < Now.Num(); ++i)
+	{
+		if (Now[i] && !(SceneCovered.IsValidIndex(i) && SceneCovered[i]))
+		{
+			Flash(FString::Printf(TEXT("SC %d  -  %s: camera on its spot"), i + 1, *Beats[i].Beat->DisplayName), 2.f);
+		}
+	}
+	SceneCovered = MoveTemp(Now);
 }

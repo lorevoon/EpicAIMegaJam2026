@@ -90,6 +90,8 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+	/** Leaves hardware ray tracing on (it may have been switched off for the real environment). */
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UPROPERTY(EditAnywhere, Category = "Directors Cut", meta = (ClampMin = "1", Units = "s"))
 	float TakeDuration = 60.f;
@@ -137,6 +139,16 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut", meta = (ClampMin = "100", Units = "cm"))
 	float ReferencePreferredDistance = 1200.f;
 
+	/**
+	 * A storyboard scene is ticked off once a placed camera stands within this distance (across the ground) of its
+	 * reference-cut camera, and within ReferenceSpotHeightTolerance of its height (so a crane shot needs a crane).
+	 */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut", meta = (ClampMin = "10", Units = "cm"))
+	float ReferenceSpotRadius = 600.f;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut", meta = (ClampMin = "10", Units = "cm"))
+	float ReferenceSpotHeightTolerance = 250.f;
+
 	bool IsReferencePlaying() const { return bReferencePlaying; }
 	bool IsReferencePaused() const { return bReferencePaused; }
 	float GetReferenceTime() const { return ReferenceTime; }
@@ -145,6 +157,8 @@ public:
 	const ADCBeat* GetReferenceBeat() const;
 	/** The beat the reference cut shows at scene time Time (null between beats). */
 	const ADCBeat* GetReferenceBeatAt(float Time) const;
+	/** Whether a placed camera stands near the reference cut's camera for this scene (index into GetBeats). */
+	bool IsSceneCovered(int32 BeatIndex) const { return SceneCovered.IsValidIndex(BeatIndex) && SceneCovered[BeatIndex]; }
 
 	/** During preparation and shooting the reference cut also plays in a corner inset, in step with the scene clock. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut")
@@ -329,6 +343,11 @@ protected:
 	/** Shows each pending beat's camera-spot circle around its window: full in preparation, faint while shooting, never in review. */
 	void UpdateCameraSpots();
 	/** Swap dressing before showing a replay frame; keep both layers resident for instant retries. */
+	/**
+	 * Swaps the studio set for the real environment (reference cut, review) and back. The real environment is far
+	 * heavier, so while it shows, Lumen uses software tracing and hardware ray tracing is off; the studio set
+	 * (preparation, shooting) keeps the full hardware look.
+	 */
 	void SetReviewEnvironment(bool bReview);
 	TMap<TWeakObjectPtr<AActor>, bool> SetOnlyHiddenStates;
 
@@ -368,8 +387,13 @@ protected:
 	TObjectPtr<UTextureRenderTarget2D> ReferenceInsetTarget;
 	float ReferenceInsetCaptureElapsed = 1.f;
 	float LastReferenceInsetSceneTime = -TNumericLimits<float>::Max();
-	/** Beat index (into Beats) for each reference shot (FDCTakeSample::Slot). */
+	/** Beat index (into Beats) and camera position for each reference shot (FDCTakeSample::Slot). */
 	TArray<int32> ReferenceShotBeats;
+	TArray<FVector> ReferenceShotLocations;
+	/** Per beat: a placed camera is near its reference camera. Updated in preparation. */
+	TArray<bool> SceneCovered;
+	/** Ticks scenes off (and announces it) as cameras are placed near their reference spots. */
+	void UpdateCoveredScenes();
 	bool bReferencePlaying = false;
 	bool bReferencePaused = false;
 	/** Set by a director that opens on the storyboard: the reference cut starts on its first tick. */

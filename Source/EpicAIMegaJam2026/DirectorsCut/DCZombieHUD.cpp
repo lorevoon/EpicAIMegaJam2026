@@ -467,11 +467,17 @@ void ADCZombieHUD::DrawStoryboardPanel(ADCZombieDirector* D)
 	for (int32 i = 0; i < Beats.Num(); ++i)
 	{
 		const FDCMultiCamBeat& State = Beats[i];
+		// Ticked off (struck through, like a to-do list) once a camera stands on the scene's reference spot.
+		const bool bCovered = D->IsSceneCovered(i);
 		const float Box = Px(Small) * 0.6f;
 		const float BY = Y + (RowH - Box) * 0.5f;
 		if (State.Status == EDCShotStatus::Captured)
 		{
 			DCUI::Rect(Canvas, X + 16.f * S, BY, Box, Box, DCUI::Good);
+		}
+		else if (bCovered && State.Status == EDCShotStatus::Pending)
+		{
+			DCUI::Rect(Canvas, X + 16.f * S, BY, Box, Box, DCUI::Gold);
 		}
 		else if (State.Status == EDCShotStatus::Missed)
 		{
@@ -481,9 +487,15 @@ void ADCZombieHUD::DrawStoryboardPanel(ADCZombieDirector* D)
 		{
 			DCUI::Outline(Canvas, X + 16.f * S, BY, Box, Box, FMath::Max(1.5f * S, 1.f), DCUI::Muted);
 		}
-		const FLinearColor Color = State.Status == EDCShotStatus::Captured ? DCUI::Good : State.Status == EDCShotStatus::Missed ? DCUI::Muted : DCUI::Ivory;
-		Label(FString::Printf(TEXT("%d. %s"), i + 1, *State.Beat->DisplayName), X + 16.f * S + Box + 12.f * S, Y + (RowH - Px(Small) * 1.2f) * 0.5f,
-			Color, Small, EAlign::Left, true, W - Box - 44.f * S);
+		const FLinearColor Color = State.Status == EDCShotStatus::Captured ? DCUI::Good : State.Status == EDCShotStatus::Missed ? DCUI::Muted
+			: bCovered ? DCUI::Muted : DCUI::Ivory;
+		const float TextX = X + 16.f * S + Box + 12.f * S;
+		const float TextY = Y + (RowH - Px(Small) * 1.2f) * 0.5f;
+		const FVector2D Size = Label(FString::Printf(TEXT("%d. %s"), i + 1, *State.Beat->DisplayName), TextX, TextY, Color, Small, EAlign::Left, true, W - Box - 44.f * S);
+		if (bCovered)
+		{
+			DCUI::Rect(Canvas, TextX - 4.f * S, TextY + Size.Y * 0.52f, Size.X + 8.f * S, FMath::Max(2.f * S, 1.5f), DCUI::Gold);
+		}
 		Y += RowH;
 	}
 }

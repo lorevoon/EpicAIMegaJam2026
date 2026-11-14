@@ -15,6 +15,7 @@
 #include "Engine/World.h"
 #include "Engine/LevelStreaming.h"
 #include "Engine/LevelStreamingDynamic.h"
+#include "HAL/IConsoleManager.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -184,6 +185,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		}
 		UpdatePrepPreview();
 		UpdateReferenceInset(DeltaSeconds);
+		UpdateCoveredScenes();
 		break;
 
 	case EDCPhase::Countdown:
@@ -594,12 +596,36 @@ void ADCMultiCamDirector::SetRigsHidden(bool bHide)
 	}
 }
 
+namespace
+{
+	/** Hardware ray tracing (and Lumen's use of it) on or off at runtime; only touches settings that change. */
+	void SetHardwareRayTracing(bool bOn)
+	{
+		const int32 Want = bOn ? 1 : 0;
+		for (const TCHAR* Name : { TEXT("r.RayTracing.Enable"), TEXT("r.Lumen.HardwareRayTracing") })
+		{
+			IConsoleVariable* Var = IConsoleManager::Get().FindConsoleVariable(Name);
+			if (Var && Var->GetInt() != Want)
+			{
+				Var->Set(Want, ECVF_SetByCode);
+			}
+		}
+	}
+}
+
+void ADCMultiCamDirector::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	SetHardwareRayTracing(true);
+	Super::EndPlay(EndPlayReason);
+}
+
 void ADCMultiCamDirector::SetReviewEnvironment(bool bReview)
 {
 	if (StudioEnvironmentLevel.IsNone() || RealEnvironmentLevel.IsNone())
 	{
 		return; // Other acts retain their existing presentation.
 	}
+	SetHardwareRayTracing(!bReview);
 	ULevelStreaming* Studio = UGameplayStatics::GetStreamingLevel(this, StudioEnvironmentLevel);
 	ULevelStreaming* Real = UGameplayStatics::GetStreamingLevel(this, RealEnvironmentLevel);
 	if (!Studio || !Real)
