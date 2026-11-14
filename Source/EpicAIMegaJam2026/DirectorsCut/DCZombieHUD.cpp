@@ -74,6 +74,8 @@ ADCZombieHUD::ADCZombieHUD()
 	DirectorThatsIt = DirThatsIt.Object;
 	static ConstructorHelpers::FObjectFinder<UTexture2D> Menu(TEXT("/Game/DirectorsCut/UI/MainMenu.MainMenu"));
 	MainMenuImage = Menu.Object;
+	static ConstructorHelpers::FObjectFinder<UTexture2D> TitleTypography(TEXT("/Game/DirectorsCut/UI/TitleTypography.TitleTypography"));
+	TitleImage = TitleTypography.Object;
 }
 
 ADCZombieDirector* ADCZombieHUD::FindDirector()
@@ -395,25 +397,18 @@ void ADCZombieHUD::DrawMainMenu(ADCZombieDirector* D)
 		DrawTexture(MainMenuImage, (W - IW * Cover) * 0.5f, (H - IH * Cover) * 0.5f, IW * Cover, IH * Cover, 0.f, 0.f, 1.f, 1.f);
 	}
 	const FDCMainMenuLayout& Layout = D->MainMenu;
-	if (Layout.VignetteStrength > 0.f)
+
+	// The title typography, bottom-left, its proportions kept.
+	if (TitleImage && TitleImage->GetSurfaceWidth() > 0.f)
 	{
-		DCUI::Vignette(Canvas, 0.f, 0.f, W, H, H * 0.45f, FLinearColor(0.f, 0.f, 0.f, Layout.VignetteStrength));
+		const float TW = W * Layout.TitleWidth;
+		const float TH = TW * TitleImage->GetSurfaceHeight() / TitleImage->GetSurfaceWidth();
+		DrawTexture(TitleImage, W * Layout.TitleCorner.X, H * Layout.TitleCorner.Y - TH, TW, TH, 0.f, 0.f, 1.f, 1.f);
 	}
 
-	// The title, centred on its position, with a gold rule under it.
-	if (!Layout.Title.IsEmpty())
-	{
-		const float TitleY = H * Layout.TitlePosition.Y - Px(Layout.TitleSize) * 0.6f;
-		const FVector2D Drawn = Label(Layout.Title, W * Layout.TitlePosition.X, TitleY, Layout.TitleColor, Layout.TitleSize, EAlign::Center, true);
-		if (Layout.bTitleUnderline)
-		{
-			const float RuleW = FMath::Min(Drawn.X * 0.6f, W * 0.6f);
-			DCUI::Rect(Canvas, W * Layout.TitlePosition.X - RuleW * 0.5f, TitleY + Drawn.Y * 1.05f, RuleW, FMath::Max(4.f * S, 2.f), DCUI::Gold);
-		}
-	}
-
-	// "Press [ENTER] to Start", the key in a key cap, breathing gently.
-	const float TextPx = Px(Layout.StartTextSize);
+	// "Press [ENTER] to Start", bottom-right and right-aligned: the key in a dark key cap, the words shadowed so they
+	// read over the artwork, a thin gold rule underneath; it all breathes gently.
+	const float TextPx = Px(Layout.PromptTextSize);
 	const float KeyPx = TextPx * 0.8f;
 	const FString Before = TEXT("Press"), Key = TEXT("ENTER"), After = TEXT("to Start");
 	const float Gap = TextPx * 0.35f, KeyPad = TextPx * 0.4f;
@@ -421,16 +416,18 @@ void ADCZombieHUD::DrawMainMenu(ADCZombieDirector* D)
 	const float AfterW = DCUI::Measure(Canvas, GetTextFont(), After, TextPx).X;
 	const float KeyW = DCUI::Measure(Canvas, GetTextFont(), Key, KeyPx).X + 2.f * KeyPad;
 	const float KeyH = TextPx * 1.35f;
-	const float CenterX = W * Layout.StartPosition.X, CenterY = H * Layout.StartPosition.Y;
-	const float Breath = 0.75f + 0.25f * FMath::Sin(Now * 2.5f);
-	float X = CenterX - (BeforeW + Gap + KeyW + Gap + AfterW) * 0.5f;
-	DCUI::Text(Canvas, GetTextFont(), Before, X, CenterY - TextPx * 0.6f, TextPx, WithAlpha(DCUI::Ivory, Breath));
+	const float TotalW = BeforeW + Gap + KeyW + Gap + AfterW;
+	const float Right = W * Layout.PromptCorner.X, MidY = H * Layout.PromptCorner.Y;
+	const float Breath = 0.7f + 0.3f * FMath::Sin(Now * 2.5f);
+	float X = Right - TotalW;
+	DCUI::Text(Canvas, GetTextFont(), Before, X, MidY - TextPx * 0.6f, TextPx, WithAlpha(DCUI::Ivory, Breath));
 	X += BeforeW + Gap;
-	DCUI::Rect(Canvas, X, CenterY - KeyH * 0.5f, KeyW, KeyH, FLinearColor(0.02f, 0.02f, 0.03f, 0.85f));
-	DCUI::Outline(Canvas, X, CenterY - KeyH * 0.5f, KeyW, KeyH, FMath::Max(3.f * S, 2.f), WithAlpha(DCUI::Gold, Breath));
-	DCUI::Text(Canvas, GetTextFont(), Key, X + KeyPad, CenterY - KeyPx * 0.6f, KeyPx, DCUI::Gold, EAlign::Left, false);
+	DCUI::Rect(Canvas, X, MidY - KeyH * 0.5f, KeyW, KeyH, FLinearColor(0.02f, 0.02f, 0.03f, 0.85f));
+	DCUI::Outline(Canvas, X, MidY - KeyH * 0.5f, KeyW, KeyH, FMath::Max(2.5f * S, 2.f), DCUI::Gold);
+	DCUI::Text(Canvas, GetTextFont(), Key, X + KeyPad, MidY - KeyPx * 0.6f, KeyPx, DCUI::Gold, EAlign::Left, false);
 	X += KeyW + Gap;
-	DCUI::Text(Canvas, GetTextFont(), After, X, CenterY - TextPx * 0.6f, TextPx, WithAlpha(DCUI::Ivory, Breath));
+	DCUI::Text(Canvas, GetTextFont(), After, X, MidY - TextPx * 0.6f, TextPx, WithAlpha(DCUI::Ivory, Breath));
+	DCUI::Rect(Canvas, Right - TotalW, MidY + KeyH * 0.5f + 10.f * S, TotalW, FMath::Max(3.f * S, 2.f), WithAlpha(DCUI::Gold, Breath));
 }
 
 void ADCZombieHUD::DrawCutscene(ADCZombieDirector* D)

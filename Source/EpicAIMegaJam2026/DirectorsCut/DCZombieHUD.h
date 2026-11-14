@@ -26,6 +26,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
 	TObjectPtr<UTexture2D> MainMenuImage;
 
+	/** The game's title typography, bottom-left on the main menu. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
+	TObjectPtr<UTexture2D> TitleImage;
+
 	/** Overall size of panels and spacing, on top of scaling with the screen height. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI", meta = (ClampMin = "0.5", ClampMax = "3"))
 	float UIScale = 1.f;

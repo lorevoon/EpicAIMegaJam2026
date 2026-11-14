@@ -25,40 +25,29 @@ class UAudioComponent;
 class UTexture2D;
 
 /**
- * Where things sit on the main menu. Positions are the centre of each element as a share of the screen (0,0 top-left,
- * 1,1 bottom-right); sizes are in pixels at 1080p and scale with the screen.
+ * Where things sit on the main menu, as a share of the screen (0,0 top-left, 1,1 bottom-right). The title is the
+ * TitleTypography image in the bottom-left corner; "Press [ENTER] to Start" sits bottom-right.
  */
 USTRUCT()
 struct FDCMainMenuLayout
 {
 	GENERATED_BODY()
 
+	/** The title image's bottom-left corner. */
 	UPROPERTY(EditAnywhere, Category = "Title")
-	FString Title = TEXT("Cinematographer Simulator");
+	FVector2D TitleCorner = FVector2D(0.035f, 0.95f);
 
-	UPROPERTY(EditAnywhere, Category = "Title")
-	FVector2D TitlePosition = FVector2D(0.5f, 0.25f);
+	/** The title image's width, as a share of the screen's width (its height follows the image). */
+	UPROPERTY(EditAnywhere, Category = "Title", meta = (ClampMin = "0.05", ClampMax = "1"))
+	float TitleWidth = 0.42f;
 
-	UPROPERTY(EditAnywhere, Category = "Title", meta = (ClampMin = "10"))
-	float TitleSize = 120.f;
-
-	UPROPERTY(EditAnywhere, Category = "Title")
-	FLinearColor TitleColor = FLinearColor(0.96f, 0.93f, 0.86f);
-
-	/** A gold line under the title. */
-	UPROPERTY(EditAnywhere, Category = "Title")
-	bool bTitleUnderline = true;
-
-	/** Where "Press [ENTER] to Start" sits (its centre). */
+	/** The prompt's right end, at its vertical middle. */
 	UPROPERTY(EditAnywhere, Category = "Start Prompt")
-	FVector2D StartPosition = FVector2D(0.5f, 0.73f);
+	FVector2D PromptCorner = FVector2D(0.965f, 0.9f);
 
+	/** Text size in pixels at 1080p (scales with the screen). */
 	UPROPERTY(EditAnywhere, Category = "Start Prompt", meta = (ClampMin = "10"))
-	float StartTextSize = 58.f;
-
-	/** How dark the screen's edges are over the background image (0 = none). */
-	UPROPERTY(EditAnywhere, Category = "Background", meta = (ClampMin = "0", ClampMax = "1"))
-	float VignetteStrength = 0.65f;
+	float PromptTextSize = 56.f;
 };
 
 /** One line of a director cutscene: his face, and what he says. */
