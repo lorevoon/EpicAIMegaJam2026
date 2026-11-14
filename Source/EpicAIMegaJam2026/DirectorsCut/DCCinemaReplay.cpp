@@ -1,7 +1,9 @@
 #include "DCCinemaReplay.h"
 #include "DCBeat.h"
 #include "DCMultiCamDirector.h"
+#include "DCUI.h"
 #include "DCZombieDirector.h"
+#include "DCZombieHUD.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
@@ -20,9 +22,13 @@ namespace
  // Draw at a fixed design size, uniformly fitted for ultrawide and small windows alike.
  struct FScreen
  {
-  AHUD* HUD; UCanvas* Canvas; float Scale, OX, OY;
+  AHUD* HUD; UCanvas* Canvas; UFont* Font; float Scale, OX, OY;
+  // Text is drawn larger than the original design sizes, in the HUD's typeface.
+  static constexpr float TextBoost=1.7f;
   FScreen(AHUD* H,UCanvas* C):HUD(H),Canvas(C)
   {
+   const ADCZombieHUD* DCHUD=Cast<ADCZombieHUD>(H);
+   Font=DCHUD?DCHUD->GetTextFont():nullptr;
    Scale=FMath::Min(C->ClipX/1920.f,C->ClipY/1080.f);
    OX=(C->ClipX-1920*Scale)*.5f; OY=(C->ClipY-1080*Scale)*.5f;
   }
@@ -44,15 +50,14 @@ namespace
     Triangle({X,Y},{X+FMath::Cos(A)*RX,Y+FMath::Sin(A)*RY},{X+FMath::Cos(B)*RX,Y+FMath::Sin(B)*RY},C);
    }
   }
-  void Text(const FString& T,float X,float Y,float Size,FLinearColor C,float MaxWidth=1700,bool Center=true) const
+  // Crisp text (glyphs rasterized at the size shown), shrunk to MaxWidth when needed.
+  void Text(const FString& T,float X,float Y,float Size,FLinearColor C,float MaxWidth=1700,bool Center=true,bool Right=false) const
   {
-   UFont* Font=GEngine->GetLargeFont(); float W,H;
-   HUD->GetTextSize(TEXT("Ag"),W,H,Font,1.f);
-   float FS=Size*32.f*Scale/FMath::Max(H,1.f);
-   HUD->GetTextSize(T,W,H,Font,FS);
-   if(W>MaxWidth*Scale) { FS*=MaxWidth*Scale/W; HUD->GetTextSize(T,W,H,Font,FS); }
-   HUD->DrawText(T,C,OX+X*Scale-(Center?W*.5f:0),OY+Y*Scale,Font,FS);
+   DCUI::Text(Canvas,Font,T,OX+X*Scale,OY+Y*Scale,Size*32.f*TextBoost*Scale,C,
+    Right?DCUI::EAlign::Right:Center?DCUI::EAlign::Center:DCUI::EAlign::Left,true,MaxWidth*Scale);
   }
+  void Stripes(float X,float Y,float W,float H) const { DCUI::ClapperStripes(Canvas,OX+X*Scale,OY+Y*Scale,W*Scale,H*Scale); }
+  void Ring(float X,float Y,float R,float T,FLinearColor C) const { DCUI::Ring(Canvas,FVector2D(OX+X*Scale,OY+Y*Scale),R*Scale,T*Scale,C); }
   // Font-independent emoji silhouettes: no missing Unicode glyphs in packaged builds.
   void Emoji(float X,float Y,int Kind,float Alpha,float Pop) const
   {
@@ -280,37 +285,59 @@ void ADCCinemaReplay::DrawCinema(AHUD* HUD,UCanvas* Canvas,ADCZombieDirector* Fi
  // House lights and evaluation rise in stages over the screen, keeping the cinema visible.
  if(Finished)
  {
+  // The evaluation arrives on a clapperboard: striped stick, then the slate with the grade, the match and the scenes.
   const float Age=FMath::Max(ResultAge,0.f), Reveal=FMath::SmoothStep(0.f,.7f,Age);
-  const float Y=137+(1-Reveal)*35;
-  P.Box(340,Y,1240,566,FLinearColor(.015f,.014f,.025f,.97f*Reveal));
-  P.Box(340,Y,1240*Reveal,3,Gold);
+  const float X=300, W=1320, H=660, Y=96+(1-Reveal)*35;
+  const float CX=X+W*.5f;
+  if(Reveal>.05f) P.Stripes(X,Y,W*Reveal,46);
+  P.Box(X,Y+52,W,H-52,FLinearColor(.02f,.02f,.03f,.96f*Reveal));
+  P.Box(X,Y+52,W*Reveal,3,Gold);
   if(Age>.25f)
   {
-   P.Text(Film->GetRecording().IsEmpty()?TEXT("THE SCREEN STAYED DARK"):TEXT("THE AUDIENCE HAS SPOKEN"),960,Y+26,.55f,Gold,1100);
-   P.Text(Film->MovieTitle,960,Y+62,1.25f,Ivory,1100);
+   P.Text(Film->GetRecording().IsEmpty()?TEXT("THE SCREEN STAYED DARK"):TEXT("THE AUDIENCE HAS SPOKEN"),CX,Y+72,.5f,Gold,1100);
+   P.Text(Film->MovieTitle,CX,Y+112,.95f,Ivory,1150);
   }
   const FDCMatch& Match=Film->GetMatch();
   const bool Good=Film->IsGoodTake();
-  if(Age>.8f) P.Text(FString::Printf(TEXT("GRADE %s   -   %s"),*Film->GetGrade(),*Film->GetCutName()),960,Y+119,.72f,Good?Green:Red,1100);
-  const auto& Beats=Film->GetBeats();
-  const float RowH=FMath::Min(31.f,240.f/FMath::Max(1,Beats.Num()));
-  for(int i=0;i<Beats.Num();++i)
+  const FLinearColor GradeColor=Good?Gold:Red;
+  // Left: the grade letter in a ring, the cut's name under it.
+  const float GX=X+210, GY=Y+370;
+  if(Age>.8f)
   {
-   const auto& B=Beats[i]; if(!B.Beat || Age<1.1f+i*.14f) continue;
-   const bool Got=B.Status==EDCShotStatus::Captured;
-   const bool Liked=HasPositiveReaction(FName(*B.Beat->BeatId),Got);
-   P.Text(FString::Printf(TEXT("%02d   %s"),i+1,*B.Beat->DisplayName),393,Y+166+i*RowH,FMath::Min(.52f,RowH/55),Got?Ivory:Red,840,false);
-   P.Text(Got?(Liked?TEXT("CAPTURED"):TEXT("MISSION MISSED")):TEXT("MISSED"),1450,Y+166+i*RowH,FMath::Min(.48f,RowH/55),Liked?Green:Red,180);
+   P.Ring(GX,GY,125,7,GradeColor);
+   P.Text(Film->GetGrade(),GX,GY-112,3.2f,GradeColor,220);
+   P.Text(Film->GetCutName(),GX,GY+150,.5f,Ivory,380);
   }
-  const float ScoreStart=1.3f+Beats.Num()*.14f;
+  // Right: the match, its three parts as bars, then the scenes.
+  const float MX=X+460, MW=W-500;
+  const auto& Beats=Film->GetBeats();
+  const float ScoreStart=1.1f;
   if(Age>ScoreStart)
   {
    const float Count=FMath::SmoothStep(0.f,1.2f,Age-ScoreStart);
-   P.Text(FString::Printf(TEXT("MATCH   %d%%"),FMath::RoundToInt(Match.Overall*100*Count)),960,Y+426,1.3f,Gold,1100);
-   P.Text(FString::Printf(TEXT("Camera position %d%%   /   Angle %d%%   /   Zoom %d%%   /   Best %d%%"),FMath::RoundToInt(Match.Position*100),
-    FMath::RoundToInt(Match.Angle*100),FMath::RoundToInt(Match.Zoom*100),FMath::RoundToInt(Film->GetBestMatch()*100)),960,Y+480,.48f,Ivory,1100);
+   P.Text(FString::Printf(TEXT("MATCH  %d%%"),FMath::RoundToInt(Match.Overall*100*Count)),MX,Y+190,1.15f,GradeColor,MW*.6f,false);
+   P.Text(FString::Printf(TEXT("best %d%%"),FMath::RoundToInt(Film->GetBestMatch()*100)),MX+MW,Y+215,.5f,Ivory,MW*.35f,false,true);
+   const TPair<const TCHAR*,float> Parts[]={{TEXT("Position"),Match.Position},{TEXT("Angle"),Match.Angle},{TEXT("Zoom"),Match.Zoom}};
+   for(int i=0;i<3;++i)
+   {
+    const float RY=Y+300+i*52;
+    P.Text(Parts[i].Key,MX,RY,.48f,Ivory,220,false);
+    P.Box(MX+240,RY+14,MW-360,14,FLinearColor(1,1,1,.12f));
+    P.Box(MX+240,RY+14,(MW-360)*FMath::Clamp(Parts[i].Value*Count,0.f,1.f),14,Gold);
+    P.Text(FString::Printf(TEXT("%d%%"),FMath::RoundToInt(Parts[i].Value*100*Count)),MX+MW,RY,.48f,Ivory,100,false,true);
+   }
   }
-  P.Text(TEXT("SPACE  Watch again        R / ENTER  Back to the set"),960,Y+530,.47f,Ivory,1100);
+  const float RowH=FMath::Min(40.f,170.f/FMath::Max(1,Beats.Num()));
+  for(int i=0;i<Beats.Num();++i)
+  {
+   const auto& B=Beats[i]; if(!B.Beat || Age<1.4f+i*.14f) continue;
+   const bool Got=B.Status==EDCShotStatus::Captured;
+   const bool Liked=HasPositiveReaction(FName(*B.Beat->BeatId),Got);
+   const float RY=Y+468+i*RowH;
+   P.Text(FString::Printf(TEXT("SC %d   %s"),i+1,*B.Beat->DisplayName),MX,RY,FMath::Min(.44f,RowH/62),Got?Ivory:Red,MW*.68f,false);
+   P.Text(Got?(Liked?TEXT("IN THE CAN"):TEXT("MISSION MISSED")):TEXT("MISSED"),MX+MW,RY,FMath::Min(.42f,RowH/62),Liked?Green:Red,MW*.3f,false,true);
+  }
+  P.Text(TEXT("SPACE  Watch again        R / ENTER  Back to the set"),CX,Y+H+16,.5f,Ivory,1300);
  }
  else if(Film->IsPremierePaused() && Open>=1) P.Text(TEXT("P A U S E D"),960,688,.55f,Ivory,900);
  const float Length=Film->GetPremiereLength();
