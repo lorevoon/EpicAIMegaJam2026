@@ -482,12 +482,13 @@ void ADCMultiCamDirector::ComputeMatch()
 	{
 		return;
 	}
-	// Compare the film with the reference cut moment by moment, in scene time.
+	// Compare the film with the reference cut moment by moment, in scene time, on what each one shows of the scene.
 	constexpr float Step = 0.1f;
 	// A gap longer than this in the recording (a recording pause) means the moment isn't in the film.
 	constexpr float MaxGap = 0.25f;
 	const int32 NumMoments = FMath::FloorToInt(TakeDuration / Step) + 1;
-	double Position = 0.0, Angle = 0.0, Zoom = 0.0;
+	double Framing = 0.0, Size = 0.0, Viewpoint = 0.0, Overall = 0.0;
+	TArray<FVector> Points;
 	for (int32 i = 0; i < NumMoments; ++i)
 	{
 		const float Time = i * Step;
@@ -495,29 +496,26 @@ void ADCMultiCamDirector::ComputeMatch()
 		FQuat RefRotation;
 		float RefFOV = 0.f, ScenePoint = 0.f;
 		const int32 Next = Algo::UpperBoundBy(Recording, Time, &FDCTakeSample::Time);
-		if (Next == 0 || !GetFilmView(ReferenceCut, Time, RefLocation, RefRotation, RefFOV, ScenePoint))
+		if (Next == 0 || Time - Recording[Next - 1].Time > MaxGap
+			|| !GetFilmView(ReferenceCut, Time, RefLocation, RefRotation, RefFOV, ScenePoint))
 		{
 			continue;
 		}
 		const FDCTakeSample& Shot = Recording[Next - 1];
-		if (Time - Shot.Time > MaxGap)
-		{
-			continue;
-		}
-		const float Distance = FVector::Dist(Shot.Location, RefLocation);
-		const float Degrees = FMath::RadiansToDegrees(Shot.Rotation.Quaternion().AngularDistance(RefRotation));
-		// 1 - x^2: near misses cost little, the score only drops fast close to the tolerance.
-		auto Closeness = [](float Error, float Tolerance) { return 1.f - FMath::Square(FMath::Clamp(Error / Tolerance, 0.f, 1.f)); };
-		Position += Closeness(Distance, MatchPositionTolerance);
-		Angle += Closeness(Degrees, MatchAngleTolerance);
-		Zoom += Closeness(FMath::Abs(Shot.FilmFOV - RefFOV), MatchZoomTolerance);
+		EvaluatePerformers(Time);
+		GetSubjectPoints(Time, Points);
+		const FDCMatch Likeness = CompareFrames(ReadFrame(Points, Shot.Location, Shot.Rotation.Quaternion(), Shot.FilmFOV),
+			ReadFrame(Points, RefLocation, RefRotation, RefFOV));
+		Framing += Likeness.Framing;
+		Size += Likeness.Size;
+		Viewpoint += Likeness.Viewpoint;
+		Overall += Likeness.Overall;
 	}
-	Match.Position = float(Position / NumMoments);
-	Match.Angle = float(Angle / NumMoments);
-	Match.Zoom = float(Zoom / NumMoments);
-	const float Weights = MatchPositionWeight + MatchAngleWeight + MatchZoomWeight;
-	Match.Overall = Weights > 0.f
-		? (Match.Position * MatchPositionWeight + Match.Angle * MatchAngleWeight + Match.Zoom * MatchZoomWeight) / Weights : 0.f;
+	EvaluatePerformers(SceneTime);
+	Match.Framing = float(Framing / NumMoments);
+	Match.Size = float(Size / NumMoments);
+	Match.Viewpoint = float(Viewpoint / NumMoments);
+	Match.Overall = float(Overall / NumMoments);
 }
 
 void ADCMultiCamDirector::UpdateCoveredScenes()

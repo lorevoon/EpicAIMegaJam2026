@@ -1,8 +1,9 @@
 // Director's Cut - the film's director, coaching the player through the take.
 //
-// Each frame of shooting compares the live camera with the reference cut at the same moment (the same comparison as
-// the grade: where the camera stands, where it points, how it's zoomed) and voices the single most useful fix, in
-// order: cut to the right camera, pan/tilt, zoom - or praise. Lines stay up long enough to read.
+// Each frame of shooting compares the live picture with the reference cut's at the same moment (the same comparison as
+// the grade: where the characters sit in the frame, how big they are, which side they're seen from) and voices the
+// single most useful fix, in order: cut to the camera with the right viewpoint, pan/tilt, size - or praise. Lines stay
+// up long enough to read. Size is asked for as "bigger"/"smaller": getting closer and zooming in both do it.
 
 #include "DCMultiCamDirector.h"
 #include "DCMultiCam.h"
@@ -11,13 +12,22 @@
 
 namespace
 {
-	/** Pan/tilt/zoom differences (degrees) below which the director doesn't bother. */
-	constexpr float PanSlack = 9.f;
-	constexpr float TiltSlack = 7.f;
-	constexpr float ZoomSlack = 5.f;
-	/** Past these, he stops being polite. */
-	constexpr float PanFar = 30.f;
-	constexpr float ZoomFar = 15.f;
+	/** How far the characters may sit from where the reference frames them (half frame widths) before he speaks up. */
+	constexpr float PanSlack = 0.15f;
+	constexpr float TiltSlack = 0.1f;
+	/** Past this, he stops being polite. */
+	constexpr float FrameFar = 0.5f;
+	/** Size ratios (live / reference) he lets go, and past which he shouts. */
+	constexpr float SizeSlack = 1.3f;
+	constexpr float SizeFar = 2.f;
+	/** Viewpoint difference (degrees) worth a cut to another camera, and how much better that camera must be. */
+	constexpr float CutViewpoint = 35.f;
+	constexpr float CutGain = 20.f;
+
+	float AngleBetween(const FVector& A, const FVector& B)
+	{
+		return FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(FVector::DotProduct(A, B), -1.f, 1.f)));
+	}
 }
 
 void ADCMultiCamDirector::Coach(FName Key, EDCDirectorMood Mood, std::initializer_list<const TCHAR*> Variants, int32 Camera, bool bForce)
@@ -62,52 +72,63 @@ void ADCMultiCamDirector::UpdateCoach()
 	FVector RefLocation;
 	FQuat RefQuat;
 	float RefFOV = 0.f, ScenePoint = 0.f;
-	if (!Live || !GetFilmView(ReferenceCut, SceneTime, RefLocation, RefQuat, RefFOV, ScenePoint))
+	TArray<FVector> Points;
+	GetSubjectPoints(SceneTime, Points);
+	if (!Live || Points.Num() == 0 || !GetFilmView(ReferenceCut, SceneTime, RefLocation, RefQuat, RefFOV, ScenePoint))
 	{
 		return;
 	}
-
-	// Where the reference films from: is the live camera there, or is another of the player's cameras?
-	auto SpotError = [&RefLocation](const ADCMultiCam* Cam) { return FVector::Dist2D(Cam->GetActorLocation(), RefLocation); };
-	const float LiveError = SpotError(Live);
-	const ADCMultiCam* Nearest = Live;
-	for (const ADCMultiCam* Cam : Cameras)
-	{
-		if (Cam && SpotError(Cam) < SpotError(Nearest))
-		{
-			Nearest = Cam;
-		}
-	}
-
-	// How the live lens differs from the reference: pan, tilt and zoom (on the film frame).
 	const UCameraComponent* Lens = Live->GetCamera();
-	const FRotator LiveRot = Lens->GetComponentRotation();
-	const FRotator RefRot = RefQuat.Rotator();
-	const float Pan = FRotator::NormalizeAxis(RefRot.Yaw - LiveRot.Yaw);
-	const float Tilt = FRotator::NormalizeAxis(RefRot.Pitch - LiveRot.Pitch);
-	const float Zoom = DCFrame::CaptureFOV(Lens->FieldOfView, GetViewAspect()) - RefFOV;
+	const FDCFrameReading Ref = ReadFrame(Points, RefLocation, RefQuat, RefFOV);
+	const FDCFrameReading Shot = ReadFrame(Points, Lens->GetComponentLocation(), Lens->GetComponentQuat(),
+		DCFrame::CaptureFOV(Lens->FieldOfView, GetViewAspect()));
 
-	// How close the shot is overall, the same way the grade measures it - that's his mood.
-	auto Closeness = [](float Error, float Tolerance) { return 1.f - FMath::Square(FMath::Clamp(Error / Tolerance, 0.f, 1.f)); };
-	const float Angle = FMath::RadiansToDegrees(Lens->GetComponentQuat().AngularDistance(RefQuat));
-	const float Likeness = (Closeness(LiveError, MatchPositionTolerance) + Closeness(Angle, MatchAngleTolerance)
-		+ Closeness(FMath::Abs(Zoom), MatchZoomTolerance)) / 3.f;
+	// How alike the pictures are, the same way the grade measures it - that's his mood.
+	const float Likeness = CompareFrames(Shot, Ref).Overall;
 	const EDCDirectorMood Mood = Likeness >= 0.85f ? EDCDirectorMood::Joy : Likeness >= 0.6f ? EDCDirectorMood::Almost : EDCDirectorMood::Disgust;
 
-	// 1. Wrong camera: another of the player's cameras stands much closer to where the reference films from.
-	if (Nearest != Live && LiveError > ReferenceSpotRadius && LiveError - SpotError(Nearest) > ReferenceSpotRadius * 0.5f)
+	// 1. Wrong camera: another of the player's cameras sees the characters from much nearer the reference's side.
+	const float LiveView = AngleBetween(Shot.ViewDir, Ref.ViewDir);
+	const ADCMultiCam* Best = Live;
+	float BestView = LiveView;
+	for (const ADCMultiCam* Cam : Cameras)
 	{
-		Coach(*FString::Printf(TEXT("Cut%d"), Nearest->GetNumber()), EDCDirectorMood::Disgust,
+		if (Cam && Cam != Live)
+		{
+			const float View = AngleBetween(ReadFrame(Points, Cam->GetCamera()->GetComponentLocation(), FQuat::Identity, 90.f).ViewDir, Ref.ViewDir);
+			if (View < BestView)
+			{
+				Best = Cam;
+				BestView = View;
+			}
+		}
+	}
+	if (Best != Live && LiveView > CutViewpoint && LiveView - BestView > CutGain)
+	{
+		Coach(*FString::Printf(TEXT("Cut%d"), Best->GetNumber()), EDCDirectorMood::Disgust,
 			{ TEXT("Wrong camera! Cut to CAM {cam}!"), TEXT("Why are we on this camera?! CAM {cam}, now!"), TEXT("CAM {cam} has the shot. CUT!") },
-			Nearest->GetNumber());
+			Best->GetNumber());
 		return;
 	}
-	// 2. Pointing the wrong way: pan first, then tilt.
-	if (FMath::Abs(Pan) > PanSlack || FMath::Abs(Tilt) > TiltSlack)
+
+	// 2. The characters sit in the wrong part of the frame: pan or tilt them to where the reference has them.
+	// Off-screen (or behind the camera), go by the direction they're in instead.
+	FVector2D Offset = Shot.Center - Ref.Center;
+	if (!Shot.bVisible)
 	{
-		const bool bPan = FMath::Abs(Pan) / PanSlack >= FMath::Abs(Tilt) / TiltSlack;
-		const bool bFar = bPan ? FMath::Abs(Pan) > PanFar : FMath::Abs(Tilt) > PanFar;
-		if (bPan && Pan < 0.f)
+		FVector Centroid = FVector::ZeroVector;
+		for (const FVector& P : Points)
+		{
+			Centroid += P / Points.Num();
+		}
+		const FVector Local = Lens->GetComponentQuat().UnrotateVector(Centroid - Lens->GetComponentLocation());
+		Offset = FVector2D(Local.Y, Local.Z).GetSafeNormal() * (FrameFar + 1.f);
+	}
+	if (FMath::Abs(Offset.X) > PanSlack || FMath::Abs(Offset.Y) > TiltSlack)
+	{
+		const bool bPan = FMath::Abs(Offset.X) / PanSlack >= FMath::Abs(Offset.Y) / TiltSlack;
+		const bool bFar = (bPan ? FMath::Abs(Offset.X) : FMath::Abs(Offset.Y)) > FrameFar;
+		if (bPan && Offset.X < 0.f)
 		{
 			Coach(bFar ? TEXT("PanLeftFar") : TEXT("PanLeft"), Mood, bFar
 				? std::initializer_list<const TCHAR*>{ TEXT("Pan LEFT! The story's over there!"), TEXT("Left! LEFT! You're filming nothing!") }
@@ -119,7 +140,7 @@ void ADCMultiCamDirector::UpdateCoach()
 				? std::initializer_list<const TCHAR*>{ TEXT("Pan RIGHT! They're over there!"), TEXT("Right! RIGHT! Where are you looking?!") }
 				: std::initializer_list<const TCHAR*>{ TEXT("Nudge it right..."), TEXT("A hair to the right, darling.") });
 		}
-		else if (Tilt > 0.f)
+		else if (Offset.Y > 0.f)
 		{
 			Coach(TEXT("TiltUp"), Mood, { TEXT("Tilt up! I'm paying for those faces!"), TEXT("Up, up! We're filming feet!") });
 		}
@@ -129,29 +150,41 @@ void ADCMultiCamDirector::UpdateCoach()
 		}
 		return;
 	}
-	// 3. Framed the right way but at the wrong size.
-	if (Zoom > ZoomSlack)
+
+	// 3. Framed right but at the wrong size - closer or zoom, whichever the player likes.
+	const float Ratio = Shot.Size / FMath::Max(Ref.Size, KINDA_SMALL_NUMBER);
+	if (Ratio < 1.f / SizeSlack)
 	{
-		Coach(Zoom > ZoomFar ? TEXT("ZoomInFar") : TEXT("ZoomIn"), Mood, Zoom > ZoomFar
-			? std::initializer_list<const TCHAR*>{ TEXT("Zoom IN! I want to see their eyes!"), TEXT("Push in! They're specks!") }
-			: std::initializer_list<const TCHAR*>{ TEXT("Push in a little..."), TEXT("Tighter. Just a touch.") });
+		const bool bFar = Ratio < 1.f / SizeFar;
+		Coach(bFar ? TEXT("BiggerFar") : TEXT("Bigger"), Mood, bFar
+			? std::initializer_list<const TCHAR*>{ TEXT("They're specks! Get closer or zoom in!"), TEXT("Bigger! I want to see their eyes!") }
+			: std::initializer_list<const TCHAR*>{ TEXT("A little tighter..."), TEXT("Bring them in a touch. Closer, or zoom.") });
 		return;
 	}
-	if (Zoom < -ZoomSlack)
+	if (Ratio > SizeSlack)
 	{
-		Coach(Zoom < -ZoomFar ? TEXT("ZoomOutFar") : TEXT("ZoomOut"), Mood, Zoom < -ZoomFar
-			? std::initializer_list<const TCHAR*>{ TEXT("Zoom OUT! Give me the whole scene!"), TEXT("Too tight! Pull back, pull back!") }
+		const bool bFar = Ratio > SizeFar;
+		Coach(bFar ? TEXT("SmallerFar") : TEXT("Smaller"), Mood, bFar
+			? std::initializer_list<const TCHAR*>{ TEXT("Too tight! Pull back or zoom out!"), TEXT("Give me the whole scene! Wider!") }
 			: std::initializer_list<const TCHAR*>{ TEXT("Ease out a bit..."), TEXT("Wider. Let it breathe.") });
 		return;
 	}
-	// 4. Nailed it.
+
+	// 4. Nailed it - or the picture is right but seen from the wrong side, and no camera has a better view.
 	if (Mood == EDCDirectorMood::Joy)
 	{
 		Coach(TEXT("Perfect"), EDCDirectorMood::Joy, { TEXT("YES! Hold it right there!"), TEXT("Beautiful! That's the shot!"), TEXT("Magnificent. Don't touch anything.") });
 	}
+	else if (Shot.ViewDir.Z - Ref.ViewDir.Z > 0.25f)
+	{
+		Coach(TEXT("High"), Mood, { TEXT("Nice framing... from way up there. Next take, lower a camera."), TEXT("Too high! This isn't a bird documentary.") });
+	}
+	else if (Ref.ViewDir.Z - Shot.ViewDir.Z > 0.25f)
+	{
+		Coach(TEXT("Low"), Mood, { TEXT("Nice framing... from down in the dirt. Next take, raise a camera."), TEXT("Too low! Get me some height next take.") });
+	}
 	else
 	{
-		// Pointing and zoomed right, but from the wrong place - and none of the cameras is closer.
-		Coach(TEXT("Spot"), Mood, { TEXT("Good framing... from the wrong spot. Next take, move a camera."), TEXT("Nice angle. Wrong place. We'll fix it next take.") });
+		Coach(TEXT("Side"), Mood, { TEXT("Good framing... from the wrong side. Next take, move a camera."), TEXT("Nice shot. Wrong angle. We'll fix it next take.") });
 	}
 }

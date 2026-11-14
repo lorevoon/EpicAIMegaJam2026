@@ -68,7 +68,6 @@ struct FDCTakeSample
 	float FilmFOV = 50.f;
 };
 
-/** How closely a take matches the reference cut, each 0-1 (averaged over the whole take). */
 /** The film director's face in the shooting HUD; his portrait follows how well the live shot matches the reference. */
 enum class EDCDirectorMood : uint8
 {
@@ -81,13 +80,33 @@ enum class EDCDirectorMood : uint8
 	Joy
 };
 
+/**
+ * How alike two shots look, each 0-1: judged on the picture, not the camera settings - so getting closer and zooming
+ * in are interchangeable. For a whole take it is the average over the take (the grade).
+ */
 struct FDCMatch
 {
-	float Position = 0.f;
-	float Angle = 0.f;
-	float Zoom = 0.f;
-	/** Weighted blend of the three: the take's grade. */
+	/** Where the subjects sit in the frame. */
+	float Framing = 0.f;
+	/** How big they appear. */
+	float Size = 0.f;
+	/** Which side and how high they are seen from. */
+	float Viewpoint = 0.f;
+	/** Weighted blend of the three. */
 	float Overall = 0.f;
+};
+
+/** What a film camera shows of the scene's subjects (their heads and feet). */
+struct FDCFrameReading
+{
+	/** Every subject point is in front of the camera. */
+	bool bVisible = false;
+	/** Centre of the subjects on the film frame: x runs -1..1 across its width, y uses the same scale (up). */
+	FVector2D Center = FVector2D::ZeroVector;
+	/** Their extent on the frame, in the same units. */
+	float Size = 0.f;
+	/** Unit direction from the subjects to the camera. */
+	FVector ViewDir = FVector::ZeroVector;
 };
 
 UCLASS()
@@ -193,28 +212,29 @@ public:
 	UTextureRenderTarget2D* GetReferenceInset() const;
 
 	/**
-	 * Grading: each moment of the take is compared with the reference cut. A part scores 100% when it matches and
-	 * falls off gently (near misses cost little) to 0% at its tolerance; moments missing from the film (recording
-	 * paused) score 0.
+	 * Grading: each moment of the take is compared with the reference cut on the picture itself - where the
+	 * scene's characters sit in the frame, how big they appear, and which side they're seen from. A part scores 100%
+	 * when it matches and falls off gently (near misses cost little) to 0% at its tolerance; moments missing from the
+	 * film (recording paused) score 0.
 	 */
-	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "1", Units = "cm"))
-	float MatchPositionTolerance = 1500.f;
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "0.05"))
+	float MatchFramingTolerance = 0.5f; // offset of the subjects' centre, in half frame widths
+
+	/** Size ratio (bigger or smaller) at which the size score reaches 0. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "1.1"))
+	float MatchSizeTolerance = 2.5f;
 
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "1", Units = "deg"))
-	float MatchAngleTolerance = 75.f;
-
-	/** Difference in the film's field of view at which the zoom score reaches 0. */
-	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "1", Units = "deg"))
-	float MatchZoomTolerance = 35.f;
+	float MatchViewpointTolerance = 75.f;
 
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "0"))
-	float MatchPositionWeight = 0.4f;
+	float MatchFramingWeight = 0.4f;
 
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "0"))
-	float MatchAngleWeight = 0.4f;
+	float MatchSizeWeight = 0.3f;
 
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Grading", meta = (ClampMin = "0"))
-	float MatchZoomWeight = 0.2f;
+	float MatchViewpointWeight = 0.3f;
 
 	/** How many cameras the player may place; 0 = unlimited. Keys 1-9 pick the first nine, [ and ] step through all. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0"))
@@ -393,6 +413,14 @@ protected:
 	void BuildReferenceCut();
 	/** Grades the recording against the reference cut (sets Match). */
 	void ComputeMatch();
+
+	// Frame likeness (DCFrameLikeness.cpp)
+	/** The reference cut's subjects at scene time Time - head and feet of each character in its beat - as posed now. */
+	void GetSubjectPoints(float Time, TArray<FVector>& OutPoints) const;
+	/** What a camera at CamLocation/CamRotation with film field of view FilmFOV shows of those points. */
+	static FDCFrameReading ReadFrame(const TArray<FVector>& Points, const FVector& CamLocation, const FQuat& CamRotation, float FilmFOV);
+	/** How alike two readings look. */
+	FDCMatch CompareFrames(const FDCFrameReading& Shot, const FDCFrameReading& Ref) const;
 	/** Best spot and lens for one beat; false if even the best can't hold it long enough to capture. */
 	bool FindReferenceShot(const FDCMultiCamBeat& State, FVector& OutLocation, float& OutFOV, float& OutCleanFrom);
 	void StartReferenceCut();

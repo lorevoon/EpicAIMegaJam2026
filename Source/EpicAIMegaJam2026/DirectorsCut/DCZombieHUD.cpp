@@ -897,16 +897,16 @@ void ADCZombieHUD::DrawResults(ADCZombieDirector* D)
 		Y += RowH;
 	}
 	Y += Px(Body) * 0.3f;
-	Label(FString::Printf(TEXT("Position %.0f%%   |   Angle %.0f%%   |   Zoom %.0f%%   |   %d cuts"),
-		Match.Position * 100.f, Match.Angle * 100.f, Match.Zoom * 100.f, D->GetCutCount()), CX, Y, DCUI::Ivory, Body, EAlign::Center, true, W - 2.f * Pad);
+	Label(FString::Printf(TEXT("Framing %.0f%%   |   Size %.0f%%   |   Viewpoint %.0f%%   |   %d cuts"),
+		Match.Framing * 100.f, Match.Size * 100.f, Match.Viewpoint * 100.f, D->GetCutCount()), CX, Y, DCUI::Ivory, Body, EAlign::Center, true, W - 2.f * Pad);
 	Y += Px(Body) * 1.3f;
 	Label(FString::Printf(TEXT("MATCH %.0f%%   (best %.0f%%)"), Match.Overall * 100.f, D->GetBestMatch() * 100.f), CX, Y, bGood ? DCUI::Gold : DCUI::Rec, Large, EAlign::Center);
 	Y += Px(Large) * 1.4f;
-	const float Weakest = FMath::Min3(Match.Position, Match.Angle, Match.Zoom);
+	const float Weakest = FMath::Min3(Match.Framing, Match.Size, Match.Viewpoint);
 	Label(D->GetGradeRank() == 0 ? TEXT("Shot for shot, that's the reference cut.")
-		: Weakest == Match.Position ? TEXT("Your cameras stood far from the reference spots.")
-		: Weakest == Match.Angle ? TEXT("Your cameras pointed elsewhere - match the reference framing.")
-		: TEXT("Your lenses differ - zoom like the reference cut."), CX, Y, DCUI::Muted, Small, EAlign::Center, true, W - 2.f * Pad);
+		: Weakest == Match.Framing ? TEXT("The actors sat in the wrong part of the frame - aim like the reference cut.")
+		: Weakest == Match.Size ? TEXT("The actors were the wrong size - get closer or zoom to match.")
+		: TEXT("You filmed them from the wrong side - place cameras where the reference looks from."), CX, Y, DCUI::Muted, Small, EAlign::Center, true, W - 2.f * Pad);
 	Y += Px(Small) * 1.6f;
 	const float W1 = KeyHint(TEXT("SPACE"), TEXT("Watch again"), 0.f, 0.f, Small, DCUI::Ivory, false);
 	const float W2 = KeyHint(TEXT("ENTER"), TEXT("Back to the set"), 0.f, 0.f, Small, DCUI::Ivory, false);

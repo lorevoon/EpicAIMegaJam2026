@@ -317,7 +317,7 @@ void ADCCinemaReplay::DrawCinema(AHUD* HUD,UCanvas* Canvas,ADCZombieDirector* Fi
    const float Count=FMath::SmoothStep(0.f,1.2f,Age-ScoreStart);
    P.Text(FString::Printf(TEXT("MATCH  %d%%"),FMath::RoundToInt(Match.Overall*100*Count)),MX,Y+190,1.15f,GradeColor,MW*.6f,false);
    P.Text(FString::Printf(TEXT("best %d%%"),FMath::RoundToInt(Film->GetBestMatch()*100)),MX+MW,Y+215,.5f,Ivory,MW*.35f,false,true);
-   const TPair<const TCHAR*,float> Parts[]={{TEXT("Position"),Match.Position},{TEXT("Angle"),Match.Angle},{TEXT("Zoom"),Match.Zoom}};
+   const TPair<const TCHAR*,float> Parts[]={{TEXT("Framing"),Match.Framing},{TEXT("Size"),Match.Size},{TEXT("Viewpoint"),Match.Viewpoint}};
    for(int i=0;i<3;++i)
    {
     const float RY=Y+300+i*52;
