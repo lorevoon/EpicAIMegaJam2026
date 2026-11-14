@@ -49,18 +49,12 @@ struct FDCMainMenuLayout
 	UPROPERTY(EditAnywhere, Category = "Title")
 	bool bTitleUnderline = true;
 
-	UPROPERTY(EditAnywhere, Category = "Start Button")
-	FString StartText = TEXT("START");
-
-	UPROPERTY(EditAnywhere, Category = "Start Button")
+	/** Where "Press [ENTER] to Start" sits (its centre). */
+	UPROPERTY(EditAnywhere, Category = "Start Prompt")
 	FVector2D StartPosition = FVector2D(0.5f, 0.73f);
 
-	UPROPERTY(EditAnywhere, Category = "Start Button")
-	FVector2D StartSize = FVector2D(400.f, 116.f);
-
-	/** "ENTER Start" under the button. */
-	UPROPERTY(EditAnywhere, Category = "Start Button")
-	bool bShowEnterHint = true;
+	UPROPERTY(EditAnywhere, Category = "Start Prompt", meta = (ClampMin = "10"))
+	float StartTextSize = 58.f;
 
 	/** How dark the screen's edges are over the background image (0 = none). */
 	UPROPERTY(EditAnywhere, Category = "Background", meta = (ClampMin = "0", ClampMax = "1"))
@@ -631,9 +625,6 @@ protected:
 	/** +1 fading to black, -1 fading back in, 0 not fading. */
 	int32 FadeDirection = 0;
 	bool bInMainMenu = false;
-	bool bMenuCursorShown = false;
-	/** The main menu needs the mouse cursor and HUD clicks; the game itself doesn't. */
-	void SetMenuCursor(bool bShow);
 	/** Preparation's checks passed: the take starts (after the action cutscene). */
 	void StartCountdown();
 	float CheerUpSince = -100.f;
@@ -642,7 +633,7 @@ protected:
 
 	ADCMultiCamCharacter* GetPlayer() const;
 	APlayerController* GetPC() const;
-	/** Width / height of the player's viewport (16:9 until there is one). */
+	/** Width / height of the gameplay view: always DCFrame::ScreenAspect (other window shapes get black bars). */
 	float GetViewAspect() const;
 	/** Tells M_DCRig (through MPC_DCFrame) where the capture frame is on screen; only does work when the view's shape changes. */
 	void UpdateFrameParams();

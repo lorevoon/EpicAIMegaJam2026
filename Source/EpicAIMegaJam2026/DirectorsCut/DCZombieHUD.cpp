@@ -7,9 +7,12 @@
 #include "DCSceneMarks.h"
 #include "DCZombieDirector.h"
 #include "Camera/PlayerCameraManager.h"
+#include "CanvasTypes.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
+#include "Engine/GameViewportClient.h"
+#include "Engine/LocalPlayer.h"
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "EngineUtils.h"
@@ -175,6 +178,26 @@ void ADCZombieHUD::DrawHUD()
 	{
 		DCUI::Rect(Canvas, 0.f, 0.f, Canvas->ClipX, Canvas->ClipY, FLinearColor(0.f, 0.f, 0.f, D->GetFadeAlpha()));
 	}
+	MaskOutsideView();
+}
+
+void ADCZombieHUD::MaskOutsideView()
+{
+	// The canvas doesn't clip: anything drawn past the 16:9 view (a drifting background, a spotlight, the cinema's
+	// back row) would show in the black bars around it. Paint the bars back to black.
+	const FVector2D Bars = GetBarsOffset();
+	if (Bars.X <= 0.f && Bars.Y <= 0.f)
+	{
+		return;
+	}
+	const float W = Canvas->ClipX;
+	const float H = Canvas->ClipY;
+	const float Pad = 2.f; // past the window edge, so nothing peeks through at fractional offsets
+	const FLinearColor Black = FLinearColor::Black;
+	DCUI::Rect(Canvas, -Bars.X - Pad, -Bars.Y - Pad, W + 2.f * (Bars.X + Pad), Bars.Y + Pad, Black);
+	DCUI::Rect(Canvas, -Bars.X - Pad, H, W + 2.f * (Bars.X + Pad), Bars.Y + Pad, Black);
+	DCUI::Rect(Canvas, -Bars.X - Pad, 0.f, Bars.X + Pad, H, Black);
+	DCUI::Rect(Canvas, W, 0.f, Bars.X + Pad, H, Black);
 }
 
 void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
@@ -342,19 +365,18 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 // ---------------------------------------------------------------------------------------------
 // Main menu and cutscenes
 
-namespace
+FVector2D ADCZombieHUD::GetBarsOffset() const
 {
-	const FName StartButton(TEXT("Start"));
-}
-
-void ADCZombieHUD::NotifyHitBoxClick(FName BoxName)
-{
-	Super::NotifyHitBoxClick(BoxName);
-	ADCZombieDirector* D = FindDirector();
-	if (BoxName == StartButton && D && D->IsInMainMenu())
+	// Exactly where the engine put the canvas in the window (past the left and top bars): its translation.
+	if (Canvas && Canvas->Canvas)
 	{
-		D->StartFromMenu();
+		const auto& Stack = Canvas->Canvas->GetTransformStack();
+		if (Stack.Num() > 0)
+		{
+			return FVector2D(Stack.Top().GetMatrix().GetOrigin());
+		}
 	}
+	return FVector2D::ZeroVector;
 }
 
 void ADCZombieHUD::DrawMainMenu(ADCZombieDirector* D)
@@ -390,35 +412,25 @@ void ADCZombieHUD::DrawMainMenu(ADCZombieDirector* D)
 		}
 	}
 
-	// START: a slate-style button that lifts and lights up gold under the mouse.
-	float MouseX = 0.f, MouseY = 0.f;
-	const bool bMouse = PlayerOwner && PlayerOwner->GetMousePosition(MouseX, MouseY);
-	const float BaseW = Layout.StartSize.X * S, BaseH = Layout.StartSize.Y * S;
+	// "Press [ENTER] to Start", the key in a key cap, breathing gently.
+	const float TextPx = Px(Layout.StartTextSize);
+	const float KeyPx = TextPx * 0.8f;
+	const FString Before = TEXT("Press"), Key = TEXT("ENTER"), After = TEXT("to Start");
+	const float Gap = TextPx * 0.35f, KeyPad = TextPx * 0.4f;
+	const float BeforeW = DCUI::Measure(Canvas, GetTextFont(), Before, TextPx).X;
+	const float AfterW = DCUI::Measure(Canvas, GetTextFont(), After, TextPx).X;
+	const float KeyW = DCUI::Measure(Canvas, GetTextFont(), Key, KeyPx).X + 2.f * KeyPad;
+	const float KeyH = TextPx * 1.35f;
 	const float CenterX = W * Layout.StartPosition.X, CenterY = H * Layout.StartPosition.Y;
-	const float BaseX = CenterX - BaseW * 0.5f, BaseY = CenterY - BaseH * 0.5f;
-	const bool bHover = bMouse && MouseX >= BaseX && MouseX <= BaseX + BaseW && MouseY >= BaseY && MouseY <= BaseY + BaseH;
-	StartHover = FMath::FInterpTo(StartHover, bHover ? 1.f : 0.f, GetWorld()->GetDeltaSeconds(), 14.f);
-	const float Grow = 1.f + 0.06f * StartHover;
-	const float BW = BaseW * Grow, BH = BaseH * Grow;
-	const float BX = CenterX - BW * 0.5f, BY = CenterY - BH * 0.5f;
-	const float Stripe = BH * 0.17f;
-	DCUI::ClapperStripes(Canvas, BX, BY, BW, Stripe);
-	const FLinearColor ButtonFill = FMath::Lerp(FLinearColor(0.02f, 0.02f, 0.03f, 0.85f), FLinearColor(1.f, 0.74f, 0.3f, 0.95f), StartHover);
-	const float Gap = 2.f * S;
-	DCUI::Rect(Canvas, BX, BY + Stripe + Gap, BW, BH - Stripe - Gap, ButtonFill);
-	DCUI::Outline(Canvas, BX, BY + Stripe + Gap, BW, BH - Stripe - Gap, FMath::Max(2.5f * S, 2.f), DCUI::Gold);
-	// The label fills about half the button's face.
-	const float TextSize = (BH - Stripe) * 0.5f / FMath::Max(S * TextScale, KINDA_SMALL_NUMBER);
-	const float TextY = BY + Stripe + (BH - Stripe - Px(TextSize) * 1.2f) * 0.5f;
-	Label(Layout.StartText, CenterX, TextY, FMath::Lerp(DCUI::Ivory, FLinearColor(0.08f, 0.07f, 0.07f), StartHover), TextSize, EAlign::Center,
-		StartHover < 0.5f, BW - 16.f * S);
-	AddHitBox(FVector2D(BaseX, BaseY), FVector2D(BaseW, BaseH), StartButton, true);
-
-	if (Layout.bShowEnterHint)
-	{
-		const float HintW = KeyHint(TEXT("ENTER"), TEXT("Start"), 0.f, 0.f, Small, DCUI::Ivory, false);
-		KeyHint(TEXT("ENTER"), TEXT("Start"), CenterX - HintW * 0.5f, BaseY + BaseH + 28.f * S, Small, WithAlpha(DCUI::Ivory, 0.8f));
-	}
+	const float Breath = 0.75f + 0.25f * FMath::Sin(Now * 2.5f);
+	float X = CenterX - (BeforeW + Gap + KeyW + Gap + AfterW) * 0.5f;
+	DCUI::Text(Canvas, GetTextFont(), Before, X, CenterY - TextPx * 0.6f, TextPx, WithAlpha(DCUI::Ivory, Breath));
+	X += BeforeW + Gap;
+	DCUI::Rect(Canvas, X, CenterY - KeyH * 0.5f, KeyW, KeyH, FLinearColor(0.02f, 0.02f, 0.03f, 0.85f));
+	DCUI::Outline(Canvas, X, CenterY - KeyH * 0.5f, KeyW, KeyH, FMath::Max(3.f * S, 2.f), WithAlpha(DCUI::Gold, Breath));
+	DCUI::Text(Canvas, GetTextFont(), Key, X + KeyPad, CenterY - KeyPx * 0.6f, KeyPx, DCUI::Gold, EAlign::Left, false);
+	X += KeyW + Gap;
+	DCUI::Text(Canvas, GetTextFont(), After, X, CenterY - TextPx * 0.6f, TextPx, WithAlpha(DCUI::Ivory, Breath));
 }
 
 void ADCZombieHUD::DrawCutscene(ADCZombieDirector* D)
@@ -440,24 +452,24 @@ void ADCZombieHUD::DrawCutscene(ADCZombieDirector* D)
 		DCUI::Disc(Canvas, Spot, H * (0.62f - i * 0.08f), FLinearColor(1.f, 0.78f, 0.45f, 0.035f), 64);
 	}
 
-	// The director, large, rising out of the bottom of the frame. Each new line pops him in (back-out ease).
+	// Cinema framing: a soft dark edge and slim letterbox bars.
+	DCUI::Vignette(Canvas, 0.f, 0.f, W, H, H * 0.3f, FLinearColor(0.f, 0.f, 0.f, 0.6f));
+	const float Bar = H * 0.06f;
+	DCUI::Rect(Canvas, 0.f, 0.f, W, Bar, FLinearColor::Black);
+	DCUI::Rect(Canvas, 0.f, H - Bar, W, Bar, FLinearColor::Black);
+
+	// The director, large, standing in front of the bottom bar. Each new line pops him in (back-out ease).
 	float PortraitRight = W * 0.4f;
 	if (UTexture2D* Portrait = Line->Portrait)
 	{
 		const float T = FMath::Clamp(Since / 0.35f, 0.f, 1.f) - 1.f;
 		const float Pop = 1.f + 2.70158f * T * T * T + 1.70158f * T * T;
-		const float PH = H * 0.78f * (0.88f + 0.12f * Pop);
+		const float PH = H * 0.8f * (0.88f + 0.12f * Pop);
 		const float PW = PH * (Portrait->GetSurfaceHeight() > 0.f ? Portrait->GetSurfaceWidth() / Portrait->GetSurfaceHeight() : 1.f);
 		const float PX = Spot.X - PW * 0.5f;
 		DrawTexture(Portrait, PX, H - PH, PW, PH, 0.f, 0.f, 1.f, 1.f);
 		PortraitRight = PX + PW;
 	}
-
-	// Cinema framing: a soft dark edge and letterbox bars.
-	DCUI::Vignette(Canvas, 0.f, 0.f, W, H, H * 0.3f, FLinearColor(0.f, 0.f, 0.f, 0.6f));
-	const float Bar = H * 0.1f;
-	DCUI::Rect(Canvas, 0.f, 0.f, W, Bar, FLinearColor::Black);
-	DCUI::Rect(Canvas, 0.f, H - Bar, W, Bar, FLinearColor::Black);
 
 	// His speech bubble on the right, sized to the wrapped line.
 	const float Pad = 30.f * S;
@@ -503,7 +515,12 @@ void ADCZombieHUD::DrawCutscene(ADCZombieDirector* D)
 	if (Remaining >= -1 && FMath::Fmod(GetWorld()->GetRealTimeSeconds(), 1.f) < 0.7f) // -1: every character shown
 	{
 		const float HintW = KeyHint(TEXT("ENTER"), TEXT("Continue"), 0.f, 0.f, Small, Ink, false);
-		KeyHint(TEXT("ENTER"), TEXT("Continue"), BX + BW - Pad - HintW, BY + BH - Pad - HintH * 0.85f, Small, Ink);
+		const float HintX = BX + BW - Pad - HintW;
+		const float HintY = BY + BH - Pad - HintH * 0.85f;
+		// A dark key cap, so the gold key reads on the cream paper.
+		const float KeyW = DCUI::Measure(Canvas, GetTextFont(), TEXT("ENTER"), Px(Small) * 0.82f).X + 16.f * S;
+		DCUI::Rect(Canvas, HintX, HintY, KeyW, Px(Small) * 1.2f, Ink);
+		KeyHint(TEXT("ENTER"), TEXT("Continue"), HintX, HintY, Small, Ink);
 	}
 }
 
@@ -523,8 +540,8 @@ void ADCZombieHUD::DrawReferenceCut(ADCZombieDirector* D)
 
 	const float TopY = (Bar - Px(Small) * 1.2f) * 0.5f;
 	const FString Map = UGameplayStatics::GetCurrentLevelName(this, true);
-	const FString ReferenceTitle = Map.Contains(TEXT("Act1")) ? TEXT("STAGE 1 REFERNCE CUT")
-		: Map.Contains(TEXT("Act2")) ? TEXT("STAGE 2 REFERNCE CUT") : TEXT("REFERNCE CUT");
+	const FString ReferenceTitle = Map.Contains(TEXT("Act1")) ? TEXT("STAGE 1 REFERENCE CUT")
+		: Map.Contains(TEXT("Act2")) ? TEXT("STAGE 2 REFERENCE CUT") : TEXT("REFERENCE CUT");
 	Label(ReferenceTitle, W * 0.5f, TopY, DCUI::Gold, Small, EAlign::Center);
 
 	// The storyboard line for the beat on screen, as a subtitle.

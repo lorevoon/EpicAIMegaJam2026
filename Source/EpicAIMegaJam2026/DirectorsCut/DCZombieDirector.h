@@ -47,7 +47,7 @@ public:
 
 
 	// HUD
-	/** The main menu's START: fades out of the menu into the intro. */
+	/** Enter on the main menu: fades out of the menu into the intro. */
 	void StartFromMenu();
 	/** While planning and looking through a camera: storyboard beats it frames at the scrubbed time. */
 	void GetPlanPreview(TArray<FString>& OutFramedBeats) const;

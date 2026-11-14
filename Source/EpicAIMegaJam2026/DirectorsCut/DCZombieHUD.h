@@ -21,8 +21,6 @@ public:
 	ADCZombieHUD();
 
 	virtual void DrawHUD() override;
-	/** The main menu's START button. */
-	virtual void NotifyHitBoxClick(FName BoxName) override;
 
 	/** Main menu background (covers the screen, cropped to fit). */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
@@ -81,6 +79,10 @@ public:
 private:
 	/** The main menu: the background image drifting slowly, the title, and a START button (a clickable hit box). */
 	void DrawMainMenu(ADCZombieDirector* D);
+	/** Where the HUD's canvas sits in the window: the width of the black bars around the fixed-aspect view. */
+	FVector2D GetBarsOffset() const;
+	/** Paints the black bars around the fixed-aspect view back to black, hiding anything drawn past its edges. */
+	void MaskOutsideView();
 	/** Everything but the menu and cutscenes: the current phase's HUD. */
 	void DrawPhase(ADCZombieDirector* D);
 	/**
@@ -138,8 +140,6 @@ private:
 	ADCZombieDirector* FindDirector();
 
 	TWeakObjectPtr<ADCZombieDirector> Director;
-	/** How far the START button is into its hover state (0-1), eased. */
-	float StartHover = 0.f;
 	/** The likeness shown (eased toward the live one so the colour doesn't flicker), and the vignette's fade. */
 	float ShownLikeness = 0.f;
 	float VignetteFade = 0.f;

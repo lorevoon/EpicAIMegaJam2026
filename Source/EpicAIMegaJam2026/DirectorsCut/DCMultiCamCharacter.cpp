@@ -30,6 +30,8 @@ ADCMultiCamCharacter::ADCMultiCamCharacter()
 	Camera->SetRelativeLocation(FVector(0.f, 0.f, 64.f));
 	Camera->bUsePawnControlRotation = true;
 	Camera->SetFieldOfView(75.f);
+	Camera->SetConstraintAspectRatio(true);
+	Camera->SetAspectRatio(DCFrame::ScreenAspect);
 	Camera->PostProcessSettings.bOverride_MotionBlurAmount = true;
 	Camera->PostProcessSettings.MotionBlurAmount = 0.f;
 

@@ -11,6 +11,12 @@ class ADCPerformer;
 namespace DCFrame
 {
 	/**
+	 * The game always renders at this shape: every camera keeps it, and a window of any other shape gets black bars
+	 * (letterbox or pillarbox) instead of a stretched or cropped view, so the HUD and the framing look the same everywhere.
+	 */
+	constexpr float ScreenAspect = 16.f / 9.f;
+
+	/**
 	 * Aspect ratio of the film. The screen of the field monitor drawn around the live frame is 912 x 430 px, so the
 	 * recording, the review playback, and its letterbox are all 912:430 (about 2.12:1).
 	 */

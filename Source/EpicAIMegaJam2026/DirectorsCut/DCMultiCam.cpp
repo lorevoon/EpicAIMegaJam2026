@@ -1,6 +1,7 @@
 // Director's Cut - fixed camera.
 
 #include "DCMultiCam.h"
+#include "DCTypes.h"
 #include "DCRail.h"
 #include "DCVisuals.h"
 #include "Camera/CameraComponent.h"
@@ -41,6 +42,8 @@ ADCMultiCam::ADCMultiCam()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(Head);
 	Camera->SetFieldOfView(DefaultFOV);
+	Camera->SetConstraintAspectRatio(true);
+	Camera->SetAspectRatio(DCFrame::ScreenAspect);
 	// FOV is the horizontal angle across the whole screen, on any screen shape. The engine's default (Maintain Y FOV)
 	// would rescale it by the window's aspect, and then the live view would no longer match the capture-frame math
 	// (DCFrame), the zombie and beat checks, or the review playback.

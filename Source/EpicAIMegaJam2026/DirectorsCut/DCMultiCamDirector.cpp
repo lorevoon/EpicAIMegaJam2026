@@ -174,10 +174,6 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	TickFade(DeltaSeconds);
-	if (bInMainMenu && !bMenuCursorShown)
-	{
-		SetMenuCursor(true);
-	}
 
 	for (ADCMultiCam* Cam : Cameras)
 	{
@@ -1243,16 +1239,7 @@ int32 ADCMultiCamDirector::GetPendingRailPoints() const
 
 float ADCMultiCamDirector::GetViewAspect() const
 {
-	if (APlayerController* PC = GetPC())
-	{
-		int32 W = 0, H = 0;
-		PC->GetViewportSize(W, H);
-		if (W > 0 && H > 0)
-		{
-			return float(W) / float(H);
-		}
-	}
-	return 16.f / 9.f;
+	return DCFrame::ScreenAspect; // every gameplay camera keeps this shape, whatever the window's
 }
 
 void ADCMultiCamDirector::UpdateFrameParams()

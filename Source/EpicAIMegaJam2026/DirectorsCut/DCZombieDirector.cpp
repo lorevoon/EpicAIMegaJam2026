@@ -56,7 +56,6 @@ void ADCZombieDirector::StartFromMenu()
 	FadeThrough([this]()
 	{
 		bInMainMenu = false;
-		SetMenuCursor(false);
 		PlayIntro();
 	});
 }
