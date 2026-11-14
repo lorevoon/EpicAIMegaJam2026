@@ -22,14 +22,24 @@ def save(name,a):
 def fade(a,d=.025):
  n=min(len(a)//2,int(d*RATE));a[:n]*=np.linspace(0,1,n)[:,None];a[-n:]*=np.linspace(1,0,n)[:,None];return a
 lines=[];events=[];voice=np.zeros((N,2));effects=np.zeros_like(voice);bed=np.zeros_like(voice)
-spec=[('Mr. Smith','Warning','1.fire-watch-out-bill.mp3',.25),('Mr. Smith','Death','2. death-scream (mp3cut.net).mp3',7.5),('Romeo','ShortNo','george-short-no.mp3',10.0),('Romeo','RunJuliet','4. run-juliet-scream (mp3cut.net).mp3',None),('Juliet','NotLeaving','5. not-leaving-you.mp3',None),('Romeo','SwordCry','6. george-sword-slash-scream.mp3',19.35),('Juliet','RomeoCry','7. romeo-scream.mp3',26.15),('Romeo','Goodbye','8. george-dying-goodbye.mp3',28.25),('Juliet','Sobbing','10. intense-sobbing.mp3',26.4)]
+spec=[('Mr. Smith','Warning','1.fire-watch-out-bill.mp3',.25),('Mr. Smith','Death','2. death-scream (mp3cut.net).mp3',7.5),('Romeo','ShortNo','george-short-no.mp3',10.0),('Romeo','RunJuliet','4. run-juliet-scream (mp3cut.net).mp3',None),('Juliet','NotLeaving','5. not-leaving-you.mp3',None),('Romeo','SwordCry','6. george-sword-slash-scream.mp3',19.35),('Juliet','RomeoCry','7. romeo-scream.mp3',26.15),('Romeo','Goodbye','8. george-dying-goodbye.mp3',28.25),('Juliet','YouPromised','you-promised-agony.mp3',None),('Juliet','Sobbing','10. intense-sobbing.mp3',26.4)]
 for who,name,file,start in spec:
  # Chain the reaction exchange tightly using the actual trimmed recording lengths.
- if start is None:start=lines[-1]['end']+.04
- a,trim=decode(file,True);a=a[:N-round(start*RATE)];a=fade(a);peak=float(np.max(np.abs(a)));a*=min(3,.68/max(peak,.001))
+ if start is None:start=lines[-1]['end']+(.08 if name=='YouPromised' else .04)
+ if name=='YouPromised':
+  # Two local ASR passes plus cropped-segment checks identify the first 3.45s as
+  # nonverbal sobs. Preserve every word and trailing sobs at original speed.
+  a,_=decode(file,False);trim=3.45;a=a[round(trim*RATE):round(8.30*RATE)]
+  assert start+len(a)/RATE<38,'Never truncate the final spoken line to fit the take.'
+ else:a,trim=decode(file,True)
+ a=a[:N-round(start*RATE)];a=fade(a);peak=float(np.max(np.abs(a)));a*=min(3,.68/max(peak,.001))
  if name=='Sobbing':
   # Keep sobbing beneath the spoken farewell, then let it carry the silent ending.
-  ts=start+np.arange(len(a))/RATE;gain=.24+.38*np.clip((ts-32.93)/.35,0,1);a*=gain[:,None];fade(a,.22)
+  ts=start+np.arange(len(a))/RATE;gain=.24+.38*np.clip((ts-32.93)/.35,0,1)
+  for spoken in lines:
+   if spoken['name']=='YouPromised':
+    weight=np.minimum(np.clip((ts-spoken['start']+.10)/.10,0,1),np.clip((spoken['end']+.15-ts)/.15,0,1));gain*=1-.85*weight
+  a*=gain[:,None];fade(a,.22)
  save(name,a);off=round(start*RATE);voice[off:off+len(a)]+=a
  mono=a.mean(axis=1);gate=[]
  for f in range(1141):

@@ -107,3 +107,14 @@ Studio repair (2026-11-14):
 - Stage 2 camera operator start marker remains at its original spawn position but hidden geometry removes its white disc.
 - Both MI_Act2_OrcOpaque materials explicitly enable skeletal-mesh usage. Without this UE5.8 substituted default materials. Rebuild script preserves the flag.
 - Validation: Saved/Act2/StudioRepair/validation.json; editor set and actual opening PIE screenshots in same folder. All five orc material assignments verified after reload.
+
+Acting/camera/audio revision 4 (2026-11-14):
+- Smith opening root height is corrected per frame through7s from actual toe/landscape contact; starts97.84cm higher. Original death transforms resume7.2s. Box lifted28.28cm.
+- Romeo/Juliet Reacting head/neck aim stays on Smith10–13s. Reaction camera moved northeast to(-4550,-8500,1430), viewing their backs.
+- Four camera angles cover five scenes. Fight/fall/Juliet approach share(-5750,-10100,1231); ending follows smoothly over29-30.5s without a position cut. Editable sequence has4camera cuts.
+- Authored DCZoomStart/DCZoomEnd/DCEndFOV provide eased entrance push-in, running/fall zoom-outs, final push-in.
+- Slow impact windows7.0–7.3 and25.0–25.9. DCDialogue=start:end tags protect all voiced intervals at exactly1x; duration compensation occurs only during unvoiced action.26–38 entirely natural speed.
+- Juliet supplied you-promised-agony.mp3 plays33.01–37.86 after Romeo goodbye. Only initial nonverbal sobs shortened(raw3.45–8.30 retained), no time-stretch. Total38s. New AudioFacesV4 soundtrack/Juliet mouth rig; other corrected bones and closed eyes preserved.
+- Regenerate in order: author_act2_continuous_camera.py then finish_act2_revision4.py. Validate with validate_act2_revision4.py and DirectorsCut.Reference.AuthoredRaid; optional -Act2VisualQA renders runtime evidence.
+
+Validation completed: C++ build succeeded; DirectorsCut.Reference.AuthoredRaid and DirectorsCut.Dialogue.SceneClock passed; saved-asset validation passed. Runtime screenshots: Saved/Act2/ActingRevision4/reference_*.png.

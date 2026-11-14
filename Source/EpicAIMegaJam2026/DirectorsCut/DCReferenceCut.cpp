@@ -259,10 +259,18 @@ void ADCMultiCamDirector::BuildReferenceCut()
 
 	// Authored cameras let a scene use several angles without adding scoring beats.
 	// Levels without these tags retain the original automatic reference solver.
-	struct FShot { int32 Beat = INDEX_NONE; FVector Location; float FOV = 0.f; float CleanFrom = 0.f; float Cut = 0.f; };
+	struct FShot
+	{
+		int32 Beat = INDEX_NONE;
+		FVector Location;
+		float FOV = 0.f, CleanFrom = 0.f, Cut = 0.f;
+		float EndFOV = 0.f, ZoomStart = 0.f, ZoomEnd = 0.f;
+		bool bContinue = false;
+	};
 	struct FSpeedWindow { float Start = 0.f; float End = 0.f; float Rate = 1.f; };
 	TArray<FShot> Shots;
 	TArray<FSpeedWindow> SpeedWindows;
+	TArray<FVector2D> DialogueWindows;
 	for (TActorIterator<ACameraActor> It(GetWorld()); It; ++It)
 	{
 		const ACameraActor* Camera = *It;
@@ -281,7 +289,23 @@ void ADCMultiCamDirector::BuildReferenceCut()
 		float TaggedFOV = Shot.FOV;
 		if (TagFloat(Camera, TEXT("DCFOV"), TaggedFOV)) Shot.FOV = TaggedFOV;
 		Shot.FOV = FMath::Clamp(Shot.FOV, ADCMultiCam::MinFOV, ADCMultiCam::MaxFOV);
+		Shot.EndFOV = Shot.FOV;
+		TagFloat(Camera, TEXT("DCEndFOV"), Shot.EndFOV);
+		Shot.EndFOV = FMath::Clamp(Shot.EndFOV, ADCMultiCam::MinFOV, ADCMultiCam::MaxFOV);
+		TagFloat(Camera, TEXT("DCZoomStart"), Shot.ZoomStart);
+		TagFloat(Camera, TEXT("DCZoomEnd"), Shot.ZoomEnd);
+		Shot.bContinue = Camera->ActorHasTag(TEXT("DCContinueShot"));
 		Shots.Add(Shot);
+		for (const FName Tag : Camera->Tags)
+		{
+			const FString Text = Tag.ToString();
+			FString Start, End;
+			float From = 0.f, To = 0.f;
+			if (Text.StartsWith(TEXT("DCDialogue=")) && Text.Mid(11).Split(TEXT(":"), &Start, &End)
+				&& LexTryParseString(From, *Start) && LexTryParseString(To, *End)
+				&& FMath::IsFinite(From) && FMath::IsFinite(To) && To > From)
+				DialogueWindows.Add(FVector2D(From, To));
+		}
 		FSpeedWindow Speed;
 		if (TagFloat(Camera, TEXT("DCSlowStart"), Speed.Start) && TagFloat(Camera, TEXT("DCSlowEnd"), Speed.End)
 			&& TagFloat(Camera, TEXT("DCSlowRate"), Speed.Rate) && Speed.Start >= 0.f && Speed.End > Speed.Start
@@ -333,6 +357,8 @@ void ADCMultiCamDirector::BuildReferenceCut()
 	FRotator Aim = FRotator::ZeroRotator;
 	int32 ShotIndex = -1;
 	float FilmTime = 0.f;
+	TArray<float> Rates;
+	float ExtraTime = 0.f, CompensableTime = 0.f;
 	for (int32 n = 0; n < NumFrames; ++n)
 	{
 		const float Time = FMath::Min(n / FilmRate, TakeDuration);
@@ -343,33 +369,53 @@ void ADCMultiCamDirector::BuildReferenceCut()
 		}
 		const FShot& Shot = Shots[Active];
 		EvaluatePerformers(Time);
-		const FRotator Target = LookAt(Shot.Location, AnchorCentroid(Beats[Shot.Beat]));
-		Aim = Active != ShotIndex ? Target : FMath::RInterpTo(Aim, Target, 1.f / FilmRate, 6.f);
+		FVector Focus = AnchorCentroid(Beats[Shot.Beat]);
+		if (Shot.bContinue && Active > 0)
+		{
+			const float FollowAlpha = FMath::SmoothStep(Shot.Cut, Shot.Cut + 1.5f, Time);
+			Focus = FMath::Lerp(AnchorCentroid(Beats[Shots[Active - 1].Beat]), Focus, FollowAlpha);
+		}
+		const FRotator Target = LookAt(Shot.Location, Focus);
+		Aim = Active != ShotIndex && !Shot.bContinue ? Target : FMath::RInterpTo(Aim, Target, 1.f / FilmRate, 6.f);
 		ShotIndex = Active;
 
 		FDCTakeSample& Sample = ReferenceCut.AddDefaulted_GetRef();
 		Sample.Time = Time;
+		float Rate = 1.f;
 		if (n > 0)
 		{
 			const float StepStart = ReferenceCut[n - 1].Time;
 			const float Midpoint = (StepStart + Time) * .5f;
-			float Rate = 1.f;
-			for (const FSpeedWindow& Speed : SpeedWindows)
-				if (Midpoint >= Speed.Start && Midpoint < Speed.End) Rate = FMath::Min(Rate, Speed.Rate);
-			FilmTime += (Time - StepStart) / Rate;
+			const bool bDialogue = DialogueWindows.ContainsByPredicate([StepStart, Time](const FVector2D& W)
+				{ return StepStart < W.Y && Time > W.X; });
+			if (!bDialogue)
+			{
+				for (const FSpeedWindow& Speed : SpeedWindows)
+					if (Midpoint >= Speed.Start && Midpoint < Speed.End) Rate = FMath::Min(Rate, Speed.Rate);
+				if (Rate == 1.f) CompensableTime += Time - StepStart;
+				else ExtraTime += (Time - StepStart) * (1.f / Rate - 1.f);
+			}
+			// Zero marks ordinary non-dialogue frames eligible for duration compensation.
+			Rates.Add(!bDialogue && Rate == 1.f ? 0.f : Rate);
 		}
+		else Rates.Add(1.f);
 		Sample.FilmTime = FilmTime;
 		Sample.Slot = Active;
 		Sample.Location = Shot.Location;
 		Sample.Rotation = Aim;
-		Sample.FilmFOV = DCFrame::CaptureFOV(Shot.FOV, Aspect);
+		const float ZoomAlpha = Shot.ZoomEnd > Shot.ZoomStart
+			? FMath::SmoothStep(Shot.ZoomStart, Shot.ZoomEnd, Time) : 0.f;
+		Sample.FilmFOV = DCFrame::CaptureFOV(FMath::Lerp(Shot.FOV, Shot.EndFOV, ZoomAlpha), Aspect);
 	}
-	// Preserve the stage's total running time: brief impact slow-motion is balanced
-	// by a small speed-up elsewhere. All scene samples, including the ending, remain.
-	if (!SpeedWindows.IsEmpty() && FilmTime > 0.f)
+	// Pay for impact slow motion only in silent action. Speech stays at exactly 1x,
+	// so the combined soundtrack never pitches down a scream or spoken line.
+	const float CompensationRate = CompensableTime > ExtraTime + KINDA_SMALL_NUMBER
+		? CompensableTime / (CompensableTime - ExtraTime) : 1.f;
+	for (int32 n = 1; n < ReferenceCut.Num(); ++n)
 	{
-		const float Scale = TakeDuration / FilmTime;
-		for (FDCTakeSample& Sample : ReferenceCut) Sample.FilmTime *= Scale;
+		const float Rate = Rates[n] == 0.f ? CompensationRate : Rates[n];
+		FilmTime += (ReferenceCut[n].Time - ReferenceCut[n - 1].Time) / Rate;
+		ReferenceCut[n].FilmTime = FilmTime;
 	}
 	for (const FShot& Shot : Shots)
 	{
