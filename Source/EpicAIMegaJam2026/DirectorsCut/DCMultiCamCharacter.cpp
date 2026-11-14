@@ -89,7 +89,6 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Input->BindAction(Sprint, ETriggerEvent::Completed, this, &ADCMultiCamCharacter::OnSprintReleased);
 	UInputAction* Primary = MapButton(EKeys::LeftMouseButton);
 	Input->BindAction(Primary, ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnPrimary);
-	Input->BindAction(Primary, ETriggerEvent::Completed, this, &ADCMultiCamCharacter::OnPrimaryReleased);
 	Input->BindAction(MapButton(EKeys::RightMouseButton), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnSecondary);
 	Input->BindAction(MapButton(EKeys::Enter), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnStartTake);
 	Input->BindAction(MapButton(EKeys::R), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRestart);
@@ -104,7 +103,6 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Mapping->MapKey(Scrub, EKeys::Q).Modifiers.Add(NewObject<UInputModifierNegate>(this));
 	Mapping->MapKey(Scrub, EKeys::Left).Modifiers.Add(NewObject<UInputModifierNegate>(this));
 	Input->BindAction(Scrub, ETriggerEvent::Triggered, this, &ADCMultiCamCharacter::OnScrub);
-	Input->BindAction(MapButton(EKeys::T), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleTool);
 	Input->BindAction(MapButton(EKeys::LeftBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, -1);
 	Input->BindAction(MapButton(EKeys::RightBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, 1);
 	UInputAction* JumpOrTransport = MapButton(EKeys::SpaceBar);
@@ -219,14 +217,6 @@ void ADCMultiCamCharacter::OnPrimary()
 	}
 }
 
-void ADCMultiCamCharacter::OnPrimaryReleased()
-{
-	if (ADCMultiCamDirector* D = GetDirector())
-	{
-		D->HandlePrimaryReleased();
-	}
-}
-
 void ADCMultiCamCharacter::OnSecondary()
 {
 	if (ADCMultiCamDirector* D = GetDirector())
@@ -272,14 +262,6 @@ void ADCMultiCamCharacter::OnScrub(const FInputActionValue& Value)
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleScrub(Value.Get<float>() * GetWorld()->GetDeltaSeconds() * D->KeyScrubRate);
-	}
-}
-
-void ADCMultiCamCharacter::OnCycleTool()
-{
-	if (ADCMultiCamDirector* D = GetDirector())
-	{
-		D->HandleCycleTool();
 	}
 }
 

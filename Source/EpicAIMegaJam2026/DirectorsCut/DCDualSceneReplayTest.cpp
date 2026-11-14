@@ -65,16 +65,16 @@ bool FDCDualSceneReplayTest::RunTest(const FString& Parameters)
 		D->ResetScene();
 		TestTrue(TEXT("Reset rewinds actor to authored start"), Romeo->GetActorLocation().Equals(StartPosition));
 		TestTrue(TEXT("Reset resumes normal rehearsal"), D->IsRehearsalPlaying() && D->GetRehearsalSpeed() == 1.f);
-		// Both camera types move in a bounded horizontal disc and keep independent presets.
+		// Cameras move in a bounded horizontal disc and keep independent presets.
 		TArray<ADCMultiCam*> FreeCameras;
 		TArray<int32> FreeSlots;
 		for (int32 Index=0; Index<3; ++Index)
 		{
-			const bool Crane = Index==1;
+			const bool bLookDown = Index==1;
 			const FVector Floor(Index*2000.f, 0.f, 10000.f);
-			ADCMultiCam* C = D->SpawnCamera(Floor+FVector(0,0,Crane ? ADCMultiCam::CraneHeight : ADCMultiCam::StaticHeight));
-			C->Setup(Index+1, Floor, Crane ? EDCCamRig::Crane : EDCCamRig::Static);
-			C->SetAim(FRotator(Crane ? -90.f : 0.f,90.f,0.f));
+			ADCMultiCam* C = D->SpawnCamera(Floor+FVector(0,0,ADCMultiCam::StaticHeight));
+			C->Setup(Index+1, Floor);
+			C->SetAim(FRotator(bLookDown ? -90.f : 0.f,90.f,0.f));
 			const FVector Center=C->GetActorLocation();
 			C->MoveLocal(FVector2D(0,1),.5f);
 			TestTrue(TEXT("W follows camera yaw even looking straight down"),C->GetActorLocation().Y>Center.Y);
@@ -86,7 +86,7 @@ bool FDCDualSceneReplayTest::RunTest(const FString& Parameters)
 			C->MoveLocal(FVector2D(-1,-1),.3f); C->AddAim(30,10);
 			C->RestoreHome();
 			TestTrue(TEXT("Retry restores prepared camera position"),C->GetActorLocation().Equals(Preset,.01f));
-			TestTrue(TEXT("Retry restores prepared camera angle"),C->GetAim().Equals(FRotator(Crane ? -90.f : 0.f,90.f,0.f),.01f));
+			TestTrue(TEXT("Retry restores prepared camera angle"),C->GetAim().Equals(FRotator(bLookDown ? -90.f : 0.f,90.f,0.f),.01f));
 			TestNull(TEXT("New camera needs no rail"),C->GetRail());
 			FreeSlots.Add(D->Cameras.Add(C)); FreeCameras.Add(C);
 		}
@@ -124,17 +124,16 @@ bool FDCDualSceneReplayTest::RunTest(const FString& Parameters)
 		D->Cameras.Add(Cam);
 		D->ViewingSlot = D->Cameras.Num()-1;
 		D->Phase = EDCPhase::Filming;
-		// Exercise 60 fps motion, zoom, a hard camera cut, and a recording pause.
+		// Exercise 60 fps motion, zoom, and a hard camera cut.
 		for (int32 Frame=0; Frame<=1200; ++Frame)
 		{
 			D->SceneTime = Frame/60.f;
-			D->bRecordingPauseHeld = Frame>=300 && Frame<360;
 			Cam->GetCamera()->SetWorldLocationAndRotation(FVector(900+Frame*.2,-1200+Frame*.1,250+Frame*.03), FRotator(-5,45+Frame*.04,0));
 			Cam->GetCamera()->SetFieldOfView(75-Frame*.02);
 			if (Frame==600) { D->Cameras.Add(Cam); D->ViewingSlot=D->Cameras.Num()-1; }
-			D->RecordSample(Frame==0 ? 0.f : 1.f/60.f);
+			D->RecordSample();
 		}
-		TestEqual(TEXT("Paused frames omitted"), D->Recording.Num(), 1141);
+		TestEqual(TEXT("Every frame recorded"), D->Recording.Num(), 1201);
 		ADCRail* UnattachedRail = World->SpawnActor<ADCRail>();
 		TMap<ADCPerformer*,FTransform> CastBefore;
 		for (ADCPerformer* Actor : D->Performers) CastBefore.Add(Actor,Actor->GetActorTransform());

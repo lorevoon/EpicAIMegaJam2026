@@ -450,7 +450,7 @@ void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
 	X += ChipW + 16.f * S;
 	if (Phase == EDCPhase::Filming)
 	{
-		const bool bBlink = D->IsRecordingPaused() || FMath::Fmod(GetWorld()->GetRealTimeSeconds(), 1.f) < 0.6f;
+		const bool bBlink = FMath::Fmod(GetWorld()->GetRealTimeSeconds(), 1.f) < 0.6f;
 		DCUI::Disc(Canvas, FVector2D(X + 10.f * S, Mid), 10.f * S, bBlink ? DCUI::Rec : WithAlpha(DCUI::Rec, 0.3f));
 		X += 30.f * S;
 	}
@@ -467,9 +467,7 @@ void ADCZombieHUD::DrawHeader(ADCZombieDirector* D)
 	// Right: the camera about to be placed.
 	if (Phase == EDCPhase::Preparation)
 	{
-		const EDCCamTool Tool = D->GetTool();
-		Label(FString::Printf(TEXT("%s  %.0f cm   |   %d camera%s"), Tool == EDCCamTool::Crane ? TEXT("CRANE") : TEXT("STATIC"),
-			D->GetPendingHeight(), D->GetCameraCount(), D->GetCameraCount() == 1 ? TEXT("") : TEXT("s")),
+		Label(FString::Printf(TEXT("HEIGHT %.0f cm   |   %d camera%s"), D->GetPendingHeight(), D->GetCameraCount(), D->GetCameraCount() == 1 ? TEXT("") : TEXT("s")),
 			W - 24.f * S, Mid - Px(Small) * 0.62f, DCUI::Ivory, Small, EAlign::Right, true, W * 0.28f);
 	}
 }
@@ -613,28 +611,18 @@ void ADCZombieHUD::DrawFraming(ADCZombieDirector* D)
 	{
 		const float RX = R - 24.f * S;
 		const float RY = T + 20.f * S;
-		if (D->IsRecordingPaused())
+		const FVector2D Size = Label(TEXT("REC"), RX, RY, DCUI::Ivory, Body, EAlign::Right);
+		if (FMath::Fmod(GetWorld()->GetRealTimeSeconds(), 1.f) < 0.6f)
 		{
-			const float BarW = 12.f * S, BarH = Px(Body);
-			DCUI::Rect(Canvas, RX - 2.f * BarW - 10.f * S, RY, BarW, BarH, DCUI::Ivory);
-			DCUI::Rect(Canvas, RX - BarW, RY, BarW, BarH, DCUI::Ivory);
-			Label(TEXT("PAUSED"), RX - 2.f * BarW - 24.f * S, RY, DCUI::Ivory, Body, EAlign::Right);
-		}
-		else
-		{
-			const FVector2D Size = Label(TEXT("REC"), RX, RY, DCUI::Ivory, Body, EAlign::Right);
-			if (FMath::Fmod(GetWorld()->GetRealTimeSeconds(), 1.f) < 0.6f)
-			{
-				DCUI::Disc(Canvas, FVector2D(RX - Size.X - 22.f * S, RY + Size.Y * 0.5f), 11.f * S, DCUI::Rec);
-			}
+			DCUI::Disc(Canvas, FVector2D(RX - Size.X - 22.f * S, RY + Size.Y * 0.5f), 11.f * S, DCUI::Rec);
 		}
 	}
 
 	if (const ADCMultiCam* Cam = D->GetCameraSlot(D->GetViewingSlot()))
 	{
 		const float Mm = 18.f / FMath::Tan(FMath::DegreesToRadians(Cam->GetFOV() * 0.5f));
-		Label(FString::Printf(TEXT("CAM %d   |   %.0f mm   |   %s   |   WASD within %.1f m"), Cam->GetNumber(), Mm,
-			Cam->GetRig() == EDCCamRig::Crane ? TEXT("CRANE") : TEXT("STATIC"), Cam->GetMovementRadius() / 100.f),
+		Label(FString::Printf(TEXT("CAM %d   |   %.0f mm   |   WASD within %.1f m"), Cam->GetNumber(), Mm,
+			Cam->GetMovementRadius() / 100.f),
 			L, T - Px(Small) * 1.45f, D->GetPhase() == EDCPhase::Filming ? DCUI::Rec : DCUI::Ivory, Small, EAlign::Left, true, R - L);
 	}
 }
@@ -843,8 +831,8 @@ void ADCZombieHUD::DrawSlatePopup(const FString& Message)
 
 void ADCZombieHUD::DrawSwitcher(ADCZombieDirector* D)
 {
-	// One slate per camera (number + camera type). While placing, the camera about to be placed already has its
-	// slate, pulsing, showing the selected type (T switches it).
+	// One slate per camera, showing its number. While placing, the camera about to be placed already has its
+	// slate, pulsing.
 	const int32 PlaceSlot = D->GetPlacementSlot();
 	const int32 Count = FMath::Max(D->IsUnlimited() ? D->GetSlotCount() : D->MaxCameras, PlaceSlot + 1);
 	if (Count == 0)
@@ -878,20 +866,9 @@ void ADCZombieHUD::DrawSwitcher(ADCZombieDirector* D)
 		DCUI::ClapperStripes(Canvas, X, Y, BoxW, 10.f * S);
 		DCUI::Rect(Canvas, X, Y + 12.f * S, BoxW, BoxH - 12.f * S, Fill);
 		DCUI::Outline(Canvas, X, Y + 12.f * S, BoxW, BoxH - 12.f * S, bPlacing ? FMath::Max(2.5f * S, 2.f) : FMath::Max(1.5f * S, 1.f), Edge);
-		Label(FString::FromInt(i + 1), X + BoxW * 0.5f, Y + 14.f * S, Edge, Large, EAlign::Center, true, BoxW - 8.f * S);
-
-		// The placed camera's type, or (for the slate being placed) the type the next click will build.
-		if (Cam || bPlacing)
-		{
-			const bool bCrane = Cam ? Cam->GetRig() == EDCCamRig::Crane : D->GetTool() == EDCCamTool::Crane;
-			Label(bCrane ? TEXT("CRANE") : TEXT("STATIC"), X + BoxW * 0.5f, Y + 14.f * S + Px(Large) * 1.05f, Edge, Small * 0.8f,
-				EAlign::Center, true, BoxW - 8.f * S);
-		}
-		if (bPlacing)
-		{
-			const float HW = KeyHint(TEXT("T"), TEXT("Switch"), 0.f, 0.f, Small * 0.8f, DCUI::Gold, false);
-			KeyHint(TEXT("T"), TEXT("Switch"), X + (BoxW - HW) * 0.5f, Y - Px(Small * 0.8f) * 1.45f, Small * 0.8f, DCUI::Gold);
-		}
+		// The camera's number, centred in its slate.
+		const float NumberY = Y + 12.f * S + (BoxH - 12.f * S - Px(Large) * 1.2f) * 0.5f;
+		Label(FString::FromInt(i + 1), X + BoxW * 0.5f, NumberY, Edge, Large, EAlign::Center, true, BoxW - 8.f * S);
 		X += BoxW + Gap;
 	}
 }
@@ -909,7 +886,7 @@ void ADCZombieHUD::GetHelpLines(ADCZombieDirector* D, TArray<TArray<TPair<FStrin
 		}
 		else
 		{
-			OutLines.Add({ FHint(TEXT("T"), TEXT("Camera type")), FHint(TEXT("LMB"), TEXT("Place")), FHint(TEXT("RMB"), TEXT("Remove")),
+			OutLines.Add({ FHint(TEXT("LMB"), TEXT("Place")), FHint(TEXT("RMB"), TEXT("Remove")),
 				FHint(TEXT("WHEEL"), TEXT("Height")), FHint(TEXT("C"), TEXT("Clear")) });
 			OutLines.Add({ FHint(TEXT("1-9"), TEXT("Look through")), FHint(TEXT("Q/E"), TEXT("Scrub")), FHint(TEXT("H"), TEXT("Rehearsal")),
 				FHint(TEXT("TAB"), TEXT("Storyboard")) });
@@ -919,7 +896,7 @@ void ADCZombieHUD::GetHelpLines(ADCZombieDirector* D, TArray<TArray<TPair<FStrin
 	case EDCPhase::Countdown:
 	case EDCPhase::Filming:
 		OutLines.Add({ FHint(TEXT("1-9"), TEXT("Cut")), FHint(TEXT("MOUSE"), TEXT("Aim")), FHint(TEXT("WHEEL"), TEXT("Zoom")), FHint(TEXT("WASD"), TEXT("Move")) });
-		OutLines.Add({ FHint(TEXT("HOLD LMB"), TEXT("Pause recording")), FHint(TEXT("R"), TEXT("Restart")), FHint(TEXT("P"), TEXT("Pause")) });
+		OutLines.Add({ FHint(TEXT("R"), TEXT("Restart")), FHint(TEXT("P"), TEXT("Pause")) });
 		break;
 	default:
 		break;

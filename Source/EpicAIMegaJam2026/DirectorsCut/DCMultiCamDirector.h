@@ -25,15 +25,6 @@ class UAudioComponent;
 
 class ADCCinemaReplay;
 
-/** Which kind of camera the next placement builds. */
-UENUM()
-enum class EDCCamTool : uint8
-{
-	Static,
-	Dolly, // Legacy, no longer offered for placement.
-	Crane
-};
-
 /** Runtime state of one hidden beat. */
 struct FDCMultiCamBeat
 {
@@ -57,9 +48,9 @@ struct FDCTakeSample
 {
 	/** Scene time this frame was filmed at. */
 	float Time = 0.f;
-	/** Position in the finished film: scene time minus every second the recording was paused. */
+	/** Position in the finished film (the take is filmed straight through, so the same as Time for a recording). */
 	float FilmTime = 0.f;
-	/** First frame after a recording pause: playback jump-cuts here instead of blending from the previous frame. */
+	/** Playback jump-cuts here instead of blending from the previous frame. */
 	bool bJumpCut = false;
 	/** Camera slot that was live; a change between samples is a cut. */
 	int32 Slot = INDEX_NONE;
@@ -175,7 +166,7 @@ public:
 
 	/**
 	 * A storyboard scene is ticked off once a placed camera stands within this distance (across the ground) of its
-	 * reference-cut camera, and within ReferenceSpotHeightTolerance of its height (so a crane shot needs a crane).
+	 * reference-cut camera, and within ReferenceSpotHeightTolerance of its height (so a raised shot needs a raised stand).
 	 */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut", meta = (ClampMin = "10", Units = "cm"))
 	float ReferenceSpotRadius = 600.f;
@@ -263,10 +254,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (ClampMin = "0"))
 	int32 MaxCameras = 4;
 
-	/** Lets the player build dolly (rail) cameras as well as static ones. T switches the camera type. */
-	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras")
-	bool bAllowMovingRigs = false;
-
 	/** How far from a wall or ceiling a mounted camera sits. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (Units = "cm"))
 	float WallStandoff = 35.f;
@@ -311,14 +298,12 @@ public:
 
 	// Player commands. Look/zoom return true when they were applied to a camera instead of the walking view.
 	void HandlePrimaryPressed();
-	void HandlePrimaryReleased();
 	/** Right Mouse: removes the camera aimed at while walking, or steps back out of the camera being looked through. */
 	void HandleSecondaryPressed();
 	virtual void HandleStartTake();
 	virtual void HandleRestart();
 	/** W/S while looking through a dolly camera: travel along its rail. */
 	void HandleRigMove(FVector2D Axis, float DeltaSeconds);
-	void HandleCycleTool();
 	void HandleFinishRail();
 	void HandleCycleCamera(int32 Direction);
 	/** Wheel or Left/Right: scrub the film in review (the zombie director also scrubs its preparation timeline). */
@@ -351,7 +336,6 @@ public:
 	int32 GetCameraCount() const;
 	int32 GetSlotCount() const { return Cameras.Num(); }
 	bool IsUnlimited() const { return MaxCameras <= 0; }
-	EDCCamTool GetTool() const { return Tool; }
 	/**
 	 * Slot of the camera being placed right now: the dolly whose rail is still being laid, else the slot the next
 	 * click would fill (may be one past the end when cameras are unlimited). INDEX_NONE when not placing.
@@ -384,8 +368,6 @@ public:
 	bool IsFilmFinished() const { return IsReviewing() && SceneTime >= GetPremiereLength(); }
 	const TArray<FDCTakeSample>& GetRecording() const { return Recording; }
 	float GetPremiereLength() const { return Recording.Num() > 0 ? Recording.Last().FilmTime : 0.f; }
-	/** Left click held during the take: nothing is recorded, captured, or penalized until it's released. */
-	bool IsRecordingPaused() const { return Phase == EDCPhase::Filming && bRecordingPauseHeld; }
 	bool IsPremierePaused() const { return bPremierePaused; }
 
 	bool bShowNotebook = true;
@@ -427,7 +409,7 @@ protected:
 	TMap<TWeakObjectPtr<AActor>, bool> SetOnlyHiddenStates;
 
 	/** Appends what went out live this frame, or skips it (and marks a jump cut) while recording is paused. */
-	void RecordSample(float DeltaSeconds);
+	void RecordSample();
 	void StartPremiere();
 	void TickPremiere(float DeltaSeconds);
 	/** Re-shoots the recording at Time: performers to that moment, playback camera to the recorded pose. */
@@ -525,8 +507,6 @@ protected:
 	UPROPERTY()
 	TObjectPtr<ADCRail> PendingRail;
 
-	EDCCamTool Tool = EDCCamTool::Static;
-
 	UPROPERTY()
 	TArray<TObjectPtr<ADCPerformer>> Performers;
 
@@ -557,9 +537,6 @@ protected:
 	bool bPremierePaused = false;
 	bool bRehearsalPlaying = true;
 	float RehearsalSpeed = 1.f;
-	bool bRecordingPauseHeld = false;
-	float PausedSeconds = 0.f;
-	bool bJumpCutPending = false;
 
 	TArray<FDCMultiCamBeat> Beats;
 	FString SetupProblem;

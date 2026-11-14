@@ -84,14 +84,6 @@ void ADCMultiCamDirector::Cheer(int32 BeatIndex)
 void ADCMultiCamDirector::UpdateCoach()
 {
 	LiveLikeness = -1.f;
-	if (IsRecordingPaused())
-	{
-		if (bShowDirectorCoach)
-		{
-			Coach(TEXT("Paused"), EDCDirectorMood::Almost, { TEXT("We're not rolling! Let go and keep filming."), TEXT("Paused?! The actors are still acting!") });
-		}
-		return;
-	}
 	const ADCMultiCam* Live = GetCameraSlot(ViewingSlot);
 	FVector RefLocation;
 	FQuat RefQuat;

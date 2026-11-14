@@ -13,7 +13,6 @@ ADCZombieDirector::ADCZombieDirector()
 	TakeDuration = 60.f;
 	// As many cameras as you like, of any kind.
 	MaxCameras = 0;
-	bAllowMovingRigs = true;
 }
 
 void ADCZombieDirector::BeginPlay()

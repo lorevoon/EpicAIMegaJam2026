@@ -116,8 +116,8 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 			? Ground.ImpactPoint.Z : Spot.Z;
 		Candidates.Add({ FVector(Spot.X, Spot.Y, SpotFloor + 170.f), ADCMultiCam::DefaultFOV, true });
 	}
-	// Out to 20 m, at heights the player's rigs reach above the ground right under each spot (a stand at eye level,
-	// a raised stand, a crane) - measured from that ground, so every reference camera can be copied by a placed one.
+	// Out to 20 m, at heights the player's rigs reach above the ground right under each spot (a stand at eye level
+	// or raised) - measured from that ground, so every reference camera can be copied by a placed one.
 	const float RaisedStand = FMath::Min(300.f, MaxStandHeight);
 	for (const float Radius : { 500.f, 800.f, 1100.f, 1500.f, 2000.f })
 	{
@@ -129,7 +129,7 @@ bool ADCMultiCamDirector::FindReferenceShot(const FDCMultiCamBeat& State, FVecto
 			{
 				continue; // no ground to stand a camera on
 			}
-			for (const float Height : { ADCMultiCam::StaticHeight, RaisedStand, ADCMultiCam::CraneHeight })
+			for (const float Height : { ADCMultiCam::StaticHeight, RaisedStand })
 			{
 				Candidates.Add({ Ground.ImpactPoint + FVector(0.f, 0.f, Height) });
 			}

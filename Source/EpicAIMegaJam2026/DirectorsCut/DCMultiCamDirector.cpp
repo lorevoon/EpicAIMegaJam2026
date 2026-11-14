@@ -93,7 +93,7 @@ void ADCMultiCamDirector::BeginPlay()
 	PlaybackCamera->GetCameraComponent()->SetConstraintAspectRatio(true);
 
 	ResetScene();
-	Flash(IsUnlimited() ? FString(TEXT("Place as many cameras as you like. T switches between static and crane."))
+	Flash(IsUnlimited() ? FString(TEXT("Place as many cameras as you like. WASD adjusts position nearby; mouse aims."))
 		: FString::Printf(TEXT("Place up to %d cameras. WASD adjusts position nearby; mouse aims."), MaxCameras), 7.f);
 }
 
@@ -444,9 +444,6 @@ void ADCMultiCamDirector::ResetScene()
 	CoachKey = NAME_None;
 	CoachMood = EDCDirectorMood::Default;
 	bPremierePaused = false;
-	bRecordingPauseHeld = false;
-	PausedSeconds = 0.f;
-	bJumpCutPending = false;
 	if (ADCMultiCamCharacter* Player = GetPlayer())
 	{
 		Player->ResetToStart(StartTransform);
@@ -478,15 +475,8 @@ void ADCMultiCamDirector::EndTake()
 // Recording and premiere: the take is re-shot from the recorded camera poses (the scene is driven
 // purely by the scene clock, so replaying the clock replays the performance exactly).
 
-void ADCMultiCamDirector::RecordSample(float DeltaSeconds)
+void ADCMultiCamDirector::RecordSample()
 {
-	if (IsRecordingPaused())
-	{
-		// Paused footage never makes it into the film; the next frame recorded is a jump cut.
-		PausedSeconds += DeltaSeconds;
-		bJumpCutPending = true;
-		return;
-	}
 	const ADCMultiCam* Live = GetCameraSlot(ViewingSlot);
 	if (!Live)
 	{
@@ -495,9 +485,7 @@ void ADCMultiCamDirector::RecordSample(float DeltaSeconds)
 	const UCameraComponent* Lens = Live->GetCamera();
 	FDCTakeSample Sample;
 	Sample.Time = SceneTime;
-	Sample.FilmTime = SceneTime - PausedSeconds;
-	Sample.bJumpCut = bJumpCutPending;
-	bJumpCutPending = false;
+	Sample.FilmTime = SceneTime;
 	Sample.Slot = ViewingSlot;
 	Sample.Location = Lens->GetComponentLocation();
 	Sample.Rotation = Lens->GetComponentRotation();
@@ -762,7 +750,7 @@ void ADCMultiCamDirector::SetReviewEnvironment(bool bReview)
 void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 {
 	// Record what went out live this frame (before the take can end below).
-	RecordSample(NowTime - PrevTime);
+	RecordSample();
 
 	const ADCMultiCam* Live = GetCameraSlot(ViewingSlot);
 
@@ -774,7 +762,7 @@ void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 		}
 		const ADCBeat* Beat = State.Beat;
 		const float Eligible = FMath::Max(0.f, FMath::Min(NowTime, Beat->WindowEnd) - FMath::Max(PrevTime, Beat->GetCaptureStartTime()));
-		if (Live && Eligible > 0.f && !IsRecordingPaused() && IsFramed(State, Live))
+		if (Live && Eligible > 0.f && IsFramed(State, Live))
 		{
 			State.Hold += Eligible;
 			State.LastProgressTime = NowTime;
@@ -795,7 +783,7 @@ void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 			State.Status = EDCShotStatus::Captured;
 			State.bEverCaptured = true;
 			State.CapturedBy = Live ? Live->GetNumber() : 0;
-			State.CapturedFilmTime = SceneTime - PausedSeconds;
+			State.CapturedFilmTime = SceneTime;
 			Flash(FString::Printf(TEXT("Captured on CAM %d: %s"), State.CapturedBy, *Beat->DisplayName));
 		}
 		else if (NowTime > Beat->WindowEnd)
@@ -1008,7 +996,7 @@ void ADCMultiCamDirector::HandlePlacementHeight(float Notches)
 {
 	if (Phase == EDCPhase::Preparation && !IsViewingCamera())
 	{
-		PendingHeight = FMath::Clamp(PendingHeight + Notches * StandHeightStep, Tool == EDCCamTool::Crane ? 450.f : MinStandHeight, Tool == EDCCamTool::Crane ? 1200.f : MaxStandHeight);
+		PendingHeight = FMath::Clamp(PendingHeight + Notches * StandHeightStep, MinStandHeight, MaxStandHeight);
 	}
 }
 
@@ -1050,20 +1038,14 @@ void ADCMultiCamDirector::UpdatePrepPreview()
 	if (bPreviewHit)
 	{
 		Ghost->SetActorLocation(PreviewPoint);
-		Ghost->Setup(0, PreviewSurface, Tool == EDCCamTool::Crane ? EDCCamRig::Crane : EDCCamRig::Static);
-		Ghost->SetAim(FRotator(Tool == EDCCamTool::Crane ? -60.f : 0.f, Player->GetControlRotation().Yaw, 0.f));
+		Ghost->Setup(0, PreviewSurface);
+		Ghost->SetAim(FRotator(0.f, Player->GetControlRotation().Yaw, 0.f));
 		Ghost->SetTint(bPreviewValid ? FLinearColor(0.2f, 1.f, 0.4f) : FLinearColor(1.f, 0.15f, 0.1f));
 	}
 }
 
 void ADCMultiCamDirector::HandlePrimaryPressed()
 {
-	if (Phase == EDCPhase::Countdown || Phase == EDCPhase::Filming)
-	{
-		// Holding left click during the take pauses the recording until it's released.
-		bRecordingPauseHeld = true;
-		return;
-	}
 	if (Phase != EDCPhase::Preparation || IsViewingCamera())
 	{
 		return;
@@ -1081,17 +1063,12 @@ void ADCMultiCamDirector::HandlePrimaryPressed()
 
 	const int32 Slot = FindFreeSlot();
 	ADCMultiCam* Cam = SpawnCamera(PreviewPoint);
-	Cam->Setup(Slot + 1, PreviewSurface, Tool == EDCCamTool::Crane ? EDCCamRig::Crane : EDCCamRig::Static);
-	Cam->SetAim(FRotator(Tool == EDCCamTool::Crane ? -60.f : 0.f, Cam->GetAim().Yaw, 0.f));
+	Cam->Setup(Slot + 1, PreviewSurface);
+	Cam->SetAim(FRotator(0.f, Cam->GetAim().Yaw, 0.f));
 	Cam->SaveHome();
 	Cameras[Slot] = Cam;
 	Flash(FString::Printf(TEXT("CAM %d placed - look through it with %s to aim"), Slot + 1,
 		Slot < 9 ? *FString::Printf(TEXT("%d"), Slot + 1) : TEXT("[ / ]")));
-}
-
-void ADCMultiCamDirector::HandlePrimaryReleased()
-{
-	bRecordingPauseHeld = false;
 }
 
 int32 ADCMultiCamDirector::FindFreeSlot()
@@ -1182,19 +1159,6 @@ void ADCMultiCamDirector::HandleFinishRail()
 int32 ADCMultiCamDirector::GetPendingRailPoints() const
 {
 	return PendingRail ? PendingRail->NumPoints() : 0;
-}
-
-void ADCMultiCamDirector::HandleCycleTool()
-{
-	if (Phase != EDCPhase::Preparation)
-	{
-		return;
-	}
-	FinishPendingRail(true);
-	Tool = Tool == EDCCamTool::Static ? EDCCamTool::Crane : EDCCamTool::Static;
-	PendingHeight = Tool == EDCCamTool::Crane ? ADCMultiCam::CraneHeight : ADCMultiCam::StaticHeight;
-	Flash(Tool == EDCCamTool::Crane ? TEXT("CRANE: elevated bird's-eye camera; click ground to place")
-		: TEXT("STATIC: eye-level camera; click ground to place"), 2.5f);
 }
 
 float ADCMultiCamDirector::GetViewAspect() const
@@ -1323,33 +1287,6 @@ void ADCMultiCamDirector::HandleSecondaryPressed()
 	}
 	if (Phase != EDCPhase::Preparation || !Player)
 	{
-		return;
-	}
-	// While laying a dolly rail, Right Mouse takes back the last point.
-	if (Tool == EDCCamTool::Dolly && PendingRail)
-	{
-		ADCMultiCam* Dolly = FindCameraOnRail(Cameras, PendingRail);
-		if (Dolly && PendingRail->NumPoints() <= 2)
-		{
-			// Going below two points removes the dolly camera (and its rail) entirely.
-			const int32 Slot = Cameras.Find(Dolly);
-			Dolly->Destroy();
-			Cameras[Slot] = nullptr;
-			PendingRail = nullptr;
-			Flash(FString::Printf(TEXT("Dolly CAM %d removed"), Slot + 1), 1.5f);
-			return;
-		}
-		PendingRail->RemovePointNear(FVector(TNumericLimits<float>::Max()), 1.f);
-		if (Dolly)
-		{
-			Dolly->MoveRig(0.f, 0.f);
-			Dolly->SaveHome();
-		}
-		else if (PendingRail->NumPoints() == 0)
-		{
-			PendingRail->Destroy();
-			PendingRail = nullptr;
-		}
 		return;
 	}
 	// Pick the camera closest to the aim ray (cameras have no collision, so trace by geometry).

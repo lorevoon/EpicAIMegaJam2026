@@ -17,8 +17,7 @@ UENUM()
 enum class EDCCamRig : uint8
 {
 	Static,
-	Dolly, // Legacy rail rigs remain loadable.
-	Crane
+	Dolly // Legacy rail rigs remain loadable.
 };
 
 UCLASS()
@@ -34,12 +33,11 @@ public:
 	static constexpr float DefaultFOV = 75.f;
 	static constexpr float DollySpeed = 600.f;
 
-	/** Static or crane camera. Number 0 is the placement ghost; Surface anchors the mount. */
-	void Setup(int32 InNumber, const FVector& Surface, EDCCamRig InRig = EDCCamRig::Static);
+	/** Static camera on a stand. Number 0 is the placement ghost; Surface anchors the mount. */
+	void Setup(int32 InNumber, const FVector& Surface);
 	void MoveLocal(const FVector2D& Axis, float DeltaSeconds);
-	float GetMovementRadius() const { return Rig == EDCCamRig::Crane ? 350.f : 200.f; }
+	float GetMovementRadius() const { return 200.f; }
 	static constexpr float StaticHeight = 170.f;
-	static constexpr float CraneHeight = 700.f;
 
 	/** Dolly camera riding a rail (the rail's points are camera positions). The camera owns the rail. */
 	void SetupDolly(int32 InNumber, ADCRail* InRail);
@@ -122,9 +120,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> Mount;
-
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UStaticMeshComponent> Boom;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UTextRenderComponent> Label;

@@ -47,14 +47,12 @@ private:
 	void OnSprintPressed() { bSprintHeld = true; }
 	void OnSprintReleased() { bSprintHeld = false; }
 	void OnPrimary();
-	void OnPrimaryReleased();
 	void OnSecondary();
 	void OnStartTake();
 	void OnRestart();
 	void OnClearCameras();
 	void OnSelectCamera(int32 Number);
 	void OnScrub(const FInputActionValue& Value);
-	void OnCycleTool();
 	void OnFinishRail();
 	void OnCycleCamera(int32 Direction);
 	void OnTransportToggle();
