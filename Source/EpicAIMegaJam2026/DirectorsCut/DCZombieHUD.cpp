@@ -49,6 +49,14 @@ ADCZombieHUD::ADCZombieHUD()
 	static ConstructorHelpers::FObjectFinder<UTexture2D> Monitor(TEXT("/Game/DirectorsCut/UI/SMALLHD_Monitor_Rig_Assembly.SMALLHD_Monitor_Rig_Assembly"));
 	TextFont = Bree.Object;
 	MonitorFrame = Monitor.Object;
+	static ConstructorHelpers::FObjectFinder<UTexture2D> DirDefault(TEXT("/Game/DirectorsCut/UI/Director/Director_Default.Director_Default"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> DirAlmost(TEXT("/Game/DirectorsCut/UI/Director/Director_Almost.Director_Almost"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> DirDisgust(TEXT("/Game/DirectorsCut/UI/Director/Director_Disgust.Director_Disgust"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> DirJoy(TEXT("/Game/DirectorsCut/UI/Director/Director_Joy.Director_Joy"));
+	DirectorDefault = DirDefault.Object;
+	DirectorAlmost = DirAlmost.Object;
+	DirectorDisgust = DirDisgust.Object;
+	DirectorJoy = DirJoy.Object;
 }
 
 ADCZombieDirector* ADCZombieHUD::FindDirector()
@@ -243,6 +251,7 @@ void ADCZombieHUD::DrawHUD()
 	}
 
 	DrawReferenceInset(D);
+	DrawCoach(D);
 	DrawSwitcher(D);
 	DrawHelp(D);
 
@@ -725,16 +734,96 @@ float ADCZombieHUD::HelpTop(ADCZombieDirector* D) const
 {
 	TArray<TArray<TPair<FString, FString>>> Lines;
 	GetHelpLines(D, Lines);
-	return Canvas->ClipY - Lines.Num() * Px(Small) * 1.5f - 16.f * S;
+	// While the director talks, the help sits just above his bubble.
+	return (ShowsCoach(D) ? CoachTop() : Canvas->ClipY) - Lines.Num() * Px(Small) * 1.5f - 16.f * S;
+}
+
+namespace
+{
+	constexpr float PortraitShare = 0.36f;	// portrait height, as a share of the screen height
+	constexpr float CoachTextSize = 50.f;	// the bubble's text: big, so it reads at a glance
+	constexpr float TypewriterRate = 45.f;	// characters per second
+}
+
+bool ADCZombieHUD::ShowsCoach(ADCZombieDirector* D) const
+{
+	return D->bShowDirectorCoach && !D->GetCoachLine().IsEmpty()
+		&& (D->GetPhase() == EDCPhase::Countdown || D->GetPhase() == EDCPhase::Filming);
+}
+
+float ADCZombieHUD::CoachRight() const
+{
+	const float H = Canvas->ClipY * PortraitShare;
+	return H * (DirectorDefault && DirectorDefault->GetSurfaceHeight() > 0.f ? DirectorDefault->GetSurfaceWidth() / DirectorDefault->GetSurfaceHeight() : 1.2f);
+}
+
+float ADCZombieHUD::CoachTop() const
+{
+	const float BubbleH = Px(CoachTextSize) * 1.3f + Px(Small) * 1.2f + 2.f * 22.f * S;
+	return Canvas->ClipY - BubbleH - 20.f * S - 12.f * S;
+}
+
+void ADCZombieHUD::DrawCoach(ADCZombieDirector* D)
+{
+	if (!ShowsCoach(D))
+	{
+		return;
+	}
+	const EDCDirectorMood Mood = D->GetCoachMood();
+	UTexture2D* Portrait = Mood == EDCDirectorMood::Joy ? DirectorJoy : Mood == EDCDirectorMood::Disgust ? DirectorDisgust
+		: Mood == EDCDirectorMood::Almost ? DirectorAlmost : DirectorDefault;
+	if (!Portrait)
+	{
+		Portrait = DirectorDefault;
+	}
+	const float Since = GetWorld()->GetRealTimeSeconds() - D->GetCoachLineStart();
+	const FLinearColor Accent = Mood == EDCDirectorMood::Joy ? DCUI::Good : Mood == EDCDirectorMood::Disgust ? DCUI::Rec
+		: Mood == EDCDirectorMood::Almost ? DCUI::Gold : DCUI::Ivory;
+
+	// The bubble runs along the bottom, from the director to the reference inset (or the screen edge).
+	const float PortraitW = CoachRight();
+	const float Pad = 22.f * S;
+	const float X = PortraitW * 0.8f;
+	const float Right = D->GetReferenceInset() ? Canvas->ClipX * (1.f - InsetShare) - 16.f * S : Canvas->ClipX - 24.f * S;
+	const float Y = CoachTop() + 12.f * S;
+	const float W = FMath::Max(Right - X, 200.f * S);
+	const float H = Canvas->ClipY - 20.f * S - Y;
+	const FLinearColor Paper(0.96f, 0.93f, 0.86f, 0.97f);
+	const FLinearColor InkColor(0.08f, 0.07f, 0.07f);
+	// Tail pointing back at the director's face.
+	DCUI::Triangle(Canvas, FVector2D(X + 2.f, Y + H * 0.25f), FVector2D(X + 2.f, Y + H * 0.6f), FVector2D(PortraitW * 0.62f, Y - H * 0.35f), Paper);
+	DCUI::Rect(Canvas, X, Y, W, H, Paper);
+	DCUI::Rect(Canvas, X, Y, FMath::Max(6.f * S, 3.f), H, Accent);
+	DCUI::Outline(Canvas, X, Y, W, H, FMath::Max(2.f * S, 1.f), FLinearColor(0.f, 0.f, 0.f, 0.35f));
+	Label(TEXT("THE DIRECTOR"), X + Pad, Y + Pad * 0.6f, FLinearColor(0.55f, 0.08f, 0.06f), Small, EAlign::Left, false, W - 2.f * Pad);
+
+	// The line types itself out.
+	const FString& Line = D->GetCoachLine();
+	const int32 Shown = FMath::Clamp(FMath::FloorToInt(Since * TypewriterRate), 0, Line.Len());
+	// Size the line for the whole sentence so the text doesn't shrink as it types.
+	const FVector2D Full = DCUI::Measure(Canvas, GetTextFont(), Line, Px(CoachTextSize));
+	const float TextPx = Full.X > W - 2.f * Pad ? Px(CoachTextSize) * (W - 2.f * Pad) / Full.X : Px(CoachTextSize);
+	DCUI::Text(Canvas, GetTextFont(), Line.Left(Shown), X + Pad + 6.f * S, Y + Pad * 0.6f + Px(Small) * 1.2f, TextPx, InkColor, EAlign::Left, false);
+
+	// The director himself, standing on the bottom edge; a little bounce when his mood changes.
+	if (Portrait)
+	{
+		const float Pop = 1.f + 0.05f * FMath::Clamp(1.f - Since / 0.2f, 0.f, 1.f);
+		const float PH = Canvas->ClipY * PortraitShare * Pop;
+		const float PW = PortraitW * Pop;
+		DrawTexture(Portrait, 0.f, Canvas->ClipY - PH, PW, PH, 0.f, 0.f, 1.f, 1.f);
+	}
 }
 
 void ADCZombieHUD::DrawHelp(ADCZombieDirector* D)
 {
 	TArray<TArray<TPair<FString, FString>>> Lines;
 	GetHelpLines(D, Lines);
-	// With the reference inset in the bottom-right corner, centre the help in the space to its left.
-	const float Room = D->GetReferenceInset() ? Canvas->ClipX * (1.f - InsetShare) - 24.f * S : Canvas->ClipX - 32.f * S;
-	const float CenterX = D->GetReferenceInset() ? Room * 0.5f + 8.f * S : Canvas->ClipX * 0.5f;
+	// Centre the help between the director (bottom-left, while he talks) and the reference inset (bottom-right).
+	const float Left = ShowsCoach(D) ? CoachRight() + 16.f * S : 16.f * S;
+	const float Right = D->GetReferenceInset() ? Canvas->ClipX * (1.f - InsetShare) - 16.f * S : Canvas->ClipX - 16.f * S;
+	const float Room = Right - Left;
+	const float CenterX = (Left + Right) * 0.5f;
 	const float Spacing = 26.f * S;
 	float Y = HelpTop(D);
 	for (const TArray<TPair<FString, FString>>& Line : Lines)

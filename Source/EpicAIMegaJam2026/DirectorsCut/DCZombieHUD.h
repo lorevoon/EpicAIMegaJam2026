@@ -38,6 +38,19 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
 	TObjectPtr<UTexture2D> MonitorFrame;
 
+	/** The film's director, bottom-left while shooting: one portrait per mood (see EDCDirectorMood). */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
+	TObjectPtr<UTexture2D> DirectorDefault;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
+	TObjectPtr<UTexture2D> DirectorAlmost;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
+	TObjectPtr<UTexture2D> DirectorDisgust;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
+	TObjectPtr<UTexture2D> DirectorJoy;
+
 	/** The monitor art's screen opening, in texture pixels (top-left and bottom-right, inclusive). */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")
 	FVector2D MonitorScreenMin = FVector2D(155.f, 130.f);
@@ -78,6 +91,13 @@ private:
 	/** The capture frame on the canvas (DCFrame::CaptureExtent for this screen). */
 	void GetCaptureRect(float& L, float& T, float& R, float& B) const;
 	float HelpTop(ADCZombieDirector* D) const;
+
+	/** Shooting: the director's portrait (bottom-left) and his chat bubble along the bottom of the screen. */
+	void DrawCoach(ADCZombieDirector* D);
+	bool ShowsCoach(ADCZombieDirector* D) const;
+	/** Where the coach's area ends: the portrait's right edge, and the top of his bubble. */
+	float CoachRight() const;
+	float CoachTop() const;
 
 	ADCZombieDirector* FindDirector();
 

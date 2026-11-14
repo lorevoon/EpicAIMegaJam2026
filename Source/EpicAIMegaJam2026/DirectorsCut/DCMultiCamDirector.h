@@ -69,6 +69,18 @@ struct FDCTakeSample
 };
 
 /** How closely a take matches the reference cut, each 0-1 (averaged over the whole take). */
+/** The film director's face in the shooting HUD; his portrait follows how well the live shot matches the reference. */
+enum class EDCDirectorMood : uint8
+{
+	Default,
+	/** Close - a small correction. */
+	Almost,
+	/** Way off, or the wrong camera is live. */
+	Disgust,
+	/** Matching the reference cut. */
+	Joy
+};
+
 struct FDCMatch
 {
 	float Position = 0.f;
@@ -163,6 +175,19 @@ public:
 	/** During preparation and shooting the reference cut also plays in a corner inset, in step with the scene clock. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut")
 	bool bShowReferenceInset = true;
+
+	/** During shooting, the film's director coaches the player (bottom-left) toward the reference cut. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Director Coach")
+	bool bShowDirectorCoach = true;
+
+	/** Shortest time a coaching line stays up before the director moves on to the next one. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Director Coach", meta = (ClampMin = "0.5", Units = "s"))
+	float CoachLineSeconds = 2.2f;
+
+	const FString& GetCoachLine() const { return CoachLine; }
+	EDCDirectorMood GetCoachMood() const { return CoachMood; }
+	/** Real time the current line started (for the HUD's typewriter). */
+	float GetCoachLineStart() const { return CoachLineStart; }
 
 	/** The inset picture during preparation and shooting; null when there's nothing to show. */
 	UTextureRenderTarget2D* GetReferenceInset() const;
@@ -401,6 +426,17 @@ protected:
 	float ReferenceTime = 0.f;
 	void FinishPremiere();
 	void Flash(const FString& Text, float Seconds = 2.5f);
+
+	// Director coach (DCDirectorCoach.cpp)
+	/** Shooting: compares the live camera with the reference cut right now and says the most useful thing. */
+	void UpdateCoach();
+	/** Changes the director's line (one of Variants, {cam} replaced by Camera) unless it was just said or is too new to replace. */
+	void Coach(FName Key, EDCDirectorMood Mood, std::initializer_list<const TCHAR*> Variants, int32 Camera = 0, bool bForce = false);
+	FString CoachLine;
+	EDCDirectorMood CoachMood = EDCDirectorMood::Default;
+	FName CoachKey;
+	float CoachLineStart = 0.f;
+	int32 CoachLineCount = 0;
 	FCollisionQueryParams MakeTraceParams(const FName& Tag) const;
 
 	ADCMultiCamCharacter* GetPlayer() const;

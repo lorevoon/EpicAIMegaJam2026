@@ -214,6 +214,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 			Performer->Evaluate(SceneTime);
 		}
 		UpdateReferenceInset(DeltaSeconds); // before EvaluateBeats, which can end the take
+		UpdateCoach();
 		EvaluateBeats(Prev, SceneTime);
 		break;
 	}
@@ -294,6 +295,8 @@ void ADCMultiCamDirector::HandleStartTake()
 	CountdownRemaining = CountdownDuration;
 	CutCount = 0;
 	ApplyStabilizer();
+	Coach(TEXT("Countdown"), EDCDirectorMood::Default, { TEXT("Places, everyone! And you - shoot it like the reference cut."),
+		TEXT("Quiet on set! Remember the reference. Every angle."), TEXT("Rolling soon. Don't make me regret hiring you.") }, 0, true);
 
 	// From Action! until back in preparation, rigs are ghosted inside every shot. Go live on the lowest-numbered camera.
 	SetRigsFrameMasked(true);
@@ -356,6 +359,9 @@ void ADCMultiCamDirector::ResetScene()
 	SetRigsHidden(false);
 	ApplyStabilizer();
 	Recording.Reset();
+	CoachLine.Reset();
+	CoachKey = NAME_None;
+	CoachMood = EDCDirectorMood::Default;
 	bPremierePaused = false;
 	bRecordingPauseHeld = false;
 	PausedSeconds = 0.f;
