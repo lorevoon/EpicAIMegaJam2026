@@ -1124,6 +1124,28 @@ void ADCZombieHUD::DrawReferenceInset(ADCZombieDirector* D)
 	{
 		Label(Beat->DisplayName, X + W * 0.5f, Y + H - Px(Small) * 1.4f, DCUI::Ivory, Small, EAlign::Center, true, W - 16.f * S);
 	}
+
+	// Preparation, walking around: how to move on to filming, in a strip on top of the inset. (Looking through a
+	// camera, Enter confirms that camera instead, so it isn't shown then.)
+	if (D->GetPhase() == EDCPhase::Preparation && !D->IsViewingCamera() && !D->IsInputBlocked())
+	{
+		const float StripH = Px(Body) * 1.9f;
+		const float StripY = Y - LabelH - StripH;
+		DCUI::Rect(Canvas, X - 4.f * S, StripY, W + 4.f * S, StripH, FLinearColor(0.f, 0.f, 0.f, 0.85f));
+		if (D->GetCameraCount() == 0)
+		{
+			const FString Text = TEXT("Place a camera, then ENTER to film");
+			Label(Text, X + W * 0.5f, StripY + (StripH - Px(Small) * 1.2f) * 0.5f, DCUI::Muted, Small, EAlign::Center, true, W - 16.f * S);
+		}
+		else
+		{
+			const float Pulse = 0.6f + 0.4f * FMath::Sin(GetWorld()->GetRealTimeSeconds() * 3.f);
+			DCUI::Rect(Canvas, X - 4.f * S, StripY, W + 4.f * S, FMath::Max(3.f * S, 2.f), WithAlpha(DCUI::Gold, Pulse));
+			const FString Action = TEXT("Start filming!");
+			const float HintW = KeyHint(TEXT("ENTER"), Action, 0.f, 0.f, Body, DCUI::Ivory, false);
+			KeyHint(TEXT("ENTER"), Action, X + (W - HintW) * 0.5f, StripY + (StripH - Px(Body) * 1.2f) * 0.5f, Body, DCUI::Ivory);
+		}
+	}
 }
 
 // ---------------------------------------------------------------------------------------------
