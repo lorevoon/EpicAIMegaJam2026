@@ -281,17 +281,24 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
 	bool bShowCutscenes = true;
 
-	/** At the start, before the reference cut. */
+	/** Before the reference cut. Each act has its own lines; anything put here replaces them. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
 	TArray<FDCCutsceneLine> IntroCutscene;
 
-	/** After the reference cut, before preparation. */
+	/** After the reference cut, before preparation (empty: the act's own lines). */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
 	TArray<FDCCutsceneLine> BriefingCutscene;
 
-	/** After preparation, before shooting. */
+	/** After preparation, before shooting (empty: the act's own lines). */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
 	TArray<FDCCutsceneLine> ActionCutscene;
+
+	/** After the evaluation, before the next act (empty: the act's own lines). */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
+	TArray<FDCCutsceneLine> OutroCutscene;
+
+	/** What Enter does on the evaluation screen, for its key hints. */
+	virtual FString GetEvaluationHint() const { return TEXT("R / ENTER  Back to the set"); }
 
 	/** Length of each half of a fade through black between phases. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes", meta = (ClampMin = "0.05", Units = "s"))
@@ -542,6 +549,8 @@ protected:
 	void StopReferenceCut();
 	/** The reference cut played to its end (or was skipped). By default, back to the storyboard page. */
 	virtual void OnReferenceCutFinished();
+	/** Enter on the evaluation screen. By default, back to preparation for another take. */
+	virtual void OnEvaluationFinished();
 	void TickReferenceCut(float DeltaSeconds);
 	void ScrubReferenceCut(float DeltaSeconds);
 	void ToggleReferenceCut();

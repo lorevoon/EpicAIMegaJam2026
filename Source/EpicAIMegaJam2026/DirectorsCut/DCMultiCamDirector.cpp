@@ -18,7 +18,6 @@
 #include "Engine/World.h"
 #include "Engine/LevelStreaming.h"
 #include "Engine/LevelStreamingDynamic.h"
-#include "Engine/Texture2D.h"
 #include "HAL/IConsoleManager.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
@@ -52,25 +51,6 @@ ADCMultiCamDirector::ADCMultiCamDirector()
 {
 	static ConstructorHelpers::FObjectFinder<UMaterialParameterCollection> FrameMPC(TEXT("/Game/DirectorsCut/Materials/MPC_DCFrame.MPC_DCFrame"));
 	FrameParams = FrameMPC.Object;
-
-	// The director's cutscenes between phases (editable per level).
-	static ConstructorHelpers::FObjectFinder<UTexture2D> Recruit(TEXT("/Game/DirectorsCut/UI/Director/Director_Recruit.Director_Recruit"));
-	static ConstructorHelpers::FObjectFinder<UTexture2D> Vision(TEXT("/Game/DirectorsCut/UI/Director/Director_Vision.Director_Vision"));
-	static ConstructorHelpers::FObjectFinder<UTexture2D> Almost(TEXT("/Game/DirectorsCut/UI/Director/Director_Almost.Director_Almost"));
-	static ConstructorHelpers::FObjectFinder<UTexture2D> CameraFace(TEXT("/Game/DirectorsCut/UI/Director/Director_Camera.Director_Camera"));
-	static ConstructorHelpers::FObjectFinder<UTexture2D> ActionFace(TEXT("/Game/DirectorsCut/UI/Director/Director_Action.Director_Action"));
-	IntroCutscene = {
-		{ Recruit.Object, TEXT("I have a vision for a masterpiece film... And I recruit YOU as my cinematographer!!") },
-		{ Vision.Object, TEXT("Now, let me show you the vision in my head.") },
-	};
-	BriefingCutscene = {
-		{ Almost.Object, TEXT("Now your job is to make my vision a reality. Make it as similar as possible!!") },
-		{ CameraFace.Object, TEXT("Let's start placing the cameras!") },
-	};
-	ActionCutscene = {
-		{ ActionFace.Object, TEXT("It's time to actually film now!!") },
-		{ ActionFace.Object, TEXT("We will do this in ONE TAKE. Good luck!!") },
-	};
 
 	PrimaryActorTick.bCanEverTick = true;
 	// Evaluate after the player has re-aimed the live camera this frame.
@@ -375,10 +355,10 @@ void ADCMultiCamDirector::HandleStartTake()
 	}
 	if (Phase == EDCPhase::Review)
 	{
-		// Enter skips to the evaluation, then goes back to preparation.
+		// Enter skips to the evaluation, then moves on from it.
 		if (IsFilmFinished())
 		{
-			HandleRestart();
+			OnEvaluationFinished();
 		}
 		else
 		{
@@ -432,6 +412,11 @@ void ADCMultiCamDirector::BeginFilming()
 	Phase = EDCPhase::Filming;
 	SceneTime = 0.f;
 	Flash(TEXT("ACTION! Cut between cameras with the number keys."), 2.f);
+}
+
+void ADCMultiCamDirector::OnEvaluationFinished()
+{
+	HandleRestart();
 }
 
 void ADCMultiCamDirector::HandleRestart()

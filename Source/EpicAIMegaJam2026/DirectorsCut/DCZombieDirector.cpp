@@ -7,32 +7,42 @@
 #include "Camera/CameraComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
+#include "Engine/Texture2D.h"
+#include "UObject/ConstructorHelpers.h"
 
 ADCZombieDirector::ADCZombieDirector()
 {
 	TakeDuration = 60.f;
 	// As many cameras as you like, of any kind.
 	MaxCameras = 0;
+
+	for (const TCHAR* Name : { TEXT("Default"), TEXT("Almost"), TEXT("Disgust"), TEXT("Joy"), TEXT("ThatsIt"),
+		TEXT("Recruit"), TEXT("Vision"), TEXT("Camera"), TEXT("Action") })
+	{
+		ConstructorHelpers::FObjectFinder<UTexture2D> Finder(*FString::Printf(TEXT("/Game/DirectorsCut/UI/Director/Director_%s.Director_%s"), Name, Name));
+		if (Finder.Succeeded())
+		{
+			Faces.Add(Finder.Object);
+		}
+	}
 }
 
 void ADCZombieDirector::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Open out of black on the main menu - or straight on the director's intro.
+	LoadActScript();
+
+	// Open out of black: the film's first act on the main menu, later acts straight on their intro.
 	Phase = EDCPhase::Storyboard;
 	Flash(FString(), 0.f);
-	if (bShowMainMenu)
+	FadeInFromBlack();
+	if (bShowMainMenu && ActIndex <= 0)
 	{
 		bInMainMenu = true;
-		FadeInFromBlack();
 	}
 	else
 	{
-		if (bShowCutscenes && IntroCutscene.Num() > 0)
-		{
-			FadeInFromBlack();
-		}
 		PlayIntro();
 	}
 }

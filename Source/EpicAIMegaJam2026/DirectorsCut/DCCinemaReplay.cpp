@@ -337,7 +337,7 @@ void ADCCinemaReplay::DrawCinema(AHUD* HUD,UCanvas* Canvas,ADCZombieDirector* Fi
    P.Text(FString::Printf(TEXT("SC %d   %s"),i+1,*B.Beat->DisplayName),MX,RY,FMath::Min(.44f,RowH/62),Got?Ivory:Red,MW*.68f,false);
    P.Text(Got?(Liked?TEXT("IN THE CAN"):TEXT("MISSION MISSED")):TEXT("MISSED"),MX+MW,RY,FMath::Min(.42f,RowH/62),Liked?Green:Red,MW*.3f,false,true);
   }
-  P.Text(TEXT("SPACE  Watch again        R / ENTER  Back to the set"),CX,Y+H+16,.5f,Ivory,1300);
+  P.Text(TEXT("SPACE  Watch again        ")+Film->GetEvaluationHint(),CX,Y+H+16,.5f,Ivory,1300);
  }
  else if(Film->IsPremierePaused() && Open>=1) P.Text(TEXT("P A U S E D"),960,688,.55f,Ivory,900);
  const float Length=Film->GetPremiereLength();

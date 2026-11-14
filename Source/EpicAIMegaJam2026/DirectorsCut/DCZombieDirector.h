@@ -46,6 +46,8 @@ public:
 	virtual void HandleScrub(float DeltaSeconds) override;
 
 
+	virtual FString GetEvaluationHint() const override;
+
 	// HUD
 	/** The main menu's START: fades out of the menu into the intro. */
 	void StartFromMenu();
@@ -54,8 +56,22 @@ public:
 
 protected:
 	virtual void OnReferenceCutFinished() override;
+	virtual void OnEvaluationFinished() override;
 
 private:
+	// The film's acts (DCActs.cpp). Each act is its own level with its own director; this one works out which act it
+	// directs from its level, and fills in that act's cutscenes.
+	/** This director's act (index into the act list), or INDEX_NONE in a level outside the film. */
+	int32 ActIndex = INDEX_NONE;
+	void LoadActScript();
+	/** After an act's outro: the next act's level, or back to the main menu after the last. */
+	void GoToNextAct();
+	/** One of the director's faces by name ("Joy" for Director_Joy), or null. */
+	UTexture2D* Face(const TCHAR* Name) const;
+	/** Every face, loaded here so they're cooked with the game. */
+	UPROPERTY()
+	TArray<TObjectPtr<UTexture2D>> Faces;
+
 	void EnterPreparation();
 	/** The intro cutscene (if any), then the reference cut. */
 	void PlayIntro();
