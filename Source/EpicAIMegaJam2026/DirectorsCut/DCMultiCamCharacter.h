@@ -22,6 +22,7 @@ public:
 	ADCMultiCamCharacter();
 
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere, Category = "Directors Cut")
@@ -37,6 +38,9 @@ public:
 	void ResetToStart(const FTransform& Start);
 
 private:
+#if WITH_EDITOR
+	bool bRestoreEditorEscape = false;
+#endif
 	ADCMultiCamDirector* GetDirector();
 	UInputAction* MakeAction(EInputActionValueType Type, bool bWhenPaused = false);
 	bool IsLockedToCamera();
@@ -49,6 +53,8 @@ private:
 	void OnPrimary();
 	void OnPrimaryReleased();
 	void OnSecondary();
+	void OnCameraCancel();
+	void OnCameraInteract();
 	void OnStartTake();
 	void OnRestart();
 	void OnClearCameras();
@@ -61,7 +67,6 @@ private:
 	void OnRehearsalToggle();
 	void OnRehearsalSpeed(int32 Direction);
 	void OnRailSpeed(int32 Direction);
-	void OnToggleNotebook();
 	void OnTogglePause();
 
 	UPROPERTY(VisibleAnywhere)

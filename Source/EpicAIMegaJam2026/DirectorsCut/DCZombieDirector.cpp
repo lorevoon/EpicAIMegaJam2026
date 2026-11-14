@@ -20,34 +20,20 @@ void ADCZombieDirector::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Open on the storyboard, which starts with the reference cut.
-	Phase = EDCPhase::Storyboard;
+	// Open directly on the reference film.
+	Phase = EDCPhase::Reference;
 	bReferenceAutoStart = true;
 	Flash(FString(), 0.f);
 }
 
 // ---------------------------------------------------------------------------------------------
-// Phase flow: storyboard -> preparation (scrub the timeline) -> shooting -> review
-
-void ADCZombieDirector::EnterPreparation()
-{
-	ResetScene();
-	Flash(TEXT("Rehearsal is playing. H pauses/resumes, comma/period change speed. Hold Q/E to scrub (and pause)."), 7.f);
-}
+// Phase flow: reference film -> preparation -> shooting -> review
 
 void ADCZombieDirector::HandleStartTake()
 {
-	if (Phase == EDCPhase::Storyboard)
+	if (Phase == EDCPhase::Reference)
 	{
-		// Enter skips the reference cut to the storyboard page, then starts preparing.
-		if (IsReferencePlaying())
-		{
-			StopReferenceCut();
-		}
-		else
-		{
-			EnterPreparation();
-		}
+		StopReferenceCut(); // Skipping the film enters preparation directly.
 		return;
 	}
 	Super::HandleStartTake();
@@ -55,7 +41,7 @@ void ADCZombieDirector::HandleStartTake()
 
 void ADCZombieDirector::HandleRestart()
 {
-	if (Phase != EDCPhase::Storyboard)
+	if (Phase != EDCPhase::Reference)
 	{
 		Super::HandleRestart();
 	}

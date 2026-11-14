@@ -6,7 +6,7 @@
 
 class ADCMultiCamDirector;
 class ADCZombieDirector;
-class AHUD;
+class ADCZombieHUD;
 class UCanvas;
 class USceneCaptureComponent2D;
 class UTextureRenderTarget2D;
@@ -27,7 +27,7 @@ public:
 	void BeginScreening(ADCMultiCamDirector* InDirector);
 	void EndScreening();
 	void ProjectFrame(ACameraActor* Camera);
-	void DrawCinema(AHUD* HUD, UCanvas* Canvas, ADCZombieDirector* Film);
+	void DrawCinema(ADCZombieHUD* HUD, UCanvas* Canvas, ADCZombieDirector* Film);
 	bool IsOpening() const { return bActive && PresentationTime < OpeningDuration; }
 	float GetResultAge() const { return ResultAge; }
 	bool IsActive() const { return bActive; }

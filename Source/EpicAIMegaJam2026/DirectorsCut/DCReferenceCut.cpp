@@ -434,7 +434,7 @@ void ADCMultiCamDirector::BuildReferenceCut()
 void ADCMultiCamDirector::StartReferenceCut()
 {
 	APlayerController* PC = GetPC();
-	if (!bShowReferenceCut || Phase != EDCPhase::Storyboard || !PC)
+	if (!bShowReferenceCut || Phase != EDCPhase::Reference || !PC)
 	{
 		return;
 	}
@@ -459,17 +459,11 @@ void ADCMultiCamDirector::StartReferenceCut()
 
 void ADCMultiCamDirector::StopReferenceCut()
 {
-	if (!bReferencePlaying)
-	{
-		return;
-	}
 	bReferencePlaying = false;
 	bReferencePaused = false;
-	SetReviewEnvironment(false);
-	SetRigsHidden(false);
-	SceneTime = 0.f;
-	EvaluatePerformers(SceneTime);
-	ViewWalking();
+	bReferenceAutoStart = false;
+	ResetScene();
+	Flash(FString(), 0.f);
 }
 
 void ADCMultiCamDirector::TickReferenceCut(float DeltaSeconds)
@@ -478,6 +472,7 @@ void ADCMultiCamDirector::TickReferenceCut(float DeltaSeconds)
 	{
 		bReferenceAutoStart = false;
 		StartReferenceCut();
+		if (!bReferencePlaying) StopReferenceCut();
 		return;
 	}
 	if (!bReferencePlaying || bReferencePaused)
@@ -487,7 +482,7 @@ void ADCMultiCamDirector::TickReferenceCut(float DeltaSeconds)
 	ReferenceTime += DeltaSeconds;
 	if (ReferenceTime >= GetReferenceLength())
 	{
-		StopReferenceCut(); // over to the storyboard page
+		StopReferenceCut(); // Finished film enters preparation directly.
 		return;
 	}
 	ShowFilmFrame(ReferenceCut, ReferenceTime);
@@ -510,7 +505,7 @@ void ADCMultiCamDirector::ToggleReferenceCut()
 	}
 	else
 	{
-		StartReferenceCut(); // watch it again from the storyboard page
+		StartReferenceCut(); // Start playback if the initial reference frame has not begun yet.
 	}
 }
 
@@ -674,7 +669,7 @@ void ADCMultiCamDirector::UpdateCoveredScenes()
 		for (const ADCMultiCam* Cam : Cameras)
 		{
 			const FVector Offset = Cam ? Cam->GetActorLocation() - ReferenceShotLocations[Shot] : FVector::ZeroVector;
-			if (Cam && Offset.Size2D() <= ReferenceSpotRadius && FMath::Abs(Offset.Z) <= ReferenceSpotHeightTolerance)
+			if (Cam && Cam != GetCameraSlot(PendingPlacementSlot) && Offset.Size2D() <= ReferenceSpotRadius && FMath::Abs(Offset.Z) <= ReferenceSpotHeightTolerance)
 			{
 				Now[ReferenceShotBeats[Shot]] = true;
 				break;

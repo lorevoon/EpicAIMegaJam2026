@@ -236,7 +236,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		TickPremiere(DeltaSeconds);
 		break;
 
-	case EDCPhase::Storyboard:
+	case EDCPhase::Reference:
 		TickReferenceCut(DeltaSeconds);
 		break;
 
@@ -266,7 +266,7 @@ void ADCMultiCamDirector::UpdateSceneDialogue(float DeltaSeconds)
 		// Pausing recording omits footage, but the actors and their speech continue on set.
 		bPlaying = SceneTime < TakeDuration;
 	}
-	else if (Phase == EDCPhase::Storyboard)
+	else if (Phase == EDCPhase::Reference)
 	{
 		bPlaying = bReferencePlaying && !bReferencePaused
 			&& GetFilmView(ReferenceCut, ReferenceTime, Location, Rotation, FOV, Position);
@@ -339,6 +339,14 @@ bool ADCMultiCamDirector::EnsureLiveCamera()
 
 void ADCMultiCamDirector::HandleStartTake()
 {
+	if (Phase == EDCPhase::Preparation && IsViewingCamera())
+	{
+		if (ADCMultiCam* Cam = GetCameraSlot(ViewingSlot)) Cam->SaveHome();
+		PendingPlacementSlot = INDEX_NONE;
+		ViewWalking();
+		Flash(TEXT(""));
+		return; // Confirming a camera must never also start the take.
+	}
 	if (Phase == EDCPhase::Review)
 	{
 		// Enter skips to the evaluation, then goes back to preparation.
@@ -392,17 +400,18 @@ void ADCMultiCamDirector::BeginFilming()
 {
 	Phase = EDCPhase::Filming;
 	SceneTime = 0.f;
-	Flash(TEXT("ACTION! Cut between cameras with the number keys."), 2.f);
+	Flash(TEXT("ACTION!"), 2.f);
 }
 
 void ADCMultiCamDirector::HandleRestart()
 {
 	ResetScene();
-	Flash(TEXT("Back to preparation. Cameras and notebook are kept."));
+	Flash(TEXT("Back to preparation. Cameras are kept."));
 }
 
 void ADCMultiCamDirector::ResetScene()
 {
+	if (IsPlacementPending()) HandleCameraCancel();
 	if (SceneDialogue.IsValid()) SceneDialogue->Stop();
 	DialoguePosition = -1.f;
 	bRehearsalPlaying = true;
@@ -625,7 +634,7 @@ void ADCMultiCamDirector::HandleScrub(float DeltaSeconds)
 		SceneTime = FMath::Clamp(SceneTime + DeltaSeconds, 0.f, GetPremiereLength());
 		ShowPremiereFrame(SceneTime);
 	}
-	else if (Phase == EDCPhase::Storyboard)
+	else if (Phase == EDCPhase::Reference)
 	{
 		ScrubReferenceCut(DeltaSeconds);
 	}
@@ -633,9 +642,9 @@ void ADCMultiCamDirector::HandleScrub(float DeltaSeconds)
 
 void ADCMultiCamDirector::HandleTransportToggle()
 {
-	if (Phase == EDCPhase::Storyboard)
+	if (Phase == EDCPhase::Reference)
 	{
-		ToggleReferenceCut(); // pause/resume, or watch it again from the storyboard page
+		ToggleReferenceCut(); // Pause/resume the reference film.
 		return;
 	}
 	if (Phase != EDCPhase::Review)
@@ -927,6 +936,7 @@ void ADCMultiCamDirector::SetRigsFrameMasked(bool bMasked)
 
 void ADCMultiCamDirector::HandleSelectCamera(int32 Number)
 {
+	if (IsPlacementPending()) return;
 	const int32 Slot = Number - 1;
 	if (Slot < 0 || Slot >= (IsUnlimited() ? Cameras.Num() : MaxCameras))
 	{
@@ -998,7 +1008,7 @@ void ADCMultiCamDirector::HandleWheel(float Delta)
 	{
 		HandlePlacementHeight(Delta);
 	}
-	else if (Phase == EDCPhase::Review || Phase == EDCPhase::Storyboard)
+	else if (Phase == EDCPhase::Review || Phase == EDCPhase::Reference)
 	{
 		HandleScrub(Delta * WheelScrubSeconds);
 	}
@@ -1085,8 +1095,50 @@ void ADCMultiCamDirector::HandlePrimaryPressed()
 	Cam->SetAim(FRotator(Tool == EDCCamTool::Crane ? -60.f : 0.f, Cam->GetAim().Yaw, 0.f));
 	Cam->SaveHome();
 	Cameras[Slot] = Cam;
-	Flash(FString::Printf(TEXT("CAM %d placed - look through it with %s to aim"), Slot + 1,
-		Slot < 9 ? *FString::Printf(TEXT("%d"), Slot + 1) : TEXT("[ / ]")));
+	PendingPlacementSlot = Slot;
+	if (Ghost) Ghost->SetActorHiddenInGame(true);
+	ViewCamera(Slot);
+	Flash(TEXT(""));
+}
+
+void ADCMultiCamDirector::HandleCameraCancel()
+{
+	if (Phase != EDCPhase::Preparation) return;
+	const int32 Pending = PendingPlacementSlot;
+	PendingPlacementSlot = INDEX_NONE;
+	ViewWalking();
+	if (ADCMultiCam* Cam = GetCameraSlot(Pending))
+	{
+		Cameras[Pending] = nullptr;
+		Cam->Destroy();
+	}
+	Flash(TEXT(""));
+}
+
+int32 ADCMultiCamDirector::GetNearbyCameraSlot() const
+{
+	const ADCMultiCamCharacter* Player = GetPlayer();
+	if (Phase != EDCPhase::Preparation || IsViewingCamera() || !Player) return INDEX_NONE;
+	int32 Best = INDEX_NONE;
+	float BestDistance = FMath::Square(250.f);
+	for (int32 Slot = 0; Slot < Cameras.Num(); ++Slot)
+	{
+		const ADCMultiCam* Cam = GetCameraSlot(Slot);
+		if (!Cam || Slot == PendingPlacementSlot) continue;
+		const float Distance = FVector::DistSquared(Player->GetActorLocation(), Cam->GetInteractionPoint() + FVector(0.f, 0.f, 90.f));
+		if (Distance < BestDistance)
+		{
+			BestDistance = Distance;
+			Best = Slot;
+		}
+	}
+	return Best;
+}
+
+void ADCMultiCamDirector::HandleCameraInteract()
+{
+	const int32 Slot = GetNearbyCameraSlot();
+	if (Slot != INDEX_NONE) ViewCamera(Slot);
 }
 
 void ADCMultiCamDirector::HandlePrimaryReleased()
@@ -1288,6 +1340,7 @@ void ADCMultiCamDirector::HandleRailSpeed(int32 Direction)
 
 void ADCMultiCamDirector::HandleCycleCamera(int32 Direction)
 {
+	if (IsPlacementPending()) return;
 	if (Phase != EDCPhase::Preparation && Phase != EDCPhase::Countdown && Phase != EDCPhase::Filming)
 	{
 		return;
@@ -1318,7 +1371,7 @@ void ADCMultiCamDirector::HandleSecondaryPressed()
 	ADCMultiCamCharacter* Player = GetPlayer();
 	if (Phase == EDCPhase::Preparation && IsViewingCamera())
 	{
-		ViewWalking(); // step back out of the camera
+		HandleCameraCancel(); // Cancel previews; exit installed cameras.
 		return;
 	}
 	if (Phase != EDCPhase::Preparation || !Player)
@@ -1388,6 +1441,7 @@ void ADCMultiCamDirector::HandleSecondaryPressed()
 
 void ADCMultiCamDirector::HandleClearCameras()
 {
+	if (IsPlacementPending()) HandleCameraCancel();
 	if (Phase != EDCPhase::Preparation)
 	{
 		return;
@@ -1430,7 +1484,7 @@ int32 ADCMultiCamDirector::GetCameraCount() const
 	{
 		Count += Cam ? 1 : 0;
 	}
-	return Count;
+	return Count - (IsPlacementPending() ? 1 : 0);
 }
 
 int32 ADCMultiCamDirector::GetSpottedCount() const
@@ -1460,7 +1514,7 @@ namespace
 	/** Minimum match for S, A, B and C; anything lower is a D. */
 	constexpr float GradeThresholds[] = { 0.85f, 0.7f, 0.55f, 0.4f };
 	const TCHAR* const GradeLetters[] = { TEXT("S"), TEXT("A"), TEXT("B"), TEXT("C"), TEXT("D") };
-	const TCHAR* const CutNames[] = { TEXT("Director's Cut"), TEXT("Final Cut"), TEXT("Rough Cut"), TEXT("Assembly Cut"), TEXT("Back to the storyboard") };
+	const TCHAR* const CutNames[] = { TEXT("Director's Cut"), TEXT("Final Cut"), TEXT("Rough Cut"), TEXT("Assembly Cut"), TEXT("Back to rehearsal") };
 }
 
 int32 ADCMultiCamDirector::GetGradeRank() const

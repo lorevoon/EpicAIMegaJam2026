@@ -9,6 +9,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace
@@ -26,6 +27,7 @@ ADCMultiCam::ADCMultiCam()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CylinderMesh(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> TripodMesh(TEXT("/Game/Fab/CINEMA_CAMERA_with_simple_tripod/cinema_camera_with_simple_tripod/StaticMeshes/cinema_camera_with_simple_tripod.cinema_camera_with_simple_tripod"));
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> RigMat(DCVisuals::RigMaterialPath);
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BasicMat(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
 	RigMaterial = RigMat.Succeeded() ? RigMat.Object : BasicMat.Object;
@@ -71,6 +73,9 @@ ADCMultiCam::ADCMultiCam()
 	Tally = MakePart(TEXT("Tally"), SphereMesh.Object, Head);
 	Tally->SetRelativeLocation(FVector(-8.f, 0.f, 15.f));
 	Tally->SetRelativeScale3D(FVector(0.06f));
+
+	Tripod = MakePart(TEXT("CinemaTripod"), TripodMesh.Object, Root);
+	Tripod->SetVisibility(false);
 
 	Mount = MakePart(TEXT("Mount"), CubeMesh.Object, Root);
 	Boom = MakePart(TEXT("CraneBoom"), CubeMesh.Object, Root);
@@ -120,6 +125,25 @@ void ADCMultiCam::SetNumberLabel()
 
 void ADCMultiCam::UpdateMount(const FVector& Surface)
 {
+	const bool bAuthoredStatic = Rig == EDCCamRig::Static && Tripod->GetStaticMesh();
+	Tripod->SetVisibility(bAuthoredStatic);
+	Body->SetVisibility(!bAuthoredStatic);
+	Lens->SetVisibility(!bAuthoredStatic);
+	Tally->SetVisibility(!bAuthoredStatic);
+	if (bAuthoredStatic)
+	{
+		// Fit the imported assembly to the selected lens height, anchoring its feet on the surface.
+		const FBox Bounds = Tripod->GetStaticMesh()->GetBoundingBox();
+		const float Height = FMath::Max(GetActorLocation().Z - Surface.Z, 1.f);
+		const float Scale = Height / FMath::Max(Bounds.GetSize().Z * 0.9f, 1.f);
+		const FRotator Rotation(0.f, Head->GetComponentRotation().Yaw, 0.f);
+		const FVector Foot(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+		Tripod->SetWorldScale3D(FVector(Scale));
+		Tripod->SetWorldLocationAndRotation(FVector(GetActorLocation().X, GetActorLocation().Y, Surface.Z) - Rotation.RotateVector(Foot * Scale), Rotation);
+		Mount->SetVisibility(false);
+		Boom->SetVisibility(false);
+		return;
+	}
 	const bool bCrane = Rig == EDCCamRig::Crane;
 	const FVector Base = bCrane ? MountSurface - FVector(250.f, 0.f, 0.f) : Surface;
 	const FVector Top = bCrane ? FVector(Base.X, Base.Y, PlacementCenter.Z) : GetActorLocation();
@@ -206,6 +230,7 @@ void ADCMultiCam::SetAim(const FRotator& NewAim)
 {
 	SetAimTarget(NewAim);
 	Head->SetWorldRotation(Aim);
+	if (Rig == EDCCamRig::Static) UpdateMount(MountSurface);
 }
 
 void ADCMultiCam::AddAim(float DeltaYaw, float DeltaPitch)
@@ -214,6 +239,7 @@ void ADCMultiCam::AddAim(float DeltaYaw, float DeltaPitch)
 	if (AimSmoothing <= 0.f)
 	{
 		Head->SetWorldRotation(Aim);
+		if (Rig == EDCCamRig::Static) UpdateMount(MountSurface);
 	}
 }
 
@@ -224,6 +250,7 @@ void ADCMultiCam::SetStabilizer(float InAimSmoothing, float InDollyEase)
 	if (AimSmoothing <= 0.f)
 	{
 		Head->SetWorldRotation(Aim);
+		if (Rig == EDCCamRig::Static) UpdateMount(MountSurface);
 	}
 	if (DollyEase <= 0.f)
 	{
@@ -238,6 +265,7 @@ void ADCMultiCam::UpdateStabilizer(float DeltaSeconds)
 	if (AimSmoothing > 0.f)
 	{
 		Head->SetWorldRotation(FMath::RInterpTo(Head->GetComponentRotation(), Aim, DeltaSeconds, AimSmoothing));
+		if (Rig == EDCCamRig::Static) UpdateMount(MountSurface);
 	}
 
 	// Dolly: ease up to speed and coast to a stop instead of starting and stopping dead.
@@ -329,6 +357,8 @@ void ADCMultiCam::SetFrameMasked(bool bMasked)
 	{
 		DCVisuals::SetFrameMask(Part, bMasked);
 	}
+	// Imported materials retain their authored appearance; hide this assembly during capture.
+	Tripod->SetHiddenInGame(bMasked);
 	Label->SetVisibility(!bMasked);
 	if (Rail)
 	{
@@ -347,6 +377,21 @@ void ADCMultiCam::SetRigHidden(bool bHide)
 
 void ADCMultiCam::SetTint(const FLinearColor& Color)
 {
+	// Keep the placed asset's materials, but retain green/red placement feedback on the preview.
+	if (Number == 0 && Tripod->GetStaticMesh() && RigMaterial)
+	{
+		for (int32 Index = 0; Index < Tripod->GetNumMaterials(); ++Index)
+		{
+			UMaterialInstanceDynamic* Material = Cast<UMaterialInstanceDynamic>(Tripod->GetMaterial(Index));
+			if (!Material || Material->Parent != RigMaterial)
+			{
+				Material = UMaterialInstanceDynamic::Create(RigMaterial, Tripod);
+				Material->SetFlags(RF_Transient);
+				Tripod->SetMaterial(Index, Material);
+			}
+			Material->SetVectorParameterValue(TEXT("Color"), Color);
+		}
+	}
 	DCVisuals::PaintWith(Body, RigMaterial, Color);
 	DCVisuals::PaintWith(Lens, RigMaterial, Color * 0.5f);
 	DCVisuals::PaintWith(Mount, RigMaterial, Color * 1.5f);

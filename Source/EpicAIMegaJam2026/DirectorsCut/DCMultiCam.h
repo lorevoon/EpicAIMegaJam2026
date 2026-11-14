@@ -45,6 +45,12 @@ public:
 	void SetupDolly(int32 InNumber, ADCRail* InRail);
 
 	EDCCamRig GetRig() const { return Rig; }
+	/** Ground-level mount position, including the crane's offset stand. */
+	FVector GetInteractionPoint() const
+	{
+		return Rig == EDCCamRig::Crane ? MountSurface - FVector(250.f, 0.f, 0.f)
+			: FVector(GetActorLocation().X, GetActorLocation().Y, MountSurface.Z);
+	}
 	ADCRail* GetRail() const { return Rail; }
 	float GetRailProgress() const;
 
@@ -125,6 +131,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> Boom;
+
+	/** Authored camera and tripod, used by static rigs. */
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UStaticMeshComponent> Tripod;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UTextRenderComponent> Label;
