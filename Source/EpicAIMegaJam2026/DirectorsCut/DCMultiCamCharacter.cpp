@@ -148,6 +148,13 @@ ADCMultiCamDirector* ADCMultiCamCharacter::GetDirector()
 	return Director.Get();
 }
 
+bool ADCMultiCamCharacter::IsInputBlocked()
+{
+	// During a cutscene or a fade only Enter and clicks get through (they move the cutscene on).
+	const ADCMultiCamDirector* D = GetDirector();
+	return D && D->IsInputBlocked();
+}
+
 bool ADCMultiCamCharacter::IsLockedToCamera()
 {
 	ADCMultiCamDirector* D = GetDirector();
@@ -172,6 +179,10 @@ void ADCMultiCamCharacter::ResetToStart(const FTransform& Start)
 
 void ADCMultiCamCharacter::OnMove(const FInputActionValue& Value)
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	const FVector2D Axis = Value.Get<FVector2D>();
 	if (IsLockedToCamera())
 	{
@@ -188,6 +199,10 @@ void ADCMultiCamCharacter::OnMove(const FInputActionValue& Value)
 
 void ADCMultiCamCharacter::OnLook(const FInputActionValue& Value)
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	const FVector2D Axis = Value.Get<FVector2D>() * LookSensitivity;
 	ADCMultiCamDirector* D = GetDirector();
 	if (D && D->HandleLook(Axis.X, Axis.Y))
@@ -203,6 +218,10 @@ void ADCMultiCamCharacter::OnLook(const FInputActionValue& Value)
 
 void ADCMultiCamCharacter::OnWheel(const FInputActionValue& Value)
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleWheel(Value.Get<float>());
@@ -219,6 +238,10 @@ void ADCMultiCamCharacter::OnPrimary()
 
 void ADCMultiCamCharacter::OnSecondary()
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleSecondaryPressed();
@@ -235,6 +258,10 @@ void ADCMultiCamCharacter::OnStartTake()
 
 void ADCMultiCamCharacter::OnRestart()
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleRestart();
@@ -243,6 +270,10 @@ void ADCMultiCamCharacter::OnRestart()
 
 void ADCMultiCamCharacter::OnClearCameras()
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleClearCameras();
@@ -251,6 +282,10 @@ void ADCMultiCamCharacter::OnClearCameras()
 
 void ADCMultiCamCharacter::OnSelectCamera(int32 Number)
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleSelectCamera(Number);
@@ -259,6 +294,10 @@ void ADCMultiCamCharacter::OnSelectCamera(int32 Number)
 
 void ADCMultiCamCharacter::OnScrub(const FInputActionValue& Value)
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleScrub(Value.Get<float>() * GetWorld()->GetDeltaSeconds() * D->KeyScrubRate);
@@ -267,6 +306,10 @@ void ADCMultiCamCharacter::OnScrub(const FInputActionValue& Value)
 
 void ADCMultiCamCharacter::OnFinishRail()
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleFinishRail();
@@ -275,6 +318,10 @@ void ADCMultiCamCharacter::OnFinishRail()
 
 void ADCMultiCamCharacter::OnCycleCamera(int32 Direction)
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleCycleCamera(Direction);
@@ -283,6 +330,10 @@ void ADCMultiCamCharacter::OnCycleCamera(int32 Direction)
 
 void ADCMultiCamCharacter::OnTransportToggle()
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	ADCMultiCamDirector* DirectorActor = GetDirector();
 	if (!IsLockedToCamera() && (!DirectorActor || DirectorActor->GetPhase() == EDCPhase::Preparation))
 	{
@@ -297,6 +348,10 @@ void ADCMultiCamCharacter::OnTransportToggle()
 
 void ADCMultiCamCharacter::OnRailSpeed(int32 Direction)
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->HandleRailSpeed(Direction);
@@ -305,16 +360,28 @@ void ADCMultiCamCharacter::OnRailSpeed(int32 Direction)
 
 void ADCMultiCamCharacter::OnRehearsalToggle()
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector()) D->HandleRehearsalToggle();
 }
 
 void ADCMultiCamCharacter::OnRehearsalSpeed(int32 Direction)
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector()) D->HandleRehearsalSpeed(Direction);
 }
 
 void ADCMultiCamCharacter::OnToggleNotebook()
 {
+	if (IsInputBlocked())
+	{
+		return;
+	}
 	if (ADCMultiCamDirector* D = GetDirector())
 	{
 		D->bShowNotebook = !D->bShowNotebook;

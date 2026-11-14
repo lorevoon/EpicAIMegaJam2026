@@ -156,6 +156,23 @@ void ADCZombieHUD::DrawHUD()
 		return;
 	}
 	S = FMath::Max(Canvas->ClipY / 1080.f, 0.6f) * UIScale;
+	if (D->IsInCutscene())
+	{
+		DrawCutscene(D);
+	}
+	else
+	{
+		DrawPhase(D);
+	}
+	// Fades between phases go over everything.
+	if (D->GetFadeAlpha() > 0.f)
+	{
+		DCUI::Rect(Canvas, 0.f, 0.f, Canvas->ClipX, Canvas->ClipY, FLinearColor(0.f, 0.f, 0.f, D->GetFadeAlpha()));
+	}
+}
+
+void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
+{
 	const float CX = Canvas->ClipX * 0.5f;
 	const float CY = Canvas->ClipY * 0.5f;
 
@@ -284,6 +301,92 @@ void ADCZombieHUD::DrawHUD()
 
 // ---------------------------------------------------------------------------------------------
 // Storyboard
+
+void ADCZombieHUD::DrawCutscene(ADCZombieDirector* D)
+{
+	const FDCCutsceneLine* Line = D->GetCutsceneLine();
+	if (!Line)
+	{
+		return;
+	}
+	const float W = Canvas->ClipX;
+	const float H = Canvas->ClipY;
+	const float Since = GetWorld()->GetRealTimeSeconds() - D->GetCutsceneLineStart();
+	const FVector2D Spot(W * 0.27f, H * 0.6f);
+
+	// A dark stage with a warm spotlight where he stands.
+	DCUI::Rect(Canvas, 0.f, 0.f, W, H, FLinearColor(0.035f, 0.03f, 0.04f, 0.93f));
+	for (int32 i = 0; i < 6; ++i)
+	{
+		DCUI::Disc(Canvas, Spot, H * (0.62f - i * 0.08f), FLinearColor(1.f, 0.78f, 0.45f, 0.035f), 64);
+	}
+
+	// The director, large, rising out of the bottom of the frame. Each new line pops him in (back-out ease).
+	float PortraitRight = W * 0.4f;
+	if (UTexture2D* Portrait = Line->Portrait)
+	{
+		const float T = FMath::Clamp(Since / 0.35f, 0.f, 1.f) - 1.f;
+		const float Pop = 1.f + 2.70158f * T * T * T + 1.70158f * T * T;
+		const float PH = H * 0.78f * (0.88f + 0.12f * Pop);
+		const float PW = PH * (Portrait->GetSurfaceHeight() > 0.f ? Portrait->GetSurfaceWidth() / Portrait->GetSurfaceHeight() : 1.f);
+		const float PX = Spot.X - PW * 0.5f;
+		DrawTexture(Portrait, PX, H - PH, PW, PH, 0.f, 0.f, 1.f, 1.f);
+		PortraitRight = PX + PW;
+	}
+
+	// Cinema framing: a soft dark edge and letterbox bars.
+	DCUI::Vignette(Canvas, 0.f, 0.f, W, H, H * 0.3f, FLinearColor(0.f, 0.f, 0.f, 0.6f));
+	const float Bar = H * 0.1f;
+	DCUI::Rect(Canvas, 0.f, 0.f, W, Bar, FLinearColor::Black);
+	DCUI::Rect(Canvas, 0.f, H - Bar, W, Bar, FLinearColor::Black);
+
+	// His speech bubble on the right, sized to the wrapped line.
+	const float Pad = 30.f * S;
+	const float TextPx = Px(Large * 1.05f);
+	const float BX = FMath::Max(PortraitRight - 60.f * S, W * 0.4f);
+	const float BW = W * 0.94f - BX;
+	TArray<FString> Lines;
+	DCUI::Wrap(Canvas, GetTextFont(), Line->Line, TextPx, BW - 2.f * Pad, Lines);
+	const float LineH = TextPx * 1.25f;
+	const float NameH = Px(Small) * 1.5f;
+	const float HintH = Px(Small) * 1.7f;
+	const float BH = 2.f * Pad + NameH + Lines.Num() * LineH + HintH;
+	const float BY = FMath::Min(H * 0.48f - BH * 0.5f, H - Bar - 30.f * S - BH);
+	const FLinearColor Paper(0.96f, 0.93f, 0.86f, 0.98f);
+	const FLinearColor Ink(0.08f, 0.07f, 0.07f);
+	DCUI::Triangle(Canvas, FVector2D(BX + 2.f, BY + BH * 0.3f), FVector2D(BX + 2.f, BY + BH * 0.58f), FVector2D(BX - 80.f * S, BY + BH * 0.36f), Paper);
+	DCUI::Rect(Canvas, BX, BY, BW, BH, Paper);
+	DCUI::Rect(Canvas, BX, BY, FMath::Max(7.f * S, 3.f), BH, DCUI::Gold);
+	DCUI::Outline(Canvas, BX, BY, BW, BH, FMath::Max(2.f * S, 1.f), FLinearColor(0.f, 0.f, 0.f, 0.35f));
+	Label(TEXT("THE DIRECTOR"), BX + Pad, BY + Pad * 0.7f, FLinearColor(0.55f, 0.08f, 0.06f), Small, EAlign::Left, false);
+
+	// The line types itself out across its wrapped lines.
+	int32 Remaining = FMath::FloorToInt(Since * ADCMultiCamDirector::CutsceneTypeRate);
+	float Y = BY + Pad * 0.7f + NameH;
+	for (const FString& Text : Lines)
+	{
+		if (Remaining > 0)
+		{
+			DCUI::Text(Canvas, GetTextFont(), Text.Left(Remaining), BX + Pad + 6.f * S, Y, TextPx, Ink, EAlign::Left, false);
+		}
+		Remaining -= Text.Len() + 1;
+		Y += LineH;
+	}
+
+	// Which line of how many, and (once it's all typed) how to go on.
+	const int32 Count = D->GetCutsceneLineCount();
+	const float DotY = BY + BH - Pad - HintH * 0.35f;
+	for (int32 i = 0; i < Count; ++i)
+	{
+		DCUI::Disc(Canvas, FVector2D(BX + Pad + 8.f * S + i * 26.f * S, DotY), 7.f * S,
+			i == D->GetCutsceneLineIndex() ? DCUI::Gold : FLinearColor(0.f, 0.f, 0.f, 0.2f), 20);
+	}
+	if (Remaining >= -1 && FMath::Fmod(GetWorld()->GetRealTimeSeconds(), 1.f) < 0.7f) // -1: every character shown
+	{
+		const float HintW = KeyHint(TEXT("ENTER"), TEXT("Continue"), 0.f, 0.f, Small, Ink, false);
+		KeyHint(TEXT("ENTER"), TEXT("Continue"), BX + BW - Pad - HintW, BY + BH - Pad - HintH * 0.85f, Small, Ink);
+	}
+}
 
 void ADCZombieHUD::DrawStoryboardCard(ADCZombieDirector* D)
 {

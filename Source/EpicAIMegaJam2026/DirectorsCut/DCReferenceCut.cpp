@@ -480,17 +480,23 @@ void ADCMultiCamDirector::TickReferenceCut(float DeltaSeconds)
 		StartReferenceCut();
 		return;
 	}
-	if (!bReferencePlaying || bReferencePaused)
+	// Holds its frame while paused or fading out to whatever comes next.
+	if (!bReferencePlaying || bReferencePaused || IsInputBlocked())
 	{
 		return;
 	}
 	ReferenceTime += DeltaSeconds;
 	if (ReferenceTime >= GetReferenceLength())
 	{
-		StopReferenceCut(); // over to the storyboard page
+		OnReferenceCutFinished();
 		return;
 	}
 	ShowFilmFrame(ReferenceCut, ReferenceTime);
+}
+
+void ADCMultiCamDirector::OnReferenceCutFinished()
+{
+	StopReferenceCut(); // over to the storyboard page
 }
 
 void ADCMultiCamDirector::ScrubReferenceCut(float DeltaSeconds)

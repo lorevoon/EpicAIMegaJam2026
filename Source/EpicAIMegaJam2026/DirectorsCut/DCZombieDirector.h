@@ -50,6 +50,11 @@ public:
 	/** While planning and looking through a camera: storyboard beats it frames at the scrubbed time. */
 	void GetPlanPreview(TArray<FString>& OutFramedBeats) const;
 
+protected:
+	virtual void OnReferenceCutFinished() override;
+
 private:
 	void EnterPreparation();
+	/** The director's briefing cutscene, then preparation. */
+	void BriefAndPrepare();
 };

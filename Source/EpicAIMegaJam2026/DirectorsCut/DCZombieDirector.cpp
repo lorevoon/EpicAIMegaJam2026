@@ -19,14 +19,37 @@ void ADCZombieDirector::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Open on the storyboard, which starts with the reference cut.
+	// Open on the director, out of black: he recruits the player, then shows them the reference cut.
 	Phase = EDCPhase::Storyboard;
-	bReferenceAutoStart = true;
 	Flash(FString(), 0.f);
+	if (bShowCutscenes && IntroCutscene.Num() > 0)
+	{
+		FadeInFromBlack();
+		PlayCutscene(IntroCutscene, [this]() { StartReferenceCut(); });
+	}
+	else
+	{
+		bReferenceAutoStart = true; // the player controller isn't ready until the first tick
+	}
 }
 
 // ---------------------------------------------------------------------------------------------
-// Phase flow: storyboard -> preparation (scrub the timeline) -> shooting -> review
+// Phase flow: intro cutscene -> reference cut -> briefing cutscene -> preparation (scrub the timeline)
+// -> action cutscene -> shooting -> review
+
+void ADCZombieDirector::OnReferenceCutFinished()
+{
+	FadeThrough([this]()
+	{
+		StopReferenceCut();
+		BriefAndPrepare();
+	});
+}
+
+void ADCZombieDirector::BriefAndPrepare()
+{
+	PlayCutscene(BriefingCutscene, [this]() { EnterPreparation(); });
+}
 
 void ADCZombieDirector::EnterPreparation()
 {
@@ -36,16 +59,20 @@ void ADCZombieDirector::EnterPreparation()
 
 void ADCZombieDirector::HandleStartTake()
 {
+	if (HandleCutsceneInput())
+	{
+		return;
+	}
 	if (Phase == EDCPhase::Storyboard)
 	{
-		// Enter skips the reference cut to the storyboard page, then starts preparing.
+		// Enter skips the reference cut (or leaves the storyboard page) for the briefing.
 		if (IsReferencePlaying())
 		{
-			StopReferenceCut();
+			OnReferenceCutFinished();
 		}
 		else
 		{
-			EnterPreparation();
+			FadeThrough([this]() { BriefAndPrepare(); });
 		}
 		return;
 	}

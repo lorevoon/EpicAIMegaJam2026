@@ -18,6 +18,7 @@
 #include "Engine/World.h"
 #include "Engine/LevelStreaming.h"
 #include "Engine/LevelStreamingDynamic.h"
+#include "Engine/Texture2D.h"
 #include "HAL/IConsoleManager.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
@@ -51,6 +52,26 @@ ADCMultiCamDirector::ADCMultiCamDirector()
 {
 	static ConstructorHelpers::FObjectFinder<UMaterialParameterCollection> FrameMPC(TEXT("/Game/DirectorsCut/Materials/MPC_DCFrame.MPC_DCFrame"));
 	FrameParams = FrameMPC.Object;
+
+	// The director's cutscenes between phases (editable per level).
+	static ConstructorHelpers::FObjectFinder<UTexture2D> Recruit(TEXT("/Game/DirectorsCut/UI/Director/Director_Recruit.Director_Recruit"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> Vision(TEXT("/Game/DirectorsCut/UI/Director/Director_Vision.Director_Vision"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> Almost(TEXT("/Game/DirectorsCut/UI/Director/Director_Almost.Director_Almost"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> CameraFace(TEXT("/Game/DirectorsCut/UI/Director/Director_Camera.Director_Camera"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> ActionFace(TEXT("/Game/DirectorsCut/UI/Director/Director_Action.Director_Action"));
+	IntroCutscene = {
+		{ Recruit.Object, TEXT("I have a vision for a masterpiece film... And I recruit YOU as my cinematographer!!") },
+		{ Vision.Object, TEXT("Now, let me show you the vision in my head.") },
+	};
+	BriefingCutscene = {
+		{ Almost.Object, TEXT("Now your job is to make my vision a reality. Make it as similar as possible!!") },
+		{ CameraFace.Object, TEXT("Let's start placing the cameras!") },
+	};
+	ActionCutscene = {
+		{ ActionFace.Object, TEXT("It's time to actually film now!!") },
+		{ ActionFace.Object, TEXT("We will do this in ONE TAKE. Good luck!!") },
+	};
+
 	PrimaryActorTick.bCanEverTick = true;
 	// Evaluate after the player has re-aimed the live camera this frame.
 	PrimaryActorTick.TickGroup = TG_PostUpdateWork;
@@ -172,6 +193,7 @@ void ADCMultiCamDirector::GatherScene()
 void ADCMultiCamDirector::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	TickFade(DeltaSeconds);
 
 	for (ADCMultiCam* Cam : Cameras)
 	{
@@ -188,6 +210,10 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 	switch (Phase)
 	{
 	case EDCPhase::Preparation:
+		if (IsInCutscene())
+		{
+			break; // the set holds still while he talks
+		}
 		if (bRehearsalPlaying && TakeDuration > KINDA_SMALL_NUMBER)
 		{
 			SceneTime = FMath::Fmod(SceneTime + FMath::Max(0.f, DeltaSeconds) * RehearsalSpeed, TakeDuration);
@@ -285,7 +311,7 @@ void ADCMultiCamDirector::UpdateSceneDialogue(float DeltaSeconds)
 			&& GetFilmView(Recording, SceneTime, Location, Rotation, FOV, Position);
 	}
 	// Beyond the device pitch range, keep fast rehearsal silent instead of playing out of sync.
-	if (!bPlaying || Rate > GetDefault<UAudioSettings>()->GlobalMaxPitchScale
+	if (!bPlaying || IsInCutscene() || Rate > GetDefault<UAudioSettings>()->GlobalMaxPitchScale
 		|| Position < 0.f || Position >= TakeDuration)
 	{
 		Audio->Stop();
@@ -339,6 +365,10 @@ bool ADCMultiCamDirector::EnsureLiveCamera()
 
 void ADCMultiCamDirector::HandleStartTake()
 {
+	if (HandleCutsceneInput())
+	{
+		return;
+	}
 	if (Phase == EDCPhase::Review)
 	{
 		// Enter skips to the evaluation, then goes back to preparation.
@@ -367,6 +397,11 @@ void ADCMultiCamDirector::HandleStartTake()
 		Flash(TEXT("Place at least one camera first"));
 		return;
 	}
+	PlayCutscene(ActionCutscene, [this]() { StartCountdown(); });
+}
+
+void ADCMultiCamDirector::StartCountdown()
+{
 	ResetScene();
 	Ghost->SetActorHiddenInGame(true);
 	Phase = EDCPhase::Countdown;
@@ -1046,6 +1081,10 @@ void ADCMultiCamDirector::UpdatePrepPreview()
 
 void ADCMultiCamDirector::HandlePrimaryPressed()
 {
+	if (HandleCutsceneInput())
+	{
+		return;
+	}
 	if (Phase != EDCPhase::Preparation || IsViewingCamera())
 	{
 		return;

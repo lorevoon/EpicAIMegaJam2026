@@ -31,6 +31,9 @@ namespace DCUI
 	FVector2D Text(UCanvas* Canvas, UFont* Font, const FString& Text, float X, float Y, float Px, const FLinearColor& Color,
 		EAlign Align = EAlign::Left, bool bShadow = true, float MaxWidth = 0.f);
 
+	/** Breaks Text into lines no wider than MaxWidth at Px pixels, at spaces (a single overlong word gets its own line). */
+	void Wrap(UCanvas* Canvas, UFont* Font, const FString& Text, float Px, float MaxWidth, TArray<FString>& OutLines);
+
 	void Rect(UCanvas* Canvas, float X, float Y, float W, float H, const FLinearColor& Color);
 	void Outline(UCanvas* Canvas, float X, float Y, float W, float H, float Thickness, const FLinearColor& Color);
 	void Line(UCanvas* Canvas, const FVector2D& A, const FVector2D& B, float Thickness, const FLinearColor& Color);

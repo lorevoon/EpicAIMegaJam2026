@@ -62,6 +62,31 @@ FVector2D DCUI::Text(UCanvas* Canvas, UFont* Font, const FString& Text, float X,
 	return Size;
 }
 
+void DCUI::Wrap(UCanvas* Canvas, UFont* Font, const FString& Text, float Px, float MaxWidth, TArray<FString>& OutLines)
+{
+	OutLines.Reset();
+	TArray<FString> Words;
+	Text.ParseIntoArray(Words, TEXT(" "));
+	FString Line;
+	for (const FString& Word : Words)
+	{
+		const FString Longer = Line.IsEmpty() ? Word : Line + TEXT(" ") + Word;
+		if (!Line.IsEmpty() && Measure(Canvas, Font, Longer, Px).X > MaxWidth)
+		{
+			OutLines.Add(MoveTemp(Line));
+			Line = Word;
+		}
+		else
+		{
+			Line = Longer;
+		}
+	}
+	if (!Line.IsEmpty())
+	{
+		OutLines.Add(MoveTemp(Line));
+	}
+}
+
 void DCUI::Rect(UCanvas* Canvas, float X, float Y, float W, float H, const FLinearColor& Color)
 {
 	FCanvasTileItem Tile(FVector2D(X, Y), FVector2D(W, H), Color);

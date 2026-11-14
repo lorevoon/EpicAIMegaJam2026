@@ -73,6 +73,13 @@ public:
 	UFont* GetTextFont() const;
 
 private:
+	/** Everything but cutscenes: the current phase's HUD. */
+	void DrawPhase(ADCZombieDirector* D);
+	/**
+	 * A director cutscene: a dark stage with a spotlight, letterbox bars, the director large on the left (popping in
+	 * on each new face) and his line typing out in a speech bubble, with Enter to continue once it's typed.
+	 */
+	void DrawCutscene(ADCZombieDirector* D);
 	void DrawStoryboardCard(ADCZombieDirector* D);
 	void DrawReferenceCut(ADCZombieDirector* D);
 	void DrawHeader(ADCZombieDirector* D);

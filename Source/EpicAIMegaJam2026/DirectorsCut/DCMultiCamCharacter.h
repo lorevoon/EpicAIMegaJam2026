@@ -40,6 +40,8 @@ private:
 	ADCMultiCamDirector* GetDirector();
 	UInputAction* MakeAction(EInputActionValueType Type, bool bWhenPaused = false);
 	bool IsLockedToCamera();
+	/** A cutscene or fade is up: everything but Enter and clicks is ignored. */
+	bool IsInputBlocked();
 
 	void OnMove(const FInputActionValue& Value);
 	void OnLook(const FInputActionValue& Value);

@@ -22,6 +22,20 @@ class UTextureRenderTarget2D;
 class APlayerController;
 class UMaterialParameterCollection;
 class UAudioComponent;
+class UTexture2D;
+
+/** One line of a director cutscene: his face, and what he says. */
+USTRUCT()
+struct FDCCutsceneLine
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Cutscene")
+	TObjectPtr<UTexture2D> Portrait;
+
+	UPROPERTY(EditAnywhere, Category = "Cutscene", meta = (MultiLine = true))
+	FString Line;
+};
 
 class ADCCinemaReplay;
 
@@ -209,6 +223,40 @@ public:
 	/** Shortest time a coaching line stays up before the director moves on to the next one. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Director Coach", meta = (ClampMin = "0.5", Units = "s"))
 	float CoachLineSeconds = 2.2f;
+
+	/** Between phases the director talks to the player in a short cutscene; Enter or click moves on. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
+	bool bShowCutscenes = true;
+
+	/** At the start, before the reference cut. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
+	TArray<FDCCutsceneLine> IntroCutscene;
+
+	/** After the reference cut, before preparation. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
+	TArray<FDCCutsceneLine> BriefingCutscene;
+
+	/** After preparation, before shooting. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
+	TArray<FDCCutsceneLine> ActionCutscene;
+
+	/** Length of each half of a fade through black between phases. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes", meta = (ClampMin = "0.05", Units = "s"))
+	float PhaseFadeSeconds = 0.6f;
+
+	/** Characters per second a cutscene line types out at. */
+	static constexpr float CutsceneTypeRate = 40.f;
+
+	bool IsInCutscene() const { return Cutscene != nullptr; }
+	/** A cutscene is up or the screen is fading: player input only moves the cutscene on. */
+	bool IsInputBlocked() const { return IsInCutscene() || FadeDirection != 0; }
+	/** The cutscene line being said (null outside cutscenes), its index and count, and the real time it started. */
+	const FDCCutsceneLine* GetCutsceneLine() const { return Cutscene && Cutscene->IsValidIndex(CutsceneLine) ? &(*Cutscene)[CutsceneLine] : nullptr; }
+	int32 GetCutsceneLineIndex() const { return CutsceneLine; }
+	int32 GetCutsceneLineCount() const { return Cutscene ? Cutscene->Num() : 0; }
+	float GetCutsceneLineStart() const { return CutsceneLineStart; }
+	/** How black the screen is (0-1), eased. */
+	float GetFadeAlpha() const { return FMath::SmoothStep(0.f, 1.f, FadeAlpha); }
 
 	/** Live likeness (0-1) from which a shot counts as perfect: the director cheers and the frame celebrates. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Director Coach", meta = (ClampMin = "0.5", ClampMax = "1"))
@@ -439,6 +487,8 @@ protected:
 	bool FindReferenceShot(const FDCMultiCamBeat& State, FVector& OutLocation, float& OutFOV, float& OutCleanFrom);
 	void StartReferenceCut();
 	void StopReferenceCut();
+	/** The reference cut played to its end (or was skipped). By default, back to the storyboard page. */
+	virtual void OnReferenceCutFinished();
 	void TickReferenceCut(float DeltaSeconds);
 	void ScrubReferenceCut(float DeltaSeconds);
 	void ToggleReferenceCut();
@@ -486,6 +536,27 @@ protected:
 	void Cheer(int32 BeatIndex);
 	FString CheerLine;
 	float CheerLineStart = -100.f;
+
+	// Cutscenes and fades (DCCutscene.cpp)
+	/** Plays Lines (or nothing, when cutscenes are off), then fades through black and calls OnDone at full black. */
+	void PlayCutscene(const TArray<FDCCutsceneLine>& Lines, TFunction<void()> OnDone);
+	/** Enter or click during a cutscene: finishes the line being typed, else moves to the next. False if no cutscene took it. */
+	bool HandleCutsceneInput();
+	/** Fades to black, calls AtBlack there, then fades back in. */
+	void FadeThrough(TFunction<void()> AtBlack);
+	/** Starts the screen black, fading in. */
+	void FadeInFromBlack();
+	void TickFade(float DeltaSeconds);
+	const TArray<FDCCutsceneLine>* Cutscene = nullptr;
+	int32 CutsceneLine = 0;
+	float CutsceneLineStart = 0.f;
+	TFunction<void()> CutsceneDone;
+	TFunction<void()> FadeAction;
+	float FadeAlpha = 0.f;
+	/** +1 fading to black, -1 fading back in, 0 not fading. */
+	int32 FadeDirection = 0;
+	/** Preparation's checks passed: the take starts (after the action cutscene). */
+	void StartCountdown();
 	float CheerUpSince = -100.f;
 	int32 CheerCount = 0;
 	FCollisionQueryParams MakeTraceParams(const FName& Tag) const;
