@@ -106,8 +106,7 @@ void ADCZombieDirector::HandleStartTake()
 	}
 	if (Phase == EDCPhase::Reference)
 	{
-		OnReferenceCutFinished(); // skipping the film goes on to the briefing
-		return;
+		return; // the reference film can't be skipped: it plays through, then the briefing follows
 	}
 	Super::HandleStartTake();
 }
