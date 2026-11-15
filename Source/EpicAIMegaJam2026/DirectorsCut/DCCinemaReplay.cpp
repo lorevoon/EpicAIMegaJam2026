@@ -2,6 +2,7 @@
 #include "DCBeat.h"
 #include "DCMultiCamDirector.h"
 #include "DCUI.h"
+#include "DCViewSettings.h"
 #include "DCZombieDirector.h"
 #include "DCZombieHUD.h"
 #include "Camera/CameraActor.h"
@@ -14,62 +15,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "CanvasItem.h"
 #include "Algo/BinarySearch.h"
-#include "HAL/IConsoleManager.h"
-#include "Interfaces/Interface_PostProcessVolume.h"
 #include "SceneInterface.h"
 
 namespace
 {
- /** Copies every setting Src overrides onto Dst (and marks it overridden there), like a volume at full weight. */
- void ApplyOverrides(const FPostProcessSettings& Src, FPostProcessSettings& Dst)
- {
-  const UScriptStruct* Struct = FPostProcessSettings::StaticStruct();
-  for (TFieldIterator<FBoolProperty> It(Struct); It; ++It)
-  {
-   const FString Flag = It->GetName();
-   if (!Flag.StartsWith(TEXT("bOverride_")) || !It->GetPropertyValue_InContainer(&Src)) continue;
-   const FString Name = Flag.RightChop(10);
-   const FProperty* Value = Struct->FindPropertyByName(FName(*Name));
-   Value = Value ? Value : Struct->FindPropertyByName(FName(TEXT("b") + Name));
-   if (!Value) continue;
-   It->SetPropertyValue_InContainer(&Dst, true);
-   Value->CopyCompleteValue_InContainer(&Dst, &Src);
-  }
-  for (const FWeightedBlendable& Blendable : Src.WeightedBlendables.Array)
-  {
-   if (Blendable.Object && Blendable.Weight > 0.f) Dst.WeightedBlendables.Array.Add(Blendable);
-  }
- }
-
- /**
-  * Scene captures ignore post-process volumes - they render with their own settings only, and switch Lumen off unless
-  * told otherwise - while the main view blends every volume it is in. Build the settings the main view would have at
-  * Location (project lighting defaults, then each volume by priority, then the camera's own), so the projected film
-  * looks exactly like the reference cut: same grade, exposure, post-process materials and lighting.
-  */
- FPostProcessSettings MainViewSettings(UWorld* World, const FVector& Location, const FPostProcessSettings& CameraSettings)
- {
-  FPostProcessSettings PP;
-  PP.bOverride_DynamicGlobalIlluminationMethod = true;
-  PP.DynamicGlobalIlluminationMethod = (EDynamicGlobalIlluminationMethod::Type)
-   IConsoleManager::Get().FindConsoleVariable(TEXT("r.DynamicGlobalIlluminationMethod"))->GetInt();
-  PP.bOverride_ReflectionMethod = true;
-  PP.ReflectionMethod = (EReflectionMethod::Type)IConsoleManager::Get().FindConsoleVariable(TEXT("r.ReflectionMethod"))->GetInt();
-  PP.bOverride_LumenSurfaceCacheResolution = true; // captures default to half resolution
-  PP.LumenSurfaceCacheResolution = 1.f;
-  for (IInterface_PostProcessVolume& Volume : World->GetPostProcessVolumeIterator()) // ascending priority
-  {
-   const FPostProcessVolumeProperties Props = Volume.GetProperties();
-   if (Props.bIsEnabled && Props.Settings && Props.BlendWeight > 0.f
-    && (Props.bIsUnbound || Volume.EncompassesPoint(Location, 0.f, nullptr)))
-   {
-    ApplyOverrides(*Props.Settings, PP);
-   }
-  }
-  ApplyOverrides(CameraSettings, PP);
-  return PP;
- }
-
  const FLinearColor Gold(.88f,.65f,.30f), Ivory(.96f,.91f,.8f), Ink(.012f,.012f,.022f);
  const FLinearColor Green(.32f,.88f,.57f), Red(.98f,.36f,.36f);
  // Draw at a fixed design size, uniformly fitted for ultrawide and small windows alike.
@@ -306,7 +255,7 @@ void ADCCinemaReplay::ProjectFrame(ACameraActor* Camera)
  if(!bActive || !Camera || !FilmTexture) return;
  Projector->SetWorldLocationAndRotation(Camera->GetActorLocation(),Camera->GetActorRotation());
  Projector->FOVAngle=Camera->GetCameraComponent()->FieldOfView;
- Projector->PostProcessSettings=MainViewSettings(GetWorld(),Camera->GetActorLocation(),Camera->GetCameraComponent()->PostProcessSettings);
+ Projector->PostProcessSettings=DCView::MainViewSettings(GetWorld(),Camera->GetActorLocation(),Camera->GetCameraComponent()->PostProcessSettings);
  Projector->PostProcessBlendWeight=1.f;
  // Active playback requests a frame every tick. Two trailing captures are enough to refresh temporal
  // history after a pause, scrub, or cut without rendering a static result for almost another second.

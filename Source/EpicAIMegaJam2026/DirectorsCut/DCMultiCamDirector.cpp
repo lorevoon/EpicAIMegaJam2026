@@ -19,6 +19,7 @@
 #include "Sound/AudioSettings.h"
 #include "Engine/World.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Engine/TextureCube.h"
 #include "Engine/LevelStreaming.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "HAL/IConsoleManager.h"
@@ -94,6 +95,8 @@ ADCMultiCamDirector::ADCMultiCamDirector()
 {
 	static ConstructorHelpers::FObjectFinder<UMaterialParameterCollection> FrameMPC(TEXT("/Game/DirectorsCut/Materials/MPC_DCFrame.MPC_DCFrame"));
 	FrameParams = FrameMPC.Object;
+	static ConstructorHelpers::FObjectFinder<UTextureCube> FillCubemap(TEXT("/Engine/MapTemplates/Sky/DaylightAmbientCubemap.DaylightAmbientCubemap"));
+	InsetFillCubemap = FillCubemap.Object;
 
 	PrimaryActorTick.bCanEverTick = true;
 	// Evaluate after the player has re-aimed the live camera this frame.
@@ -1290,7 +1293,7 @@ void ADCMultiCamDirector::UpdatePrepPreview()
    for (const FDCMultiCamBeat& State : Beats) PlacementCapture->HiddenActors.Add(State.Beat);
    PlacementCapture->SetWorldLocationAndRotation(Ghost->GetCamera()->GetComponentLocation(), Ghost->GetAim());
    PlacementCapture->FOVAngle = DCFrame::CaptureFOV(Ghost->GetFOV(), DCFrame::ScreenAspect);
-   PlacementCapture->CaptureScene();
+   CaptureInset(PlacementCapture);
    PlacementCaptureElapsed = 0.f;
   }
 	}

@@ -25,6 +25,7 @@ class APlayerController;
 class UMaterialParameterCollection;
 class UAudioComponent;
 class UTexture2D;
+class UTextureCube;
 
 /**
  * Where things sit on the main menu, as a share of the screen (0,0 top-left, 1,1 bottom-right). The title is the
@@ -448,6 +449,20 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras")
 	bool bZoomExtendsRange = true;
 
+	/**
+	 * The reference-cut and placement insets skip Lumen to stay cheap, so sets lit mostly by bounce light (Act 2's
+	 * studio) come out dark in them. This flat cubemap fill, seen only by the insets, stands in for that bounce light.
+	 * 0 = off.
+	 */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Insets", meta = (ClampMin = "0"))
+	float InsetFillIntensity = 0.f;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Insets")
+	TObjectPtr<UTextureCube> InsetFillCubemap;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Insets")
+	FLinearColor InsetFillTint = FLinearColor::White;
+
 	// Player commands. Look/zoom return true when they were applied to a camera instead of the walking view.
 	void HandlePrimaryPressed();
 	void HandleCameraCancel();
@@ -607,6 +622,8 @@ protected:
 	void ToggleReferenceCut();
 	/** Renders the reference cut's camera into the preparation inset at 15 Hz while its scene time changes. */
 	void UpdateReferenceInset(float DeltaSeconds);
+	/** Captures an inset with the main view's volume settings (exposure, grade) plus the cheap inset fill light. */
+	void CaptureInset(USceneCaptureComponent2D* Capture) const;
 	TArray<FDCTakeSample> ReferenceCut;
 	bool bReferenceCutBuilt = false;
 	/**

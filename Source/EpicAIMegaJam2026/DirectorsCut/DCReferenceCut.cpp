@@ -10,6 +10,7 @@
 #include "DCMultiCamCharacter.h"
 #include "DCPerformer.h"
 #include "DCRail.h"
+#include "DCViewSettings.h"
 #include "Algo/BinarySearch.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
@@ -611,6 +612,24 @@ UTextureRenderTarget2D* ADCMultiCamDirector::GetReferenceInset() const
 	return bPhase && bShowReferenceInset && ReferenceCut.Num() > 0 ? ReferenceInsetTarget.Get() : nullptr;
 }
 
+void ADCMultiCamDirector::CaptureInset(USceneCaptureComponent2D* Capture) const
+{
+	// Scene captures ignore volumes, so hand them the main view's (night exposure, clay grade) - but keep Lumen off.
+	FPostProcessSettings& PP = Capture->PostProcessSettings;
+	PP = DCView::MainViewSettings(GetWorld(), Capture->GetComponentLocation());
+	PP.DynamicGlobalIlluminationMethod = EDynamicGlobalIlluminationMethod::None;
+	PP.ReflectionMethod = EReflectionMethod::None;
+	if (InsetFillIntensity > 0.f && InsetFillCubemap)
+	{
+		PP.bOverride_AmbientCubemapIntensity = true;
+		PP.bOverride_AmbientCubemapTint = true;
+		PP.AmbientCubemap = InsetFillCubemap;
+		PP.AmbientCubemapIntensity = InsetFillIntensity;
+		PP.AmbientCubemapTint = InsetFillTint;
+	}
+	Capture->CaptureScene();
+}
+
 void ADCMultiCamDirector::UpdateReferenceInset(float DeltaSeconds)
 {
 	constexpr float CaptureInterval = 1.f / 15.f;
@@ -667,7 +686,7 @@ void ADCMultiCamDirector::UpdateReferenceInset(float DeltaSeconds)
 
 	ReferenceCapture->SetWorldLocationAndRotation(Location, Rotation);
 	ReferenceCapture->FOVAngle = FOV;
-	ReferenceCapture->CaptureScene();
+	CaptureInset(ReferenceCapture);
 	ReferenceInsetCaptureElapsed = 0.f;
 	LastReferenceInsetSceneTime = SceneTime;
 }
