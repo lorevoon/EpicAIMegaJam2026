@@ -66,11 +66,15 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
     MinimumRate = FMath::Min(MinimumRate, Rate); MaximumRate = FMath::Max(MaximumRate, Rate);
     if (S.Time >= 26.05f && S.Time <= 37.8f)
      TestTrue(TEXT("Death scream and final dialogue stay at natural speed"), FMath::IsNearlyEqual(Rate, 1.f, .001f));
-    if (S.Time > 18.1f && S.Time < 28.9f)
-     TestTrue(TEXT("Fight and fall retain one camera position"), S.Location.Equals(D->ReferenceCut[550].Location, .01f));
+    if (S.Time > 19.1f && S.Time < 25.9f)
+     TestTrue(TEXT("Fight and fall retain one camera position"), S.Location.Equals(D->ReferenceCut[580].Location, .01f));
    }
   }
   TestEqual(TEXT("All five story sections used"), Slots.Num(), 5);
+  TestEqual(TEXT("Smith falls within the continuous raid shot"), D->ReferenceCut[240].Slot, D->ReferenceCut[0].Slot);
+  TestTrue(TEXT("Raid camera dollies without a cut"), FVector::Dist(D->ReferenceCut[0].Location, D->ReferenceCut[240].Location) > 100.f);
+  TestEqual(TEXT("Juliet has her own shot at sixteen seconds"), D->ReferenceCut[480].Slot, 2);
+  TestEqual(TEXT("Duel camera starts at nineteen seconds"), D->ReferenceCut[571].Slot, 3);
   for (const FVector& Position : Positions)
    TestTrue(TEXT("Reference camera stays inside the studio walls"), D->ReferenceStageBounds.IsInside(FVector2D(Position)));
   // Every scene cuts to a camera of its own, too far from the others for one placed camera to stand on two spots.
@@ -79,8 +83,8 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Scene camera zones do not overlap"), FVector::Dist2D(Positions[i], Positions[j]) >= D->GetReferenceShotSpacing());
   TestTrue(TEXT("Fall zoom opens the frame"), D->ReferenceCut[850].FilmFOV > D->ReferenceCut[580].FilmFOV + 3.f);
   TestTrue(TEXT("Ending zoom moves closer"), D->ReferenceCut[1100].FilmFOV < D->ReferenceCut[880].FilmFOV - 5.f);
-  TestTrue(TEXT("Impact is slowed"), MinimumRate < .85f && MinimumRate >= .25f);
-  TestTrue(TEXT("Remaining action compensates without a large speed-up"), MaximumRate > 1.f && MaximumRate < 1.2f);
+  TestTrue(TEXT("All action stays at natural speed"), FMath::IsNearlyEqual(MinimumRate, 1.f, .001f));
+  TestTrue(TEXT("No compensating speed-up"), FMath::IsNearlyEqual(MaximumRate, 1.f, .001f));
   if (D->ReferenceShotBeats.Num() == 5)
   {
    TSet<int32> StoryBeats; for (int32 B : D->ReferenceShotBeats) StoryBeats.Add(B);
@@ -129,7 +133,7 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
   TestEqual(TEXT("Juliet fires two real arrows"), ArrowCount, 2);
   // Main's picture-based scoring and live coach consume scene time. A slowed
   // reference must not leave them inspecting the previous shot's characters.
-  const float SubjectTimes[] = {6.01f, 10.01f, 18.01f, 29.01f};
+  const float SubjectTimes[] = {6.01f, 10.01f, 19.01f, 29.01f};
   const TCHAR* SubjectNames[] = {TEXT("Mr. Smith"), TEXT("Juliet"), TEXT("Armoured monster"), TEXT("Juliet")};
   for (int32 i = 0; i < UE_ARRAY_COUNT(SubjectTimes); ++i)
   {
@@ -143,7 +147,7 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
   D->Phase = EDCPhase::Reference; D->bReferencePlaying = true; D->bReferencePaused = false;
   D->ReferenceTime = D->ReferenceFilmTimeAtSceneTime(25.5f); D->UpdateSceneDialogue(0.f);
   if (TestNotNull(TEXT("Synchronized raid audio"), D->SceneDialogue.Get()))
-   TestTrue(TEXT("Sound slows with the fatal strike"), D->SceneDialogue->PitchMultiplier > .25f && D->SceneDialogue->PitchMultiplier < .85f);
+   TestTrue(TEXT("Fight audio stays at natural pitch"), FMath::IsNearlyEqual(D->SceneDialogue->PitchMultiplier, 1.f, .001f));
   D->ReferenceTime = D->ReferenceFilmTimeAtSceneTime(26.2f); D->UpdateSceneDialogue(0.f);
   TestTrue(TEXT("Juliet's Romeo scream has natural pitch"), FMath::IsNearlyEqual(D->SceneDialogue->PitchMultiplier, 1.f, .001f));
   // Film timestamps lose precision late in the take. Their per-frame derivative
@@ -172,7 +176,7 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
  // Optional rendered evidence uses the same runtime film as the player's reference.
  if (FParse::Param(FCommandLine::Get(), TEXT("Act2VisualQA")))
  {
-  for (float Moment : {0.5f, 3.f, 5.8f, 6.5f, 10.5f, 11.f, 13.8f, 15.f, 16.5f, 19.5f, 22.5f, 23.2f, 24.9f, 25.2f, 26.8f, 27.8f, 35.f, 37.f})
+  for (float Moment : {0.5f, 3.f, 5.8f, 7.8f, 9.f, 10.5f, 13.f, 15.5f, 17.7f, 18.1f, 18.8f, 19.5f, 22.5f, 25.5f, 26.8f, 27.8f, 29.5f, 35.f})
   {
    ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([Moment]()
    {
@@ -194,7 +198,7 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
    ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(1.f));
    ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([Moment]()
    {
-    FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("Act2/CinemaRevision9/Runtime") /
+    FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("PerformanceRevision11/Act2") /
      FString::Printf(TEXT("reference_%04d.png"), FMath::RoundToInt(Moment * 10)), false, false);
     return true;
    }));
@@ -234,7 +238,7 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
        {
         TArray64<uint8> PNG;
         FImageUtils::PNGCompressImageArray(Target->SizeX, Target->SizeY, Pixels, PNG);
-        const FString Path = FPaths::ProjectSavedDir() / TEXT("Act2/CinemaRevision9/Runtime") / FString::Printf(TEXT("preparation_%04d.png"), FMath::RoundToInt(Moment * 10));
+        const FString Path = FPaths::ProjectSavedDir() / TEXT("PerformanceRevision11/Act2") / FString::Printf(TEXT("preparation_%04d.png"), FMath::RoundToInt(Moment * 10));
         FFileHelper::SaveArrayToFile(PNG, *Path);
        }
       }

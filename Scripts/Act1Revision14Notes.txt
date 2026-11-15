@@ -1,0 +1,15 @@
+Act 1 revision 14
+- Juliet walks from (-5150,-8250) into the first shot, arriving at her original conversation mark at 5.6 seconds. Female walking source retained; camera framing unchanged.
+- Romeo: strengthened the timed opening mouth movement and set FaceSmile=0.9 during LetMeHelp (0.15-1.74 seconds). Scene-clock evaluation explicitly updates the FaceSmile material parameter.
+- Replaced outward drift and sliding during the kiss approach with breathing idle, animated short walking steps from 14.8 to 16 seconds, and a blended transition into the existing eased kiss. Final held pose after 17.8 seconds preserved.
+- Restored a persistent preparation spawn at (-4200,-9300,1082), on the studio floor beside the clapperboard. ADCStartMark hides itself and disables collision in BeginPlay. Missing-marker fallback now uses the clapperboard instead of the distant default world position.
+- Build and saved-scene validation passed. Runtime test passed for studio spawn, invisible marker, and safe fallback after deleting the marker. Reviewed first-shot frames: Juliet is outside frame at time 0 and walks in from the right.
+Rebuild: Scripts/author_act1_14.py, then Scripts/validate_act1_14.py. Backup, logs, and rendered evidence: Saved/Act1Revision14.
+
+Face-material follow-up: close-up review revealed the original brow artwork still read as stern. Added Romeo-only M_RomeoFriendlyFace / MI_RomeoFriendlyFace under Animations/Act1Revision14, remapping the existing male facial UVs to the friendly atlas expression when FaceSmile > 0.5 and using its matching opacity. Rebuild this material with Scripts/fix_romeo_face14.py after scene authoring. Other actors retain their existing materials.
+
+Final mouth refinement: Scripts/refine_romeo_smile14.py adds a Romeo-only upturned mouth mask fitted to the existing mouth-card UVs. FaceSmile switches to this shape; the existing bone track still opens and closes it with the opening line. Material opacity follows the same shape to avoid residual corners from the old mouth artwork. Rebuild order ends with fix_romeo_face14.py and refine_romeo_smile14.py.
+
+Final verification: close-up frames at 0.4/0.8 seconds show the corrected upward mouth corners and distinct closed/open speaking shapes; skin opacity is intact. Final DirectorsCut.Reference.PairedPerformance run passed, including preparation spawn, hidden marker, and deleted-marker fallback checks. Build, saved-scene validation, Python compilation, and diff whitespace checks passed.
+
+Revision 15 supersedes the smile and spawn: Romeo uses the original MI_Act1_FacialExpressions again with FaceSmile=0 throughout, and a restrained opening mouth track (LetMeHelp) without the smiling mouth mask. New asset Animations/Act1Revision15/A_Act1_Romeo. Spawn moved to (-4700,-9300,1082), 430 cm inside the inner face of the actual right studio wall. Missing-marker fallback now places the player in front of the inward-facing clapperboard rather than behind it. Runtime test checks both normal and fallback spawn against the studio bounds, as well as marker invisibility. Rebuild with Scripts/author_act1_15.py; evidence in Saved/Act1Revision15.

@@ -18,6 +18,7 @@ class ADCStartMark : public AActor
 
 public:
 	ADCStartMark();
+	virtual void BeginPlay() override;
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 

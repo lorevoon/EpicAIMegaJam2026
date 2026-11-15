@@ -158,6 +158,7 @@ class ADCMultiCamDirector : public AActor
 	friend class FDCDualSceneReplayTest;
 	friend class FDCDialoguePlaybackTest;
 	friend class FDCAuthoredReferenceTest;
+	friend class FDCAct1PerformanceTest;
 	friend class FDCSharedUITest;
 	friend class FDCCinemaReplayTest;
 
@@ -368,6 +369,8 @@ public:
  bool IsReferenceFocused() const { return bReferenceFocused && Phase == EDCPhase::Preparation; }
  bool IsSetOverview() const { return OverviewRemaining > 0.f; }
  void StartSetOverview();
+ float GetPreparationSlateRemaining() const { return OverviewRemaining; }
+ TArray<float> GetReferenceCameraCutTimes(bool bSceneTime) const;
  UTextureRenderTarget2D* GetPlacementPreview() const { return bPreviewHit && Phase == EDCPhase::Preparation && !IsViewingCamera() ? PlacementTarget.Get() : nullptr; }
  FVector GetPlacementHintLocation() const { return PreviewPoint; }
  /** Where the stand of the camera being placed meets its tripod legs, a little above the ground. */

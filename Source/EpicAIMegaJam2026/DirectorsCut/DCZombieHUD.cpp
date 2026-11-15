@@ -1,6 +1,7 @@
 // Director's Cut - canvas HUD, styled like a film set (see DCUI for the building blocks).
 
 #include "DCZombieHUD.h"
+#include "DCCrewMember.h"
 #include "ImageUtils.h"
 #include "Misc/Paths.h"
 #include "DCBeat.h"
@@ -236,7 +237,7 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 		return;
 	}
 
- if (D->IsSetOverview()) return;
+ if (D->IsSetOverview()) { DrawCountdown(D); return; }
  const bool bPrep = D->GetPhase() == EDCPhase::Preparation;
  FocusProgress = bPrep ? FMath::Clamp(FocusProgress + (D->IsReferenceFocused() ? 1.f : -1.f) * GetWorld()->GetDeltaSeconds() / 0.35f, 0.f, 1.f) : 0.f;
  FocusEase = FMath::SmoothStep(0.f, 1.f, FocusProgress);
@@ -318,6 +319,31 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 	DrawCoach(D);
 	DrawSwitcher(D);
 	DrawCheer(D);
+	if (D->GetPhase() == EDCPhase::Preparation && !D->IsViewingCamera() && PlayerOwner && PlayerOwner->GetPawn())
+	{
+		ADCCrewMember* Nearest = nullptr;
+		float BestDistance = FMath::Square(360.f);
+		for (TActorIterator<ADCCrewMember> It(GetWorld()); It; ++It)
+		{
+			const float Distance = FVector::DistSquared(PlayerOwner->GetPawn()->GetActorLocation(), It->GetActorLocation());
+			if (!It->IsHidden() && Distance < BestDistance && PlayerOwner->LineOfSightTo(*It))
+			{ Nearest = *It; BestDistance = Distance; }
+		}
+		FVector2D Point;
+		if (Nearest && PlayerOwner->ProjectWorldLocationToScreen(Nearest->GetActorLocation() + FVector(0, 0, Nearest->HeadHeight), Point))
+		{
+			const float W = FMath::Min(420.f * S, Canvas->ClipX - 32.f), FontPx = 21.f * S;
+			TArray<FString> Lines;
+			DCUI::Wrap(Canvas, GetTextFont(), Nearest->GetDialogue(), FontPx, W - 28.f * S, Lines);
+			const float H = (40.f + 27.f * Lines.Num()) * S;
+			const float X = FMath::Clamp(float(Point.X) - W / 2.f, 16.f, Canvas->ClipX - W - 16.f);
+			const float Y = FMath::Clamp(float(Point.Y) - H - 14.f * S, 80.f * S, Canvas->ClipY - H - 16.f);
+			DCUI::Panel(Canvas, X, Y, W, H, S, FLinearColor(.015f,.02f,.025f,.94f));
+			DCUI::Text(Canvas, GetTextFont(), Nearest->CrewRole, X + 14.f*S, Y + 9.f*S, FontPx, DCUI::Gold);
+			for (int32 i = 0; i < Lines.Num(); ++i)
+				DCUI::Text(Canvas, GetTextFont(), Lines[i], X + 14.f*S, Y + (37.f + i*27.f)*S, FontPx, DCUI::Ivory);
+		}
+	}
 	if (D->GetPhase() == EDCPhase::Preparation)
 	{
 		DrawPlanPreview(D); // Keep timeline controls readable throughout the cheer animation.
@@ -737,11 +763,9 @@ void ADCZombieHUD::DrawReferenceCut(ADCZombieDirector* D)
 	const float TW = W * 0.34f;
 	const float TY = H - Bar * 0.5f - 3.f * S;
 	DCUI::Rect(Canvas, X0, TY, TW, 6.f * S, FLinearColor(1.f, 1.f, 1.f, 0.2f));
-	for (const FDCMultiCamBeat& State : D->GetBeats())
-	{
-		DCUI::Rect(Canvas, X0 + TW * State.Beat->GetCaptureStartTime() / Length - 2.f, TY - 8.f * S, 4.f, 22.f * S, DCUI::Gold);
-	}
 	DCUI::Rect(Canvas, X0, TY, TW * Time / Length, 6.f * S, Rose);
+ for (float Cut : D->GetReferenceCameraCutTimes(false))
+  DCUI::Rect(Canvas, X0 + TW * Cut / Length - 1.5f * S, TY - 8.f * S, 3.f * S, 22.f * S, DCUI::Gold);
 	DCUI::Rect(Canvas, X0 + TW * Time / Length - 1.5f, TY - 8.f * S, 3.f, 22.f * S, DCUI::Ivory);
 	Label(DCUI::Timecode(Time) + TEXT("  /  ") + DCUI::Timecode(Length), 24.f * S, BotY, DCUI::Muted, Small, EAlign::Left, true, X0 - 48.f * S);
 	if (D->IsReferencePaused())
@@ -1081,6 +1105,8 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 	TimelineKey(TEXT("E"), X + W - Pad - KeySize);
 	DCUI::Rect(Canvas, TrackX, TY, TrackW, 6.f * S, FLinearColor(1.f, 1.f, 1.f, 0.2f));
 	DCUI::Rect(Canvas, TrackX, TY, TrackW * Time / Length, 6.f * S, DCUI::Gold);
+ for (float Cut : D->GetReferenceCameraCutTimes(true))
+  DCUI::Rect(Canvas, TrackX + TrackW * Cut / Length - 1.5f * S, TY - 7.f * S, 3.f * S, 20.f * S, Rose);
 	DCUI::Rect(Canvas, TrackX + TrackW * Time / Length - 1.5f, TY - 7.f * S, 3.f, 20.f * S, DCUI::Ivory);
 	if (D->IsViewingCamera())
 	{
@@ -1091,21 +1117,35 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 
 void ADCZombieHUD::DrawCountdown(ADCZombieDirector* D)
 {
-	// A film-leader countdown: rings, crosshair, a sweeping hand and the number.
-	const FVector2D C(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
-	const float R = 190.f * S;
-	const float Remaining = D->GetCountdownRemaining();
-	const int32 N = FMath::Max(FMath::CeilToInt(Remaining), 1);
-	const float Sweep = 360.f * (1.f - (Remaining - FMath::FloorToFloat(Remaining - KINDA_SMALL_NUMBER)));
-	DCUI::Disc(Canvas, C, R, FLinearColor(0.f, 0.f, 0.f, 0.45f), 64);
-	DCUI::Wedge(Canvas, C, R, -90.f, Sweep, FLinearColor(1.f, 1.f, 1.f, 0.16f), 64);
-	DCUI::Ring(Canvas, C, R, 5.f * S, DCUI::Ivory);
-	DCUI::Ring(Canvas, C, R * 0.8f, 2.5f * S, WithAlpha(DCUI::Ivory, 0.7f));
-	DCUI::Line(Canvas, C - FVector2D(R * 1.15f, 0.f), C + FVector2D(R * 1.15f, 0.f), FMath::Max(2.f * S, 1.f), WithAlpha(DCUI::Ivory, 0.5f));
-	DCUI::Line(Canvas, C - FVector2D(0.f, R * 1.15f), C + FVector2D(0.f, R * 1.15f), FMath::Max(2.f * S, 1.f), WithAlpha(DCUI::Ivory, 0.5f));
-	const FVector2D NumSize = DCUI::Measure(Canvas, GetTextFont(), FString::FromInt(N), Px(Huge));
-	Label(FString::FromInt(N), C.X, C.Y - NumSize.Y * 0.5f, DCUI::Ivory, Huge, EAlign::Center);
-	Label(TEXT("Places, everyone... and quiet on set."), C.X, C.Y + R + 28.f * S, DCUI::Ivory, Body, EAlign::Center);
+ // Fit the open arm and the board together, including compact PIE viewports.
+ TGuardValue<float> SlateScale(S, FMath::Min(S, Canvas->ClipY / 650.f));
+ const bool bPreparation = D->IsSetOverview();
+ const float Duration = bPreparation ? 2.4f : FMath::Max(D->CountdownDuration, .01f);
+ const float Remaining = bPreparation ? D->GetPreparationSlateRemaining() : D->GetCountdownRemaining();
+ const float T = FMath::Clamp(1.f - Remaining / Duration, 0.f, 1.f);
+ const float Enter = FMath::SmoothStep(0.f, .20f, T);
+ const float Exit = FMath::SmoothStep(.78f, 1.f, T);
+ const float W = 480.f * S, H = 270.f * S, Stick = 38.f * S;
+ const float X = (Canvas->ClipX - W) * .5f;
+ const float Y = (Canvas->ClipY - H + W * .5f + Stick) * .5f + (1.f - Enter + Exit) * Canvas->ClipY;
+ DCUI::Rect(Canvas, 0, 0, Canvas->ClipX, Canvas->ClipY, FLinearColor(0,0,0,.55f * Enter * (1.f - Exit)));
+ DCUI::Rect(Canvas, X, Y, W, H, FLinearColor(.025f,.028f,.032f,1));
+ DCUI::Outline(Canvas, X, Y, W, H, 2.f*S, DCUI::Muted);
+ DCUI::ClapperStripes(Canvas, X, Y, W, Stick);
+ const float Angle = -.52f * (1.f - FMath::SmoothStep(.42f, .51f, T));
+ const FVector2D Pivot(X, Y - 4.f*S);
+ auto Point = [&](float U, float V) { return Pivot + FVector2D(U*FMath::Cos(Angle)-V*FMath::Sin(Angle), U*FMath::Sin(Angle)+V*FMath::Cos(Angle)); };
+ for (int32 I=0; I<12; ++I)
+ {
+  const float L = W*I/12.f, R = W*(I+1)/12.f;
+  const FLinearColor Color = I%2 ? DCUI::Ivory : FLinearColor(.03f,.03f,.03f,1);
+  DCUI::Triangle(Canvas, Point(L,-Stick), Point(R,-Stick), Point(R,0), Color);
+  DCUI::Triangle(Canvas, Point(L,-Stick), Point(R,0), Point(L,0), Color);
+ }
+ Label(TEXT("DIRECTOR'S CUT"), X+W*.5f, Y+62.f*S, DCUI::Ivory, Large, EAlign::Center);
+ DCUI::Line(Canvas,FVector2D(X+24.f*S,Y+118.f*S),FVector2D(X+W-24.f*S,Y+118.f*S),2.f*S,DCUI::Muted);
+ Label(bPreparation ? TEXT("CAMERA PREPARATION") : TEXT("ROLL CAMERA"), X+W*.5f,Y+140.f*S,DCUI::Gold,Body,EAlign::Center);
+ Label(T < .51f ? TEXT("Quiet on set") : bPreparation ? TEXT("Find your frame") : TEXT("Action!"),X+W*.5f,Y+205.f*S,DCUI::Ivory,Body,EAlign::Center);
 }
 
 void ADCZombieHUD::DrawSlatePopup(const FString& Message)

@@ -360,7 +360,7 @@ void ADCMultiCamDirector::UpdateSceneDialogue(float DeltaSeconds)
 	float FOV;
 	if (Phase == EDCPhase::Preparation)
 	{
-		bPlaying = bRehearsalPlaying;
+		bPlaying = false;
 		Rate = 1.f;
 	}
 	else if (Phase == EDCPhase::Filming)
@@ -1187,37 +1187,11 @@ void ADCMultiCamDirector::HandlePlacementHeight(float Notches)
 void ADCMultiCamDirector::StartSetOverview()
 {
  if (!PlaybackCamera) return;
- const FBox2D Bounds = ReferenceStageBounds.bIsValid ? ReferenceStageBounds : GetStudioBounds();
- const FVector2D Center = Bounds.bIsValid ? Bounds.GetCenter() : FVector2D(StartTransform.GetLocation());
- const float FloorZ = StartTransform.GetLocation().Z - 96.f;
- // Use actual tall, thin studio wall geometry; ignore roofs, floors and lighting rigs.
- float WallTop = -TNumericLimits<float>::Max();
- const ULevelStreaming* Studio = UGameplayStatics::GetStreamingLevel(this, StudioEnvironmentLevel);
- if (const ULevel* Level = Studio ? Studio->GetLoadedLevel() : nullptr)
- {
-  for (const AActor* Actor : Level->Actors)
-  {
-   if (!Actor) continue;
-   const FBox Box = Actor->GetComponentsBoundingBox(true);
-   const FVector Size = Box.GetSize();
-   const bool bPerimeter = !Bounds.bIsValid || (Box.IsValid &&
-    (FMath::Abs(Box.Min.X - Bounds.Min.X) < 250.f || FMath::Abs(Box.Max.X - Bounds.Max.X) < 250.f ||
-     FMath::Abs(Box.Min.Y - Bounds.Min.Y) < 250.f || FMath::Abs(Box.Max.Y - Bounds.Max.Y) < 250.f));
-   if (Box.IsValid && bPerimeter && Size.Z > 400.f && FMath::Min(Size.X, Size.Y) < 160.f && FMath::Max(Size.X, Size.Y) > 500.f)
-    WallTop = FMath::Max(WallTop, float(Box.Max.Z));
-  }
- }
- // Hold a stationary top-down shot inside the studio, 1.2 m below its wall tops.
- const float EyeZ = WallTop > -TNumericLimits<float>::Max() ? WallTop - 120.f : FloorZ + 1000.f;
- const float Height = FMath::Max(EyeZ - FloorZ, 100.f);
- const FVector2D Size = Bounds.bIsValid ? Bounds.GetSize() : FVector2D(2400.f, 1800.f);
- const float HalfWidth = FMath::Max(float(Size.X), float(Size.Y) * DCFrame::ScreenAspect) * 0.5f;
- const float FOV = FMath::Clamp(FMath::RadiansToDegrees(2.f * FMath::Atan(HalfWidth / Height)), 60.f, 115.f);
- PlaybackCamera->SetActorLocationAndRotation(FVector(Center.X, Center.Y, EyeZ), FRotator(-90.f, 90.f, 0.f));
- PlaybackCamera->GetCameraComponent()->SetFieldOfView(FOV);
- PlaybackCamera->GetCameraComponent()->SetAspectRatio(DCFrame::ScreenAspect);
- if (APlayerController* PC = GetWorld()->GetFirstPlayerController()) PC->SetViewTargetWithBlend(PlaybackCamera, 0.f);
- OverviewRemaining = 3.f;
+ // Enter at the player's position; the HUD supplies the clapperboard transition.
+ ViewWalking();
+ OverviewRemaining = 2.4f;
+ if (SceneDialogue.IsValid()) SceneDialogue->Stop();
+ DialoguePosition = -1.f;
  if (Ghost) Ghost->SetActorHiddenInGame(true);
 }
 

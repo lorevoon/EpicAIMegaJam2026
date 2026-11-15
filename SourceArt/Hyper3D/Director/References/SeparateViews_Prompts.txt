@@ -1,0 +1,6 @@
+Tool: built-in image_gen, four separate generations using Director_TPose_FourViews.png.
+Shared prompt: Use attached turnaround as exact reference. Produce ONE isolated full-body orthographic view of the SAME low-poly director, preserving exact face, proportions, burgundy beret and scarf, brown hair beard moustache, neck headphones, cream rolled sleeves, brown waistcoat, dark trousers and shoes. Pure white background, no text, no labels, no ground shadow, full body and all fingertips visible with margin. T-pose unchanged. 
+Front: Front view only, matching leftmost reference; arms extended horizontally, palms down.
+Back: Back view only, matching second reference; facing away, no face; back of scarf over shoulders, plain waistcoat back.
+Left: Left profile only, nose points left, matching third reference; true side view of T-pose, arms foreshortened toward and away from camera, near hand end-on at shoulder height.
+Right: Right profile only, nose points right, matching fourth reference; true side view of T-pose, arms foreshortened toward and away from camera, near hand end-on at shoulder height; preserve asymmetric hat and scarf rather than mirroring left.
