@@ -112,8 +112,9 @@ private:
 	FBox2D GetInsetBounds() const;
 	/** Preparation and shooting: the reference cut in the bottom-right corner, in step with the scene clock. */
 	void DrawReferenceInset(ADCZombieDirector* D);
-	/** Filming: a speech bubble over the reference inset counting down to its next cut, then "Press N!". */
-	void DrawCutCue(ADCZombieDirector* D, float InsetX, float InsetTop, float InsetW);
+	/** Filming: a speech bubble below the requested camera counting down to its next cut, then "Press N!". */
+	void DrawCutCue(ADCZombieDirector* D);
+	void DrawFilmingGuide(ADCZombieDirector* D);
 	void DrawResults(ADCZombieDirector* D);
 	void DrawPremiere(ADCZombieDirector* D);
 

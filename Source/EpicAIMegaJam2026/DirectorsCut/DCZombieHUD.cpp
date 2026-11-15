@@ -311,6 +311,7 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 		}
 	}
 
+	DrawFilmingGuide(D);
 	DrawReferenceInset(D);
 	DrawCoach(D);
 	DrawSwitcher(D);
@@ -1193,10 +1194,11 @@ void ADCZombieHUD::DrawSwitcher(ADCZombieDirector* D)
 	float X = Bounds.Min.X;
 	const float Y = Bounds.Min.Y;
 	const bool bOnAir = D->GetPhase() == EDCPhase::Filming || D->GetPhase() == EDCPhase::Countdown;
-	if (D->GetPhase() == EDCPhase::Filming)
-		Label(TEXT("Press number to switch cameras"), Canvas->ClipX * 0.5f, Y + BoxH + 12.f * S,
-			DCUI::Ivory, Small, EAlign::Center);
+	DrawCutCue(D);
 	const float Pulse = 0.65f + 0.35f * FMath::Sin(GetWorld()->GetRealTimeSeconds() * 5.f);
+	float CutSeconds = 0.f;
+	int32 CutCamera = 0;
+	const bool bCue = D->GetCutCue(CutSeconds, CutCamera);
 
 	for (int32 i = 0; i < Count; ++i)
 	{
@@ -1212,6 +1214,13 @@ void ADCZombieHUD::DrawSwitcher(ADCZombieDirector* D)
 		{
 			Fill = WithAlpha(DCUI::Gold, 0.25f * Pulse);
 			Edge = WithAlpha(DCUI::Gold, Pulse);
+		}
+		if (bCue && i + 1 == CutCamera)
+		{
+			Edge = WithAlpha(DCUI::Gold, Pulse);
+			Fill = WithAlpha(DCUI::Gold, CutSeconds <= 0.f ? 0.45f * Pulse : 0.15f);
+			const float Progress = 1.f - FMath::Clamp(CutSeconds / FMath::Max(D->CutCueLead, 0.01f), 0.f, 1.f);
+			DCUI::Rect(Canvas, X, Y + BoxH + 4.f * S, BoxW * Progress, 3.f * S, Edge);
 		}
 		// Camera silhouette: twin film reels, body and projecting lens.
 		const float BodyW = BoxW * 0.78f;
@@ -1400,7 +1409,7 @@ void ADCZombieHUD::DrawReferenceInset(ADCZombieDirector* D)
 	{
 		Label(Beat->DisplayName, X + W * 0.5f, Y + H - Px(Small) * 1.4f, DCUI::Ivory, Small, EAlign::Center, true, W - 16.f * S);
 	}
-	DrawCutCue(D, X, Y - LabelH, W);
+
 
  if (FocusProgress < 1.f)
  {
@@ -1431,7 +1440,51 @@ void ADCZombieHUD::DrawReferenceInset(ADCZombieDirector* D)
 
 }
 
-void ADCZombieHUD::DrawCutCue(ADCZombieDirector* D, float InsetX, float InsetTop, float InsetW)
+void ADCZombieHUD::DrawFilmingGuide(ADCZombieDirector* D)
+{
+	FVector2D Aim;
+	float Ratio;
+	if (FocusEase > 0.05f || !D->GetFilmingGuide(Aim, Ratio)) return;
+	float L, T, R, B;
+	GetCaptureRect(L, T, R, B);
+	const FVector2D Center((L + R) * 0.5f, (T + B) * 0.5f);
+	const float Now = GetWorld()->GetRealTimeSeconds();
+	const float Pulse = 0.7f + 0.3f * FMath::Sin(Now * 6.f);
+	if (Ratio > 0.f)
+	{
+		const bool bMatched = FMath::Abs(FMath::Loge(Ratio)) < 0.06f;
+		const FLinearColor Color = bMatched ? DCUI::Good : WithAlpha(DCUI::Gold, Pulse);
+		// The extra frame represents subject magnification: too tight grows OUTSIDE the film.
+		// Compress extreme errors so all four corners remain on screen.
+		const float MaxScale = FMath::Min((Canvas->ClipX - 16.f * S) / (R - L), (Canvas->ClipY - 16.f * S) / (B - T));
+		const float Scale = Ratio > 1.f ? 1.f + (MaxScale - 1.f) * (1.f - 1.f / Ratio) : FMath::Max(0.3f, Ratio);
+		const float W = (R - L) * Scale, H = (B - T) * Scale;
+		DCUI::Corners(Canvas, Center.X - W * 0.5f, Center.Y - H * 0.5f, W, H, 42.f * S, 10.f * S, Color);
+	}
+	// X/Y are film-width units; screen Y points down. Clamp off-screen targets along the same ray.
+	FVector2D Delta(Aim.X * (R - L) * 0.5f, -Aim.Y * (R - L) * 0.5f);
+	const float LimitX = (R - L) * 0.42f, LimitY = (B - T) * 0.36f;
+	const double Fit = FMath::Max(1., FMath::Max(FMath::Abs(Delta.X) / LimitX, FMath::Abs(Delta.Y) / LimitY));
+	Delta /= Fit;
+	const FVector2D Target = Center + Delta;
+	const bool bAimed = Aim.Size() < 0.045f;
+	const FLinearColor Color = bAimed ? DCUI::Good : DCUI::Ivory;
+	DCUI::Ring(Canvas, Target, (bAimed ? 10.f : 14.f + 2.f * Pulse) * S, 2.f * S, Color);
+	DCUI::Line(Canvas, Center - FVector2D(5.f * S, 0), Center + FVector2D(5.f * S, 0), S, DCUI::Ivory);
+	DCUI::Line(Canvas, Center - FVector2D(0, 5.f * S), Center + FVector2D(0, 5.f * S), S, DCUI::Ivory);
+	if (!bAimed && Delta.Size() > 24.f * S)
+	{
+		const FVector2D Dir = Delta.GetSafeNormal(), Side(-Dir.Y, Dir.X);
+		const FVector2D Tip = Target - Dir * 20.f * S;
+		DCUI::Line(Canvas, Center + Dir * 12.f * S, Tip, 2.f * S, WithAlpha(Color, 0.65f));
+		DCUI::Line(Canvas, Tip, Tip - Dir * 12.f * S + Side * 7.f * S, 3.f * S, Color);
+		DCUI::Line(Canvas, Tip, Tip - Dir * 12.f * S - Side * 7.f * S, 3.f * S, Color);
+		// A traveling dot makes the required mouse movement unambiguous.
+		DCUI::Disc(Canvas, Center + Delta * FMath::Frac(Now * 0.85f), 4.f * S, DCUI::Gold);
+	}
+}
+
+void ADCZombieHUD::DrawCutCue(ADCZombieDirector* D)
 {
 	float Left = 0.f;
 	int32 CameraNumber = 0;
@@ -1439,33 +1492,35 @@ void ADCZombieHUD::DrawCutCue(ADCZombieDirector* D, float InsetX, float InsetTop
 	{
 		return;
 	}
-	// 3, 2, 1 ... then the call to cut, which stands out in gold.
+	int32 Count; float BoxW; FBox2D Bounds;
+	if (!GetSwitcherLayout(D, Count, BoxW, Bounds) || CameraNumber < 1 || CameraNumber > Count) return;
+	// Count down directly under the camera that will be needed.
 	const bool bCut = Left <= 0.f;
-	const FString Text = bCut ? FString::Printf(TEXT("Press %d!"), CameraNumber) : FString::FromInt(FMath::CeilToInt(Left));
+	const FString Text = bCut ? FString::Printf(TEXT("Press camera %d!"), CameraNumber) : FString::FromInt(FMath::CeilToInt(Left));
 	// Each number (and the call) pops in, then settles.
 	const float Shown = bCut ? -Left : FMath::CeilToFloat(Left) - Left;
 	const float Pop = 1.f + 0.3f * FMath::Exp(-Shown * 12.f);
-	const float TextSize = Large * Pop;
+	const float TextSize = Small * Pop;
 	const FVector2D TextExtent = DCUI::Measure(Canvas, GetTextFont(), Text, Px(TextSize));
 
-	// A pill-shaped speech bubble, its tail pointing down at the reference cut, bobbing gently.
+	// A pill-shaped speech bubble pointing up at the requested camera, bobbing gently.
 	const float PadX = 30.f * S;
 	const float PadY = 12.f * S;
 	const float BH = TextExtent.Y + 2.f * PadY;
 	const float BW = FMath::Max(TextExtent.X + 2.f * PadX, BH);
 	const float Tail = 16.f * S;
-	const float CX = InsetX + InsetW * 0.5f;
+	const float CX = Bounds.Min.X + (CameraNumber - 1) * (BoxW + 12.f * S) + BoxW * 0.5f;
 	const float Bob = FMath::Sin(GetWorld()->GetRealTimeSeconds() * 3.f) * 6.f * S;
 	const float BX = CX - BW * 0.5f;
-	const float BY = InsetTop - 10.f * S - Tail - BH + Bob;
+	const float BY = Bounds.Max.Y + Tail + 10.f * S + Bob;
 	auto Bubble = [&](float Grow, const FLinearColor& Color)
 	{
 		const float R = BH * 0.5f + Grow;
 		DCUI::Rect(Canvas, BX + BH * 0.5f, BY - Grow, BW - BH, BH + 2.f * Grow, Color);
 		DCUI::Disc(Canvas, FVector2D(BX + BH * 0.5f, BY + BH * 0.5f), R, Color);
 		DCUI::Disc(Canvas, FVector2D(BX + BW - BH * 0.5f, BY + BH * 0.5f), R, Color);
-		DCUI::Triangle(Canvas, FVector2D(CX - Tail - Grow, BY + BH - 2.f * S), FVector2D(CX + Tail + Grow, BY + BH - 2.f * S),
-			FVector2D(CX, BY + BH + Tail + Grow * 1.5f), Color);
+		DCUI::Triangle(Canvas, FVector2D(CX - Tail - Grow, BY + 2.f * S), FVector2D(CX + Tail + Grow, BY + 2.f * S),
+			FVector2D(CX, BY - Tail - Grow * 1.5f), Color);
 	};
 	const FLinearColor Dark(0.03f, 0.03f, 0.04f, 0.94f);
 	Bubble(3.f * S, DCUI::Gold); // outline

@@ -7,6 +7,44 @@
 #include "DCMultiCamDirector.h"
 #include "DCPerformer.h"
 #include "Algo/BinarySearch.h"
+#include "DCMultiCam.h"
+#include "Camera/CameraComponent.h"
+
+bool ADCMultiCamDirector::GetFilmingGuide(FVector2D& OutAim, float& OutZoomRatio) const
+{
+	OutAim = FVector2D::ZeroVector;
+	OutZoomRatio = 1.f;
+	const ADCMultiCam* Live = GetCameraSlot(ViewingSlot);
+	FVector RefLocation;
+	FQuat RefRotation;
+	float RefFOV = 0.f, ScenePoint = 0.f;
+	TArray<FVector> Points;
+	GetSubjectPoints(SceneTime, Points);
+	if (Phase != EDCPhase::Filming || IsWrappingUp() || !Live || Points.IsEmpty()
+		|| !GetFilmView(ReferenceCut, ReferenceFilmTimeAtSceneTime(SceneTime), RefLocation, RefRotation, RefFOV, ScenePoint))
+		return false;
+	const UCameraComponent* Lens = Live->GetCamera();
+	const FDCFrameReading Ref = ReadFrame(Points, RefLocation, RefRotation, RefFOV);
+	const FDCFrameReading Shot = ReadFrame(Points, Lens->GetComponentLocation(), Lens->GetComponentQuat(),
+		DCFrame::CaptureFOV(Lens->FieldOfView, GetViewAspect()));
+	if (!Ref.bVisible) return false;
+	if (Shot.bVisible)
+	{
+		OutZoomRatio = Shot.Size / FMath::Max(Ref.Size, 0.02f);
+		// Preserve the reference's composition instead of always centering the actors.
+		OutAim = Shot.Center - Ref.Center * OutZoomRatio;
+	}
+	else
+	{
+		FVector Center = FVector::ZeroVector;
+		for (const FVector& P : Points) Center += P / Points.Num();
+		const FVector Local = Lens->GetComponentQuat().UnrotateVector(Center - Lens->GetComponentLocation());
+		OutAim = FVector2D(FMath::Atan2(Local.Y, Local.X), FMath::Atan2(Local.Z, FMath::Max(1., FMath::Abs(Local.X))));
+		if (OutAim.IsNearlyZero()) OutAim.X = PI;
+		OutZoomRatio = 0.f; // Aim first; size is unavailable behind the lens.
+	}
+	return true;
+}
 
 void ADCMultiCamDirector::GetSubjectPoints(float Time, TArray<FVector>& OutPoints) const
 {

@@ -360,6 +360,8 @@ public:
 
 	/** While shooting: how alike the live shot is to the reference cut right now (0-1); negative when there's nothing to compare. */
 	float GetLiveLikeness() const { return LiveLikeness; }
+	/** Live composition error in film-width units (Y up), and subject size / reference size. */
+	bool GetFilmingGuide(FVector2D& OutAim, float& OutZoomRatio) const;
 
 	const FString& GetCoachLine() const { return CoachLine; }
 	EDCDirectorMood GetCoachMood() const { return CoachMood; }
