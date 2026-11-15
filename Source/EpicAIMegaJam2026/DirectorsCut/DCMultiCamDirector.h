@@ -357,7 +357,7 @@ public:
 	float WallStandoff = 35.f;
 
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (Units = "cm"))
-	float MinStandHeight = 40.f;
+	float MinStandHeight = 110.f; // Fixed tripod feet and camera head must fit below the lens.
 
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cameras", meta = (Units = "cm"))
 	float MaxStandHeight = 320.f;

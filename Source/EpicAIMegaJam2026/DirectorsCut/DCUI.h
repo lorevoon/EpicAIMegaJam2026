@@ -29,7 +29,7 @@ namespace DCUI
 	 * (when > 0) shrinks to fit. Returns the drawn size.
 	 */
 	FVector2D Text(UCanvas* Canvas, UFont* Font, const FString& Text, float X, float Y, float Px, const FLinearColor& Color,
-		EAlign Align = EAlign::Left, bool bShadow = true, float MaxWidth = 0.f);
+		EAlign Align = EAlign::Left, bool bShadow = true, float MaxWidth = 0.f, float RenderScale = 1.f);
 
 	/** Breaks Text into lines no wider than MaxWidth at Px pixels, at spaces (a single overlong word gets its own line). */
 	void Wrap(UCanvas* Canvas, UFont* Font, const FString& Text, float Px, float MaxWidth, TArray<FString>& OutLines);

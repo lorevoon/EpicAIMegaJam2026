@@ -38,6 +38,7 @@ public:
 	void MoveLocal(const FVector2D& Axis, float DeltaSeconds);
 	float GetMovementRadius() const { return 200.f; }
 	static constexpr float StaticHeight = 170.f;
+	static constexpr float MinStaticHeight = 110.f;
 
 	/** Dolly camera riding a rail (the rail's points are camera positions). The camera owns the rail. */
 	void SetupDolly(int32 InNumber, ADCRail* InRail);
@@ -126,6 +127,12 @@ private:
 	/** Authored camera and tripod, used by static rigs. */
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> Tripod;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UStaticMeshComponent> TripodNeck;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UStaticMeshComponent> TripodHead;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UTextRenderComponent> Label;

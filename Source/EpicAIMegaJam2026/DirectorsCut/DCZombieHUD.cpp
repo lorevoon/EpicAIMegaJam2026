@@ -240,9 +240,9 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 		}
 	}
 
-	// While shooting, dim everything outside the capture frame and frame it with the field monitor, its screen fitted
+	// While viewing a camera, dim everything outside the capture frame and frame it with the field monitor, its screen fitted
 	// exactly over the capture frame. Drawn first so the HUD stays on top.
-	if ((D->GetPhase() == EDCPhase::Countdown || D->GetPhase() == EDCPhase::Filming) && D->IsViewingCamera())
+	if ((D->GetPhase() == EDCPhase::Preparation || D->GetPhase() == EDCPhase::Countdown || D->GetPhase() == EDCPhase::Filming) && D->IsViewingCamera())
 	{
 		const float W = Canvas->ClipX;
 		const float H = Canvas->ClipY;
@@ -317,24 +317,38 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 		{
 			if (D->IsPlacementPending())
 			{
-				const FString Hint = TEXT("Press Enter to confirm or Esc to cancel");
-				// A slow, subtle breathing pulse keeps the instruction readable while framing.
-				const float Pulse = 0.5f + 0.5f * FMath::Sin(GetWorld()->GetRealTimeSeconds() * 3.f);
-				const float Size = Small * (1.f + 0.06f * Pulse);
-				const float Width = Canvas->ClipX * 0.44f;
-				const float Y = 150.f * S - (Px(Size) - Px(Small)) * 0.5f;
-				const FVector2D Extent = DCUI::Measure(Canvas, GetTextFont(), Hint, Px(Size));
-				const float W = Width; // Keep a stable backing wide enough for the full pulse.
-				DCUI::Rect(Canvas, CX - W * 0.5f - 12.f * S, Y - 6.f * S, W + 24.f * S,
-					Extent.Y + 12.f * S, FLinearColor(0.f, 0.f, 0.f, 0.5f));
-				for (int32 i = 0; i < 8; ++i)
+				// Rasterize at a fixed font size and animate its float render scale: no integer font-size steps.
+				const float Pulse = 1.f + 0.03f * (1.f + FMath::Sin(GetWorld()->GetRealTimeSeconds() * 2.f));
+				const TCHAR* Parts[] = { TEXT("Press "), TEXT("Left Click"), TEXT(" to confirm install or "), TEXT("Esc"), TEXT(" to cancel") };
+				float Widths[5];
+				float Total = 0.f;
+				const float FontPx = Px(Small);
+				const float KeyPad = 6.f * S;
+				const float TextH = DCUI::Measure(Canvas, GetTextFont(), TEXT("Left Click"), FontPx).Y;
+				for (int32 i = 0; i < 5; ++i)
 				{
-					const float Angle = i * PI * 0.25f;
-					const float Radius = (1.5f + Pulse) * S;
-					Label(Hint, CX + FMath::Cos(Angle) * Radius, Y + FMath::Sin(Angle) * Radius,
-						WithAlpha(DCUI::Gold, 0.08f + 0.08f * Pulse), Size, EAlign::Center, false, Width);
+					Widths[i] = DCUI::Measure(Canvas, GetTextFont(), Parts[i], FontPx).X + ((i == 1 || i == 3) ? KeyPad * 2.f : 0.f);
+					Total += Widths[i];
 				}
-				Label(Hint, CX, Y, DCUI::Ivory, Size, EAlign::Center, true, Width);
+				const float Fit = FMath::Min(1.f, Canvas->ClipX * 0.8f / (Total * 1.06f));
+				const float Scale = Pulse * Fit;
+				const float CenterY = 150.f * S + TextH * 0.5f;
+				const float PanelW = Total * 1.06f * Fit + 24.f * S;
+				const float PanelH = (TextH + KeyPad * 2.f) * 1.06f * Fit + 12.f * S;
+				DCUI::Rect(Canvas, CX - PanelW * 0.5f, CenterY - PanelH * 0.5f, PanelW, PanelH, FLinearColor(0.f, 0.f, 0.f, 0.5f));
+				float X = CX - Total * Scale * 0.5f;
+				for (int32 i = 0; i < 5; ++i)
+				{
+					const bool bKey = i == 1 || i == 3;
+					if (bKey)
+					{
+						DCUI::Outline(Canvas, X, CenterY - (TextH * 0.5f + KeyPad) * Scale,
+							Widths[i] * Scale, (TextH + KeyPad * 2.f) * Scale, FMath::Max(1.f, 1.5f * S), DCUI::Gold);
+					}
+					DCUI::Text(Canvas, GetTextFont(), Parts[i], X + (bKey ? KeyPad * Scale : 0.f), CenterY - TextH * Scale * 0.5f,
+						FontPx, bKey ? DCUI::Gold : DCUI::Ivory, EAlign::Left, false, 0.f, Scale);
+					X += Widths[i] * Scale;
+				}
 			}
 			else
 			{
@@ -851,7 +865,7 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 
 	const float Length = FMath::Max(D->TakeDuration, KINDA_SMALL_NUMBER);
 	const float Time = D->GetSceneTime();
-	Label(FString::Printf(TEXT("REHEARSAL  |  %s  |  %.1fx"), D->IsRehearsalPlaying() ? TEXT("PLAYING") : TEXT("PAUSED"), D->GetRehearsalSpeed()),
+	Label(FString::Printf(TEXT("SPACE: Play/Pause  |  %s  |  %.1fx"), D->IsRehearsalPlaying() ? TEXT("PLAYING") : TEXT("PAUSED"), D->GetRehearsalSpeed()),
 		X + Pad, Y + Pad, DCUI::Gold, Small, EAlign::Left, true, W * 0.6f);
 	Label(DCUI::Timecode(Time), X + W - Pad, Y + Pad, DCUI::Ivory, Small, EAlign::Right);
 	const float KeyTop = Y + Pad + Px(Small) * 1.3f + RowGap;
@@ -1126,7 +1140,7 @@ void ADCZombieHUD::DrawReferenceInset(ADCZombieDirector* D)
 	}
 
 	// Preparation, walking around: how to move on to filming, in a strip on top of the inset. (Looking through a
-	// camera, Enter confirms that camera instead, so it isn't shown then.)
+	// camera, left-click confirms that camera; Enter is ignored.)
 	if (D->GetPhase() == EDCPhase::Preparation && !D->IsViewingCamera() && !D->IsInputBlocked())
 	{
 		const float StripH = Px(Body) * 1.9f;
