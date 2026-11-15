@@ -192,20 +192,16 @@ void ADCZombieHUD::DrawHUD()
 void ADCZombieHUD::MaskOutsideView()
 {
 	// The canvas doesn't clip: anything drawn past the 16:9 view (a drifting background, a spotlight, the cinema's
-	// back row) would show in the black bars around it. Paint the bars back to black.
-	const FVector2D Bars = GetBarsOffset();
-	if (Bars.X <= 0.f && Bars.Y <= 0.f)
-	{
-		return;
-	}
+	// back row) would show in the black bars around it. Paint everything outside the view black - far enough out to
+	// cover bars of any size, so it never depends on measuring them; the window clips the rest.
 	const float W = Canvas->ClipX;
 	const float H = Canvas->ClipY;
-	const float Pad = 2.f; // past the window edge, so nothing peeks through at fractional offsets
+	const float Far = 2.f * FMath::Max(W, H);
 	const FLinearColor Black = FLinearColor::Black;
-	DCUI::Rect(Canvas, -Bars.X - Pad, -Bars.Y - Pad, W + 2.f * (Bars.X + Pad), Bars.Y + Pad, Black);
-	DCUI::Rect(Canvas, -Bars.X - Pad, H, W + 2.f * (Bars.X + Pad), Bars.Y + Pad, Black);
-	DCUI::Rect(Canvas, -Bars.X - Pad, 0.f, Bars.X + Pad, H, Black);
-	DCUI::Rect(Canvas, W, 0.f, Bars.X + Pad, H, Black);
+	DCUI::Rect(Canvas, -Far, -Far, W + 2.f * Far, Far, Black);
+	DCUI::Rect(Canvas, -Far, H, W + 2.f * Far, Far, Black);
+	DCUI::Rect(Canvas, -Far, 0.f, Far, H, Black);
+	DCUI::Rect(Canvas, W, 0.f, Far, H, Black);
 }
 
 void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
@@ -397,20 +393,6 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 // ---------------------------------------------------------------------------------------------
 // Main menu and cutscenes
 
-FVector2D ADCZombieHUD::GetBarsOffset() const
-{
-	// Exactly where the engine put the canvas in the window (past the left and top bars): its translation.
-	if (Canvas && Canvas->Canvas)
-	{
-		const auto& Stack = Canvas->Canvas->GetTransformStack();
-		if (Stack.Num() > 0)
-		{
-			return FVector2D(Stack.Top().GetMatrix().GetOrigin());
-		}
-	}
-	return FVector2D::ZeroVector;
-}
-
 void ADCZombieHUD::DrawMainMenu(ADCZombieDirector* D)
 {
 	const float W = Canvas->ClipX;
@@ -418,13 +400,15 @@ void ADCZombieHUD::DrawMainMenu(ADCZombieDirector* D)
 	const float Now = GetWorld()->GetRealTimeSeconds();
 	DCUI::Rect(Canvas, 0.f, 0.f, W, H, FLinearColor::Black);
 
-	// The background covers the screen (cropped, never stretched), breathing in and out very slowly.
+	// The background covers the screen (cropped, never stretched), breathing in and out very slowly. Only the part
+	// inside the view is drawn, so none of it shows in the black bars of wider or taller windows.
 	if (MainMenuImage && MainMenuImage->GetSurfaceWidth() > 0.f && MainMenuImage->GetSurfaceHeight() > 0.f)
 	{
 		const float IW = MainMenuImage->GetSurfaceWidth();
 		const float IH = MainMenuImage->GetSurfaceHeight();
 		const float Cover = FMath::Max(W / IW, H / IH) * (1.04f + 0.02f * FMath::Sin(Now * 0.15f));
-		DrawTexture(MainMenuImage, (W - IW * Cover) * 0.5f, (H - IH * Cover) * 0.5f, IW * Cover, IH * Cover, 0.f, 0.f, 1.f, 1.f);
+		const float UWidth = W / (IW * Cover), VHeight = H / (IH * Cover);
+		DrawTexture(MainMenuImage, 0.f, 0.f, W, H, (1.f - UWidth) * 0.5f, (1.f - VHeight) * 0.5f, UWidth, VHeight);
 	}
 	const FDCMainMenuLayout& Layout = D->MainMenu;
 

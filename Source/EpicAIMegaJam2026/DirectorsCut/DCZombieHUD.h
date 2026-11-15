@@ -83,8 +83,6 @@ public:
 private:
 	/** The main menu: the background image drifting slowly, the title, and a START button (a clickable hit box). */
 	void DrawMainMenu(ADCZombieDirector* D);
-	/** Where the HUD's canvas sits in the window: the width of the black bars around the fixed-aspect view. */
-	FVector2D GetBarsOffset() const;
 	/** Paints the black bars around the fixed-aspect view back to black, hiding anything drawn past its edges. */
 	void MaskOutsideView();
 	/** Everything but the menu and cutscenes: the current phase's HUD. */
