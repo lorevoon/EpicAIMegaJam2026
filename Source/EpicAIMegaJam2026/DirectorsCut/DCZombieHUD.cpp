@@ -6,6 +6,7 @@
 #include "DCBeat.h"
 #include "DCCinemaReplay.h"
 #include "DCMultiCam.h"
+#include "Camera/CameraComponent.h"
 #include "DCSceneMarks.h"
 #include "DCZombieDirector.h"
 #include "Camera/PlayerCameraManager.h"
@@ -320,6 +321,7 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 	if (D->GetPhase() == EDCPhase::Preparation)
 	{
 		DrawPlanPreview(D); // Keep timeline controls readable throughout the cheer animation.
+		FVector2D Joint; // where a nearby camera's stand meets its legs, on screen (for the F prompt)
 		if (D->IsViewingCamera())
 		{
 			if (D->IsPlacementPending())
@@ -364,16 +366,21 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 				Label(TEXT("Press Esc to exit camera"), CX, 150.f * S, DCUI::Ivory, Small, EAlign::Center);
 			}
 		}
-		else if (D->GetNearbyCameraSlot() != INDEX_NONE)
+		else if (const ADCMultiCam* Near = D->GetCameraSlot(D->GetNearbyCameraSlot()); Near && ProjectVisible(Near->GetStandJoint(), Joint))
 		{
+			// The F key floats beside the camera it opens, where its pole meets the tripod legs (so it stays low however
+			// tall the stand is), on the side facing the middle of the screen. Only on-screen cameras are interactable.
 			const float KeyPx = Px(Small) * 0.82f * 2.f;
 			const FVector2D KeySize = DCUI::Measure(Canvas, GetTextFont(), TEXT("F"), KeyPx);
 			const float W = KeySize.X + 32.f * S;
 			const float H = Px(Small) * 2.4f;
-			const float Y = CY + 50.f * S;
-			DCUI::Rect(Canvas, CX - W * 0.5f, Y, W, H, FLinearColor(0.f, 0.f, 0.f, 0.72f));
-			DCUI::Outline(Canvas, CX - W * 0.5f, Y, W, H, FMath::Max(1.f, 2.f * S), DCUI::Gold);
-			DCUI::Text(Canvas, GetTextFont(), TEXT("F"), CX, Y + (H - KeySize.Y) * 0.5f,
+			const float Side = Joint.X > CX ? -1.f : 1.f;
+			const float KX = FMath::Clamp(float(Joint.X) + Side * 46.f * S - (Side < 0.f ? W : 0.f), 10.f * S, Canvas->ClipX - W - 10.f * S);
+			const float KY = FMath::Clamp(float(Joint.Y) - H * 0.5f, 10.f * S, Canvas->ClipY - H - 10.f * S);
+			const float Bob = FMath::Sin(GetWorld()->GetRealTimeSeconds() * 4.f) * 3.f * S;
+			DCUI::Rect(Canvas, KX, KY + Bob, W, H, FLinearColor(0.f, 0.f, 0.f, 0.72f));
+			DCUI::Outline(Canvas, KX, KY + Bob, W, H, FMath::Max(1.f, 2.f * S), DCUI::Gold);
+			DCUI::Text(Canvas, GetTextFont(), TEXT("F"), KX + W * 0.5f, KY + Bob + (H - KeySize.Y) * 0.5f,
 				KeyPx, DCUI::Gold, EAlign::Center, false);
 		}
 	}
@@ -1385,11 +1392,15 @@ void ADCZombieHUD::DrawReferenceInset(ADCZombieDirector* D)
    DrawTexture(Preview, PreviewX, PY, PreviewW, PreviewH, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, BLEND_Opaque);
    if (!ScrollWheelIcon) ScrollWheelIcon = FImageUtils::ImportFileAsTexture2D(FPaths::ProjectContentDir() / TEXT("DirectorsCut/RawUI/mouse-scroll-wheel-icon.png"));
    FVector2D P;
-   if (FocusProgress == 0.f && ScrollWheelIcon && ProjectVisible(D->GetPlacementHintLocation(), P))
+   // Where the stand's pole meets its tripod legs - a little above the ground, the same at any height - beside it on
+   // the side facing the middle of the screen.
+   if (FocusProgress == 0.f && ScrollWheelIcon && ProjectVisible(D->GetPlacementJointLocation(), P))
    {
-    const float IX = FMath::Clamp(float(P.X) + 70.f * S, 10.f * S, Canvas->ClipX - 110.f * S);
-    const float IY = FMath::Clamp(float(P.Y), 100.f * S, Canvas->ClipY - 180.f * S);
-    DrawTexture(ScrollWheelIcon, IX, IY, 76.f * S, 76.f * S, 0.f, 0.f, 1.f, 1.f);
+    const float IconSize = 76.f * S;
+    const float Side = P.X > Canvas->ClipX * 0.5f ? -1.f : 1.f;
+    const float IX = FMath::Clamp(float(P.X) + Side * 40.f * S - (Side < 0.f ? IconSize : 0.f), 10.f * S, Canvas->ClipX - IconSize - 10.f * S);
+    const float IY = FMath::Clamp(float(P.Y) - IconSize * 0.5f, 100.f * S, Canvas->ClipY - 180.f * S);
+    DrawTexture(ScrollWheelIcon, IX, IY, IconSize, IconSize, 0.f, 0.f, 1.f, 1.f);
    }
   }
  }

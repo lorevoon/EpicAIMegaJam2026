@@ -289,6 +289,22 @@ void ADCMultiCam::UpdateStabilizer(float DeltaSeconds)
 	}
 }
 
+void ADCMultiCam::FaceLabel(const FVector& ViewLocation)
+{
+	// Text renders face along their +X axis: point it at the viewer so the label reads from any side.
+	const FVector ToView = ViewLocation - Label->GetComponentLocation();
+	if (!ToView.IsNearlyZero())
+	{
+		Label->SetWorldRotation(ToView.Rotation());
+	}
+}
+
+FVector ADCMultiCam::GetStandJoint() const
+{
+	const float BaseHeight = Tripod->GetStaticMesh() ? Tripod->GetStaticMesh()->GetBoundingBox().Max.Z : 40.f;
+	return FVector(GetActorLocation().X, GetActorLocation().Y, MountSurface.Z + BaseHeight);
+}
+
 float ADCMultiCam::GetPlacementAimHeight(float StandHeight) const
 {
  if (Tripod->GetStaticMesh() && TripodNeck->GetStaticMesh())

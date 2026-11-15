@@ -70,6 +70,8 @@ namespace
 	}
 
 	constexpr float PlaceRange = 1500.f;
+	/** Preparation: the camera to be placed stands this far in front of the player - walk to where it should go. */
+	constexpr float PlaceAhead = 160.f;
 	constexpr float PickRadius = 80.f;
 	constexpr float FaceDot = 0.25f;
 	constexpr float LookDegreesPerUnit = 2.5f;
@@ -161,8 +163,8 @@ void ADCMultiCamDirector::BeginPlay()
 	FilmKeyLight->RegisterComponent();
 
 	ResetScene();
-	Flash(IsUnlimited() ? FString(TEXT("Place as many cameras as you like. WASD adjusts position nearby; mouse aims."))
-		: FString::Printf(TEXT("Place up to %d cameras. WASD adjusts position nearby; mouse aims."), MaxCameras), 7.f);
+	Flash(IsUnlimited() ? FString(TEXT("Place as many cameras as you like. Walk to a spot - the camera stands just in front of you."))
+		: FString::Printf(TEXT("Place up to %d cameras. Walk to a spot - the camera stands just in front of you."), MaxCameras), 7.f);
 }
 
 void ADCMultiCamDirector::GatherScene()
@@ -250,12 +252,19 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
  }
  if (Phase != EDCPhase::Preparation) bReferenceFocused = false;
 
+	const APlayerController* ViewPC = GetPC();
+	const bool bHasView = ViewPC && ViewPC->PlayerCameraManager;
+	const FVector ViewLocation = bHasView ? ViewPC->PlayerCameraManager->GetCameraLocation() : FVector::ZeroVector;
 	for (ADCMultiCam* Cam : Cameras)
 	{
 		if (Cam)
 		{
 			Cam->UpdateZoom(DeltaSeconds);
 			Cam->UpdateStabilizer(DeltaSeconds);
+			if (bHasView)
+			{
+				Cam->FaceLabel(ViewLocation); // "CAM n" labels always face the player
+			}
 		}
 	}
 
@@ -1209,6 +1218,11 @@ void ADCMultiCamDirector::StartSetOverview()
  if (Ghost) Ghost->SetActorHiddenInGame(true);
 }
 
+FVector ADCMultiCamDirector::GetPlacementJointLocation() const
+{
+	return Ghost ? Ghost->GetStandJoint() : PreviewSurface;
+}
+
 void ADCMultiCamDirector::UpdatePrepPreview()
 {
 	ADCMultiCamCharacter* Player = GetPlayer();
@@ -1227,25 +1241,17 @@ void ADCMultiCamDirector::UpdatePrepPreview()
 		Params.AddIgnoredActor(Performer);
 	}
 
- // Intersect the actual crosshair ray with the neck-height plane, then find the
- // supporting floor. No fixed pitch offset: looking down brings the stand closer.
- const FVector ViewDirection = Player->GetCamera()->GetForwardVector();
- // Ground targeting uses the default stand height, independent of the wheel.
- // Scrolling changes only the lens height above this same floor position.
- const float NeckHeight = Ghost->GetPlacementAimHeight(ADCMultiCam::StaticHeight);
- FHitResult Ground;
- const bool bGround = GetWorld()->LineTraceSingleByChannel(Ground, CamLoc,
-  CamLoc - FVector(0.f, 0.f, PlaceRange), ECC_Visibility, Params);
- const float FloorZ = bGround ? Ground.ImpactPoint.Z : Player->GetActorLocation().Z - 96.f;
- float Distance = 220.f; // Nearby fallback when looking parallel to the neck plane.
- if (FMath::Abs(ViewDirection.Z) > 0.01f)
- {
-  const float Intersection = (FloorZ + NeckHeight - CamLoc.Z) / ViewDirection.Z;
-  if (Intersection > 0.f) Distance = Intersection;
- }
- Distance = FMath::Clamp(Distance, 140.f, PlaceRange);
- const FVector NeckPoint = CamLoc + ViewDirection * Distance;
- const FVector Probe(NeckPoint.X, NeckPoint.Y, FMath::Max(CamLoc.Z, FloorZ + MaxStandHeight) + 50.f);
+	// The camera to be placed stands on the ground a step in front of the player, facing the way they face: walking
+	// takes it where it should go, and looking around only turns it (looking up or down doesn't move it). Scrolling
+	// still sets its lens height.
+	const float NeckHeight = Ghost->GetPlacementAimHeight(ADCMultiCam::StaticHeight);
+	FHitResult Ground;
+	const bool bGround = GetWorld()->LineTraceSingleByChannel(Ground, CamLoc,
+		CamLoc - FVector(0.f, 0.f, PlaceRange), ECC_Visibility, Params);
+	const float FloorZ = bGround ? Ground.ImpactPoint.Z : Player->GetActorLocation().Z - 96.f;
+	const FVector Facing = FRotator(0.f, Player->GetControlRotation().Yaw, 0.f).Vector();
+	const FVector Spot = Player->GetActorLocation() + Facing * PlaceAhead;
+	const FVector Probe(Spot.X, Spot.Y, FMath::Max(CamLoc.Z, FloorZ + MaxStandHeight) + 50.f);
  FHitResult Hit;
  if (GetWorld()->LineTraceSingleByChannel(Hit, Probe, Probe - FVector(0.f, 0.f, PlaceRange), ECC_Visibility, Params))
 	{
@@ -1316,7 +1322,7 @@ void ADCMultiCamDirector::HandlePrimaryPressed()
 	}
 	if (!bPreviewHit || !bPreviewValid)
 	{
-		Flash(!bPreviewHit ? TEXT("Aim at clear ground within 15 m") : TEXT("No room for a camera there"));
+		Flash(!bPreviewHit ? TEXT("Walk onto clear ground to stand a camera there") : TEXT("No room for a camera there"));
 		return;
 	}
 
@@ -1350,12 +1356,29 @@ int32 ADCMultiCamDirector::GetNearbyCameraSlot() const
 {
 	const ADCMultiCamCharacter* Player = GetPlayer();
 	if (Phase != EDCPhase::Preparation || IsViewingCamera() || !Player) return INDEX_NONE;
+	// Only a camera the player can see: one behind them or off screen can't be opened (and shows no F prompt).
+	const APlayerController* PC = GetPC();
+	int32 ViewW = 0, ViewH = 0;
+	if (PC)
+	{
+		PC->GetViewportSize(ViewW, ViewH);
+	}
+	auto OnScreen = [&](const ADCMultiCam* Cam)
+	{
+		FVector2D Screen;
+		if (!PC || ViewW <= 0 || ViewH <= 0)
+		{
+			return true; // no screen to check against (automation tests)
+		}
+		return PC->ProjectWorldLocationToScreen(Cam->GetStandJoint(), Screen)
+			&& Screen.X >= 0.f && Screen.Y >= 0.f && Screen.X <= ViewW && Screen.Y <= ViewH;
+	};
 	int32 Best = INDEX_NONE;
 	float BestDistance = FMath::Square(250.f);
 	for (int32 Slot = 0; Slot < Cameras.Num(); ++Slot)
 	{
 		const ADCMultiCam* Cam = GetCameraSlot(Slot);
-		if (!Cam || Slot == PendingPlacementSlot) continue;
+		if (!Cam || Slot == PendingPlacementSlot || !OnScreen(Cam)) continue;
 		const float Distance = FVector::DistSquared(Player->GetActorLocation(), Cam->GetInteractionPoint() + FVector(0.f, 0.f, 90.f));
 		if (Distance < BestDistance)
 		{

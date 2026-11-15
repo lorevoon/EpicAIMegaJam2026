@@ -369,6 +369,8 @@ public:
  void StartSetOverview();
  UTextureRenderTarget2D* GetPlacementPreview() const { return bPreviewHit && Phase == EDCPhase::Preparation && !IsViewingCamera() ? PlacementTarget.Get() : nullptr; }
  FVector GetPlacementHintLocation() const { return PreviewPoint; }
+ /** Where the stand of the camera being placed meets its tripod legs, a little above the ground. */
+ FVector GetPlacementJointLocation() const;
  UPROPERTY() TObjectPtr<USceneCaptureComponent2D> PlacementCapture;
  UPROPERTY() TObjectPtr<UTextureRenderTarget2D> PlacementTarget;
  bool bReferenceFocused = false;

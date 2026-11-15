@@ -72,6 +72,10 @@ public:
 	float GetFOV() const;
 	/** Height above the floor at the middle of the adjustable tripod neck. */
 	float GetPlacementAimHeight(float StandHeight) const;
+	/** Where the stand's pole meets its tripod legs, a little above the ground - the same whatever the camera's height. */
+	FVector GetStandJoint() const;
+	/** Turns the "CAM n" label to face ViewLocation, like a billboard. */
+	void FaceLabel(const FVector& ViewLocation);
 	/** Where the zoom is heading; the lens eases toward it every frame. */
 	float GetTargetFOV() const { return TargetFOV; }
 	void SetFOV(float NewFOV);
