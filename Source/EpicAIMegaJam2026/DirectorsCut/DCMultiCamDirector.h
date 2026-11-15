@@ -309,6 +309,20 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
 	TArray<FDCCutsceneLine> FilmingTutorial;
 
+	/** When the take ends: the scene holds while he says these in his corner bubble, one after another, each with its
+	 *  own face; then the premiere starts (empty: the act's own lines, else straight to the premiere). */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
+	TArray<FDCCutsceneLine> WrapUpLines;
+
+	/** How long each wrap-up line stays up. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes", meta = (ClampMin = "0.5", Units = "s"))
+	float WrapUpLineSeconds = 3.5f;
+
+	/** The take is over and he's wrapping up before the premiere. */
+	bool IsWrappingUp() const { return WrapUpLine != INDEX_NONE; }
+	/** A face picked for what he's saying (the wrap-up), or null to show the face for his mood. */
+	UTexture2D* GetCoachPortrait() const { return CoachPortrait; }
+
 
 	/** Length of each half of a fade through black between phases. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes", meta = (ClampMin = "0.05", Units = "s"))
@@ -652,6 +666,15 @@ protected:
 	int32 CutsceneLine = 0;
 	float CutsceneLineStart = 0.f;
 	TFunction<void()> CutsceneDone;
+	/** The wrap-up line being said (INDEX_NONE when not wrapping up), and for how long. */
+	int32 WrapUpLine = INDEX_NONE;
+	float WrapUpElapsed = 0.f;
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> CoachPortrait;
+	void SayWrapUpLine(int32 Index);
+	void TickWrapUp(float DeltaSeconds);
+	/** Grades the take and goes to the premiere (after the wrap-up, if any). */
+	void FinishTake();
 	bool bCutsceneOverScene = false;
 	/** The filming tutorial plays before the first take only. */
 	bool bFilmingTutorialShown = false;

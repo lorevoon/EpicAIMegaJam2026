@@ -301,6 +301,11 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 
 	case EDCPhase::Filming:
 	{
+		if (IsWrappingUp())
+		{
+			TickWrapUp(DeltaSeconds); // the scene holds on its last frame while he wraps up
+			break;
+		}
 		if (!EnsureLiveCamera())
 		{
 			return;
@@ -560,6 +565,8 @@ void ADCMultiCamDirector::ResetScene()
 	CoachLine.Reset();
 	CoachKey = NAME_None;
 	CoachMood = EDCDirectorMood::Default;
+	CoachPortrait = nullptr;
+	WrapUpLine = INDEX_NONE;
 	bPremierePaused = false;
 	if (ADCMultiCamCharacter* Player = GetPlayer())
 	{
@@ -569,12 +576,10 @@ void ADCMultiCamDirector::ResetScene()
 
 void ADCMultiCamDirector::EndTake()
 {
-	if (Phase != EDCPhase::Filming)
+	if (Phase != EDCPhase::Filming || IsWrappingUp())
 	{
 		return; // end-take fires once
 	}
-
-	Phase = EDCPhase::Review;
 	for (FDCMultiCamBeat& State : Beats)
 	{
 		if (State.Status == EDCShotStatus::Pending)
@@ -582,6 +587,53 @@ void ADCMultiCamDirector::EndTake()
 			State.Status = EDCShotStatus::Missed;
 		}
 	}
+	// Not straight to the theater: the director calls cut and wraps up in his corner first.
+	LiveLikeness = -1.f; // the shot is no longer being judged: no vignette
+	if (bShowCutscenes && WrapUpLines.Num() > 0)
+	{
+		SayWrapUpLine(0);
+	}
+	else
+	{
+		FinishTake();
+	}
+}
+
+void ADCMultiCamDirector::SayWrapUpLine(int32 Index)
+{
+	WrapUpLine = Index;
+	WrapUpElapsed = 0.f;
+	CoachPortrait = WrapUpLines[Index].Portrait;
+	CoachKey = NAME_None;
+	CoachMood = Index == 0 ? EDCDirectorMood::Joy : EDCDirectorMood::Default;
+	CoachLine = WrapUpLines[Index].Line;
+	CoachLineStart = GetWorld()->GetRealTimeSeconds();
+}
+
+void ADCMultiCamDirector::TickWrapUp(float DeltaSeconds)
+{
+	WrapUpElapsed += FMath::Max(DeltaSeconds, 0.f);
+	if (WrapUpElapsed < WrapUpLineSeconds || FadeDirection != 0)
+	{
+		return;
+	}
+	if (WrapUpLines.IsValidIndex(WrapUpLine + 1))
+	{
+		SayWrapUpLine(WrapUpLine + 1);
+		return;
+	}
+	// Last line said: fade through black into the theater (the grading runs while the screen is black).
+	FadeThrough([this]()
+	{
+		WrapUpLine = INDEX_NONE;
+		CoachPortrait = nullptr;
+		FinishTake();
+	});
+}
+
+void ADCMultiCamDirector::FinishTake()
+{
+	Phase = EDCPhase::Review;
 	// The grade: how closely the film matches the reference cut.
 	ComputeMatch();
 	BestMatch = FMath::Max(BestMatch, Match.Overall);

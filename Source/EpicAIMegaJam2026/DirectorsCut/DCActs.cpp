@@ -64,6 +64,11 @@ void ADCZombieDirector::LoadActScript()
 		}
 	};
 
+	// Every act: when the take ends he calls cut, then sends everyone to the premiere.
+	Fill(WrapUpLines, {
+		{ TEXT("Recruit"), TEXT("Aaand that's cut! Great work, everybody!") },
+		{ TEXT("Explaining2"), TEXT("Let's now watch the audience feedback.") } });
+
 	switch (ActIndex)
 	{
 	case 0: // Act 1 - The Promise

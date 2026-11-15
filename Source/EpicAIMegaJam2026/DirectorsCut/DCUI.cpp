@@ -150,6 +150,19 @@ void DCUI::Wedge(UCanvas* Canvas, const FVector2D& Center, float Radius, float S
 	}
 }
 
+void DCUI::RoundedRect(UCanvas* Canvas, float X, float Y, float W, float H, float Radius, const FLinearColor& Color)
+{
+	// A cross of three rectangles plus a quarter disc in each corner; nothing overlaps, so translucent colours stay even.
+	const float R = FMath::Clamp(Radius, 0.f, FMath::Min(W, H) * 0.5f);
+	Rect(Canvas, X + R, Y, W - 2.f * R, H, Color);
+	Rect(Canvas, X, Y + R, R, H - 2.f * R, Color);
+	Rect(Canvas, X + W - R, Y + R, R, H - 2.f * R, Color);
+	Wedge(Canvas, FVector2D(X + R, Y + R), R, 180.f, 90.f, Color, 32);
+	Wedge(Canvas, FVector2D(X + W - R, Y + R), R, 270.f, 90.f, Color, 32);
+	Wedge(Canvas, FVector2D(X + W - R, Y + H - R), R, 0.f, 90.f, Color, 32);
+	Wedge(Canvas, FVector2D(X + R, Y + H - R), R, 90.f, 90.f, Color, 32);
+}
+
 void DCUI::Vignette(UCanvas* Canvas, float L, float T, float R, float B, float Depth, const FLinearColor& Color)
 {
 	// One trapezoid per side, coloured at its outer edge and clear at its inner one: the GPU blends the gradient.

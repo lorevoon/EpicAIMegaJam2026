@@ -778,7 +778,7 @@ bool ADCMultiCamDirector::GetCutCue(float& OutSecondsToCut, int32& OutCameraNumb
 {
 	// After the cut, keep calling for the camera this long if the player hasn't switched yet.
 	constexpr float Linger = 2.f;
-	if (Phase != EDCPhase::Filming || ReferenceCut.Num() < 2)
+	if (Phase != EDCPhase::Filming || IsWrappingUp() || ReferenceCut.Num() < 2)
 	{
 		return false;
 	}

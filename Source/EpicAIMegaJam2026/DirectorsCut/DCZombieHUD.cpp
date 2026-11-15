@@ -1144,6 +1144,10 @@ void ADCZombieHUD::DrawCoach(ADCZombieDirector* D)
 	const EDCDirectorMood Mood = D->GetCoachMood();
 	UTexture2D* Portrait = Mood == EDCDirectorMood::Joy ? DirectorJoy : Mood == EDCDirectorMood::Disgust ? DirectorDisgust
 		: Mood == EDCDirectorMood::Almost ? DirectorAlmost : DirectorDefault;
+	if (UTexture2D* Chosen = D->GetCoachPortrait())
+	{
+		Portrait = Chosen; // a face picked for this line (the wrap-up)
+	}
 	if (!Portrait)
 	{
 		Portrait = DirectorDefault;
@@ -1181,22 +1185,32 @@ void ADCZombieHUD::DrawDirectorSpeech(ADCZombieDirector* D, UTexture2D* Portrait
 	const bool bFilming = D->GetPhase() == EDCPhase::Countdown || D->GetPhase() == EDCPhase::Filming;
 	const float TextSize = bFilming ? FilmingCoachTextSize : CoachTextSize;
 	const float NameSize = bFilming ? FilmingCoachNameSize : Small;
-	const float PortraitW = CoachRight();
+	// Each face is drawn at its own proportions (the faces aren't all the same shape); the bubble keeps clear of the
+	// widest of this face and the default one, so it doesn't jump left for a narrower face.
+	const float FaceH = Canvas->ClipY * PortraitShare;
+	const float FaceAspect = Portrait && Portrait->GetSurfaceHeight() > 0.f ? Portrait->GetSurfaceWidth() / Portrait->GetSurfaceHeight() : 0.f;
+	const float FaceW = FaceAspect > 0.f ? FaceH * FaceAspect : CoachRight();
+	const float PortraitW = FMath::Max(CoachRight(), FaceW);
 	const float Pad = (bFilming ? 14.f : 22.f) * S;
-	const float X = PortraitW * 0.8f;
+	// Clear of the director's sprite, so it never covers the bubble's start.
+	const float X = PortraitW + 18.f * S;
 	const float Right = D->GetReferenceInset() ? Canvas->ClipX * (1.f - InsetShare) - 16.f * S : Canvas->ClipX - 24.f * S;
 	const float Lift = D->GetPhase() == EDCPhase::Preparation
 		? Canvas->ClipX * InsetShare / DCFrame::FilmAspect + Px(Small) * 1.4f + 24.f * S : 0.f;
 	const float H = Px(TextSize) * 1.3f + Px(NameSize) * 1.2f + 2.f * Pad;
 	const float Y = Canvas->ClipY - 20.f * S - H + Drop - Lift;
 	const float W = FMath::Max(bFilming ? FMath::Min(Right - X, FilmingCoachMaxWidth * S) : Right - X, 200.f * S);
-	const FLinearColor Paper(0.96f, 0.93f, 0.86f, 0.97f);
+	const FLinearColor Paper(0.96f, 0.93f, 0.86f);
 	const FLinearColor InkColor(0.08f, 0.07f, 0.07f);
-	// Tail pointing back at the director's face.
-	DCUI::Triangle(Canvas, FVector2D(X + 2.f, Y + H * 0.25f), FVector2D(X + 2.f, Y + H * 0.6f), FVector2D(PortraitW * 0.62f, Y - H * 0.35f + Lift), Paper);
-	DCUI::Rect(Canvas, X, Y, W, H, Paper);
-	DCUI::Rect(Canvas, X, Y, FMath::Max(6.f * S, 3.f), H, Accent);
-	DCUI::Outline(Canvas, X, Y, W, H, FMath::Max(2.f * S, 1.f), FLinearColor(0.f, 0.f, 0.f, 0.35f));
+	// A rounded speech bubble: a soft dark edge, the mood colour showing as a sliver down its left side, cream paper on
+	// top, and a tail pointing back at the director's face.
+	const float Radius = FMath::Min(18.f * S, H * 0.45f);
+	const float Edge = FMath::Max(2.f * S, 1.f);
+	const float AccentW = FMath::Max(6.f * S, 3.f);
+	DCUI::RoundedRect(Canvas, X - Edge, Y - Edge, W + 2.f * Edge, H + 2.f * Edge, Radius + Edge, FLinearColor(0.f, 0.f, 0.f, 0.35f));
+	DCUI::Triangle(Canvas, FVector2D(X + Radius, Y + H * 0.3f), FVector2D(X + Radius, Y + H * 0.65f), FVector2D(PortraitW * 0.9f, Y - H * 0.35f + Lift), Paper);
+	DCUI::RoundedRect(Canvas, X, Y, W, H, Radius, Accent);
+	DCUI::RoundedRect(Canvas, X + AccentW, Y, W - AccentW, H, Radius, Paper);
 	Label(TEXT("THE DIRECTOR"), X + Pad, Y + Pad * 0.6f, FLinearColor(0.55f, 0.08f, 0.06f), NameSize, EAlign::Left, false, W - 2.f * Pad);
 
 	// The line types itself out.
@@ -1210,8 +1224,8 @@ void ADCZombieHUD::DrawDirectorSpeech(ADCZombieDirector* D, UTexture2D* Portrait
 	if (Portrait)
 	{
 		const float Pop = 1.f + 0.05f * FMath::Clamp(1.f - Since / 0.2f, 0.f, 1.f);
-		const float PH = Canvas->ClipY * PortraitShare * Pop;
-		const float PW = PortraitW * Pop;
+		const float PH = FaceH * Pop;
+		const float PW = FaceW * Pop;
 		DrawTexture(Portrait, 0.f, Canvas->ClipY - PH + Drop, PW, PH, 0.f, 0.f, 1.f, 1.f);
 	}
 }
