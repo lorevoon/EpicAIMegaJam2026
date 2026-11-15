@@ -249,7 +249,10 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		{
 			return;
 		}
-		CountdownRemaining -= DeltaSeconds;
+		if (!IsInCutscene())
+		{
+			CountdownRemaining -= DeltaSeconds; // holds while the filming tutorial explains
+		}
 		UpdateReferenceInset(DeltaSeconds);
 		if (CountdownRemaining <= 0.f)
 		{
@@ -418,7 +421,16 @@ void ADCMultiCamDirector::HandleStartTake()
 		Flash(TEXT("Place at least one camera first"));
 		return;
 	}
-	PlayCutscene(ActionCutscene, [this]() { StartCountdown(); });
+	PlayCutscene(ActionCutscene, [this]()
+	{
+		StartCountdown();
+		// The first take: on set behind the live camera, he explains the controls before anything rolls.
+		if (bShowCutscenes && !bFilmingTutorialShown && FilmingTutorial.Num() > 0)
+		{
+			bFilmingTutorialShown = true;
+			PlayCutscene(FilmingTutorial, [this]() { RollCountdown(); }, true);
+		}
+	});
 }
 
 void ADCMultiCamDirector::StartCountdown()
@@ -426,11 +438,9 @@ void ADCMultiCamDirector::StartCountdown()
 	ResetScene();
 	Ghost->SetActorHiddenInGame(true);
 	Phase = EDCPhase::Countdown;
-	CountdownRemaining = CountdownDuration;
 	CutCount = 0;
 	ApplyStabilizer();
-	Coach(TEXT("Countdown"), EDCDirectorMood::Default, { TEXT("Places, everyone! And you - shoot it like the reference cut."),
-		TEXT("Quiet on set! Remember the reference. Every angle."), TEXT("Rolling soon. Don't make me regret hiring you.") }, 0, true);
+	RollCountdown();
 
 	// From Action! until back in preparation, rigs are ghosted inside every shot. Go live on the lowest-numbered camera.
 	SetRigsFrameMasked(true);
@@ -444,11 +454,17 @@ void ADCMultiCamDirector::StartCountdown()
 	}
 }
 
+void ADCMultiCamDirector::RollCountdown()
+{
+	CountdownRemaining = CountdownDuration;
+	Coach(TEXT("Countdown"), EDCDirectorMood::Default, { TEXT("Places, everyone! And you - shoot it like the reference cut."),
+		TEXT("Quiet on set! Remember the reference. Every angle."), TEXT("Rolling soon. Don't make me regret hiring you.") }, 0, true);
+}
+
 void ADCMultiCamDirector::BeginFilming()
 {
 	Phase = EDCPhase::Filming;
 	SceneTime = 0.f;
-	Flash(TEXT("ACTION!"), 2.f);
 }
 
 void ADCMultiCamDirector::OnEvaluationFinished()
@@ -482,7 +498,6 @@ void ADCMultiCamDirector::ResetScene()
 	{
 		State.Status = EDCShotStatus::Pending;
 		State.Hold = 0.f;
-		State.LastProgressTime = -100.f;
 		State.CapturedBy = 0;
 	}
 	for (ADCPerformer* Performer : Performers)
@@ -833,12 +848,7 @@ void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 		if (Live && Eligible > 0.f && IsFramed(State, Live))
 		{
 			State.Hold += Eligible;
-			State.LastProgressTime = NowTime;
-			if (!State.bSpotted)
-			{
-				State.bSpotted = true;
-				Flash(FString::Printf(TEXT("New discovery: %s"), *Beat->DisplayName));
-			}
+			State.bSpotted = true;
 		}
 		else
 		{
@@ -852,7 +862,6 @@ void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 			State.bEverCaptured = true;
 			State.CapturedBy = Live ? Live->GetNumber() : 0;
 			State.CapturedFilmTime = SceneTime;
-			Flash(FString::Printf(TEXT("Captured on CAM %d: %s"), State.CapturedBy, *Beat->DisplayName));
 		}
 		else if (NowTime > Beat->WindowEnd)
 		{

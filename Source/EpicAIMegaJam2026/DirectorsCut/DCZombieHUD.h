@@ -94,17 +94,22 @@ private:
 	 * on each new face) and his line typing out in a speech bubble, with Enter to continue once it's typed.
 	 */
 	void DrawCutscene(ADCZombieDirector* D);
+	/** Filming tutorial: spotlights the reference cut and the camera switcher, with what each is for. */
+	void DrawShootingUIHighlight(ADCZombieDirector* D);
 	void DrawReferenceCut(ADCZombieDirector* D);
 	void DrawMissionPanel(ADCZombieDirector* D);
 	/** A storyboard scene being ticked off: its name swells and is struck through, with a ring and sparkles from its box. */
 	void DrawTickOff(const FString& Name, float TextX, float MidY, const FVector2D& Box, float Age);
 	void DrawFraming(ADCZombieDirector* D);
 	void DrawPlanPreview(ADCZombieDirector* D);
-	void DrawGauges(ADCZombieDirector* D);
 	void DrawCountdown(ADCZombieDirector* D);
 	/** A pop-up message on a little clapperboard. */
 	void DrawSlatePopup(const FString& Message);
 	void DrawSwitcher(ADCZombieDirector* D);
+	/** The camera switcher's buttons: how many, how wide each is, and the box around them all. False if there are none. */
+	bool GetSwitcherLayout(ADCZombieDirector* D, int32& OutCount, float& OutBoxW, FBox2D& OutBounds) const;
+	/** The reference inset in the bottom-right corner, including its label strip. */
+	FBox2D GetInsetBounds() const;
 	/** Preparation and shooting: the reference cut in the bottom-right corner, in step with the scene clock. */
 	void DrawReferenceInset(ADCZombieDirector* D);
 	/** Filming: a speech bubble over the reference inset counting down to its next cut, then "Press N!". */
@@ -145,6 +150,8 @@ private:
 	ADCZombieDirector* FindDirector();
 
 	TWeakObjectPtr<ADCZombieDirector> Director;
+	/** Real time the shooting coach came (back) on screen, for his pop-up; negative while he's away. */
+	float CoachShownSince = -1.f;
 	/** The likeness shown (eased toward the live one so the colour doesn't flicker), and the vignette's fade. */
 	float ShownLikeness = 0.f;
 	float VignetteFade = 0.f;

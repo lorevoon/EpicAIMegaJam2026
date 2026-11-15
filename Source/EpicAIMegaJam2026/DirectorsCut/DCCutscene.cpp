@@ -8,7 +8,7 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 
-void ADCMultiCamDirector::PlayCutscene(const TArray<FDCCutsceneLine>& Lines, TFunction<void()> OnDone)
+void ADCMultiCamDirector::PlayCutscene(const TArray<FDCCutsceneLine>& Lines, TFunction<void()> OnDone, bool bOverScene)
 {
 	if (!bShowCutscenes || Lines.Num() == 0)
 	{
@@ -19,6 +19,7 @@ void ADCMultiCamDirector::PlayCutscene(const TArray<FDCCutsceneLine>& Lines, TFu
 	CutsceneLine = 0;
 	CutsceneLineStart = GetWorld()->GetRealTimeSeconds();
 	CutsceneDone = MoveTemp(OnDone);
+	bCutsceneOverScene = bOverScene;
 }
 
 bool ADCMultiCamDirector::HandleCutsceneInput()
@@ -44,17 +45,26 @@ bool ADCMultiCamDirector::HandleCutsceneInput()
 		CutsceneLineStart = Now;
 		return true;
 	}
-	// Last line said: fade out, and leave the cutscene once the screen is black.
-	FadeThrough([this]()
+	// Last line said: leave the cutscene - straight away over the scene, else once the screen has faded to black.
+	auto Leave = [this]()
 	{
 		Cutscene = nullptr;
+		bCutsceneOverScene = false;
 		TFunction<void()> Done = MoveTemp(CutsceneDone);
 		CutsceneDone = nullptr;
 		if (Done)
 		{
 			Done();
 		}
-	});
+	};
+	if (bCutsceneOverScene)
+	{
+		Leave();
+	}
+	else
+	{
+		FadeThrough(Leave);
+	}
 	return true;
 }
 

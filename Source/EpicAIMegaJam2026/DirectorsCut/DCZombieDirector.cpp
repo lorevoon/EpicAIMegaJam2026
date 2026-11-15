@@ -17,7 +17,7 @@ ADCZombieDirector::ADCZombieDirector()
 	MaxCameras = 0;
 
 	for (const TCHAR* Name : { TEXT("Default"), TEXT("Almost"), TEXT("Disgust"), TEXT("Joy"), TEXT("ThatsIt"),
-		TEXT("Recruit"), TEXT("Vision"), TEXT("Camera"), TEXT("Action") })
+		TEXT("Recruit"), TEXT("Vision"), TEXT("Camera"), TEXT("Action"), TEXT("Explaining"), TEXT("Explaining2") })
 	{
 		ConstructorHelpers::FObjectFinder<UTexture2D> Finder(*FString::Printf(TEXT("/Game/DirectorsCut/UI/Director/Director_%s.Director_%s"), Name, Name));
 		if (Finder.Succeeded())

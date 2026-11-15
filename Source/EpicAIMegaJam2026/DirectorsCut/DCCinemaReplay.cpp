@@ -16,6 +16,7 @@
 #include "Algo/BinarySearch.h"
 #include "HAL/IConsoleManager.h"
 #include "Interfaces/Interface_PostProcessVolume.h"
+#include "SceneInterface.h"
 
 namespace
 {
@@ -207,6 +208,11 @@ void ADCCinemaReplay::Tick(float DeltaSeconds)
  // Coalesce scrubs and multiple pose evaluations into one render per engine frame.
  if(FramesToSettle>0 || (IsOpening() && !Director->GetRecording().IsEmpty()))
  {
+  // The scene's frame number only advances when the main view renders the world, and the screening switches that
+  // off. Frozen, every projector frame looks like "already updated this frame" to the renderer: the global distance
+  // field stops updating while its list of moved objects grows without end, and reallocating that ever larger list
+  // caused the growing hitches (GlobalDistanceFieldUpdate, 30 ms climbing past 500 ms). Advance it per film frame.
+  if(!UGameplayStatics::GetEnableWorldRendering(this) && GetWorld()->Scene) GetWorld()->Scene->IncrementFrameNumber();
   Projector->CaptureScene();
   FramesToSettle=FMath::Max(0,FramesToSettle-1);
  }
