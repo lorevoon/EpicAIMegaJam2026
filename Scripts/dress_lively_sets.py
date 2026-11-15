@@ -105,10 +105,11 @@ for act,main in [(1,'Promise'),(2,'BrokenPromise')]:
  gx,gy=(-5400,-9750) if act==1 else (-5100,-10300)
  person('Producer','Arguing',gx,gy,90,["You said one more take three takes ago.","We can have the crane or overtime. We cannot have both."],3)
  person('First assistant director','Talking',gx,gy+130,-90,["I'm not rushing the art. I'm trying to get us lunch.","Five minutes means five minutes, not a new lighting setup."],4)
- person('Exhausted runner','Tired',-5800,-9900,0,["I went for coffee and came back with a call sheet for tomorrow.","I've had three dinners today. All of them were biscuits."],2)
- person('Lighting technician','Idle',-4600,-9150,180,["Every time they say natural light, I carry six more lamps.","Don't unplug that. We finally got rid of the flicker."],4)
+ if act == 1:
+  person('Exhausted runner','Tired',-5800,-9900,0,["I went for coffee and came back with a call sheet for tomorrow.","I've had three dinners today. All of them were biscuits."],2)
+  person('Lighting technician','Idle',-4600,-9150,180,["Every time they say natural light, I carry six more lamps.","Don't unplug that. We finally got rid of the flicker."],4)
  person('Director','Idle',tx-310,ty+210,155,["Find the frame first. The feeling will follow.","If this works, we're calling it a bold creative choice."],0,True)
- assert len(crew)==9
+ assert len(crew)==(9 if act==1 else 7)
  assert not any(a.get_actor_label().startswith('H3D - Light') for a in aes.get_all_level_actors())
  assert u.EditorLoadingAndSavingUtils.save_map(studio.get_loaded_level().get_outer(),setpath)
  report[str(act)]=dict(crew=crew,reference_components=len(refs),new_actors=len(created),floor=floor,floor_props=props)

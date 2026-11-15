@@ -815,7 +815,7 @@ void ADCZombieHUD::DrawMissionPanel(ADCZombieDirector* D)
 	for (int32 i = 0; i < Beats.Num(); ++i)
 	{
 		const FDCMultiCamBeat& State = Beats[i];
-		// Ticked off (struck through, like a to-do list) once a camera stands on the scene's reference spot.
+		// Ticked off (struck through, like a to-do list) once an installed camera matches the scene's reference picture.
 		const bool bCovered = D->IsSceneCovered(i);
 		const float Age = Now - D->GetSceneCoveredTime(i);
 		const bool bTicking = bCovered && State.Status == EDCShotStatus::Pending && D->GetSceneCoveredTime(i) >= 0.f && Age < TickOffSeconds;
