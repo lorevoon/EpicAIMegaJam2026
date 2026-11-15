@@ -208,3 +208,17 @@ Cinematic polish revision 9 (2026-11-15):
 - Rebuild: prepare_act2_cinema9_audio.py (ordinary Python), rebuild_act2_cinema9.py (Unreal Python, project editors closed).
 - Foreground clearance: Act2 village blaze 06 and its bounce light moved east of the raid camera; fire scale reduced from3.3 to2.0. Real-environment backup: before_real.umap. Reapply with clear_act2_cinema9_foreground.py after a full environment rebuild.
 - Final verification: C++ editor build and Python syntax checks passed; saved-scene arrow, reply overlap, back-to-back and mourning-separation checks passed; DirectorsCut.Dialogue.SceneClock and final DirectorsCut.Reference.AuthoredRaid runtime tests passed. Rendered raid/reaction/duel/goodbye and preparation frames reviewed under Saved/Act2/CinemaRevision9/Runtime.
+
+Story order and reference angles revision 10 (2026-11-16):
+- Five scene windows are now Raid0-10, Stand together10-15:13 (15.433s), Juliet strikes first15.433-19, Sword fight19-26, Romeo death26-38.
+- Mr. Smith's death no longer has a dedicated cut or scored beat. The raid camera is70cm above terrain, dollies west3.5-7.5, and pans its focus onto Smith4-7.5 to follow the fall continuously.
+- New optional authored camera tags support reversible scene-clock movement (DCEndX/Y/Z, DCMoveStart/End) and a tagged performer focus transition (DCFocusActor/Start/End). Untagged shots retain stationary behavior.
+- Romeo and Juliet now share their alert facing for the stand composition; Juliet starts at(-4870,-8850). Her reply is pitch-preserving1.30x tempo and starts15.950,0.38s before Romeo finishes.
+- Juliet rises/draws from15.433, fires17.8 (impact18.1), runs18.1-19.1, and fires again20.2 (impact20.5). Target death clips and both arrow paths are retimed accordingly.
+- Dedicated archer camera stays on Juliet until19. The duel then cuts to the orc's front/Romeo's reverse angle, with0.65x impact slow motion25.0-25.9.
+- Juliet's return26.5-28.3 curves east around the fallen body through(-4550,-8940), ending(-4770,-8810), facing135 degrees. Measured return clearance to torso/head is129cm; her kneeling pelvis is133cm to Romeo's anatomical right.
+- Minimum camera separation along the full raid move is1320cm. Original map and sequence backed up in Saved/Act2/StoryRevision10.
+- Rebuild: prepare_act2_story10_audio.py, author_act2_story10.py, finish_validate_act2_story10.py. Runtime evidence: Saved/Act2/StoryRevision10/Runtime.
+- Final framing refinement: raid follows the clear lane from(-5200,-9150) to(-5370,-9020); Juliet stands to Romeo's screen-left and advances to(-4660,-9190). The death camera cuts in at26, opens at38 degrees, then pushes to20. Its height is1900cm to clear foreground terrain; village blaze02 was moved behind it.
+
+Revision 10 final verification: Editor build succeeded; saved-scene validation passed; DirectorsCut.Reference.AuthoredRaid runtime test passed (final_runtime.log, 2026-11-16). Reviewed rendered fall/arrival/mourning frames at 26.8, 27.8 and 35 seconds. Moved Act2 village blaze02 behind the ending camera to clear foreground fire. Final reference cut: 0-10 raid including Smith fall, 10-15.433 stand together, 15.433-19 Juliet, 19-26 duel, 26-38 Romeo fall and goodbye. Ending return route maintains 128.978 cm minimum torso/head clearance and arrives on Romeo's right.
