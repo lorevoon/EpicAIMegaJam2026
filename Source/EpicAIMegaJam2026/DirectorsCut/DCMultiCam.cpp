@@ -289,6 +289,16 @@ void ADCMultiCam::UpdateStabilizer(float DeltaSeconds)
 	}
 }
 
+float ADCMultiCam::GetPlacementAimHeight(float StandHeight) const
+{
+ if (Tripod->GetStaticMesh() && TripodNeck->GetStaticMesh())
+ {
+  const float BaseHeight = Tripod->GetStaticMesh()->GetBoundingBox().Max.Z;
+  return (BaseHeight + StandHeight - 24.590548f) * 0.5f;
+ }
+ return StandHeight * 0.5f;
+}
+
 float ADCMultiCam::GetFOV() const
 {
 	return Camera->FieldOfView;

@@ -65,9 +65,9 @@ private:
 	void OnCycleCamera(int32 Direction);
 	void OnTransportToggle();
 	void OnRehearsalToggle();
-	void OnRehearsalSpeed(int32 Direction);
 	void OnRailSpeed(int32 Direction);
 	void OnTogglePause();
+ void OnReferenceFocus();
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> Camera;

@@ -29,7 +29,7 @@ ADCMultiCamCharacter::ADCMultiCamCharacter()
 	Camera->SetupAttachment(GetCapsuleComponent());
 	Camera->SetRelativeLocation(FVector(0.f, 0.f, 64.f));
 	Camera->bUsePawnControlRotation = true;
-	Camera->SetFieldOfView(75.f);
+	Camera->SetFieldOfView(90.f);
 	Camera->SetConstraintAspectRatio(true);
 	Camera->SetAspectRatio(DCFrame::ScreenAspect);
 	Camera->PostProcessSettings.bOverride_MotionBlurAmount = true;
@@ -118,7 +118,8 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Input->BindAction(Move, ETriggerEvent::Triggered, this, &ADCMultiCamCharacter::OnMove);
 	Input->BindAction(Look, ETriggerEvent::Triggered, this, &ADCMultiCamCharacter::OnLook);
 	Input->BindAction(Wheel, ETriggerEvent::Triggered, this, &ADCMultiCamCharacter::OnWheel);
-	UInputAction* Sprint = MapButton(EKeys::LeftShift);
+	Input->BindAction(MapButton(EKeys::Tab), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnReferenceFocus);
+ UInputAction* Sprint = MapButton(EKeys::LeftShift);
 	Input->BindAction(Sprint, ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnSprintPressed);
 	Input->BindAction(Sprint, ETriggerEvent::Completed, this, &ADCMultiCamCharacter::OnSprintReleased);
 	UInputAction* Primary = MapButton(EKeys::LeftMouseButton);
@@ -141,8 +142,6 @@ void ADCMultiCamCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Input->BindAction(MapButton(EKeys::LeftBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, -1);
 	Input->BindAction(MapButton(EKeys::RightBracket), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnCycleCamera, 1);
 	Input->BindAction(MapButton(EKeys::SpaceBar), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnTransportToggle);
-	Input->BindAction(MapButton(EKeys::Comma), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRehearsalSpeed, -1);
-	Input->BindAction(MapButton(EKeys::Period), ETriggerEvent::Started, this, &ADCMultiCamCharacter::OnRehearsalSpeed, 1);
 
 	const FKey NumberKeys[] = { EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five, EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine };
 	for (int32 i = 0; i < UE_ARRAY_COUNT(NumberKeys); ++i)
@@ -183,7 +182,7 @@ bool ADCMultiCamCharacter::IsInputBlocked()
 {
 	// During a cutscene or a fade only Enter and clicks get through (they move the cutscene on).
 	const ADCMultiCamDirector* D = GetDirector();
-	return D && D->IsInputBlocked();
+	return D && (D->IsInputBlocked() || D->IsReferenceFocused());
 }
 
 bool ADCMultiCamCharacter::IsLockedToCamera()
@@ -201,7 +200,9 @@ void ADCMultiCamCharacter::ResetToStart(const FTransform& Start)
 	TeleportTo(Start.GetLocation(), Start.Rotator(), false, true);
 	if (AController* C = GetController())
 	{
-		C->SetControlRotation(Start.Rotator());
+		FRotator View = Start.Rotator();
+  View.Pitch = -10.f; // Start with the crosshair at the neck of a nearby stand.
+  C->SetControlRotation(View);
 	}
 }
 
@@ -343,7 +344,7 @@ void ADCMultiCamCharacter::OnSelectCamera(int32 Number)
 
 void ADCMultiCamCharacter::OnScrub(const FInputActionValue& Value)
 {
-	if (IsInputBlocked())
+	if (GetDirector() && GetDirector()->IsInputBlocked())
 	{
 		return;
 	}
@@ -379,7 +380,7 @@ void ADCMultiCamCharacter::OnCycleCamera(int32 Direction)
 
 void ADCMultiCamCharacter::OnTransportToggle()
 {
-	if (IsInputBlocked())
+	if (GetDirector() && GetDirector()->IsInputBlocked())
 	{
 		return;
 	}
@@ -411,13 +412,9 @@ void ADCMultiCamCharacter::OnRehearsalToggle()
 	if (ADCMultiCamDirector* D = GetDirector()) D->HandleRehearsalToggle();
 }
 
-void ADCMultiCamCharacter::OnRehearsalSpeed(int32 Direction)
+void ADCMultiCamCharacter::OnReferenceFocus()
 {
-	if (IsInputBlocked())
-	{
-		return;
-	}
-	if (ADCMultiCamDirector* D = GetDirector()) D->HandleRehearsalSpeed(Direction);
+ if (ADCMultiCamDirector* D = GetDirector()) D->ToggleReferenceFocus();
 }
 
 void ADCMultiCamCharacter::OnTogglePause()

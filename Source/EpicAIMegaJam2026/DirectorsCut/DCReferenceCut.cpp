@@ -644,7 +644,7 @@ void ADCMultiCamDirector::UpdateReferenceInset(float DeltaSeconds)
 	if (!ReferenceInsetTarget)
 	{
 		ReferenceInsetTarget = NewObject<UTextureRenderTarget2D>(this);
-		ReferenceInsetTarget->InitCustomFormat(640, FMath::RoundToInt(640.f / DCFrame::FilmAspect), PF_B8G8R8A8, false);
+		ReferenceInsetTarget->InitCustomFormat(1280, FMath::RoundToInt(1280.f / DCFrame::FilmAspect), PF_B8G8R8A8, false);
 		ReferenceCapture->TextureTarget = ReferenceInsetTarget;
 	}
 

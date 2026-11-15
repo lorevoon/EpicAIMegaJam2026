@@ -40,8 +40,8 @@ bool FDCDialoguePlaybackTest::RunTest(const FString& Parameters)
   TestEqual(TEXT("Paused audio must seek on resume"), D->DialoguePosition, -1.f);
   D->HandleScrub(4.f); D->HandleRehearsalToggle(); D->UpdateSceneDialogue(0.f);
   TestEqual(TEXT("Resume seeks to scrubbed scene time"), D->DialoguePosition, 5.f);
-  D->RehearsalSpeed = .5f; D->SceneTime = 5.25f; D->UpdateSceneDialogue(.5f);
-  TestEqual(TEXT("Slow rehearsal changes audio rate"), Audio->PitchMultiplier, .5f);
+  D->SceneTime = 5.5f; D->UpdateSceneDialogue(.5f);
+  TestEqual(TEXT("Rehearsal keeps normal audio rate"), Audio->PitchMultiplier, 1.f);
   D->Phase = EDCPhase::Countdown; D->UpdateSceneDialogue(.1f);
   TestFalse(TEXT("Countdown is silent"), Audio->IsPlaying());
   D->Phase = EDCPhase::Review; D->bPremierePaused = false;

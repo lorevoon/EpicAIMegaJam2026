@@ -18,6 +18,7 @@
 #include "Sound/AmbientSound.h"
 #include "Sound/AudioSettings.h"
 #include "Engine/World.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Engine/LevelStreaming.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "HAL/IConsoleManager.h"
@@ -61,7 +62,12 @@ ADCMultiCamDirector::ADCMultiCamDirector()
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
 	// Renders the reference cut for the preparation inset; captured by hand only while that inset is showing.
-	ReferenceCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("ReferenceInsetCapture"));
+	PlacementCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("PlacementCapture"));
+ PlacementCapture->SetupAttachment(RootComponent);
+ PlacementCapture->bCaptureEveryFrame = false;
+ PlacementCapture->bCaptureOnMovement = false;
+ PlacementCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+ ReferenceCapture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("ReferenceInsetCapture"));
 	ReferenceCapture->SetupAttachment(RootComponent);
 	ReferenceCapture->bCaptureEveryFrame = false;
 	ReferenceCapture->bCaptureOnMovement = false;
@@ -80,6 +86,11 @@ void ADCMultiCamDirector::BeginPlay()
 {
 	Super::BeginPlay();
 
+ // Both inset cameras must use the same lighting pipeline and temporal state.
+ PlacementCapture->ShowFlags = ReferenceCapture->ShowFlags;
+ PlacementCapture->PostProcessSettings = ReferenceCapture->PostProcessSettings;
+ PlacementCapture->PostProcessBlendWeight = ReferenceCapture->PostProcessBlendWeight;
+ PlacementCapture->bAlwaysPersistRenderingState = ReferenceCapture->bAlwaysPersistRenderingState;
 	GatherScene();
 	if (!IsUnlimited())
 	{
@@ -191,6 +202,14 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	TickFade(DeltaSeconds);
+ if (OverviewRemaining > 0.f)
+ {
+  OverviewRemaining -= DeltaSeconds;
+  if (OverviewRemaining <= 0.f)
+   if (APlayerController* PC = GetWorld()->GetFirstPlayerController()) PC->SetViewTargetWithBlend(PC->GetPawn(), 0.f);
+  return;
+ }
+ if (Phase != EDCPhase::Preparation) bReferenceFocused = false;
 
 	for (ADCMultiCam* Cam : Cameras)
 	{
@@ -214,7 +233,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		}
 		if (bRehearsalPlaying && TakeDuration > KINDA_SMALL_NUMBER)
 		{
-			SceneTime = FMath::Fmod(SceneTime + FMath::Max(0.f, DeltaSeconds) * RehearsalSpeed, TakeDuration);
+			SceneTime = FMath::Fmod(SceneTime + FMath::Max(0.f, DeltaSeconds) , TakeDuration);
 			for (ADCPerformer* Performer : Performers)
 			{
 				Performer->Evaluate(SceneTime);
@@ -283,7 +302,7 @@ void ADCMultiCamDirector::UpdateSceneDialogue(float DeltaSeconds)
 	if (Phase == EDCPhase::Preparation)
 	{
 		bPlaying = bRehearsalPlaying;
-		Rate = RehearsalSpeed;
+		Rate = 1.f;
 	}
 	else if (Phase == EDCPhase::Filming)
 	{
@@ -445,11 +464,12 @@ void ADCMultiCamDirector::HandleRestart()
 
 void ADCMultiCamDirector::ResetScene()
 {
+ bReferenceFocused = false;
+ OverviewRemaining = 0.f;
 	if (IsPlacementPending()) HandleCameraCancel();
 	if (SceneDialogue.IsValid()) SceneDialogue->Stop();
 	DialoguePosition = -1.f;
 	bRehearsalPlaying = true;
-	RehearsalSpeed = 1.f;
 	if (Cinema) { Cinema->EndScreening(); Cinema->ClearMissionOutcomes(); }
 	ReplayMissionOutcomes.Reset();
 	SetReviewEnvironment(false);
@@ -700,14 +720,6 @@ void ADCMultiCamDirector::HandleRehearsalToggle()
 	if (Phase == EDCPhase::Preparation)
 	{
 		bRehearsalPlaying = !bRehearsalPlaying;
-	}
-}
-
-void ADCMultiCamDirector::HandleRehearsalSpeed(int32 Direction)
-{
-	if (Phase == EDCPhase::Preparation && Direction != 0)
-	{
-		RehearsalSpeed = FMath::Clamp(RehearsalSpeed * (Direction > 0 ? 2.f : 0.5f), 0.5f, 4.f);
 	}
 }
 
@@ -1060,6 +1072,43 @@ void ADCMultiCamDirector::HandlePlacementHeight(float Notches)
 // ---------------------------------------------------------------------------------------------
 // Preparation: placing cameras
 
+void ADCMultiCamDirector::StartSetOverview()
+{
+ if (!PlaybackCamera) return;
+ const FBox2D Bounds = ReferenceStageBounds.bIsValid ? ReferenceStageBounds : GetStudioBounds();
+ const FVector2D Center = Bounds.bIsValid ? Bounds.GetCenter() : FVector2D(StartTransform.GetLocation());
+ const float FloorZ = StartTransform.GetLocation().Z - 96.f;
+ // Use actual tall, thin studio wall geometry; ignore roofs, floors and lighting rigs.
+ float WallTop = -TNumericLimits<float>::Max();
+ const ULevelStreaming* Studio = UGameplayStatics::GetStreamingLevel(this, StudioEnvironmentLevel);
+ if (const ULevel* Level = Studio ? Studio->GetLoadedLevel() : nullptr)
+ {
+  for (const AActor* Actor : Level->Actors)
+  {
+   if (!Actor) continue;
+   const FBox Box = Actor->GetComponentsBoundingBox(true);
+   const FVector Size = Box.GetSize();
+   const bool bPerimeter = !Bounds.bIsValid || (Box.IsValid &&
+    (FMath::Abs(Box.Min.X - Bounds.Min.X) < 250.f || FMath::Abs(Box.Max.X - Bounds.Max.X) < 250.f ||
+     FMath::Abs(Box.Min.Y - Bounds.Min.Y) < 250.f || FMath::Abs(Box.Max.Y - Bounds.Max.Y) < 250.f));
+   if (Box.IsValid && bPerimeter && Size.Z > 400.f && FMath::Min(Size.X, Size.Y) < 160.f && FMath::Max(Size.X, Size.Y) > 500.f)
+    WallTop = FMath::Max(WallTop, float(Box.Max.Z));
+  }
+ }
+ // Hold a stationary top-down shot inside the studio, 1.2 m below its wall tops.
+ const float EyeZ = WallTop > -TNumericLimits<float>::Max() ? WallTop - 120.f : FloorZ + 1000.f;
+ const float Height = FMath::Max(EyeZ - FloorZ, 100.f);
+ const FVector2D Size = Bounds.bIsValid ? Bounds.GetSize() : FVector2D(2400.f, 1800.f);
+ const float HalfWidth = FMath::Max(float(Size.X), float(Size.Y) * DCFrame::ScreenAspect) * 0.5f;
+ const float FOV = FMath::Clamp(FMath::RadiansToDegrees(2.f * FMath::Atan(HalfWidth / Height)), 60.f, 115.f);
+ PlaybackCamera->SetActorLocationAndRotation(FVector(Center.X, Center.Y, EyeZ), FRotator(-90.f, 90.f, 0.f));
+ PlaybackCamera->GetCameraComponent()->SetFieldOfView(FOV);
+ PlaybackCamera->GetCameraComponent()->SetAspectRatio(DCFrame::ScreenAspect);
+ if (APlayerController* PC = GetWorld()->GetFirstPlayerController()) PC->SetViewTargetWithBlend(PlaybackCamera, 0.f);
+ OverviewRemaining = 3.f;
+ if (Ghost) Ghost->SetActorHiddenInGame(true);
+}
+
 void ADCMultiCamDirector::UpdatePrepPreview()
 {
 	ADCMultiCamCharacter* Player = GetPlayer();
@@ -1072,15 +1121,33 @@ void ADCMultiCamDirector::UpdatePrepPreview()
 	}
 
 	const FVector CamLoc = Player->GetCamera()->GetComponentLocation();
-	const FVector End = CamLoc + Player->GetCamera()->GetForwardVector() * PlaceRange;
 	FCollisionQueryParams Params = MakeTraceParams(SCENE_QUERY_STAT_NAME_ONLY(DCMultiCamPreview));
 	for (ADCPerformer* Performer : Performers)
 	{
 		Params.AddIgnoredActor(Performer);
 	}
 
-	FHitResult Hit;
-	if (GetWorld()->LineTraceSingleByChannel(Hit, CamLoc, End, ECC_Visibility, Params))
+ // Intersect the actual crosshair ray with the neck-height plane, then find the
+ // supporting floor. No fixed pitch offset: looking down brings the stand closer.
+ const FVector ViewDirection = Player->GetCamera()->GetForwardVector();
+ // Ground targeting uses the default stand height, independent of the wheel.
+ // Scrolling changes only the lens height above this same floor position.
+ const float NeckHeight = Ghost->GetPlacementAimHeight(ADCMultiCam::StaticHeight);
+ FHitResult Ground;
+ const bool bGround = GetWorld()->LineTraceSingleByChannel(Ground, CamLoc,
+  CamLoc - FVector(0.f, 0.f, PlaceRange), ECC_Visibility, Params);
+ const float FloorZ = bGround ? Ground.ImpactPoint.Z : Player->GetActorLocation().Z - 96.f;
+ float Distance = 220.f; // Nearby fallback when looking parallel to the neck plane.
+ if (FMath::Abs(ViewDirection.Z) > 0.01f)
+ {
+  const float Intersection = (FloorZ + NeckHeight - CamLoc.Z) / ViewDirection.Z;
+  if (Intersection > 0.f) Distance = Intersection;
+ }
+ Distance = FMath::Clamp(Distance, 140.f, PlaceRange);
+ const FVector NeckPoint = CamLoc + ViewDirection * Distance;
+ const FVector Probe(NeckPoint.X, NeckPoint.Y, FMath::Max(CamLoc.Z, FloorZ + MaxStandHeight) + 50.f);
+ FHitResult Hit;
+ if (GetWorld()->LineTraceSingleByChannel(Hit, Probe, Probe - FVector(0.f, 0.f, PlaceRange), ECC_Visibility, Params))
 	{
 		bPreviewHit = true;
 		PreviewSurface = Hit.ImpactPoint;
@@ -1088,7 +1155,10 @@ void ADCMultiCamDirector::UpdatePrepPreview()
 		PreviewPoint = Hit.ImpactNormal.Z > 0.7f ? Hit.ImpactPoint + FVector(0.f, 0.f, PendingHeight) : Hit.ImpactPoint + Hit.ImpactNormal * WallStandoff;
 		FHitResult Block;
 		const bool bRoom = !GetWorld()->LineTraceSingleByChannel(Block, Hit.ImpactPoint + Hit.ImpactNormal * 2.f, PreviewPoint, ECC_Visibility, Params);
-		bPreviewValid = bRoom && Hit.ImpactNormal.Z > 0.7f && HasCameraBudget();
+		FHitResult Occluder;
+  const bool bVisible = !GetWorld()->LineTraceSingleByChannel(Occluder, CamLoc,
+   Hit.ImpactPoint + FVector(0.f, 0.f, NeckHeight), ECC_Visibility, Params);
+  bPreviewValid = bRoom && bVisible && Hit.ImpactNormal.Z > 0.7f && HasCameraBudget();
 	}
 
 	Ghost->SetActorHiddenInGame(!bPreviewHit);
@@ -1098,11 +1168,31 @@ void ADCMultiCamDirector::UpdatePrepPreview()
 		Ghost->Setup(0, PreviewSurface);
 		Ghost->SetAim(FRotator(0.f, Player->GetControlRotation().Yaw, 0.f));
 		Ghost->SetTint(bPreviewValid ? FLinearColor(0.2f, 1.f, 0.4f) : FLinearColor(1.f, 0.15f, 0.1f));
+  PlacementCaptureElapsed += GetWorld()->GetDeltaSeconds();
+  if (PlacementCaptureElapsed >= 1.f / 15.f)
+  {
+   if (!PlacementTarget)
+   {
+    PlacementTarget = NewObject<UTextureRenderTarget2D>(this);
+    PlacementTarget->InitCustomFormat(640, FMath::RoundToInt(640.f / DCFrame::FilmAspect), PF_B8G8R8A8, false);
+    PlacementCapture->TextureTarget = PlacementTarget;
+   }
+   PlacementCapture->HiddenActors.Reset();
+   PlacementCapture->HiddenActors.Add(Ghost);
+   PlacementCapture->HiddenActors.Add(Player);
+   for (ADCMultiCam* Cam : Cameras) PlacementCapture->HiddenActors.Add(Cam);
+   for (const FDCMultiCamBeat& State : Beats) PlacementCapture->HiddenActors.Add(State.Beat);
+   PlacementCapture->SetWorldLocationAndRotation(Ghost->GetCamera()->GetComponentLocation(), Ghost->GetAim());
+   PlacementCapture->FOVAngle = DCFrame::CaptureFOV(Ghost->GetFOV(), DCFrame::ScreenAspect);
+   PlacementCapture->CaptureScene();
+   PlacementCaptureElapsed = 0.f;
+  }
 	}
 }
 
 void ADCMultiCamDirector::HandlePrimaryPressed()
 {
+ if (IsSetOverview() || IsReferenceFocused()) return;
 	if (HandleCutsceneInput())
 	{
 		return;

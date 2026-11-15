@@ -1,6 +1,8 @@
 // Director's Cut - canvas HUD, styled like a film set (see DCUI for the building blocks).
 
 #include "DCZombieHUD.h"
+#include "ImageUtils.h"
+#include "Misc/Paths.h"
 #include "DCBeat.h"
 #include "DCCinemaReplay.h"
 #include "DCMultiCam.h"
@@ -112,7 +114,7 @@ float ADCZombieHUD::KeyHint(const FString& Key, const FString& Action, float X, 
 	const float KeyPx = Px(Size) * 0.82f;
 	const FVector2D KeySize = DCUI::Measure(Canvas, GetTextFont(), Key, KeyPx);
 	const FVector2D ActionSize = DCUI::Measure(Canvas, GetTextFont(), Action, Px(Size));
-	const float Pad = 8.f * S;
+	const float Pad = 14.f * S;
 	const float BoxW = KeySize.X + 2.f * Pad;
 	const float BoxH = Px(Size) * 1.2f;
 	if (bDraw)
@@ -120,9 +122,9 @@ float ADCZombieHUD::KeyHint(const FString& Key, const FString& Action, float X, 
 		DCUI::Rect(Canvas, X, Y, BoxW, BoxH, FLinearColor(1.f, 1.f, 1.f, 0.08f));
 		DCUI::Outline(Canvas, X, Y, BoxW, BoxH, FMath::Max(1.f, 1.5f * S), WithAlpha(DCUI::Gold, 0.8f));
 		DCUI::Text(Canvas, GetTextFont(), Key, X + Pad, Y + (BoxH - KeySize.Y) * 0.5f, KeyPx, DCUI::Gold, EAlign::Left, false);
-		DCUI::Text(Canvas, GetTextFont(), Action, X + BoxW + 10.f * S, Y + (BoxH - ActionSize.Y) * 0.5f, Px(Size), Color);
+		DCUI::Text(Canvas, GetTextFont(), Action, X + BoxW + 18.f * S, Y + (BoxH - ActionSize.Y) * 0.5f, Px(Size), Color);
 	}
-	return BoxW + 10.f * S + ActionSize.X;
+	return BoxW + 18.f * S + ActionSize.X;
 }
 
 void ADCZombieHUD::GetCaptureRect(float& L, float& T, float& R, float& B) const
@@ -230,15 +232,19 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 		return;
 	}
 
-	if (D->GetPhase() == EDCPhase::Preparation && !D->IsViewingCamera())
-	{
-		FVector2D P;
-		if (D->GetClapperboard() && ProjectVisible(D->GetClapperboard()->GetActorLocation() + FVector(0.f, 0.f, 170.f), P))
-		{
-			KeyHint(TEXT("ENTER"), TEXT("Call ACTION!"), P.X - KeyHint(TEXT("ENTER"), TEXT("Call ACTION!"), 0.f, 0.f, Small, DCUI::Ivory, false) * 0.5f,
-				P.Y, Small, DCUI::Ivory);
-		}
-	}
+ if (D->IsSetOverview()) return;
+ const bool bPrep = D->GetPhase() == EDCPhase::Preparation;
+ FocusProgress = bPrep ? FMath::Clamp(FocusProgress + (D->IsReferenceFocused() ? 1.f : -1.f) * GetWorld()->GetDeltaSeconds() / 0.35f, 0.f, 1.f) : 0.f;
+ FocusEase = FMath::SmoothStep(0.f, 1.f, FocusProgress);
+ if (FocusProgress > 0.f)
+ {
+  DCUI::Rect(Canvas, 0.f, 0.f, Canvas->ClipX, Canvas->ClipY, FLinearColor(0.f, 0.f, 0.f, 0.72f * FocusEase));
+  DrawMissionPanel(D);
+  DrawSwitcher(D);
+  DrawReferenceInset(D);
+  DrawPlanPreview(D);
+  return;
+ }
 
 	// While viewing a camera, dim everything outside the capture frame and frame it with the field monitor, its screen fitted
 	// exactly over the capture frame. Drawn first so the HUD stays on top.
@@ -319,16 +325,17 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 			{
 				// Rasterize at a fixed font size and animate its float render scale: no integer font-size steps.
 				const float Pulse = 1.f + 0.03f * (1.f + FMath::Sin(GetWorld()->GetRealTimeSeconds() * 2.f));
-				const TCHAR* Parts[] = { TEXT("Press "), TEXT("Left Click"), TEXT(" to confirm install or "), TEXT("Esc"), TEXT(" to cancel") };
+				const TCHAR* Parts[] = { TEXT("Press"), TEXT("Left Click"), TEXT("to confirm install or"), TEXT("Esc"), TEXT("to cancel") };
 				float Widths[5];
 				float Total = 0.f;
 				const float FontPx = Px(Small);
-				const float KeyPad = 6.f * S;
+				const float KeyPad = 14.f * S;
+                const float PartGap = 18.f * S;
 				const float TextH = DCUI::Measure(Canvas, GetTextFont(), TEXT("Left Click"), FontPx).Y;
 				for (int32 i = 0; i < 5; ++i)
 				{
 					Widths[i] = DCUI::Measure(Canvas, GetTextFont(), Parts[i], FontPx).X + ((i == 1 || i == 3) ? KeyPad * 2.f : 0.f);
-					Total += Widths[i];
+					Total += Widths[i] + (i < 4 ? PartGap : 0.f) + (i == 2 ? 20.f * S : 0.f);
 				}
 				const float Fit = FMath::Min(1.f, Canvas->ClipX * 0.8f / (Total * 1.06f));
 				const float Scale = Pulse * Fit;
@@ -340,14 +347,15 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 				for (int32 i = 0; i < 5; ++i)
 				{
 					const bool bKey = i == 1 || i == 3;
+                    const FLinearColor KeyColor = i == 1 ? DCUI::Good : DCUI::Rec;
 					if (bKey)
 					{
 						DCUI::Outline(Canvas, X, CenterY - (TextH * 0.5f + KeyPad) * Scale,
-							Widths[i] * Scale, (TextH + KeyPad * 2.f) * Scale, FMath::Max(1.f, 1.5f * S), DCUI::Gold);
+							Widths[i] * Scale, (TextH + KeyPad * 2.f) * Scale, FMath::Max(1.f, 1.5f * S), KeyColor);
 					}
 					DCUI::Text(Canvas, GetTextFont(), Parts[i], X + (bKey ? KeyPad * Scale : 0.f), CenterY - TextH * Scale * 0.5f,
-						FontPx, bKey ? DCUI::Gold : DCUI::Ivory, EAlign::Left, false, 0.f, Scale);
-					X += Widths[i] * Scale;
+						FontPx, bKey ? KeyColor : DCUI::Ivory, EAlign::Left, false, 0.f, Scale);
+					X += (Widths[i] + PartGap + (i == 2 ? 20.f * S : 0.f)) * Scale;
 				}
 			}
 			else
@@ -592,7 +600,7 @@ void ADCZombieHUD::DrawMissionPanel(ADCZombieDirector* D)
 	// Preparation missions: always visible at the top right.
 	const TArray<FDCMultiCamBeat>& Beats = D->GetBeats();
 	const float W = Canvas->ClipX * 0.25f;
-	const float X = Canvas->ClipX - W - 20.f * S;
+	const float X = Canvas->ClipX - W - 20.f * S + (W + 40.f * S) * FocusEase;
 	float Y = 18.f * S;
 	const float Band = 14.f * S;
 	const float RowH = Px(Small) * 1.35f;
@@ -600,6 +608,21 @@ void ADCZombieHUD::DrawMissionPanel(ADCZombieDirector* D)
 	DCUI::Rect(Canvas, X, Y, W, H, DCUI::Fill);
 	DCUI::Sprockets(Canvas, X, Y, W, Band);
 	DCUI::Sprockets(Canvas, X, Y + H - Band, W, Band);
+ // Fit the entire hint as one row, keeping the key padding and gap proportional.
+ const float HintPx = Px(Small);
+ const FVector2D PromptSize = DCUI::Measure(Canvas, GetTextFont(), TEXT("Ready to film?"), HintPx);
+ const FVector2D EnterSize = DCUI::Measure(Canvas, GetTextFont(), TEXT("ENTER"), HintPx * 0.82f);
+ const float HintPad = 14.f * S, HintGap = 20.f * S;
+ const float EnterW = EnterSize.X + HintPad * 2.f;
+ const float HintScale = FMath::Min(1.f, W / (PromptSize.X + HintGap + EnterW));
+ const float HintY = Y + H + 12.f * S;
+ const float HintH = FMath::Max(PromptSize.Y, EnterSize.Y + HintPad) * HintScale;
+ DCUI::Text(Canvas, GetTextFont(), TEXT("Ready to film?"), X, HintY + (HintH - PromptSize.Y * HintScale) * 0.5f,
+  HintPx, DCUI::Ivory, EAlign::Left, true, 0.f, HintScale);
+ const float EnterX = X + (PromptSize.X + HintGap) * HintScale;
+ DCUI::Outline(Canvas, EnterX, HintY, EnterW * HintScale, HintH, FMath::Max(1.f, 1.5f * S), DCUI::Gold);
+ DCUI::Text(Canvas, GetTextFont(), TEXT("ENTER"), EnterX + HintPad * HintScale, HintY + (HintH - EnterSize.Y * HintScale) * 0.5f,
+  HintPx * 0.82f, DCUI::Gold, EAlign::Left, false, 0.f, HintScale);
 	Y += Band + 6.f * S;
 	Label(TEXT("MISSION"), X + 16.f * S, Y, DCUI::Gold, Small);
 	Y += Px(Small) * 1.5f;
@@ -866,9 +889,24 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 
 	const float Length = FMath::Max(D->TakeDuration, KINDA_SMALL_NUMBER);
 	const float Time = D->GetSceneTime();
-	Label(FString::Printf(TEXT("SPACE: Play/Pause  |  %s  |  %.1fx"), D->IsRehearsalPlaying() ? TEXT("PLAYING") : TEXT("PAUSED"), D->GetRehearsalSpeed()),
-		X + Pad, Y + Pad, DCUI::Gold, Small, EAlign::Left, true, W * 0.6f);
-	Label(DCUI::Timecode(Time), X + W - Pad, Y + Pad, DCUI::Ivory, Small, EAlign::Right);
+ // Center the transport icon and timecode as one group.
+ const FString Timecode = DCUI::Timecode(Time);
+ const FVector2D TimeSize = DCUI::Measure(Canvas, GetTextFont(), Timecode, Px(Small));
+ const float IconH = Px(Small) * 0.85f;
+ const float IconW = IconH * 0.8f;
+ const float TransportGap = 12.f * S;
+ const float IconX = X + (W - IconW - TransportGap - TimeSize.X) * 0.5f;
+ const float TransportMidY = Y + Pad + Px(Small) * 1.3f * 0.5f;
+ const float IconY = TransportMidY - IconH * 0.5f;
+ if (D->IsRehearsalPlaying())
+  DCUI::Triangle(Canvas, FVector2D(IconX, IconY), FVector2D(IconX, IconY + IconH),
+   FVector2D(IconX + IconH * 0.8f, IconY + IconH * 0.5f), DCUI::Gold);
+ else
+ {
+  DCUI::Rect(Canvas, IconX, IconY, IconH * 0.25f, IconH, DCUI::Gold);
+  DCUI::Rect(Canvas, IconX + IconH * 0.55f, IconY, IconH * 0.25f, IconH, DCUI::Gold);
+ }
+	Label(Timecode, IconX + IconW + TransportGap, TransportMidY - TimeSize.Y * 0.5f, DCUI::Ivory, Small);
 	const float KeyTop = Y + Pad + Px(Small) * 1.3f + RowGap;
 	const float TY = KeyTop + KeySize * 0.5f - 3.f * S;
 	const float KeySpace = KeySize + 12.f * S;
@@ -967,7 +1005,7 @@ void ADCZombieHUD::DrawSwitcher(ADCZombieDirector* D)
 	const float BoxW = FMath::Min(132.f * S, (Canvas->ClipX * 0.44f - (Count - 1) * Gap) / Count);
 	const float BoxH = 112.f * S;
 	float X = Canvas->ClipX * 0.5f - (Count * BoxW + (Count - 1) * Gap) * 0.5f;
-	const float Y = 18.f * S;
+	const float Y = (18.f - 300.f * FocusEase) * S;
 	const bool bOnAir = D->GetPhase() == EDCPhase::Filming || D->GetPhase() == EDCPhase::Countdown;
 	if (D->GetPhase() == EDCPhase::Filming)
 		Label(TEXT("Press number to switch cameras"), Canvas->ClipX * 0.5f, Y + BoxH + 12.f * S,
@@ -1127,14 +1165,26 @@ void ADCZombieHUD::DrawReferenceInset(ADCZombieDirector* D)
 		return;
 	}
 	// Flush in the bottom-right corner, in the film's own 2.12:1 shape (the help moves left of it).
-	const float W = Canvas->ClipX * InsetShare;
-	const float H = W / DCFrame::FilmAspect;
-	const float X = Canvas->ClipX - W;
-	const float Y = Canvas->ClipY - H;
+	const float W = FMath::Lerp(Canvas->ClipX * InsetShare, FMath::Min(Canvas->ClipX * 0.78f, Canvas->ClipY * 0.60f * DCFrame::FilmAspect), FocusEase);
+ const float H = W / DCFrame::FilmAspect;
+ const float X = FMath::Lerp(Canvas->ClipX - W, (Canvas->ClipX - W) * 0.5f, FocusEase);
+ const float Y = FMath::Lerp(Canvas->ClipY - H, (Canvas->ClipY - H) * 0.42f, FocusEase);
 	const float LabelH = Px(Small) * 1.4f;
 	DCUI::Rect(Canvas, X - 4.f * S, Y - LabelH, W + 4.f * S, H + LabelH, FLinearColor::Black);
 	DCUI::Disc(Canvas, FVector2D(X + 12.f * S, Y - LabelH * 0.5f), 7.f * S, DCUI::Gold);
-	Label(TEXT("REFERENCE CUT"), X + 26.f * S, Y - LabelH + (LabelH - Px(Small) * 1.2f) * 0.5f, DCUI::Gold, Small, EAlign::Left, true, W - 30.f * S);
+ const bool bShowTab = D->GetPhase() == EDCPhase::Preparation;
+ const float TabPx = Px(Small) * 0.70f;
+ const FVector2D TabSize = DCUI::Measure(Canvas, GetTextFont(), TEXT("Tab"), TabPx);
+ const float TabW = TabSize.X + 24.f * S;
+ const float TabH = LabelH - 8.f * S;
+ const float TabX = X + W - TabW - 8.f * S;
+ Label(TEXT("REFERENCE CUT"), X + 26.f * S, Y - LabelH + (LabelH - Px(Small) * 1.2f) * 0.5f, DCUI::Gold, Small, EAlign::Left, true,
+  W - 30.f * S - (bShowTab ? TabW + 16.f * S : 0.f));
+ if (bShowTab)
+ {
+  DCUI::Outline(Canvas, TabX, Y - LabelH + 4.f * S, TabW, TabH, FMath::Max(1.f, 1.5f * S), DCUI::Gold);
+  DCUI::Text(Canvas, GetTextFont(), TEXT("Tab"), TabX + 12.f * S, Y - LabelH * 0.5f - TabSize.Y * 0.5f, TabPx, DCUI::Gold, EAlign::Left, false);
+ }
 	DrawTexture(Inset, X, Y, W, H, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, BLEND_Opaque);
 	if (const ADCBeat* Beat = D->GetReferenceBeatAt(D->GetSceneTime()))
 	{
@@ -1142,27 +1192,29 @@ void ADCZombieHUD::DrawReferenceInset(ADCZombieDirector* D)
 	}
 	DrawCutCue(D, X, Y - LabelH, W);
 
-	// Preparation, walking around: how to move on to filming, in a strip on top of the inset. (Looking through a
-	// camera, left-click confirms that camera; Enter is ignored.)
-	if (D->GetPhase() == EDCPhase::Preparation && !D->IsViewingCamera() && !D->IsInputBlocked())
-	{
-		const float StripH = Px(Body) * 1.9f;
-		const float StripY = Y - LabelH - StripH;
-		DCUI::Rect(Canvas, X - 4.f * S, StripY, W + 4.f * S, StripH, FLinearColor(0.f, 0.f, 0.f, 0.85f));
-		if (D->GetCameraCount() == 0)
-		{
-			const FString Text = TEXT("Place a camera, then ENTER to film");
-			Label(Text, X + W * 0.5f, StripY + (StripH - Px(Small) * 1.2f) * 0.5f, DCUI::Muted, Small, EAlign::Center, true, W - 16.f * S);
-		}
-		else
-		{
-			const float Pulse = 0.6f + 0.4f * FMath::Sin(GetWorld()->GetRealTimeSeconds() * 3.f);
-			DCUI::Rect(Canvas, X - 4.f * S, StripY, W + 4.f * S, FMath::Max(3.f * S, 2.f), WithAlpha(DCUI::Gold, Pulse));
-			const FString Action = TEXT("Start filming!");
-			const float HintW = KeyHint(TEXT("ENTER"), Action, 0.f, 0.f, Body, DCUI::Ivory, false);
-			KeyHint(TEXT("ENTER"), Action, X + (W - HintW) * 0.5f, StripY + (StripH - Px(Body) * 1.2f) * 0.5f, Body, DCUI::Ivory);
-		}
-	}
+ if (FocusProgress < 1.f)
+ {
+  if (UTextureRenderTarget2D* Preview = D->GetPlacementPreview())
+  {
+   const float PreviewW = Canvas->ClipX * InsetShare;
+   const float PreviewH = PreviewW / DCFrame::FilmAspect;
+   const float PreviewX = Canvas->ClipX - PreviewW + (PreviewW + 12.f * S) * FocusEase;
+   const float PY = Canvas->ClipY - PreviewH * 2.f - LabelH;
+   DCUI::Rect(Canvas, PreviewX, PY - LabelH, PreviewW, PreviewH + LabelH, FLinearColor::Black);
+   DCUI::Disc(Canvas, FVector2D(PreviewX + 12.f * S, PY - LabelH * 0.5f), 7.f * S, DCUI::Gold);
+   Label(TEXT("PLACEMENT PREVIEW"), PreviewX + 26.f * S, PY - LabelH, DCUI::Gold, Small, EAlign::Left, true, PreviewW - 30.f * S);
+   DrawTexture(Preview, PreviewX, PY, PreviewW, PreviewH, 0.f, 0.f, 1.f, 1.f, FLinearColor::White, BLEND_Opaque);
+   if (!ScrollWheelIcon) ScrollWheelIcon = FImageUtils::ImportFileAsTexture2D(FPaths::ProjectContentDir() / TEXT("DirectorsCut/RawUI/mouse-scroll-wheel-icon.png"));
+   FVector2D P;
+   if (FocusProgress == 0.f && ScrollWheelIcon && ProjectVisible(D->GetPlacementHintLocation(), P))
+   {
+    const float IX = FMath::Clamp(float(P.X) + 70.f * S, 10.f * S, Canvas->ClipX - 110.f * S);
+    const float IY = FMath::Clamp(float(P.Y), 100.f * S, Canvas->ClipY - 180.f * S);
+    DrawTexture(ScrollWheelIcon, IX, IY, 76.f * S, 76.f * S, 0.f, 0.f, 1.f, 1.f);
+   }
+  }
+ }
+
 }
 
 void ADCZombieHUD::DrawCutCue(ADCZombieDirector* D, float InsetX, float InsetTop, float InsetW)
