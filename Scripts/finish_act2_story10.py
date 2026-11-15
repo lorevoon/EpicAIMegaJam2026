@@ -41,7 +41,7 @@ for i,(start,end,beat,point,fov,endfov,zstart,zend,names) in enumerate(shots,1):
  if i==1:tags += [f'DCDialogue={s}:{e}' for s,e in windows]
  if i==1:
   end=solution[0]['end'];tags += [f'DCEndX={end[0]}',f'DCEndY={end[1]}',f'DCEndZ={end[2]}','DCMoveStart=3.5','DCMoveEnd=7.5','DCFocusActor=RaidSmithFocus','DCFocusStart=4','DCFocusEnd=7.5']
- if i==4:tags+=['DCSlowStart=25.0','DCSlowEnd=25.9','DCSlowRate=0.65']
+ # Revision 11: the whole sword fight plays at natural speed.
  cam.tags=tags;cameras.append(cam);b=beats[beat];b.set_editor_property('camera_spot',b.get_actor_transform().inverse_transform_location(u.Vector(*point)))
 spacing=min(math.dist(a[3][:2],b[3][:2]) for i,a in enumerate(shots) for b in shots[i+1:]);assert spacing>=1300,spacing
 for a in cast.values():a.evaluate(0)

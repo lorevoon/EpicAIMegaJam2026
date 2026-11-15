@@ -40,6 +40,13 @@ ADCStartMark::ADCStartMark()
 	DCVisuals::SetupLabel(Label, FColor::White, 28.f);
 }
 
+void ADCStartMark::BeginPlay()
+{
+	Super::BeginPlay();
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+}
+
 FTransform ADCStartMark::FindStartTransform(UWorld* World)
 {
 	constexpr float StandHeight = 100.f;
@@ -49,6 +56,12 @@ FTransform ADCStartMark::FindStartTransform(UWorld* World)
 		{
 			return FTransform(FRotator(0.f, It->GetActorRotation().Yaw, 0.f), It->GetActorLocation() + FVector(0.f, 0.f, StandHeight));
 		}
+        // A deleted editor marker must not send the operator outside the studio.
+        for (TActorIterator<ADCClapperboard> It(World); It; ++It)
+        {
+            const FVector Offset = It->GetActorRotation().RotateVector(FVector(250.f, 0.f, StandHeight));
+            return FTransform(FRotator(0.f, It->GetActorRotation().Yaw, 0.f), It->GetActorLocation() + Offset);
+        }
 	}
 	return FTransform(FRotator::ZeroRotator, FVector(-1000.f, 0.f, StandHeight));
 }

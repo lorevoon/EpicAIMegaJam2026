@@ -891,3 +891,12 @@ void ADCMultiCamDirector::UpdateCoveredScenes()
 	}
 	SceneCovered = MoveTemp(Now);
 }
+
+TArray<float> ADCMultiCamDirector::GetReferenceCameraCutTimes(bool bSceneTime) const
+{
+ TArray<float> Times;
+ for (int32 Index = 1; Index < ReferenceCut.Num(); ++Index)
+  if (ReferenceCut[Index].Slot != ReferenceCut[Index - 1].Slot)
+   Times.Add(bSceneTime ? ReferenceCut[Index].Time : ReferenceCut[Index].FilmTime);
+ return Times;
+}

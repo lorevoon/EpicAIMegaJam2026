@@ -1,0 +1,12 @@
+import unreal as u
+from pathlib import Path
+R=Path(__file__).resolve().parents[1];B='/Game/DirectorsCut';F=B+'/Animations/Act1Revision14';e=u.EditorAssetLibrary;m=u.MaterialEditingLibrary;source=B+'/Materials/M_Act1_FacialExpressions';path=F+'/M_RomeoFriendlyFace';mat=u.load_asset(path) or e.duplicate_asset(source,path);node=u.load_object(None,mat.get_path_name()+':MaterialExpressionCustom_0');uv=dict(zip(m.get_material_expression_input_names(node),m.get_inputs_for_material_expression(mat,node)))['UV'];param=m.create_material_expression(mat,u.MaterialExpressionScalarParameter,-800,1400);param.set_editor_property('parameter_name','FaceSmile');param.set_editor_property('default_value',0)
+remap=m.create_material_expression(mat,u.MaterialExpressionCustom,-500,1400);remap.set_editor_property('output_type',u.CustomMaterialOutputType.CMOT_FLOAT2);inputs=[]
+for name in ['UV','Smile']:
+ x=u.CustomInput();x.set_editor_property('input_name',name);inputs.append(x)
+remap.set_editor_property('inputs',inputs);remap.set_editor_property('code','bool face = UV.x > .51 && UV.x < .61 && UV.y > .515 && UV.y < .64; return UV + float2((face && Smile > .5) ? .28125 : 0., 0.);');m.connect_material_expressions(uv,'',remap,'UV');m.connect_material_expressions(param,'',remap,'Smile');sample=m.create_material_expression(mat,u.MaterialExpressionTextureSample,-200,1400);sample.texture=u.load_asset(B+'/Materials/T_Polysplit_RGBMask');m.connect_material_expressions(remap,'',sample,'UVs');m.connect_material_expressions(sample,'RGBA',node,'Mask');m.connect_material_property(sample,'A',u.MaterialProperty.MP_OPACITY_MASK);m.recompile_material(mat);assert e.save_loaded_asset(mat,False)
+mi=u.load_asset(F+'/MI_RomeoFriendlyFace') or e.duplicate_asset(B+'/Materials/MI_Act1_FacialExpressions',F+'/MI_RomeoFriendlyFace');m.set_material_instance_parent(mi,mat);assert e.save_loaded_asset(mi,False)
+les=u.get_editor_subsystem(u.LevelEditorSubsystem);les.load_level(B+'/Levels/L_DC_Act1_Promise');a=next(a for a in u.get_editor_subsystem(u.EditorActorSubsystem).get_all_level_actors() if isinstance(a,u.DCPerformer) and a.get_actor_label()=='Romeo');c=a.get_component_by_class(u.SkeletalMeshComponent)
+for i,slot in enumerate(a.get_editor_property('character_mesh').materials):
+ if 'Body' in str(slot.material_slot_name):c.set_material(i,mi)
+a.evaluate(0);assert u.EditorLoadingAndSavingUtils.save_map(u.get_editor_subsystem(u.UnrealEditorSubsystem).get_editor_world(),B+'/Levels/L_DC_Act1_Promise');print('ROMEO_FRIENDLY_FACE_SAVED')

@@ -83,8 +83,8 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Scene camera zones do not overlap"), FVector::Dist2D(Positions[i], Positions[j]) >= D->GetReferenceShotSpacing());
   TestTrue(TEXT("Fall zoom opens the frame"), D->ReferenceCut[850].FilmFOV > D->ReferenceCut[580].FilmFOV + 3.f);
   TestTrue(TEXT("Ending zoom moves closer"), D->ReferenceCut[1100].FilmFOV < D->ReferenceCut[880].FilmFOV - 5.f);
-  TestTrue(TEXT("Impact is slowed"), MinimumRate < .85f && MinimumRate >= .25f);
-  TestTrue(TEXT("Remaining action compensates without a large speed-up"), MaximumRate > 1.f && MaximumRate < 1.2f);
+  TestTrue(TEXT("All action stays at natural speed"), FMath::IsNearlyEqual(MinimumRate, 1.f, .001f));
+  TestTrue(TEXT("No compensating speed-up"), FMath::IsNearlyEqual(MaximumRate, 1.f, .001f));
   if (D->ReferenceShotBeats.Num() == 5)
   {
    TSet<int32> StoryBeats; for (int32 B : D->ReferenceShotBeats) StoryBeats.Add(B);
@@ -147,7 +147,7 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
   D->Phase = EDCPhase::Reference; D->bReferencePlaying = true; D->bReferencePaused = false;
   D->ReferenceTime = D->ReferenceFilmTimeAtSceneTime(25.5f); D->UpdateSceneDialogue(0.f);
   if (TestNotNull(TEXT("Synchronized raid audio"), D->SceneDialogue.Get()))
-   TestTrue(TEXT("Sound slows with the fatal strike"), D->SceneDialogue->PitchMultiplier > .25f && D->SceneDialogue->PitchMultiplier < .85f);
+   TestTrue(TEXT("Fight audio stays at natural pitch"), FMath::IsNearlyEqual(D->SceneDialogue->PitchMultiplier, 1.f, .001f));
   D->ReferenceTime = D->ReferenceFilmTimeAtSceneTime(26.2f); D->UpdateSceneDialogue(0.f);
   TestTrue(TEXT("Juliet's Romeo scream has natural pitch"), FMath::IsNearlyEqual(D->SceneDialogue->PitchMultiplier, 1.f, .001f));
   // Film timestamps lose precision late in the take. Their per-frame derivative
@@ -198,7 +198,7 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
    ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(1.f));
    ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([Moment]()
    {
-    FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("Act2/StoryRevision10/Runtime") /
+    FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("PerformanceRevision11/Act2") /
      FString::Printf(TEXT("reference_%04d.png"), FMath::RoundToInt(Moment * 10)), false, false);
     return true;
    }));
@@ -238,7 +238,7 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
        {
         TArray64<uint8> PNG;
         FImageUtils::PNGCompressImageArray(Target->SizeX, Target->SizeY, Pixels, PNG);
-        const FString Path = FPaths::ProjectSavedDir() / TEXT("Act2/StoryRevision10/Runtime") / FString::Printf(TEXT("preparation_%04d.png"), FMath::RoundToInt(Moment * 10));
+        const FString Path = FPaths::ProjectSavedDir() / TEXT("PerformanceRevision11/Act2") / FString::Printf(TEXT("preparation_%04d.png"), FMath::RoundToInt(Moment * 10));
         FFileHelper::SaveArrayToFile(PNG, *Path);
        }
       }

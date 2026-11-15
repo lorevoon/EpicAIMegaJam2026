@@ -10,6 +10,8 @@
 #include "DCMultiCam.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/World.h"
+#include "DCCrewMember.h"
+#include "EngineUtils.h"
 
 namespace
 {
@@ -60,6 +62,10 @@ void ADCMultiCamDirector::Coach(FName Key, EDCDirectorMood Mood, std::initialize
 
 void ADCMultiCamDirector::Cheer(int32 BeatIndex)
 {
+	for (TActorIterator<ADCCrewMember> It(GetWorld()); It; ++It)
+	{
+		if (It->bDirector && !It->IsHidden()) It->Celebrate();
+	}
 	static const TCHAR* const Lines[] = {
 		TEXT("THAT'S IT! That's my spot for scene {n}!"),
 		TEXT("Yes, YES! \"{scene}\" is going to look gorgeous!"),
