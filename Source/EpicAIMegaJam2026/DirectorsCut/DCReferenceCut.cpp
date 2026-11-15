@@ -320,6 +320,9 @@ void ADCMultiCamDirector::BuildReferenceCut()
 		FVector Location;
 		float FOV = 0.f, CleanFrom = 0.f, Cut = 0.f;
 		float EndFOV = 0.f, ZoomStart = 0.f, ZoomEnd = 0.f;
+		FVector EndLocation = FVector::ZeroVector;
+		float MoveStart = 0.f, MoveEnd = 0.f, FocusStart = 0.f, FocusEnd = 0.f;
+		ADCPerformer* FocusPerformer = nullptr;
 		bool bContinue = false;
 	};
 	struct FSpeedWindow { float Start = 0.f; float End = 0.f; float Rate = 1.f; };
@@ -340,6 +343,15 @@ void ADCMultiCamDirector::BuildReferenceCut()
 			continue;
 		}
 		Shot.Location = Camera->GetActorLocation();
+		Shot.EndLocation = Shot.Location;
+		float X = Shot.Location.X, Y = Shot.Location.Y, Z = Shot.Location.Z;
+		TagFloat(Camera, TEXT("DCEndX"), X); TagFloat(Camera, TEXT("DCEndY"), Y); TagFloat(Camera, TEXT("DCEndZ"), Z);
+		Shot.EndLocation = FVector(X, Y, Z);
+		TagFloat(Camera, TEXT("DCMoveStart"), Shot.MoveStart); TagFloat(Camera, TEXT("DCMoveEnd"), Shot.MoveEnd);
+		TagFloat(Camera, TEXT("DCFocusStart"), Shot.FocusStart); TagFloat(Camera, TEXT("DCFocusEnd"), Shot.FocusEnd);
+		const FString FocusTag = TagValue(Camera, TEXT("DCFocusActor"));
+		if (!FocusTag.IsEmpty())
+			for (ADCPerformer* P : Performers) if (P && P->ActorHasTag(FName(*FocusTag))) { Shot.FocusPerformer = P; break; }
 		Shot.FOV = Camera->GetCameraComponent()->FieldOfView;
 		float TaggedFOV = Shot.FOV;
 		if (TagFloat(Camera, TEXT("DCFOV"), TaggedFOV)) Shot.FOV = TaggedFOV;
@@ -439,7 +451,11 @@ void ADCMultiCamDirector::BuildReferenceCut()
 			const float FollowAlpha = FMath::SmoothStep(Shot.Cut, Shot.Cut + 1.5f, Time);
 			Focus = FMath::Lerp(AnchorCentroid(Beats[Shots[Active - 1].Beat]), Focus, FollowAlpha);
 		}
-		const FRotator Target = LookAt(Shot.Location, Focus);
+		if (Shot.FocusPerformer && Shot.FocusEnd > Shot.FocusStart)
+			Focus = FMath::Lerp(Focus, Shot.FocusPerformer->GetAnchor(EDCAnchorPart::Head)->GetComponentLocation(), FMath::SmoothStep(Shot.FocusStart, Shot.FocusEnd, Time));
+		const float MoveAlpha = Shot.MoveEnd > Shot.MoveStart ? FMath::SmoothStep(Shot.MoveStart, Shot.MoveEnd, Time) : 0.f;
+		const FVector CameraLocation = FMath::Lerp(Shot.Location, Shot.EndLocation, MoveAlpha);
+		const FRotator Target = LookAt(CameraLocation, Focus);
 		Aim = Active != ShotIndex && !Shot.bContinue ? Target : FMath::RInterpTo(Aim, Target, 1.f / FilmRate, 6.f);
 		ShotIndex = Active;
 
@@ -465,7 +481,7 @@ void ADCMultiCamDirector::BuildReferenceCut()
 		else Rates.Add(1.f);
 		Sample.FilmTime = FilmTime;
 		Sample.Slot = Active;
-		Sample.Location = Shot.Location;
+		Sample.Location = CameraLocation;
 		Sample.Rotation = Aim;
 		const float ZoomAlpha = Shot.ZoomEnd > Shot.ZoomStart
 			? FMath::SmoothStep(Shot.ZoomStart, Shot.ZoomEnd, Time) : 0.f;
@@ -893,4 +909,13 @@ void ADCMultiCamDirector::UpdateCoveredScenes()
 		}
 	}
 	SceneCovered = MoveTemp(Now);
+}
+
+TArray<float> ADCMultiCamDirector::GetReferenceCameraCutTimes(bool bSceneTime) const
+{
+ TArray<float> Times;
+ for (int32 Index = 1; Index < ReferenceCut.Num(); ++Index)
+  if (ReferenceCut[Index].Slot != ReferenceCut[Index - 1].Slot)
+   Times.Add(bSceneTime ? ReferenceCut[Index].Time : ReferenceCut[Index].FilmTime);
+ return Times;
 }

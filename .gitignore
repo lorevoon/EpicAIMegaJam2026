@@ -24,6 +24,8 @@
 *.la
 *.a
 *.lib
+# Required NVIDIA NGX linker input for Windows Development/Shipping builds.
+!Plugins/DLSS/Source/ThirdParty/NGX/Lib/x64/nvsdk_ngx_d.lib
 
 # Executables
 *.exe

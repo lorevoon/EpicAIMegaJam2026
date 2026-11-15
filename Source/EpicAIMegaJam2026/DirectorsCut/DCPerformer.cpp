@@ -7,6 +7,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Animation/AnimSequence.h"
+#include "Animation/AnimInstance.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -271,6 +272,10 @@ void ADCPerformer::Evaluate(float SceneTime)
 			Character->SetPosition(Position, false);
 			Character->TickAnimation(0.f, false);
 			Character->RefreshBoneTransforms();
+			if (UAnimInstance* Instance = Character->GetAnimInstance())
+			{
+				Character->SetScalarParameterValueOnMaterials(TEXT("FaceSmile"), Instance->GetCurveValue(TEXT("FaceSmile")));
+			}
 			Character->UpdateComponentToWorld();
 		}
 		else
