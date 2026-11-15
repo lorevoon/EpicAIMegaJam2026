@@ -1,0 +1,27 @@
+[
+  {
+    "variant": "Crew_F01_Auburn_Bun_Rig",
+    "max_export_world_bind_matrix_error": 8.344650268554688e-07,
+    "parents_match": true
+  },
+  {
+    "variant": "Crew_F02_Blonde_Bob_Rig",
+    "max_export_world_bind_matrix_error": 8.344650268554688e-07,
+    "parents_match": true
+  },
+  {
+    "variant": "Crew_F03_Black_Ponytail_Rig",
+    "max_export_world_bind_matrix_error": 8.344650268554688e-07,
+    "parents_match": true
+  },
+  {
+    "variant": "Crew_M01_Brown_Crop_Rig",
+    "max_export_world_bind_matrix_error": 8.344650268554688e-07,
+    "parents_match": true
+  },
+  {
+    "variant": "Crew_M02_Silver_Swept_Rig",
+    "max_export_world_bind_matrix_error": 8.344650268554688e-07,
+    "parents_match": true
+  }
+]

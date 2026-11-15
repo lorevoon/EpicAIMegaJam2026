@@ -299,7 +299,7 @@ public:
 
 	bool IsInCutscene() const { return Cutscene != nullptr; }
 	/** The main menu or a cutscene is up, or the screen is fading: player input only moves those on. */
-	bool IsInputBlocked() const { return bInMainMenu || IsInCutscene() || FadeDirection != 0; }
+	bool IsInputBlocked() const { return OverviewRemaining > 0.f || bInMainMenu || IsInCutscene() || FadeDirection != 0; }
 	/** The cutscene line being said (null outside cutscenes), its index and count, and the real time it started. */
 	const FDCCutsceneLine* GetCutsceneLine() const { return Cutscene && Cutscene->IsValidIndex(CutsceneLine) ? &(*Cutscene)[CutsceneLine] : nullptr; }
 	int32 GetCutsceneLineIndex() const { return CutsceneLine; }
@@ -322,6 +322,17 @@ public:
 
 	/** The inset picture during preparation and shooting; null when there's nothing to show. */
 	UTextureRenderTarget2D* GetReferenceInset() const;
+ void ToggleReferenceFocus() { if (Phase == EDCPhase::Preparation && !IsInputBlocked()) bReferenceFocused = !bReferenceFocused; }
+ bool IsReferenceFocused() const { return bReferenceFocused && Phase == EDCPhase::Preparation; }
+ bool IsSetOverview() const { return OverviewRemaining > 0.f; }
+ void StartSetOverview();
+ UTextureRenderTarget2D* GetPlacementPreview() const { return bPreviewHit && Phase == EDCPhase::Preparation && !IsViewingCamera() ? PlacementTarget.Get() : nullptr; }
+ FVector GetPlacementHintLocation() const { return PreviewPoint; }
+ UPROPERTY() TObjectPtr<USceneCaptureComponent2D> PlacementCapture;
+ UPROPERTY() TObjectPtr<UTextureRenderTarget2D> PlacementTarget;
+ bool bReferenceFocused = false;
+ float OverviewRemaining = 0.f;
+ float PlacementCaptureElapsed = 0.f;
 
 	/**
 	 * Grading: each moment of the take is compared with the reference cut on the picture itself - where the
@@ -413,9 +424,8 @@ public:
 	/** Space in review: pause/resume the film, or watch it again once it has ended. */
 	void HandleTransportToggle();
 	void HandleRehearsalToggle();
-	void HandleRehearsalSpeed(int32 Direction);
 	bool IsRehearsalPlaying() const { return Phase == EDCPhase::Preparation && bRehearsalPlaying; }
-	float GetRehearsalSpeed() const { return RehearsalSpeed; }
+	float GetRehearsalSpeed() const { return 1.f; }
 	/** Z / X: slower / faster dolly travel for the camera being looked through. */
 	void HandleRailSpeed(int32 Direction);
 	void HandleClearCameras();
@@ -683,7 +693,6 @@ protected:
 	TArray<FDCTakeSample> Recording;
 	bool bPremierePaused = false;
 	bool bRehearsalPlaying = true;
-	float RehearsalSpeed = 1.f;
 
 	TArray<FDCMultiCamBeat> Beats;
 	FString SetupProblem;

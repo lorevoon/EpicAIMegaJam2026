@@ -1,0 +1,49 @@
+[
+  {
+    "name": "Crew_F01_Auburn_Bun",
+    "source": "BaseFemale.fbx",
+    "hair_meshes": [
+      "F_hair_1b",
+      "F_hair_1b_Bun"
+    ],
+    "bones": 99,
+    "meshes": 22
+  },
+  {
+    "name": "Crew_M01_Brown_Crop",
+    "source": "BaseMale.fbx",
+    "hair_meshes": [
+      "M_hair_3b"
+    ],
+    "bones": 99,
+    "meshes": 21
+  },
+  {
+    "name": "Crew_F02_Blonde_Bob",
+    "source": "BaseFemale.fbx",
+    "hair_meshes": [
+      "F_hair_6b"
+    ],
+    "bones": 99,
+    "meshes": 21
+  },
+  {
+    "name": "Crew_M02_Silver_Swept",
+    "source": "BaseMale.fbx",
+    "hair_meshes": [
+      "M_hair_7b"
+    ],
+    "bones": 99,
+    "meshes": 21
+  },
+  {
+    "name": "Crew_F03_Black_Ponytail",
+    "source": "BaseFemale.fbx",
+    "hair_meshes": [
+      "F_hair_13b",
+      "F_hair_13b_Ponytail"
+    ],
+    "bones": 99,
+    "meshes": 22
+  }
+]

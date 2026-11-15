@@ -154,4 +154,7 @@ private:
 	int32 PerfectBurstCount = 0;
 	/** Layout unit: 1 at 1080p, times UIScale. */
 	float S = 1.f;
+ float FocusProgress = 0.f;
+ float FocusEase = 0.f;
+ UPROPERTY() TObjectPtr<UTexture2D> ScrollWheelIcon;
 };

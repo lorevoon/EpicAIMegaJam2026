@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Crew_F01_Auburn_Bun",
+    "bones": 99,
+    "mesh_objects": 52,
+    "unweighted_vertices": 0,
+    "shirt_thickness_m": 0.00065,
+    "trouser_thickness_m": 0.0009
+  },
+  {
+    "name": "Crew_M01_Brown_Crop",
+    "bones": 99,
+    "mesh_objects": 51,
+    "unweighted_vertices": 0,
+    "shirt_thickness_m": 0.00065,
+    "trouser_thickness_m": 0.0009
+  },
+  {
+    "name": "Crew_F02_Blonde_Bob",
+    "bones": 99,
+    "mesh_objects": 51,
+    "unweighted_vertices": 0,
+    "shirt_thickness_m": 0.00065,
+    "trouser_thickness_m": 0.0009
+  },
+  {
+    "name": "Crew_M02_Silver_Swept",
+    "bones": 99,
+    "mesh_objects": 51,
+    "unweighted_vertices": 0,
+    "shirt_thickness_m": 0.00065,
+    "trouser_thickness_m": 0.0009
+  },
+  {
+    "name": "Crew_F03_Black_Ponytail",
+    "bones": 99,
+    "mesh_objects": 52,
+    "unweighted_vertices": 0,
+    "shirt_thickness_m": 0.00065,
+    "trouser_thickness_m": 0.0009
+  }
+]

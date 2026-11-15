@@ -1,0 +1,275 @@
+C:\Unity Projects\EpicAIMegaJam2026\SourceArt\FilmCrew\build_crew.py:8: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m=bpy.data.materials.new(name); m.diffuse_color=(*color,1); m.use_nodes=True
+BlenderMCP addon registered
+BlenderMCP addon unregistered
+FBX version: 7100
+
+FBX export starting... 'C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\FilmCrew/Crew_F01_Auburn_Bun.fbx'
+export finished in 0.2835 sec.
+INFO Draco mesh compression is available, use library at C:\Program Files\Blender Foundation\Blender 5.0\5.0\scripts\addons_core\io_scene_gltf2\extern_draco.dll
+18:00:02 | INFO: Starting glTF 2.0 export
+18:00:02 | INFO: Extracting primitive: Crew_F01_Auburn_Bun_CapBill
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Sphere
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Crew_F01_Auburn_Bun_CarryLoop
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Crew_F01_Auburn_Bun_DarkCap
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Sphere.002
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Sphere.004
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Sphere.001
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Sphere.003
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Mesh.002
+18:00:02 | INFO: Primitives created: 2
+18:00:02 | WARNING: There are more than 4 joint vertex influences.The 4 with highest weight will be used (and normalized).
+18:00:02 | INFO: Extracting primitive: Mesh.003
+18:00:02 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Mesh.008
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Mesh.032
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Mesh.033
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Mesh
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Mesh.013
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Mesh.001
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Crew_F01_Auburn_Bun_HeadsetBand
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Crew_F01_Auburn_Bun_Megaphone
+18:00:02 | INFO: Primitives created: 2
+18:00:02 | INFO: Extracting primitive: Cube
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Crew_F01_Auburn_Bun_MicBoom
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Sphere.005
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Extracting primitive: Crew_F01_Auburn_Bun_TShirt
+18:00:02 | INFO: Primitives created: 1
+18:00:02 | INFO: Finished glTF 2.0 export in 0.12116479873657227 s
+
+FBX version: 7100
+
+FBX export starting... 'C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\FilmCrew/Crew_M01_Brown_Crop.fbx'
+export finished in 0.2638 sec.
+18:00:03 | INFO: Starting glTF 2.0 export
+18:00:03 | INFO: Extracting primitive: Crew_M01_Brown_Crop_CapBill
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Sphere.006
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Crew_M01_Brown_Crop_CarryLoop
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Crew_M01_Brown_Crop_DarkCap
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Sphere.008
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Sphere.010
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Sphere.007
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Sphere.009
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Crew_M01_Brown_Crop_HeadsetBand
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Mesh.054
+18:00:03 | INFO: Primitives created: 2
+18:00:03 | INFO: Extracting primitive: Mesh.055
+18:00:03 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Mesh.060
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Mesh.086
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Mesh.052
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Mesh.065
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Mesh.053
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Crew_M01_Brown_Crop_Megaphone
+18:00:03 | INFO: Primitives created: 2
+18:00:03 | INFO: Extracting primitive: Cube.001
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Crew_M01_Brown_Crop_MicBoom
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Sphere.011
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | INFO: Extracting primitive: Crew_M01_Brown_Crop_TShirt
+18:00:03 | INFO: Primitives created: 1
+18:00:03 | WARNING: There are more than 4 joint vertex influences.The 4 with highest weight will be used (and normalized).
+18:00:03 | INFO: Finished glTF 2.0 export in 0.11489987373352051 s
+
+FBX version: 7100
+
+FBX export starting... 'C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\FilmCrew/Crew_F02_Blonde_Bob.fbx'
+export finished in 0.2606 sec.
+18:00:04 | INFO: Starting glTF 2.0 export
+18:00:04 | INFO: Extracting primitive: Crew_F02_Blonde_Bob_CapBill
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Sphere.012
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Crew_F02_Blonde_Bob_CarryLoop
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Crew_F02_Blonde_Bob_DarkCap
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Sphere.014
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Sphere.016
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Sphere.013
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Sphere.015
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Mesh.118
+18:00:04 | INFO: Primitives created: 2
+18:00:04 | WARNING: There are more than 4 joint vertex influences.The 4 with highest weight will be used (and normalized).
+18:00:04 | INFO: Extracting primitive: Mesh.119
+18:00:04 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Mesh.124
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Mesh.156
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Mesh.116
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Mesh.129
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Mesh.117
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Crew_F02_Blonde_Bob_HeadsetBand
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Crew_F02_Blonde_Bob_Megaphone
+18:00:04 | INFO: Primitives created: 2
+18:00:04 | INFO: Extracting primitive: Cube.002
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Crew_F02_Blonde_Bob_MicBoom
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Sphere.017
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Extracting primitive: Crew_F02_Blonde_Bob_TShirt
+18:00:04 | INFO: Primitives created: 1
+18:00:04 | INFO: Finished glTF 2.0 export in 0.09582376480102539 s
+
+FBX version: 7100
+
+FBX export starting... 'C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\FilmCrew/Crew_M02_Silver_Swept.fbx'
+export finished in 0.2947 sec.
+18:00:05 | INFO: Starting glTF 2.0 export
+18:00:05 | INFO: Extracting primitive: Crew_M02_Silver_Swept_CapBill
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Sphere.018
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Crew_M02_Silver_Swept_CarryLoop
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Crew_M02_Silver_Swept_DarkCap
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Sphere.020
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Sphere.022
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Sphere.019
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Sphere.021
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Crew_M02_Silver_Swept_HeadsetBand
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Mesh.170
+18:00:05 | INFO: Primitives created: 2
+18:00:05 | INFO: Extracting primitive: Mesh.171
+18:00:05 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Mesh.176
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Mesh.210
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Mesh.168
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Mesh.181
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Mesh.169
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Crew_M02_Silver_Swept_Megaphone
+18:00:05 | INFO: Primitives created: 2
+18:00:05 | INFO: Extracting primitive: Cube.003
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Crew_M02_Silver_Swept_MicBoom
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Sphere.023
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | INFO: Extracting primitive: Crew_M02_Silver_Swept_TShirt
+18:00:05 | INFO: Primitives created: 1
+18:00:05 | WARNING: There are more than 4 joint vertex influences.The 4 with highest weight will be used (and normalized).
+18:00:05 | INFO: Finished glTF 2.0 export in 0.08350062370300293 s
+
+FBX version: 7100
+
+FBX export starting... 'C:\\Unity Projects\\EpicAIMegaJam2026\\SourceArt\\FilmCrew/Crew_F03_Black_Ponytail.fbx'
+export finished in 0.2833 sec.
+18:00:06 | INFO: Starting glTF 2.0 export
+18:00:06 | INFO: Extracting primitive: Crew_F03_Black_Ponytail_CapBill
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Sphere.024
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Crew_F03_Black_Ponytail_CarryLoop
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Crew_F03_Black_Ponytail_DarkCap
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Sphere.026
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Sphere.028
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Sphere.025
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Sphere.027
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Mesh.234
+18:00:06 | INFO: Primitives created: 2
+18:00:06 | WARNING: There are more than 4 joint vertex influences.The 4 with highest weight will be used (and normalized).
+18:00:06 | INFO: Extracting primitive: Mesh.235
+18:00:06 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Mesh.240
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Mesh.280
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Mesh.281
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Mesh.232
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Mesh.245
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Mesh.233
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Crew_F03_Black_Ponytail_HeadsetBand
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Crew_F03_Black_Ponytail_Megaphone
+18:00:06 | INFO: Primitives created: 2
+18:00:06 | INFO: Extracting primitive: Cube.004
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Crew_F03_Black_Ponytail_MicBoom
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Sphere.029
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Extracting primitive: Crew_F03_Black_Ponytail_TShirt
+18:00:06 | INFO: Primitives created: 1
+18:00:06 | INFO: Finished glTF 2.0 export in 0.12544798851013184 s
+00:23.000  render           | Saved: 'C:\Unity Projects\EpicAIMegaJam2026\SourceArt\FilmCrew\FilmCrew_Lineup.png'
+
+Info: Saved as "FilmCrew_5Variants.blend"
+CREW_BUILD_COMPLETE [{'name': 'Crew_F01_Auburn_Bun', 'source': 'BaseFemale.fbx', 'hair_meshes': ['F_hair_1b', 'F_hair_1b_Bun'], 'bones': 99, 'meshes': 22}, {'name': 'Crew_M01_Brown_Crop', 'source': 'BaseMale.fbx', 'hair_meshes': ['M_hair_3b'], 'bones': 99, 'meshes': 21}, {'name': 'Crew_F02_Blonde_Bob', 'source': 'BaseFemale.fbx', 'hair_meshes': ['F_hair_6b'], 'bones': 99, 'meshes': 21}, {'name': 'Crew_M02_Silver_Swept', 'source': 'BaseMale.fbx', 'hair_meshes': ['M_hair_7b'], 'bones': 99, 'meshes': 21}, {'name': 'Crew_F03_Black_Ponytail', 'source': 'BaseFemale.fbx', 'hair_meshes': ['F_hair_13b', 'F_hair_13b_Ponytail'], 'bones': 99, 'meshes': 22}]
+Exception ignored in: <function ImagePreviewCollection.__del__ at 0x00000174268A7560>
+Traceback (most recent call last):
+  File "C:\Program Files\Blender Foundation\Blender 5.0\5.0\scripts\modules\bpy\utils\previews.py", line 63, in __del__
+    raise ResourceWarning(
+ResourceWarning: <ImagePreviewCollection id=0x174268c6090[4], <super: <class 'ImagePreviewCollection'>, <ImagePreviewCollection object>>>: left open, remove with 'bpy.utils.previews.remove()'
+Blender 5.0.1 (hash a3db93c5b259 built 2025-12-16 01:32:30)
+
+Blender quit

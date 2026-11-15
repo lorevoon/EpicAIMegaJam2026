@@ -1,0 +1,16 @@
+BlenderMCP addon registered
+BlenderMCP addon unregistered
+FBX version: 7400
+FBX version: 7400
+FBX version: 7400
+FBX version: 7400
+FBX version: 7400
+VALIDATED [{'file': 'Crew_F01_Auburn_Bun.fbx', 'rigs': 1, 'bones': 99, 'meshes': 22, 'unweighted_vertices': 0, 'bounds_m': [(-1.0548245906829834, 1.0548245906829834), (-0.2915107011795044, 0.25557741522789), (-1.6398448110521713e-07, 2.1013917922973633)], 'triangles': 3611}, {'file': 'Crew_F02_Blonde_Bob.fbx', 'rigs': 1, 'bones': 99, 'meshes': 21, 'unweighted_vertices': 0, 'bounds_m': [(-1.0548245906829834, 1.0548245906829834), (-0.2915107011795044, 0.22937418520450592), (-1.6398448110521713e-07, 2.1013917922973633)], 'triangles': 3696}, {'file': 'Crew_F03_Black_Ponytail.fbx', 'rigs': 1, 'bones': 99, 'meshes': 22, 'unweighted_vertices': 0, 'bounds_m': [(-1.0548245906829834, 1.0548245906829834), (-0.2915107011795044, 0.26744329929351807), (-1.6398448110521713e-07, 2.1013917922973633)], 'triangles': 4300}, {'file': 'Crew_M01_Brown_Crop.fbx', 'rigs': 1, 'bones': 99, 'meshes': 21, 'unweighted_vertices': 0, 'bounds_m': [(-1.0568188428878784, 1.0568188428878784), (-0.2915107011795044, 0.21499992907047272), (-1.639882043491525e-07, 2.1013917922973633)], 'triangles': 3182}, {'file': 'Crew_M02_Silver_Swept.fbx', 'rigs': 1, 'bones': 99, 'meshes': 21, 'unweighted_vertices': 0, 'bounds_m': [(-1.0568188428878784, 1.0568188428878784), (-0.2915107011795044, 0.21499992907047272), (-1.639882043491525e-07, 2.1013917922973633)], 'triangles': 3500}]
+Exception ignored in: <function ImagePreviewCollection.__del__ at 0x000001B818B94A40>
+Traceback (most recent call last):
+  File "C:\Program Files\Blender Foundation\Blender 5.0\5.0\scripts\modules\bpy\utils\previews.py", line 63, in __del__
+    raise ResourceWarning(
+ResourceWarning: <ImagePreviewCollection id=0x1b818bf2090[4], <super: <class 'ImagePreviewCollection'>, <ImagePreviewCollection object>>>: left open, remove with 'bpy.utils.previews.remove()'
+Blender 5.0.1 (hash a3db93c5b259 built 2025-12-16 01:32:30)
+
+Blender quit

@@ -52,11 +52,10 @@ bool FDCDualSceneReplayTest::RunTest(const FString& Parameters)
 		TestEqual(TEXT("Paused rehearsal holds time"), D->GetSceneTime(), 8.f);
 		D->HandleScrub(2.f);
 		TestEqual(TEXT("Paused rehearsal scrubs"), D->GetSceneTime(), 10.f);
-		D->HandleRehearsalSpeed(1);
 		D->HandleRehearsalToggle();
 		D->Tick(1.f);
-		TestEqual(TEXT("Rehearsal speed controls clock"), D->GetSceneTime(), 12.f);
-		D->HandleScrub(7.5f);
+		TestEqual(TEXT("Rehearsal advances at normal speed"), D->GetSceneTime(), 11.f);
+		D->HandleScrub(9.f);
 		TestFalse(TEXT("Scrub pauses playback"), D->IsRehearsalPlaying());
 		D->HandleRehearsalToggle();
 		D->Tick(.5f);

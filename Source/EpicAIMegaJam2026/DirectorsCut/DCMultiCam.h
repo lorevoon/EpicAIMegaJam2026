@@ -70,6 +70,8 @@ public:
 
 	/** Current (eased) field of view. */
 	float GetFOV() const;
+	/** Height above the floor at the middle of the adjustable tripod neck. */
+	float GetPlacementAimHeight(float StandHeight) const;
 	/** Where the zoom is heading; the lens eases toward it every frame. */
 	float GetTargetFOV() const { return TargetFOV; }
 	void SetFOV(float NewFOV);

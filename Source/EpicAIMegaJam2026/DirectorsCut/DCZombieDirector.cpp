@@ -89,12 +89,13 @@ void ADCZombieDirector::OnReferenceCutFinished()
 	FadeThrough([this]()
 	{
 		StopReferenceCut(); // into preparation, with the briefing over it
-		PlayCutscene(BriefingCutscene, []() {});
+		PlayCutscene(BriefingCutscene, [this]() { StartSetOverview(); });
 	});
 }
 
 void ADCZombieDirector::HandleStartTake()
 {
+ if (IsSetOverview() || IsReferenceFocused()) return;
 	if (bInMainMenu)
 	{
 		StartFromMenu(); // Enter works as well as clicking START
