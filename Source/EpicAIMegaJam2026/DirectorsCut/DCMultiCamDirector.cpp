@@ -3,6 +3,7 @@
 #include "DCMultiCamDirector.h"
 #include "DCBeat.h"
 #include "DCCinemaReplay.h"
+#include "DCCrewMember.h"
 #include "DCMultiCam.h"
 #include "DCMultiCamCharacter.h"
 #include "DCPerformer.h"
@@ -14,6 +15,7 @@
 #include "Camera/PlayerCameraManager.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/RectLightComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/AudioComponent.h"
 #include "Sound/AmbientSound.h"
 #include "Sound/AudioSettings.h"
@@ -1797,22 +1799,34 @@ void ADCMultiCamDirector::PullFocus(UCameraComponent* Lens, float DeltaSeconds, 
 		Query.AddIgnoredActor(Cam); // the camera rigs on set never steal focus from the actors
 	}
 
-	// Like a focus puller, keep the actors sharp: focus on the visible performer nearest the middle of the frame,
-	// so the set behind them falls out of focus. With nobody in shot, focus on whatever is in the middle.
+	// Like a focus puller, keep the people sharp: focus on the visible performer or crew member nearest the middle of
+	// the frame, so the set behind them falls out of focus. With nobody in shot, focus on whatever is in the middle.
+	TArray<TPair<const AActor*, FVector>, TInlineAllocator<32>> Heads;
+	for (const ADCPerformer* Performer : Performers)
+	{
+		if (const USceneComponent* Head = Performer && !Performer->IsHidden() ? Performer->GetAnchor(EDCAnchorPart::Head) : nullptr)
+		{
+			Heads.Emplace(Performer, Head->GetComponentLocation());
+		}
+	}
+	for (TActorIterator<ADCCrewMember> It(GetWorld()); It; ++It)
+	{
+		if (!It->IsHidden())
+		{
+			const USkeletalMeshComponent* Body = It->Character;
+			Heads.Emplace(*It, Body && Body->DoesSocketExist(TEXT("Head")) ? Body->GetSocketLocation(TEXT("Head"))
+				: It->GetActorLocation() + FVector(0.f, 0.f, It->HeadHeight));
+		}
+	}
 	const FVector Start = Lens->GetComponentLocation();
 	const FTransform LensToWorld(Lens->GetComponentRotation(), Start);
 	const float TanHalfWidth = FMath::Tan(FMath::DegreesToRadians(Lens->FieldOfView * .5f));
 	const float TanHalfHeight = TanHalfWidth / DCFrame::ScreenAspect;
 	float Target = -1.f;
 	float BestOffCentre = TNumericLimits<float>::Max();
-	for (const ADCPerformer* Performer : Performers)
+	for (const TPair<const AActor*, FVector>& Person : Heads)
 	{
-		const USceneComponent* Head = Performer && !Performer->IsHidden() ? Performer->GetAnchor(EDCAnchorPart::Head) : nullptr;
-		if (!Head)
-		{
-			continue;
-		}
-		const FVector Local = LensToWorld.InverseTransformPosition(Head->GetComponentLocation());
+		const FVector Local = LensToWorld.InverseTransformPosition(Person.Value);
 		if (Local.X < 50.f || FMath::Abs(Local.Y) > Local.X * TanHalfWidth || FMath::Abs(Local.Z) > Local.X * TanHalfHeight)
 		{
 			continue; // behind the lens or out of frame
@@ -1823,9 +1837,9 @@ void ADCMultiCamDirector::PullFocus(UCameraComponent* Lens, float DeltaSeconds, 
 			continue;
 		}
 		FCollisionQueryParams SightQuery = Query;
-		SightQuery.AddIgnoredActor(Performer);
+		SightQuery.AddIgnoredActor(Person.Key);
 		FHitResult Blocker;
-		if (!GetWorld()->LineTraceSingleByChannel(Blocker, Start, Head->GetComponentLocation(), ECC_Visibility, SightQuery))
+		if (!GetWorld()->LineTraceSingleByChannel(Blocker, Start, Person.Value, ECC_Visibility, SightQuery))
 		{
 			BestOffCentre = OffCentre;
 			Target = Local.X; // focal distance is measured along the lens axis
