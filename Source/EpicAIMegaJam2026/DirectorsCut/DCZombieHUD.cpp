@@ -771,13 +771,14 @@ void ADCZombieHUD::DrawLikenessVignette(ADCZombieDirector* D)
 		// Around the whole screen, so it frames the monitor rather than crowding the shot.
 		const float W = Canvas->ClipX;
 		const float H = Canvas->ClipY;
-		// 0 = far off (red), 1 = there (blue), by way of magenta and violet (HSV) so it stays vivid in between.
+		// 0 = far off, 1 = there. Red fades out as the shot improves, nothing at all halfway, then blue fades in.
 		const float Close = FMath::SmoothStep(0.3f, Perfect, ShownLikeness);
-		const FLinearColor Color = FLinearColor::LerpUsingHSV(FarColor, CloseColor, Close);
-		// Strong and throbbing while it's wrong, calmer as it closes in, a slow breath once perfect.
-		const float Throb = 1.f + 0.18f * (1.f - Close) * FMath::Sin(Now * 7.f);
+		const float Lean = Close * 2.f - 1.f; // -1 red ... 0 clear ... +1 blue
+		const FLinearColor Color = Lean < 0.f ? FarColor : CloseColor;
+		// Strong and throbbing while it's wrong, a slow breath once perfect.
+		const float Throb = 1.f + 0.18f * FMath::Max(-Lean, 0.f) * FMath::Sin(Now * 7.f);
 		const float Breath = bPerfectShot ? 0.85f + 0.15f * FMath::Sin(Now * 3.f) : 1.f;
-		const float Alpha = VignetteStrength * FMath::Lerp(1.f, 0.6f, Close) * Throb * Breath * VignetteFade;
+		const float Alpha = VignetteStrength * FMath::Lerp(1.f, 0.6f, Close) * FMath::Abs(Lean) * Throb * Breath * VignetteFade;
 		const float Depth = H * VignetteDepth * FMath::Lerp(1.f, 0.75f, Close);
 		// A wide soft layer plus a tight one: falls off like a lens vignette rather than a straight ramp.
 		DCUI::Vignette(Canvas, 0.f, 0.f, W, H, Depth, WithAlpha(Color, Alpha * 0.55f));
@@ -1018,6 +1019,10 @@ namespace
 {
 	constexpr float PortraitShare = 0.36f;	// portrait height, as a share of the screen height
 	constexpr float CoachTextSize = 50.f;	// the bubble's text: big, so it reads at a glance
+	// While filming, the action comes first: a smaller bubble that keeps out of the way of the shot.
+	constexpr float FilmingCoachTextSize = 32.f;
+	constexpr float FilmingCoachNameSize = 22.f;
+	constexpr float FilmingCoachMaxWidth = 760.f;	// layout units
 	constexpr float TypewriterRate = 45.f;	// characters per second
 }
 
@@ -1031,12 +1036,6 @@ float ADCZombieHUD::CoachRight() const
 {
 	const float H = Canvas->ClipY * PortraitShare;
 	return H * (DirectorDefault && DirectorDefault->GetSurfaceHeight() > 0.f ? DirectorDefault->GetSurfaceWidth() / DirectorDefault->GetSurfaceHeight() : 1.2f);
-}
-
-float ADCZombieHUD::CoachTop() const
-{
-	const float BubbleH = Px(CoachTextSize) * 1.3f + Px(Small) * 1.2f + 2.f * 22.f * S;
-	return Canvas->ClipY - BubbleH - 20.f * S - 12.f * S;
 }
 
 void ADCZombieHUD::DrawCoach(ADCZombieDirector* D)
@@ -1082,15 +1081,18 @@ void ADCZombieHUD::DrawCheer(ADCZombieDirector* D)
 void ADCZombieHUD::DrawDirectorSpeech(ADCZombieDirector* D, UTexture2D* Portrait, const FString& Line, const FLinearColor& Accent, float Since, float Drop)
 {
 	// The bubble runs along the bottom, from the director to the reference inset (or the screen edge).
+	const bool bFilming = D->GetPhase() == EDCPhase::Countdown || D->GetPhase() == EDCPhase::Filming;
+	const float TextSize = bFilming ? FilmingCoachTextSize : CoachTextSize;
+	const float NameSize = bFilming ? FilmingCoachNameSize : Small;
 	const float PortraitW = CoachRight();
-	const float Pad = 22.f * S;
+	const float Pad = (bFilming ? 14.f : 22.f) * S;
 	const float X = PortraitW * 0.8f;
 	const float Right = D->GetReferenceInset() ? Canvas->ClipX * (1.f - InsetShare) - 16.f * S : Canvas->ClipX - 24.f * S;
 	const float Lift = D->GetPhase() == EDCPhase::Preparation
 		? Canvas->ClipX * InsetShare / DCFrame::FilmAspect + Px(Small) * 1.4f + 24.f * S : 0.f;
-	const float Y = CoachTop() + 12.f * S + Drop - Lift;
-	const float W = FMath::Max(Right - X, 200.f * S);
-	const float H = Canvas->ClipY - 20.f * S - (CoachTop() + 12.f * S);
+	const float H = Px(TextSize) * 1.3f + Px(NameSize) * 1.2f + 2.f * Pad;
+	const float Y = Canvas->ClipY - 20.f * S - H + Drop - Lift;
+	const float W = FMath::Max(bFilming ? FMath::Min(Right - X, FilmingCoachMaxWidth * S) : Right - X, 200.f * S);
 	const FLinearColor Paper(0.96f, 0.93f, 0.86f, 0.97f);
 	const FLinearColor InkColor(0.08f, 0.07f, 0.07f);
 	// Tail pointing back at the director's face.
@@ -1098,14 +1100,14 @@ void ADCZombieHUD::DrawDirectorSpeech(ADCZombieDirector* D, UTexture2D* Portrait
 	DCUI::Rect(Canvas, X, Y, W, H, Paper);
 	DCUI::Rect(Canvas, X, Y, FMath::Max(6.f * S, 3.f), H, Accent);
 	DCUI::Outline(Canvas, X, Y, W, H, FMath::Max(2.f * S, 1.f), FLinearColor(0.f, 0.f, 0.f, 0.35f));
-	Label(TEXT("THE DIRECTOR"), X + Pad, Y + Pad * 0.6f, FLinearColor(0.55f, 0.08f, 0.06f), Small, EAlign::Left, false, W - 2.f * Pad);
+	Label(TEXT("THE DIRECTOR"), X + Pad, Y + Pad * 0.6f, FLinearColor(0.55f, 0.08f, 0.06f), NameSize, EAlign::Left, false, W - 2.f * Pad);
 
 	// The line types itself out.
 	const int32 Shown = FMath::Clamp(FMath::FloorToInt(Since * TypewriterRate), 0, Line.Len());
 	// Size the line for the whole sentence so the text doesn't shrink as it types.
-	const FVector2D Full = DCUI::Measure(Canvas, GetTextFont(), Line, Px(CoachTextSize));
-	const float TextPx = Full.X > W - 2.f * Pad ? Px(CoachTextSize) * (W - 2.f * Pad) / Full.X : Px(CoachTextSize);
-	DCUI::Text(Canvas, GetTextFont(), Line.Left(Shown), X + Pad + 6.f * S, Y + Pad * 0.6f + Px(Small) * 1.2f, TextPx, InkColor, EAlign::Left, false);
+	const FVector2D Full = DCUI::Measure(Canvas, GetTextFont(), Line, Px(TextSize));
+	const float TextPx = Full.X > W - 2.f * Pad ? Px(TextSize) * (W - 2.f * Pad) / Full.X : Px(TextSize);
+	DCUI::Text(Canvas, GetTextFont(), Line.Left(Shown), X + Pad + 6.f * S, Y + Pad * 0.6f + Px(NameSize) * 1.2f, TextPx, InkColor, EAlign::Left, false);
 
 	// The director himself, standing on the bottom edge; a little bounce when his mood changes.
 	if (Portrait)
@@ -1138,6 +1140,7 @@ void ADCZombieHUD::DrawReferenceInset(ADCZombieDirector* D)
 	{
 		Label(Beat->DisplayName, X + W * 0.5f, Y + H - Px(Small) * 1.4f, DCUI::Ivory, Small, EAlign::Center, true, W - 16.f * S);
 	}
+	DrawCutCue(D, X, Y - LabelH, W);
 
 	// Preparation, walking around: how to move on to filming, in a strip on top of the inset. (Looking through a
 	// camera, left-click confirms that camera; Enter is ignored.)
@@ -1160,6 +1163,48 @@ void ADCZombieHUD::DrawReferenceInset(ADCZombieDirector* D)
 			KeyHint(TEXT("ENTER"), Action, X + (W - HintW) * 0.5f, StripY + (StripH - Px(Body) * 1.2f) * 0.5f, Body, DCUI::Ivory);
 		}
 	}
+}
+
+void ADCZombieHUD::DrawCutCue(ADCZombieDirector* D, float InsetX, float InsetTop, float InsetW)
+{
+	float Left = 0.f;
+	int32 CameraNumber = 0;
+	if (!D->GetCutCue(Left, CameraNumber))
+	{
+		return;
+	}
+	// 3, 2, 1 ... then the call to cut, which stands out in gold.
+	const bool bCut = Left <= 0.f;
+	const FString Text = bCut ? FString::Printf(TEXT("Press %d!"), CameraNumber) : FString::FromInt(FMath::CeilToInt(Left));
+	// Each number (and the call) pops in, then settles.
+	const float Shown = bCut ? -Left : FMath::CeilToFloat(Left) - Left;
+	const float Pop = 1.f + 0.3f * FMath::Exp(-Shown * 12.f);
+	const float TextSize = Large * Pop;
+	const FVector2D TextExtent = DCUI::Measure(Canvas, GetTextFont(), Text, Px(TextSize));
+
+	// A pill-shaped speech bubble, its tail pointing down at the reference cut, bobbing gently.
+	const float PadX = 30.f * S;
+	const float PadY = 12.f * S;
+	const float BH = TextExtent.Y + 2.f * PadY;
+	const float BW = FMath::Max(TextExtent.X + 2.f * PadX, BH);
+	const float Tail = 16.f * S;
+	const float CX = InsetX + InsetW * 0.5f;
+	const float Bob = FMath::Sin(GetWorld()->GetRealTimeSeconds() * 3.f) * 6.f * S;
+	const float BX = CX - BW * 0.5f;
+	const float BY = InsetTop - 10.f * S - Tail - BH + Bob;
+	auto Bubble = [&](float Grow, const FLinearColor& Color)
+	{
+		const float R = BH * 0.5f + Grow;
+		DCUI::Rect(Canvas, BX + BH * 0.5f, BY - Grow, BW - BH, BH + 2.f * Grow, Color);
+		DCUI::Disc(Canvas, FVector2D(BX + BH * 0.5f, BY + BH * 0.5f), R, Color);
+		DCUI::Disc(Canvas, FVector2D(BX + BW - BH * 0.5f, BY + BH * 0.5f), R, Color);
+		DCUI::Triangle(Canvas, FVector2D(CX - Tail - Grow, BY + BH - 2.f * S), FVector2D(CX + Tail + Grow, BY + BH - 2.f * S),
+			FVector2D(CX, BY + BH + Tail + Grow * 1.5f), Color);
+	};
+	const FLinearColor Dark(0.03f, 0.03f, 0.04f, 0.94f);
+	Bubble(3.f * S, DCUI::Gold); // outline
+	Bubble(0.f, bCut ? DCUI::Gold : Dark);
+	Label(Text, CX, BY + (BH - TextExtent.Y) * 0.5f, bCut ? Dark : DCUI::Ivory, TextSize, EAlign::Center, !bCut);
 }
 
 // ---------------------------------------------------------------------------------------------

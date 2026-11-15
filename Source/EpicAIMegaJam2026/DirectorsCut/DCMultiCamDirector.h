@@ -235,6 +235,19 @@ public:
 	bool IsSceneCovered(int32 BeatIndex) const { return SceneCovered.IsValidIndex(BeatIndex) && SceneCovered[BeatIndex]; }
 	/** Real time the scene was last ticked off, for the storyboard's animation (negative if it never was). */
 	float GetSceneCoveredTime(int32 BeatIndex) const { return SceneCoveredTime.IsValidIndex(BeatIndex) ? SceneCoveredTime[BeatIndex] : -1.f; }
+	/**
+	 * Filming: the reference cut's next cut the player should follow. OutSecondsToCut counts down to it (0 or less once
+	 * it's due, for a moment, until that camera is live); OutCameraNumber is the placed camera to cut to. False when
+	 * no cut is coming up within CutCueLead seconds, or the right camera is already live.
+	 */
+	bool GetCutCue(float& OutSecondsToCut, int32& OutCameraNumber) const;
+	/** Placed camera slot that takes reference shot Shot: the one on its spot (paired as the storyboard ticks scenes off),
+	 *  else the nearest. INDEX_NONE without cameras. */
+	int32 GetCameraForReferenceShot(int32 Shot) const;
+
+	/** Filming: how many seconds before each of the reference cut's cuts the countdown to it starts. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut", meta = (ClampMin = "0", Units = "s"))
+	float CutCueLead = 3.f;
 
 	/** Preparation: how long the director's praise stays up once he has popped up (a scene was ticked off). */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Director Coach", meta = (ClampMin = "1", Units = "s"))

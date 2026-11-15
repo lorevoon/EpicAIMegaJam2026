@@ -719,6 +719,109 @@ void ADCMultiCamDirector::ComputeMatch()
 	Match.Overall = float(Overall / NumMoments);
 }
 
+int32 ADCMultiCamDirector::GetCameraForReferenceShot(int32 Shot) const
+{
+	if (!ReferenceShotLocations.IsValidIndex(Shot))
+	{
+		return INDEX_NONE;
+	}
+	// The same pairing that ticks scenes off the storyboard (UpdateCoveredScenes): cameras standing on reference spots,
+	// closest pairs first, one camera per shot.
+	struct FPair { int32 Camera; int32 Shot; double Distance; };
+	TArray<FPair> Pairs;
+	for (int32 Slot = 0; Slot < Cameras.Num(); ++Slot)
+	{
+		if (!Cameras[Slot])
+		{
+			continue;
+		}
+		for (int32 Spot = 0; Spot < ReferenceShotLocations.Num(); ++Spot)
+		{
+			const FVector Offset = Cameras[Slot]->GetActorLocation() - ReferenceShotLocations[Spot];
+			if (Offset.Size2D() <= ReferenceSpotRadius && FMath::Abs(Offset.Z) <= ReferenceSpotHeightTolerance)
+			{
+				Pairs.Add({ Slot, Spot, Offset.Size2D() });
+			}
+		}
+	}
+	Pairs.Sort([](const FPair& A, const FPair& B) { return A.Distance < B.Distance; });
+	TSet<int32> UsedCameras, UsedShots;
+	for (const FPair& Pair : Pairs)
+	{
+		if (UsedCameras.Contains(Pair.Camera) || UsedShots.Contains(Pair.Shot))
+		{
+			continue;
+		}
+		if (Pair.Shot == Shot)
+		{
+			return Pair.Camera;
+		}
+		UsedCameras.Add(Pair.Camera);
+		UsedShots.Add(Pair.Shot);
+	}
+	// Nobody stands on this shot's spot: the nearest camera is the best stand-in.
+	int32 Best = INDEX_NONE;
+	double BestDistance = TNumericLimits<double>::Max();
+	for (int32 Slot = 0; Slot < Cameras.Num(); ++Slot)
+	{
+		const double Distance = Cameras[Slot] ? FVector::Dist(Cameras[Slot]->GetActorLocation(), ReferenceShotLocations[Shot]) : BestDistance;
+		if (Distance < BestDistance)
+		{
+			Best = Slot;
+			BestDistance = Distance;
+		}
+	}
+	return Best;
+}
+
+bool ADCMultiCamDirector::GetCutCue(float& OutSecondsToCut, int32& OutCameraNumber) const
+{
+	// After the cut, keep calling for the camera this long if the player hasn't switched yet.
+	constexpr float Linger = 2.f;
+	if (Phase != EDCPhase::Filming || ReferenceCut.Num() < 2)
+	{
+		return false;
+	}
+	const int32 Here = FMath::Clamp(Algo::UpperBoundBy(ReferenceCut, SceneTime, &FDCTakeSample::Time) - 1, 0, ReferenceCut.Num() - 1);
+	const int32 Shot = ReferenceCut[Here].Slot;
+
+	// A cut that has just happened, while its camera still isn't live.
+	int32 ShotStart = Here;
+	while (ShotStart > 0 && ReferenceCut[ShotStart - 1].Slot == Shot)
+	{
+		--ShotStart;
+	}
+	if (ShotStart > 0 && SceneTime - ReferenceCut[ShotStart].Time < Linger)
+	{
+		const int32 Slot = GetCameraForReferenceShot(Shot);
+		if (Slot != INDEX_NONE && Slot != ViewingSlot)
+		{
+			OutSecondsToCut = ReferenceCut[ShotStart].Time - SceneTime;
+			OutCameraNumber = Slot + 1;
+			return true;
+		}
+	}
+
+	// The next cut, once it is close.
+	for (int32 i = Here + 1; i < ReferenceCut.Num(); ++i)
+	{
+		if (ReferenceCut[i].Slot == Shot)
+		{
+			continue;
+		}
+		const float Left = ReferenceCut[i].Time - SceneTime;
+		const int32 Slot = GetCameraForReferenceShot(ReferenceCut[i].Slot);
+		if (Left > CutCueLead || Slot == INDEX_NONE || Slot == ViewingSlot)
+		{
+			return false; // not yet, or already on the right camera
+		}
+		OutSecondsToCut = Left;
+		OutCameraNumber = Slot + 1;
+		return true;
+	}
+	return false;
+}
+
 void ADCMultiCamDirector::UpdateCoveredScenes()
 {
 	if (!bReferenceCutBuilt)

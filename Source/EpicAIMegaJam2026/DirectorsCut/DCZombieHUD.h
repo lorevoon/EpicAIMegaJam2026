@@ -107,6 +107,8 @@ private:
 	void DrawSwitcher(ADCZombieDirector* D);
 	/** Preparation and shooting: the reference cut in the bottom-right corner, in step with the scene clock. */
 	void DrawReferenceInset(ADCZombieDirector* D);
+	/** Filming: a speech bubble over the reference inset counting down to its next cut, then "Press N!". */
+	void DrawCutCue(ADCZombieDirector* D, float InsetX, float InsetTop, float InsetW);
 	void DrawResults(ADCZombieDirector* D);
 	void DrawPremiere(ADCZombieDirector* D);
 
@@ -130,7 +132,6 @@ private:
 	bool ShowsCoach(ADCZombieDirector* D) const;
 	/** Where the coach's area ends: the portrait's right edge, and the top of his bubble. */
 	float CoachRight() const;
-	float CoachTop() const;
 
 	/**
 	 * Shooting: a vignette around the screen, red while the shot is far from the reference cut and turning blue
