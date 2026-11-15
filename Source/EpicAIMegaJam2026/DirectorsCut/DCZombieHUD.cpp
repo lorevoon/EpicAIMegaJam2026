@@ -33,7 +33,6 @@ namespace
 
 	const FLinearColor Rose(1.f, 0.55f, 0.7f);
 	const FLinearColor Live(0.85f, 0.08f, 0.07f, 0.9f);
-	constexpr float GaugeLinger = 1.5f;
 	/** Width of the reference-cut inset, as a share of the screen width. */
 	constexpr float InsetShare = 0.24f;
 	/** Height of the top bar during preparation and shooting (layout units). */
@@ -169,6 +168,10 @@ void ADCZombieHUD::DrawHUD()
 	}
 	else if (D->IsInCutscene())
 	{
+		if (D->IsCutsceneOverScene())
+		{
+			DrawPhase(D); // the filming tutorial plays over the live camera and its HUD
+		}
 		DrawCutscene(D);
 	}
 	else
@@ -280,17 +283,15 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 	{
 		DCUI::Corners(Canvas, CX - 9.f * S, CY - 9.f * S, 18.f * S, 18.f * S, 6.f * S, FMath::Max(1.5f * S, 1.f), DCUI::Ivory);
 	}
-	if (D->GetPhase() == EDCPhase::Filming)
-	{
-		DrawGauges(D);
-	}
-	if (D->GetPhase() == EDCPhase::Countdown)
+	if (D->GetPhase() == EDCPhase::Countdown && !D->IsInCutscene())
 	{
 		DrawCountdown(D);
 	}
 
+	// Nothing pops up in the middle of the shot while the camera rolls.
 	const FString Message = D->GetMessage();
-	if (!Message.IsEmpty())
+	const bool bRolling = D->GetPhase() == EDCPhase::Countdown || D->GetPhase() == EDCPhase::Filming;
+	if (!Message.IsEmpty() && !bRolling)
 	{
 		DrawSlatePopup(Message);
 	}
@@ -456,16 +457,17 @@ void ADCZombieHUD::DrawCutscene(ADCZombieDirector* D)
 	const float Since = GetWorld()->GetRealTimeSeconds() - D->GetCutsceneLineStart();
 	const FVector2D Spot(W * 0.27f, H * 0.6f);
 
-	// A dark stage with a warm spotlight where he stands.
-	DCUI::Rect(Canvas, 0.f, 0.f, W, H, FLinearColor(0.035f, 0.03f, 0.04f, 0.93f));
+	// A dark stage with a warm spotlight where he stands - or, over the live scene, just enough dimming to read him.
+	const bool bOverScene = D->IsCutsceneOverScene();
+	DCUI::Rect(Canvas, 0.f, 0.f, W, H, FLinearColor(0.035f, 0.03f, 0.04f, bOverScene ? 0.55f : 0.93f));
 	for (int32 i = 0; i < 6; ++i)
 	{
 		DCUI::Disc(Canvas, Spot, H * (0.62f - i * 0.08f), FLinearColor(1.f, 0.78f, 0.45f, 0.035f), 64);
 	}
 
-	// Cinema framing: a soft dark edge and slim letterbox bars.
+	// Cinema framing: a soft dark edge and slim letterbox bars (not over the scene: they'd hide its HUD).
 	DCUI::Vignette(Canvas, 0.f, 0.f, W, H, H * 0.3f, FLinearColor(0.f, 0.f, 0.f, 0.6f));
-	const float Bar = H * 0.06f;
+	const float Bar = bOverScene ? 0.f : H * 0.06f;
 	DCUI::Rect(Canvas, 0.f, 0.f, W, Bar, FLinearColor::Black);
 	DCUI::Rect(Canvas, 0.f, H - Bar, W, Bar, FLinearColor::Black);
 
@@ -532,6 +534,49 @@ void ADCZombieHUD::DrawCutscene(ADCZombieDirector* D)
 		const float KeyW = DCUI::Measure(Canvas, GetTextFont(), TEXT("ENTER"), Px(Small) * 0.82f).X + 16.f * S;
 		DCUI::Rect(Canvas, HintX, HintY, KeyW, Px(Small) * 1.2f, Ink);
 		KeyHint(TEXT("ENTER"), TEXT("Continue"), HintX, HintY, Small, Ink);
+	}
+
+	if (Line->bHighlightShootingUI)
+	{
+		DrawShootingUIHighlight(D);
+	}
+}
+
+void ADCZombieHUD::DrawShootingUIHighlight(ADCZombieDirector* D)
+{
+	// Bring the two panels back up over the dimming, then frame each in pulsing gold with a tag saying what it's for.
+	DrawReferenceInset(D);
+	DrawSwitcher(D);
+	const float Now = GetWorld()->GetRealTimeSeconds();
+	const float Pulse = 0.55f + 0.45f * FMath::Sin(Now * 5.f);
+	const FLinearColor Ink(0.03f, 0.03f, 0.04f);
+	auto Spotlight = [&](FBox2D Box, const FString& Tag, bool bTagBelow)
+	{
+		const float Grow = (10.f + 4.f * Pulse) * S;
+		Box = Box.ExpandBy(FVector2D(Grow, Grow));
+		const FVector2D Size = Box.GetSize();
+		DCUI::Outline(Canvas, Box.Min.X, Box.Min.Y, Size.X, Size.Y, FMath::Max(4.f * S, 2.f), WithAlpha(DCUI::Gold, 0.4f + 0.6f * Pulse));
+		DCUI::Corners(Canvas, Box.Min.X - 6.f * S, Box.Min.Y - 6.f * S, Size.X + 12.f * S, Size.Y + 12.f * S, 26.f * S,
+			FMath::Max(5.f * S, 2.f), DCUI::Gold);
+		// The tag: a gold label on the frame's edge, kept on screen.
+		const FVector2D TagSize = DCUI::Measure(Canvas, GetTextFont(), Tag, Px(Small));
+		const float TagW = TagSize.X + 28.f * S;
+		const float TagH = TagSize.Y + 12.f * S;
+		const float TagX = FMath::Clamp(Box.GetCenter().X - TagW * 0.5f, 8.f * S, Canvas->ClipX - TagW - 8.f * S);
+		const float TagY = bTagBelow ? Box.Max.Y + 10.f * S : Box.Min.Y - TagH - 10.f * S;
+		DCUI::Rect(Canvas, TagX, TagY, TagW, TagH, DCUI::Gold);
+		Label(Tag, TagX + TagW * 0.5f, TagY + 6.f * S, Ink, Small, EAlign::Center, false);
+	};
+	if (D->GetReferenceInset())
+	{
+		Spotlight(GetInsetBounds(), TEXT("MATCH THIS REFERENCE CUT"), false);
+	}
+	int32 Count = 0;
+	float BoxW = 0.f;
+	FBox2D Switcher;
+	if (GetSwitcherLayout(D, Count, BoxW, Switcher))
+	{
+		Spotlight(Switcher, Count > 1 ? FString::Printf(TEXT("PRESS 1-%d TO SWITCH CAMERAS"), Count) : FString(TEXT("PRESS 1 FOR YOUR CAMERA")), true);
 	}
 }
 
@@ -893,30 +938,6 @@ void ADCZombieHUD::DrawPlanPreview(ADCZombieDirector* D)
 	}
 }
 
-void ADCZombieHUD::DrawGauges(ADCZombieDirector* D)
-{
-	const float BarW = 460.f * S;
-	const float BarH = 12.f * S;
-	float Y = Canvas->ClipY * 0.58f;
-	const float X = Canvas->ClipX * 0.5f - BarW * 0.5f;
-	for (const FDCMultiCamBeat& State : D->GetBeats())
-	{
-		const bool bFilling = State.Status == EDCShotStatus::Pending && State.Hold > 0.f;
-		const bool bJustCaptured = State.Status == EDCShotStatus::Captured && D->GetSceneTime() - State.LastProgressTime < GaugeLinger;
-		if (!bFilling && !bJustCaptured)
-		{
-			continue;
-		}
-		const float Fill = bJustCaptured ? 1.f : FMath::Clamp(State.Hold / State.Beat->RequiredHold, 0.f, 1.f);
-		const FLinearColor Color = bJustCaptured ? DCUI::Good : Rose;
-		Y += Label(bJustCaptured ? FString::Printf(TEXT("%s  -  IN THE CAN"), *State.Beat->DisplayName) : State.Beat->DisplayName,
-			Canvas->ClipX * 0.5f, Y, Color, Body, EAlign::Center).Y;
-		DCUI::Rect(Canvas, X, Y, BarW, BarH, DCUI::Fill);
-		DCUI::Rect(Canvas, X, Y, BarW * Fill, BarH, Color);
-		Y += BarH + 14.f * S;
-	}
-}
-
 void ADCZombieHUD::DrawCountdown(ADCZombieDirector* D)
 {
 	// A film-leader countdown: rings, crosshair, a sweeping hand and the number.
@@ -954,20 +975,44 @@ void ADCZombieHUD::DrawSlatePopup(const FString& Message)
 	Label(Message, Canvas->ClipX * 0.5f, Y + Pad * 0.7f, DCUI::Ivory, Body, EAlign::Center, true, W - 2.f * Pad);
 }
 
+bool ADCZombieHUD::GetSwitcherLayout(ADCZombieDirector* D, int32& OutCount, float& OutBoxW, FBox2D& OutBounds) const
+{
+	OutCount = FMath::Max(D->IsUnlimited() ? D->GetSlotCount() : D->MaxCameras, D->GetPlacementSlot() + 1);
+	if (OutCount == 0)
+	{
+		return false;
+	}
+	const float Gap = 12.f * S;
+	OutBoxW = FMath::Min(132.f * S, (Canvas->ClipX * 0.44f - (OutCount - 1) * Gap) / OutCount);
+	const float TotalW = OutCount * OutBoxW + (OutCount - 1) * Gap;
+	const FVector2D Min(Canvas->ClipX * 0.5f - TotalW * 0.5f, 18.f * S);
+	OutBounds = FBox2D(Min, Min + FVector2D(TotalW, 112.f * S));
+	return true;
+}
+
+FBox2D ADCZombieHUD::GetInsetBounds() const
+{
+	const float W = Canvas->ClipX * InsetShare;
+	const float H = W / DCFrame::FilmAspect;
+	const float LabelH = Px(Small) * 1.4f;
+	return FBox2D(FVector2D(Canvas->ClipX - W - 4.f * S, Canvas->ClipY - H - LabelH), FVector2D(Canvas->ClipX, Canvas->ClipY));
+}
+
 void ADCZombieHUD::DrawSwitcher(ADCZombieDirector* D)
 {
 	// One camera-shaped button per slot, with the placement slot pulsing in gold.
 	const int32 PlaceSlot = D->GetPlacementSlot();
-	const int32 Count = FMath::Max(D->IsUnlimited() ? D->GetSlotCount() : D->MaxCameras, PlaceSlot + 1);
-	if (Count == 0)
+	int32 Count = 0;
+	float BoxW = 0.f;
+	FBox2D Bounds;
+	if (!GetSwitcherLayout(D, Count, BoxW, Bounds))
 	{
 		return;
 	}
 	const float Gap = 12.f * S;
-	const float BoxW = FMath::Min(132.f * S, (Canvas->ClipX * 0.44f - (Count - 1) * Gap) / Count);
-	const float BoxH = 112.f * S;
-	float X = Canvas->ClipX * 0.5f - (Count * BoxW + (Count - 1) * Gap) * 0.5f;
-	const float Y = 18.f * S;
+	const float BoxH = Bounds.GetSize().Y;
+	float X = Bounds.Min.X;
+	const float Y = Bounds.Min.Y;
 	const bool bOnAir = D->GetPhase() == EDCPhase::Filming || D->GetPhase() == EDCPhase::Countdown;
 	if (D->GetPhase() == EDCPhase::Filming)
 		Label(TEXT("Press number to switch cameras"), Canvas->ClipX * 0.5f, Y + BoxH + 12.f * S,
@@ -1028,7 +1073,7 @@ namespace
 
 bool ADCZombieHUD::ShowsCoach(ADCZombieDirector* D) const
 {
-	return D->bShowDirectorCoach && !D->GetCoachLine().IsEmpty()
+	return D->bShowDirectorCoach && !D->GetCoachLine().IsEmpty() && !D->IsInCutscene()
 		&& (D->GetPhase() == EDCPhase::Countdown || D->GetPhase() == EDCPhase::Filming);
 }
 
@@ -1042,8 +1087,18 @@ void ADCZombieHUD::DrawCoach(ADCZombieDirector* D)
 {
 	if (!ShowsCoach(D))
 	{
+		CoachShownSince = -1.f;
 		return;
 	}
+	// He pops up from below when he (re)appears - after the filming tutorial, or as the countdown starts.
+	const float Now = GetWorld()->GetRealTimeSeconds();
+	if (CoachShownSince < 0.f)
+	{
+		CoachShownSince = Now;
+	}
+	const float T = FMath::Clamp((Now - CoachShownSince) / 0.45f, 0.f, 1.f) - 1.f;
+	const float Rise = 1.f + 2.70158f * T * T * T + 1.70158f * T * T; // back-out ease
+	const float Drop = (1.f - Rise) * Canvas->ClipY * PortraitShare * 1.1f;
 	const EDCDirectorMood Mood = D->GetCoachMood();
 	UTexture2D* Portrait = Mood == EDCDirectorMood::Joy ? DirectorJoy : Mood == EDCDirectorMood::Disgust ? DirectorDisgust
 		: Mood == EDCDirectorMood::Almost ? DirectorAlmost : DirectorDefault;
@@ -1053,7 +1108,7 @@ void ADCZombieHUD::DrawCoach(ADCZombieDirector* D)
 	}
 	const FLinearColor Accent = Mood == EDCDirectorMood::Joy ? DCUI::Good : Mood == EDCDirectorMood::Disgust ? DCUI::Rec
 		: Mood == EDCDirectorMood::Almost ? DCUI::Gold : DCUI::Ivory;
-	DrawDirectorSpeech(D, Portrait, D->GetCoachLine(), Accent, GetWorld()->GetRealTimeSeconds() - D->GetCoachLineStart(), 0.f);
+	DrawDirectorSpeech(D, Portrait, D->GetCoachLine(), Accent, Now - D->GetCoachLineStart(), Drop);
 }
 
 void ADCZombieHUD::DrawCheer(ADCZombieDirector* D)

@@ -63,6 +63,10 @@ struct FDCCutsceneLine
 
 	UPROPERTY(EditAnywhere, Category = "Cutscene", meta = (MultiLine = true))
 	FString Line;
+
+	/** Filming tutorial: while he says this, the reference cut and the camera switcher are spotlit. */
+	UPROPERTY(EditAnywhere, Category = "Cutscene")
+	bool bHighlightShootingUI = false;
 };
 
 class ADCCinemaReplay;
@@ -74,8 +78,6 @@ struct FDCMultiCamBeat
 	TArray<FDCAnchor> Anchors;
 	EDCShotStatus Status = EDCShotStatus::Pending;
 	float Hold = 0.f;
-	/** Scene time the gauge last moved, for HUD fade-out. */
-	float LastProgressTime = -100.f;
 	/** Camera number that captured it. */
 	int32 CapturedBy = 0;
 	/** Where in the finished film it was captured (for the review timeline). */
@@ -302,6 +304,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
 	TArray<FDCCutsceneLine> OutroCutscene;
 
+	/** The first take only: once on set behind the live camera, before the countdown, he explains the shooting controls
+	 *  over the scene (empty: the act's own lines, if any). */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes")
+	TArray<FDCCutsceneLine> FilmingTutorial;
+
 
 	/** Length of each half of a fade through black between phases. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Cutscenes", meta = (ClampMin = "0.05", Units = "s"))
@@ -311,6 +318,8 @@ public:
 	static constexpr float CutsceneTypeRate = 40.f;
 
 	bool IsInCutscene() const { return Cutscene != nullptr; }
+	/** The cutscene is played over the live scene (the filming tutorial) rather than on its own dark stage. */
+	bool IsCutsceneOverScene() const { return IsInCutscene() && bCutsceneOverScene; }
 	/** The main menu or a cutscene is up, or the screen is fading: player input only moves those on. */
 	bool IsInputBlocked() const { return bInMainMenu || IsInCutscene() || FadeDirection != 0; }
 	/** The cutscene line being said (null outside cutscenes), its index and count, and the real time it started. */
@@ -618,7 +627,10 @@ protected:
 
 	// Cutscenes and fades (DCCutscene.cpp)
 	/** Plays Lines (or nothing, when cutscenes are off), then fades through black and calls OnDone at full black. */
-	void PlayCutscene(const TArray<FDCCutsceneLine>& Lines, TFunction<void()> OnDone);
+	/** bOverScene: drawn over the live scene, and it ends without a fade (the scene is already showing). */
+	void PlayCutscene(const TArray<FDCCutsceneLine>& Lines, TFunction<void()> OnDone, bool bOverScene = false);
+	/** Starts the countdown to Action! - the director's places-everyone line goes with it. */
+	void RollCountdown();
 	/** Enter or click during a cutscene: finishes the line being typed, else moves to the next. False if no cutscene took it. */
 	bool HandleCutsceneInput();
 	/** Fades to black, calls AtBlack there, then fades back in. */
@@ -630,6 +642,9 @@ protected:
 	int32 CutsceneLine = 0;
 	float CutsceneLineStart = 0.f;
 	TFunction<void()> CutsceneDone;
+	bool bCutsceneOverScene = false;
+	/** The filming tutorial plays before the first take only. */
+	bool bFilmingTutorialShown = false;
 	TFunction<void()> FadeAction;
 	float FadeAlpha = 0.f;
 	/** +1 fading to black, -1 fading back in, 0 not fading. */
