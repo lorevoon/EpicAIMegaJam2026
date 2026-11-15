@@ -49,6 +49,11 @@ SourceArt/**/*.tga
 # Binary Files
 Binaries/*
 Plugins/**/Binaries/*
+# ...except the NVIDIA runtime DLLs (DLSS, Streamline): prebuilt, not compiled by the project, needed at runtime.
+# Tracked with Git LFS (.gitattributes). Windows-on-ARM copies aren't needed.
+!Plugins/*/Binaries/ThirdParty/
+Plugins/*/Binaries/ThirdParty/WinArm64/
+!Plugins/*/Binaries/ThirdParty/Win64/**/*.dll
 
 # Builds
 Build/*
