@@ -112,7 +112,7 @@ void ADCPerformer::OnConstruction(const FTransform& Transform)
 	Character->SetRelativeTransform(MeshOffset);
 	Character->SetVisibility(CharacterMesh != nullptr);
 	Character->SetComponentTickEnabled(false); // The scene clock is the only animation clock.
-	const bool bBlockout = CharacterMesh == nullptr;
+	const bool bBlockout = CharacterMesh == nullptr && !bPropOnly;
 	Body->SetVisibility(bBlockout);
 	Head->SetVisibility(bBlockout);
 	Nose->SetVisibility(bBlockout);
@@ -286,6 +286,14 @@ void ADCPerformer::Evaluate(float SceneTime)
 		if (Character->DoesSocketExist(BodyBone))
 		{
 			Body->SetWorldLocation(Character->GetSocketLocation(BodyBone));
+		}
+	}
+	if (CarriedMesh)
+	{
+		Prop->SetVisibility(SceneTime >= PropVisibleFrom && SceneTime < PropVisibleUntil);
+		if (CharacterMesh && !CarryBone.IsNone() && Character->DoesSocketExist(CarryBone))
+		{
+			Prop->SetWorldTransform(CarryTransform * Character->GetSocketTransform(CarryBone));
 		}
 	}
 }

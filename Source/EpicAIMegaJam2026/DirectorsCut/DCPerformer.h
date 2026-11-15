@@ -61,6 +61,15 @@ public:
 	/** Optional carried prop, placed at its destination when the scene clock reaches SetDownTime. */
 	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
 	TObjectPtr<UStaticMesh> CarriedMesh;
+	/** Scene-clock props (arrows) use the same deterministic route as the cast. */
+	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
+	bool bPropOnly = false;
+	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
+	FName CarryBone = NAME_None;
+	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
+	float PropVisibleFrom = 0.f;
+	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
+	float PropVisibleUntil = 100000.f;
 	UPROPERTY(EditAnywhere, Category = "Performer|Prop")
 	FTransform CarryTransform = FTransform::Identity;
 	UPROPERTY(EditAnywhere, Category = "Performer|Prop")

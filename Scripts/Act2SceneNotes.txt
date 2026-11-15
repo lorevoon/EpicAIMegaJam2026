@@ -135,3 +135,76 @@ Pending flow revision (2026-11-15; NOT applied or visually verified):
   execution was unavailable in the authoring session, so no animation assets changed.
   Review both reference and filming playback after running, especially sword contact,
   foot planting, Juliet's kneeling contact and the simultaneous fall.
+
+Stand-together / bow revision 6 (2026-11-15):
+- Current saved map and LS_DC_Act2_OrcRaid use the new supplied Run Juliet recording.
+  Romeo's complete line plays 11.489-16.330; Juliet refuses 16.370-18.450.
+  Updated mouth keys follow the new timing; the final goodbye remains at its original times.
+- Romeo holds at (-5050,-8880) after the reaction. Smith's actual killer charges
+  from its Smith encounter position into sword range by18.8. The existing flowing
+  duel and tragic ending are retained at the couple's new location.
+- Juliet uses Standing Equip Bow, Standing Draw Arrow and Standing Walk Left.
+  The source BasicWeapons bow is fitted to her left wrist. Two source ArrowBasic
+  meshes visibly nock, fly, and pass through targets at22.65 and25.20 seconds.
+  Death From Front Headshot and Death Crouching Headshot Front start at those impacts;
+  both victims remain dead. The other two raiders take the outer flank.
+- Props use the same reversible scene clock as the cast. Arrow-tip positions were
+  checked against actual animated target heads after reloading the saved map.
+- Five distinct reference camera stations are at least1608cm apart. Establishing
+  push-in, Smith impact, couple/threat view, side-angle wide combat with an early
+  zoom-out, then a separate final push-in. Combat includes both archery targets.
+  Slow motion7.0-7.3 and25.0-25.9; all recorded speech stays at1x; total38seconds.
+- Editable sequence includes cast, wrist-bow transforms, nocked/flying arrows,
+  visibility, five camera cuts, animated lenses, soundtrack and final fade.
+- Sources: SourceArt/Act2/BowRevision6. Generated assets: Act2/BowRevision6.
+  Original map/sequence backups and authoring/validation evidence: Saved/Act2/BowRevision6.
+- Rebuild order: prepare_act2_bow_audio.py (ordinary Python), import_act2_bow.py,
+  author_act2_bow.py, refine_act2_bow.py, finish_validate_act2_bow.py (Unreal Python).
+  Do not run import/authoring while these assets are open in another editor process.
+- Visual QA uses DirectorsCut.Reference.AuthoredRaid with -Act2VisualQA, which
+  captures the actual runtime film under Saved/Act2/BowRevision6/Runtime.
+- Final verification: editor C++ build succeeded; saved-scene arrow/contact/seek validation passed; DirectorsCut.Reference.AuthoredRaid and DirectorsCut.Dialogue.SceneClock passed. Runtime camera frames were visually reviewed after the final side-angle adjustment.
+
+Smooth staging revision 7 (2026-11-15):
+- Supersedes revision 6 staging and camera placement. Retains its dialogue and source arrow assets.
+- New source clips: Withdrawing Sword, Standing Block Idle, Dodging; retargeted for Swordsman and Raider.
+- Romeo and Juliet stand 142 cm apart. Both idle in opening scenes; surprise, weapon draws and guarded dialogue replace movement.
+- Smith killer follows the actual approach heading. Supporting troops have at least 220 cm separation in their opening formation.
+- Two arrow targets draw weapons; other two raiders leave the combat frame to the west.
+- Blended attack/guard/dodge beats replace the jumpy duel. Juliet remains at one mark while transitioning into kneeling.
+- Bow is reversed about its long axis at its wrist grip. New arrows are regenerated against revised animated target heads.
+- Camera solver restricts stations to the interior studio footprint and checks real-village occlusion; stations remain at least 1300 cm apart.
+- Rebuild with editors closed: import_act2_smooth7.py, author_act2_smooth7.py, cameras_act2_smooth7.py, finish_act2_smooth7.py, validate_act2_smooth7.py.
+- Baseline map/sequence backup and generated reports: Saved/Act2/SmoothRevision7.
+- Runtime reference and preparation visual checks: DirectorsCut.Reference.AuthoredRaid with -Act2VisualQA -Act2PrepQA.
+- Final camera spacing: 1521.4 cm minimum. Couple spacing: 142.7 cm.
+- Retarget root tracks preserve body height and orientation; only horizontal root travel is removed. Standing ankle-height checks pass.
+- Bow is fitted from the actual aiming wrist, with string direction opposite the arrow trajectory (dot=-0.973).
+- Saved-scene validation passes: precise impacts, final deaths, reversible arrows, idle motion, straight approach and stationary mourning.
+- Editor C++ build succeeds. Reference and dialogue-clock runtime tests pass; preparation samples now explicitly pause rehearsal for exact-frame checks.
+- Final saved-camera runtime pass: DirectorsCut.Reference.AuthoredRaid succeeded. Six preparation captures (13, 17, 20, 24, 31, 35 seconds) are distinct; dialogue/combat/ending renders reviewed. Evidence: Saved/Act2/SmoothRevision7/Runtime and FinalTests.
+
+Mobile bow action revision 8 (2026-11-15):
+- Supersedes revision 7's stationary Juliet choreography; Romeo's duel and original dialogue timing remain.
+- Supplied Standing To Crouch, Crouch Turn Left 90, Crouch Turn Right 90, Standing Run Forward imported and retargeted to Archer.
+- Juliet turns back-to-back with Romeo while drawing, crouches at13.2, scans left/right14.5-16.8, and rises18.4-19.4.
+- First arrow releases22.35 and hits22.65. Juliet runs22.65-23.65 from(-4890,-8734.5) to(-4790,-9110), then draws and releases again24.90; impact25.20.
+- Second raider relocated to(-4430,-9380); trajectories rebuilt from actual wrist/head poses. Both exact tip-contact and reverse-seek tests pass.
+- Juliet turns to Romeo25.8-26.5, runs back26.5-28.3, and transitions into the original kneeling performance. Existing cry and goodbye audio retain their timing.
+- Left/right crouch turns align at their root orientation boundaries. Root height is retained; horizontal animation root travel is removed in favour of deterministic routes.
+- Saved reference cut and editable sequence rebuilt with the new body, bow and arrow tracks; five camera stations remain at least1521cm apart.
+- Sources and generated assets: SourceArt/Act2/MobileRevision8 and Content/DirectorsCut/Act2/MobileRevision8. Backups/reports: Saved/Act2/MobileRevision8.
+- Rebuild order: import_act2_mobile8.py, author_act2_mobile8.py, finish_validate_act2_mobile8.py. Close the project editor before asset authoring.
+- Final verification: editor build succeeded; saved-scene contact/movement/facing checks passed; DirectorsCut.Reference.AuthoredRaid and DirectorsCut.Dialogue.SceneClock passed. Runtime crouch, both shots, forward/return runs and mourning frames reviewed under Saved/Act2/MobileRevision8/Runtime.
+
+Cinematic polish revision 9 (2026-11-15):
+- Reframed the raid from the southeast, with explicit angular exclusion of Romeo and Juliet. Opening push-in54 to34 degrees.
+- Stand-together camera moved to the front of Juliet's back-to-back crouch. Raised brows, widened eyes and a silent gasp are sustained until the guarded stance reads.
+- Dialogue now starts Juliet's refusal at16.150, overlapping Romeo's ending by0.180 seconds, with pitch-preserving1.12x tempo. Mouth keys retimed to the new recording.
+- Combat reference anchors are Romeo and Smith's killer, not the whole troop. Tight20-degree lens opens to32 for the fatal strike and return. Combat slow motion25.0-25.9 remains0.65x; speech stays at natural playback pitch.
+- Juliet's return ends at(-4905,-8665), facing-60 degrees. Her pelvis is about93cm from Romeo's, beside his shoulder instead of across his torso.
+- Final goodbye camera at(-4450,-9400,1400) looks toward her face and Romeo, with a32-to20-degree push-in.
+- Source dialogue mix, timing and originals: SourceArt/Act2/CinemaRevision9/Audio. Saved map/sequence backups and validation: Saved/Act2/CinemaRevision9.
+- Rebuild: prepare_act2_cinema9_audio.py (ordinary Python), rebuild_act2_cinema9.py (Unreal Python, project editors closed).
+- Foreground clearance: Act2 village blaze 06 and its bounce light moved east of the raid camera; fire scale reduced from3.3 to2.0. Real-environment backup: before_real.umap. Reapply with clear_act2_cinema9_foreground.py after a full environment rebuild.
+- Final verification: C++ editor build and Python syntax checks passed; saved-scene arrow, reply overlap, back-to-back and mourning-separation checks passed; DirectorsCut.Dialogue.SceneClock and final DirectorsCut.Reference.AuthoredRaid runtime tests passed. Rendered raid/reaction/duel/goodbye and preparation frames reviewed under Saved/Act2/CinemaRevision9/Runtime.

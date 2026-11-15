@@ -5,6 +5,8 @@
 #include "DCBeat.h"
 #include "DCPerformer.h"
 #include "Components/AudioComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -12,6 +14,11 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
+#include "GameFramework/HUD.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "ImageUtils.h"
+#include "Misc/FileHelper.h"
+#include "GameFramework/PlayerController.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDCAuthoredReferenceTest, "DirectorsCut.Reference.AuthoredRaid",
  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -64,10 +71,12 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
    }
   }
   TestEqual(TEXT("All five story sections used"), Slots.Num(), 5);
+  for (const FVector& Position : Positions)
+   TestTrue(TEXT("Reference camera stays inside the studio walls"), D->ReferenceStageBounds.IsInside(FVector2D(Position)));
   // Every scene cuts to a camera of its own, too far from the others for one placed camera to stand on two spots.
   for (int32 i = 0; i < Positions.Num(); ++i)
    for (int32 j = i + 1; j < Positions.Num(); ++j)
-    TestTrue(TEXT("Each scene has its own camera spot"), FVector::Dist2D(Positions[i], Positions[j]) > D->ReferenceSpotRadius);
+    TestTrue(TEXT("Scene camera zones do not overlap"), FVector::Dist2D(Positions[i], Positions[j]) >= D->GetReferenceShotSpacing());
   TestTrue(TEXT("Fall zoom opens the frame"), D->ReferenceCut[850].FilmFOV > D->ReferenceCut[580].FilmFOV + 3.f);
   TestTrue(TEXT("Ending zoom moves closer"), D->ReferenceCut[1100].FilmFOV < D->ReferenceCut[880].FilmFOV - 5.f);
   TestTrue(TEXT("Impact is slowed"), MinimumRate < .85f && MinimumRate >= .25f);
@@ -85,6 +94,39 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
    TestTrue(TEXT("Inset and grading recover the original scene time, including cuts"), FMath::IsNearlyEqual(Scene, Recovered, .001f));
   }
   for (const auto& Pair : Before) TestTrue(TEXT("Building the film preserves rehearsal pose"), Pair.Key->GetActorTransform().Equals(Pair.Value, .01));
+  // The charge must come to the couple, and arrows must survive reverse seeking.
+  ADCPerformer* Romeo = nullptr;
+  ADCPerformer* Killer = nullptr;
+  for (ADCPerformer* P : D->Performers)
+  {
+   if (P->GetActorLabel() == TEXT("Romeo")) Romeo = P;
+   if (P->GetActorLabel() == TEXT("Armoured monster")) Killer = P;
+  }
+  if (TestNotNull(TEXT("Romeo"), Romeo) && TestNotNull(TEXT("Smith's killer"), Killer))
+  {
+   D->EvaluatePerformers(13.f); const FVector Stand = Romeo->GetActorLocation();
+   const float BeforeCharge = FVector::Dist2D(Stand, Killer->GetActorLocation());
+   D->EvaluatePerformers(18.8f);
+   TestTrue(TEXT("Romeo holds his ground"), FVector::Dist2D(Stand, Romeo->GetActorLocation()) < 1.f);
+   TestTrue(TEXT("Smith's killer charges into sword range"), BeforeCharge > 700.f && FVector::Dist2D(Stand, Killer->GetActorLocation()) < 200.f);
+  }
+  int32 ArrowCount = 0;
+  for (ADCPerformer* P : D->Performers)
+  {
+   if (!P->bPropOnly) continue;
+   ++ArrowCount;
+   UStaticMeshComponent* Prop = nullptr;
+   TArray<UStaticMeshComponent*> Components; P->GetComponents(Components);
+   for (UStaticMeshComponent* C : Components) if (C->GetFName() == TEXT("Prop")) Prop = C;
+   if (!TestNotNull(TEXT("Arrow mesh component"), Prop)) continue;
+   P->Evaluate(P->PropVisibleFrom - .1f); TestFalse(TEXT("No arrow before drawing"), Prop->IsVisible());
+   P->Evaluate(P->PropVisibleFrom + .75f); const FTransform Flying = Prop->GetComponentTransform();
+   TestTrue(TEXT("Arrow visible in flight"), Prop->IsVisible());
+   P->Evaluate(37.f); TestFalse(TEXT("Arrow clears after passing through victim"), Prop->IsVisible());
+   P->Evaluate(P->PropVisibleFrom + .75f);
+   TestTrue(TEXT("Reverse seek restores the exact arrow pose"), Prop->GetComponentTransform().Equals(Flying, .01f));
+  }
+  TestEqual(TEXT("Juliet fires two real arrows"), ArrowCount, 2);
   // Main's picture-based scoring and live coach consume scene time. A slowed
   // reference must not leave them inspecting the previous shot's characters.
   const float SubjectTimes[] = {6.01f, 10.01f, 18.01f, 29.01f};
@@ -130,7 +172,7 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
  // Optional rendered evidence uses the same runtime film as the player's reference.
  if (FParse::Param(FCommandLine::Get(), TEXT("Act2VisualQA")))
  {
-  for (float Moment : {0.5f, 6.5f, 11.f, 24.f, 28.f, 35.f, 37.f})
+  for (float Moment : {0.5f, 3.f, 5.8f, 6.5f, 10.5f, 11.f, 13.8f, 15.f, 16.5f, 19.5f, 22.5f, 23.2f, 24.9f, 25.2f, 26.8f, 27.8f, 35.f, 37.f})
   {
    ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([Moment]()
    {
@@ -143,6 +185,8 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
        D->StartReferenceCut(); D->bReferencePaused = true;
        D->ReferenceTime = D->ReferenceFilmTimeAtSceneTime(Moment);
        D->ShowFilmFrame(D->ReferenceCut, D->ReferenceTime);
+       if (APlayerController* PC = D->GetPC())
+        if (AHUD* HUD = PC->GetHUD()) HUD->bShowHUD = false;
        return true;
       }
     return true;
@@ -150,13 +194,55 @@ bool FDCAuthoredReferenceTest::RunTest(const FString& Parameters)
    ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(1.f));
    ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([Moment]()
    {
-    FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("Act2/ActingRevision4") /
+    FScreenshotRequest::RequestScreenshot(FPaths::ProjectSavedDir() / TEXT("Act2/CinemaRevision9/Runtime") /
      FString::Printf(TEXT("reference_%04d.png"), FMath::RoundToInt(Moment * 10)), false, false);
     return true;
    }));
    ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(.5f));
   }
  }
+ if (FParse::Param(FCommandLine::Get(), TEXT("Act2PrepQA")))
+ {
+  for (float Moment : {13.f, 17.f, 20.f, 24.f, 31.f, 35.f})
+  {
+   ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([Moment]()
+   {
+    for (const FWorldContext& C : GEngine->GetWorldContexts())
+     if (C.WorldType == EWorldType::PIE)
+      for (TActorIterator<ADCMultiCamDirector> It(C.World()); It; ++It)
+      {
+       ADCMultiCamDirector* D = *It;
+       D->ResetScene(); D->bRehearsalPlaying = false; D->SetReviewEnvironment(false);
+       D->Phase = EDCPhase::Preparation; D->SceneTime = Moment;
+       D->EvaluatePerformers(Moment); D->UpdateReferenceInset(1.f);
+      }
+    return true;
+   }));
+   ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(1.f));
+   ADD_LATENT_AUTOMATION_COMMAND(FFunctionLatentCommand([this, Moment]()
+   {
+    for (const FWorldContext& C : GEngine->GetWorldContexts())
+     if (C.WorldType == EWorldType::PIE)
+      for (TActorIterator<ADCMultiCamDirector> It(C.World()); It; ++It)
+      {
+       ADCMultiCamDirector* D = *It;
+       UTextureRenderTarget2D* Target = D->ReferenceInsetTarget;
+       if (!TestNotNull(TEXT("Preparation reference render target"), Target)) continue;
+       TestTrue(TEXT("Preparation capture follows scene clock"), FMath::IsNearlyEqual(D->LastReferenceInsetSceneTime, Moment, .001f));
+       TArray<FColor> Pixels;
+       if (TestTrue(TEXT("Preparation inset renders pixels"), Target->GameThread_GetRenderTargetResource()->ReadPixels(Pixels)))
+       {
+        TArray64<uint8> PNG;
+        FImageUtils::PNGCompressImageArray(Target->SizeX, Target->SizeY, Pixels, PNG);
+        const FString Path = FPaths::ProjectSavedDir() / TEXT("Act2/CinemaRevision9/Runtime") / FString::Printf(TEXT("preparation_%04d.png"), FMath::RoundToInt(Moment * 10));
+        FFileHelper::SaveArrayToFile(PNG, *Path);
+       }
+      }
+    return true;
+   }));
+  }
+ }
+
  return true;
 }
 #endif
