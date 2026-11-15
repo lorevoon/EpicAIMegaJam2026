@@ -26,6 +26,14 @@ public class EpicAIMegaJam2026 : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "SlateCore", "RenderCore" });
 
+		// NVIDIA DLSS (Plugins/DLSS, Windows only): asked at startup whether DLSS runs here, to pick the render resolution.
+		bool bWithDLSS = Target.Platform == UnrealTargetPlatform.Win64;
+		if (bWithDLSS)
+		{
+			PrivateDependencyModuleNames.Add("DLSSBlueprint");
+		}
+		PublicDefinitions.Add("WITH_DLSS=" + (bWithDLSS ? "1" : "0"));
+
 		PublicIncludePaths.AddRange(new string[] {
 			"EpicAIMegaJam2026",
 			"EpicAIMegaJam2026/DirectorsCut",

@@ -44,6 +44,42 @@
 			"TargetAllowList": [
 				"Editor"
 			]
+		},
+		{
+			"Name": "DLSS",
+			"Enabled": true
+		},
+		{
+			"Name": "StreamlineCore",
+			"Enabled": true
+		},
+		{
+			"Name": "StreamlineNGXCommon",
+			"Enabled": true
+		},
+		{
+			"Name": "StreamlineDLSSG",
+			"Enabled": true
+		},
+		{
+			"Name": "StreamlineReflex",
+			"Enabled": true
+		},
+		{
+			"Name": "Streamline",
+			"Enabled": false
+		},
+		{
+			"Name": "StreamlineDeepDVC",
+			"Enabled": false
+		},
+		{
+			"Name": "NIS",
+			"Enabled": false
+		},
+		{
+			"Name": "DLSSMoviePipelineSupport",
+			"Enabled": false
 		}
 	]
 }

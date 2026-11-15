@@ -28,9 +28,47 @@
 #include "Materials/MaterialParameterCollection.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
+#if WITH_DLSS
+#include "DLSSLibrary.h"
+#endif
 
 namespace
 {
+	/**
+	 * Picks the render resolution once per run. Where DLSS runs (RTX), render at DLSS Quality's resolution and let it
+	 * upscale; anywhere else stay at native resolution, so other GPUs don't lose sharpness to TSR upscaling.
+	 */
+	void ApplyRenderResolution()
+	{
+		static bool bApplied = false;
+		IConsoleVariable* ScreenPercentage = IConsoleManager::Get().FindConsoleVariable(TEXT("r.ScreenPercentage"));
+		if (bApplied || !ScreenPercentage)
+		{
+			return;
+		}
+		bApplied = true;
+		float Percentage = 100.f;
+#if WITH_DLSS
+		if (UDLSSLibrary::IsDLSSSupported())
+		{
+			FVector2D Resolution(1920.f, 1080.f);
+			if (GEngine && GEngine->GameViewport)
+			{
+				GEngine->GameViewport->GetViewportSize(Resolution);
+			}
+			bool bSupported = false, bFixed = false;
+			float Optimal = 0.f, Min = 0.f, Max = 0.f, Sharpness = 0.f;
+			UDLSSLibrary::GetDLSSModeInformation(UDLSSMode::Quality, Resolution, bSupported, Optimal, bFixed, Min, Max, Sharpness);
+			Percentage = bSupported && Optimal > 0.f ? Optimal : 67.f;
+		}
+#endif
+		// Same priority as DefaultEngine.ini, so a value typed in the console still wins.
+		ScreenPercentage->Set(Percentage, ECVF_SetByProjectSetting);
+		UE_LOG(LogTemp, Log, TEXT("Render resolution: %.0f%% (%s)"), Percentage, Percentage < 100.f ? TEXT("DLSS Quality") : TEXT("native"));
+	}
+
 	constexpr float PlaceRange = 1500.f;
 	constexpr float PickRadius = 80.f;
 	constexpr float FaceDot = 0.25f;
@@ -85,6 +123,7 @@ ADCMultiCamDirector::ADCMultiCamDirector()
 void ADCMultiCamDirector::BeginPlay()
 {
 	Super::BeginPlay();
+	ApplyRenderResolution();
 
  // Both inset cameras must use the same lighting pipeline and temporal state.
  PlacementCapture->ShowFlags = ReferenceCapture->ShowFlags;
