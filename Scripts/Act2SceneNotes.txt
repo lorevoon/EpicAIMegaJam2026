@@ -118,3 +118,20 @@ Acting/camera/audio revision 4 (2026-11-14):
 - Regenerate in order: author_act2_continuous_camera.py then finish_act2_revision4.py. Validate with validate_act2_revision4.py and DirectorsCut.Reference.AuthoredRaid; optional -Act2VisualQA renders runtime evidence.
 
 Validation completed: C++ build succeeded; DirectorsCut.Reference.AuthoredRaid and DirectorsCut.Dialogue.SceneClock passed; saved-asset validation passed. Runtime screenshots: Saved/Act2/ActingRevision4/reference_*.png.
+
+Pending flow revision (2026-11-15; NOT applied or visually verified):
+- Scripts/smooth_act2_performances.py generates separate FlowRevision5 assets from
+  the map's current performances and rebinds runtime plus Sequencer animation.
+- Replaces the 18.8-26s idle/strike pattern with overlapping attacks and blocks.
+  Clash targets remain 19.60, 22.60 and 25.55; death still starts at26.
+- Contact phase is initially38% of each source clip and needs visual review against
+  weapon contact/audio before accepting the choreography.
+- Short body-rotation filtering covers reaction, run/draw, death and mourning seams.
+  Facial keys and root transforms are preserved; existing continuous marches retained.
+- With PIE stopped, use Unreal's Execute Python Script command to run
+  Scripts/smooth_act2_performances.py. Original performance assets are untouched;
+  map/sequence backups and the baseline manifest are stored in Saved/Act2/Flow.
+- Three standalone choreography tests and Python syntax checks passed. Editor
+  execution was unavailable in the authoring session, so no animation assets changed.
+  Review both reference and filming playback after running, especially sword contact,
+  foot planting, Juliet's kneeling contact and the simultaneous fall.

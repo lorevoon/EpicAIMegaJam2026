@@ -351,11 +351,7 @@ void ADCMultiCamDirector::HandleStartTake()
 	}
 	if (Phase == EDCPhase::Preparation && IsViewingCamera())
 	{
-		if (ADCMultiCam* Cam = GetCameraSlot(ViewingSlot)) Cam->SaveHome();
-		PendingPlacementSlot = INDEX_NONE;
-		ViewWalking();
-		Flash(TEXT(""));
-		return; // Confirming a camera must never also start the take.
+		return; // Left-click confirms; Enter must not install a camera or start filming from this view.
 	}
 	if (Phase == EDCPhase::Review)
 	{
@@ -650,6 +646,11 @@ void ADCMultiCamDirector::HandleScrub(float DeltaSeconds)
 
 void ADCMultiCamDirector::HandleTransportToggle()
 {
+	if (Phase == EDCPhase::Preparation)
+	{
+		HandleRehearsalToggle();
+		return;
+	}
 	if (Phase == EDCPhase::Reference)
 	{
 		ToggleReferenceCut(); // Pause/resume the reference film.
@@ -1026,7 +1027,7 @@ void ADCMultiCamDirector::HandlePlacementHeight(float Notches)
 {
 	if (Phase == EDCPhase::Preparation && !IsViewingCamera())
 	{
-		PendingHeight = FMath::Clamp(PendingHeight + Notches * StandHeightStep, MinStandHeight, MaxStandHeight);
+		PendingHeight = FMath::Clamp(PendingHeight + Notches * StandHeightStep, FMath::Max(MinStandHeight, ADCMultiCam::MinStaticHeight), FMath::Max(MaxStandHeight, ADCMultiCam::MinStaticHeight));
 	}
 }
 
@@ -1080,9 +1081,17 @@ void ADCMultiCamDirector::HandlePrimaryPressed()
 	{
 		return;
 	}
-	if (Phase != EDCPhase::Preparation || IsViewingCamera())
+	if (Phase != EDCPhase::Preparation)
 	{
 		return;
+	}
+	if (IsViewingCamera())
+	{
+		if (ADCMultiCam* Cam = GetCameraSlot(ViewingSlot)) Cam->SaveHome();
+		PendingPlacementSlot = INDEX_NONE;
+		ViewWalking();
+		Flash(TEXT(""));
+		return; // This click only confirms: never place a second camera on the same press.
 	}
 	if (!PendingRail && !HasCameraBudget())
 	{

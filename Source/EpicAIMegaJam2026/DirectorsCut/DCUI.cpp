@@ -34,7 +34,7 @@ FVector2D DCUI::Measure(UCanvas* Canvas, UFont* Font, const FString& Text, float
 }
 
 FVector2D DCUI::Text(UCanvas* Canvas, UFont* Font, const FString& Text, float X, float Y, float Px, const FLinearColor& Color,
-	EAlign Align, bool bShadow, float MaxWidth)
+	EAlign Align, bool bShadow, float MaxWidth, float RenderScale)
 {
 	Font = OrDefault(Font);
 	FVector2D Size = Measure(Canvas, Font, Text, Px);
@@ -43,6 +43,7 @@ FVector2D DCUI::Text(UCanvas* Canvas, UFont* Font, const FString& Text, float X,
 		Px *= MaxWidth / Size.X;
 		Size *= MaxWidth / Size.X;
 	}
+	Size *= RenderScale;
 	if (Align == EAlign::Center)
 	{
 		X -= Size.X * 0.5f;
@@ -53,6 +54,7 @@ FVector2D DCUI::Text(UCanvas* Canvas, UFont* Font, const FString& Text, float X,
 	}
 	// Ask for glyphs at the size they're shown; stretching a base-size bitmap is what makes canvas text look blocky.
 	FCanvasTextItem Item(FVector2D(X, Y), FText::FromString(Text), FSlateFontInfo(Font, FMath::Max(Px * PointsPerPixel, 4.f)), Color);
+	Item.Scale = FVector2D(RenderScale, RenderScale);
 	if (bShadow)
 	{
 		const float Offset = FMath::Max(1.f, Px * 0.05f);

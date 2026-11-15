@@ -28,7 +28,9 @@ ADCMultiCam::ADCMultiCam()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CylinderMesh(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> TripodMesh(TEXT("/Game/Fab/CINEMA_CAMERA_with_simple_tripod/cinema_camera_with_simple_tripod/StaticMeshes/cinema_camera_with_simple_tripod.cinema_camera_with_simple_tripod"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> TripodMesh(TEXT("/Game/DirectorsCut/Props/AdjustableCinemaCamera/SM_CinemaBase.SM_CinemaBase"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> NeckMesh(TEXT("/Game/DirectorsCut/Props/AdjustableCinemaCamera/SM_CinemaNeck.SM_CinemaNeck"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> CameraHeadMesh(TEXT("/Game/DirectorsCut/Props/AdjustableCinemaCamera/SM_CinemaHead.SM_CinemaHead"));
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> RigMat(DCVisuals::RigMaterialPath);
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BasicMat(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
 	RigMaterial = RigMat.Succeeded() ? RigMat.Object : BasicMat.Object;
@@ -79,6 +81,8 @@ ADCMultiCam::ADCMultiCam()
 
 	Tripod = MakePart(TEXT("CinemaTripod"), TripodMesh.Object, Root);
 	Tripod->SetVisibility(false);
+	TripodNeck = MakePart(TEXT("CinemaNeck"), NeckMesh.Object, Root);
+	TripodHead = MakePart(TEXT("CinemaHead"), CameraHeadMesh.Object, Root);
 
 	Mount = MakePart(TEXT("Mount"), CubeMesh.Object, Root);
 
@@ -126,21 +130,28 @@ void ADCMultiCam::SetNumberLabel()
 
 void ADCMultiCam::UpdateMount(const FVector& Surface)
 {
-	const bool bAuthoredStatic = Rig == EDCCamRig::Static && Tripod->GetStaticMesh();
+	const bool bAuthoredStatic = Rig == EDCCamRig::Static && Tripod->GetStaticMesh() && TripodNeck->GetStaticMesh() && TripodHead->GetStaticMesh();
 	Tripod->SetVisibility(bAuthoredStatic);
+	TripodNeck->SetVisibility(bAuthoredStatic);
+	TripodHead->SetVisibility(bAuthoredStatic);
 	Body->SetVisibility(!bAuthoredStatic);
 	Lens->SetVisibility(!bAuthoredStatic);
 	Tally->SetVisibility(!bAuthoredStatic);
 	if (bAuthoredStatic)
 	{
-		// Fit the imported assembly to the selected lens height, anchoring its feet on the surface.
-		const FBox Bounds = Tripod->GetStaticMesh()->GetBoundingBox();
-		const float Height = FMath::Max(GetActorLocation().Z - Surface.Z, 1.f);
-		const float Scale = Height / FMath::Max(Bounds.GetSize().Z * 0.9f, 1.f);
+		// Blender parts use centimetres and bottom pivots. Only the neck changes length.
+		constexpr float HeadLensOffset = 24.590548f;
+		const float BaseHeight = Tripod->GetStaticMesh()->GetBoundingBox().Max.Z;
+		const float NeckHeight = TripodNeck->GetStaticMesh()->GetBoundingBox().GetSize().Z;
+		const float Height = FMath::Max(GetActorLocation().Z - Surface.Z, MinStaticHeight);
+		const FVector Foot(GetActorLocation().X, GetActorLocation().Y, Surface.Z);
 		const FRotator Rotation(0.f, Head->GetComponentRotation().Yaw, 0.f);
-		const FVector Foot(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
-		Tripod->SetWorldScale3D(FVector(Scale));
-		Tripod->SetWorldLocationAndRotation(FVector(GetActorLocation().X, GetActorLocation().Y, Surface.Z) - Rotation.RotateVector(Foot * Scale), Rotation);
+		Tripod->SetWorldScale3D(FVector::OneVector);
+		Tripod->SetWorldLocationAndRotation(Foot, Rotation);
+		TripodNeck->SetWorldScale3D(FVector(1.f, 1.f, (Height - HeadLensOffset - BaseHeight) / FMath::Max(NeckHeight, 1.f)));
+		TripodNeck->SetWorldLocationAndRotation(Foot + FVector(0.f, 0.f, BaseHeight), Rotation);
+		TripodHead->SetWorldScale3D(FVector::OneVector);
+		TripodHead->SetWorldLocationAndRotation(Foot + FVector(0.f, 0.f, Height - HeadLensOffset), Rotation);
 		Mount->SetVisibility(false);
 		return;
 	}
@@ -351,6 +362,8 @@ void ADCMultiCam::SetFrameMasked(bool bMasked)
 	}
 	// Imported materials retain their authored appearance; hide this assembly during capture.
 	Tripod->SetHiddenInGame(bMasked);
+	TripodNeck->SetHiddenInGame(bMasked);
+	TripodHead->SetHiddenInGame(bMasked);
 	Label->SetVisibility(!bMasked);
 	if (Rail)
 	{
@@ -372,14 +385,15 @@ void ADCMultiCam::SetTint(const FLinearColor& Color)
 	// Keep the placed asset's materials, but retain green/red placement feedback on the preview.
 	if (Number == 0 && Tripod->GetStaticMesh() && RigMaterial)
 	{
-		for (int32 Index = 0; Index < Tripod->GetNumMaterials(); ++Index)
+		for (UStaticMeshComponent* Part : { Tripod.Get(), TripodNeck.Get(), TripodHead.Get() })
+		for (int32 Index = 0; Index < Part->GetNumMaterials(); ++Index)
 		{
-			UMaterialInstanceDynamic* Material = Cast<UMaterialInstanceDynamic>(Tripod->GetMaterial(Index));
+			UMaterialInstanceDynamic* Material = Cast<UMaterialInstanceDynamic>(Part->GetMaterial(Index));
 			if (!Material || Material->Parent != RigMaterial)
 			{
-				Material = UMaterialInstanceDynamic::Create(RigMaterial, Tripod);
+				Material = UMaterialInstanceDynamic::Create(RigMaterial, Part);
 				Material->SetFlags(RF_Transient);
-				Tripod->SetMaterial(Index, Material);
+				Part->SetMaterial(Index, Material);
 			}
 			Material->SetVectorParameterValue(TEXT("Color"), Color);
 		}
