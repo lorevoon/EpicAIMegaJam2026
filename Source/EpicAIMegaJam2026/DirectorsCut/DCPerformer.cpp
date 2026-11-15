@@ -39,6 +39,8 @@ ADCPerformer::ADCPerformer()
 	Character->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	Character->SetCanEverAffectNavigation(false);
 	Character->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	// Channel 1 too: the film camera's key light (ADCMultiCamDirector::FilmKeyLight) lights only the actors.
+	Character->LightingChannels.bChannel1 = true;
 
 	Body = MakePart(TEXT("Body"), CylinderMesh.Object, Root);
 	Body->SetRelativeLocation(FVector(0.f, 0.f, 78.f));

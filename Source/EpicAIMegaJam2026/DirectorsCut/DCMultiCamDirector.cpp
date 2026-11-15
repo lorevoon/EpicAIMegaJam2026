@@ -11,7 +11,9 @@
 #include "Algo/BinarySearch.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Components/RectLightComponent.h"
 #include "Components/AudioComponent.h"
 #include "Sound/AmbientSound.h"
 #include "Sound/AudioSettings.h"
@@ -92,6 +94,21 @@ void ADCMultiCamDirector::BeginPlay()
 	// The film is FilmAspect wide; the engine letterboxes (or pillarboxes) the playback to it on any screen.
 	PlaybackCamera->GetCameraComponent()->SetAspectRatio(DCFrame::FilmAspect);
 	PlaybackCamera->GetCameraComponent()->SetConstraintAspectRatio(true);
+
+	// The studio's big rect lights put the waxy highlights on the actors. The real environment has none, so the film
+	// camera carries a soft light of its own there, up and to one side like a key light, that touches only the actors.
+	FilmKeyLight = NewObject<URectLightComponent>(PlaybackCamera, TEXT("FilmKeyLight"));
+	FilmKeyLight->SetupAttachment(PlaybackCamera->GetRootComponent());
+	FilmKeyLight->SetRelativeLocationAndRotation(FVector(0.f, 150.f, 120.f), FRotator(-12.f, -10.f, 0.f));
+	FilmKeyLight->SetIntensityUnits(ELightUnits::Candelas);
+	FilmKeyLight->SetIntensity(FilmKeyLightIntensity);
+	FilmKeyLight->SetSourceWidth(300.f);
+	FilmKeyLight->SetSourceHeight(200.f);
+	FilmKeyLight->SetAttenuationRadius(5000.f);
+	FilmKeyLight->SetCastShadows(false);
+	FilmKeyLight->SetLightingChannels(false, true, false);
+	FilmKeyLight->SetVisibility(false);
+	FilmKeyLight->RegisterComponent();
 
 	ResetScene();
 	Flash(IsUnlimited() ? FString(TEXT("Place as many cameras as you like. WASD adjusts position nearby; mouse aims."))
@@ -186,6 +203,7 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 
 	UpdateCameraSpots();
 	UpdateFrameParams();
+	UpdateFocus(DeltaSeconds);
 
 	switch (Phase)
 	{
@@ -610,8 +628,12 @@ void ADCMultiCamDirector::ShowFilmFrame(const TArray<FDCTakeSample>& Film, float
 		return;
 	}
 	EvaluatePerformers(ScenePoint);
+	// A cut or a scrub jumps the camera: focus lands on the new shot at once instead of racking over from the last one.
+	const bool bCut = FVector::DistSquared(PlaybackCamera->GetActorLocation(), Location) > FMath::Square(100.f)
+		|| PlaybackCamera->GetActorQuat().AngularDistance(Rotation) > FMath::DegreesToRadians(10.f);
 	PlaybackCamera->SetActorLocationAndRotation(Location, Rotation);
 	PlaybackCamera->GetCameraComponent()->SetFieldOfView(FOV);
+	PullFocus(PlaybackCamera->GetCameraComponent(), GetWorld()->GetDeltaSeconds(), bCut);
 }
 
 void ADCMultiCamDirector::SetReplayMissionOutcome(FName BeatId, bool bSucceeded)
@@ -734,6 +756,10 @@ void ADCMultiCamDirector::SetReviewEnvironment(bool bReview)
 		return; // Other acts retain their existing presentation.
 	}
 	SetHardwareRayTracing(!bReview);
+	if (FilmKeyLight)
+	{
+		FilmKeyLight->SetVisibility(bReview && FilmKeyLightIntensity > 0.f);
+	}
 	ULevelStreaming* Studio = UGameplayStatics::GetStreamingLevel(this, StudioEnvironmentLevel);
 	ULevelStreaming* Real = UGameplayStatics::GetStreamingLevel(this, RealEnvironmentLevel);
 	if (!Studio || !Real)
@@ -1508,4 +1534,110 @@ ADCMultiCamCharacter* ADCMultiCamDirector::GetPlayer() const
 APlayerController* ADCMultiCamDirector::GetPC() const
 {
 	return UGameplayStatics::GetPlayerController(this, 0);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Clay look: a shallow, miniature-style depth of field with automatic focus pulling.
+// The rest of the look (grade, bloom, AO, bounce light) lives on the PPV_ClayLook post-process volume.
+
+namespace
+{
+	TAutoConsoleVariable<float> CVarClayFStop(
+		TEXT("dc.ClayLook.FStop"),
+		2.f,
+		TEXT("Aperture of the clay look's depth of field: lower blurs the foreground and background more, so the set reads ")
+		TEXT("as a tabletop miniature. 0 turns the depth of field off."));
+
+	constexpr float FocusTraceRange = 50000.f;
+	constexpr float FocusPullSpeed = 6.f;
+
+	UCameraComponent* GetLens(AActor* Actor)
+	{
+		if (const ADCMultiCam* Cam = Cast<ADCMultiCam>(Actor))
+		{
+			return Cam->GetCamera();
+		}
+		return Actor ? Actor->FindComponentByClass<UCameraComponent>() : nullptr;
+	}
+}
+
+void ADCMultiCamDirector::UpdateFocus(float DeltaSeconds)
+{
+	// The films (reference cut, review, cinema) pull focus as each frame is posed, in ShowFilmFrame.
+	const APlayerController* PC = GetPC();
+	AActor* ViewTarget = PC && PC->PlayerCameraManager ? PC->PlayerCameraManager->GetViewTarget() : nullptr;
+	if (ViewTarget && ViewTarget != PlaybackCamera)
+	{
+		PullFocus(GetLens(ViewTarget), DeltaSeconds, false);
+	}
+}
+
+void ADCMultiCamDirector::PullFocus(UCameraComponent* Lens, float DeltaSeconds, bool bSnap) const
+{
+	if (!Lens)
+	{
+		return;
+	}
+	const float FStop = CVarClayFStop.GetValueOnGameThread();
+	FPostProcessSettings& PP = Lens->PostProcessSettings;
+	PP.bOverride_DepthOfFieldFstop = FStop > 0.f;
+	PP.bOverride_DepthOfFieldFocalDistance = FStop > 0.f;
+	if (FStop <= 0.f)
+	{
+		return;
+	}
+	PP.DepthOfFieldFstop = FStop;
+
+	const APlayerController* PC = GetPC();
+	FCollisionQueryParams Query(SCENE_QUERY_STAT(DCFocus), false);
+	Query.AddIgnoredActor(Lens->GetOwner());
+	Query.AddIgnoredActor(PC ? PC->GetPawn() : nullptr);
+	Query.AddIgnoredActor(Ghost);
+	for (ADCMultiCam* Cam : Cameras)
+	{
+		Query.AddIgnoredActor(Cam); // the camera rigs on set never steal focus from the actors
+	}
+
+	// Like a focus puller, keep the actors sharp: focus on the visible performer nearest the middle of the frame,
+	// so the set behind them falls out of focus. With nobody in shot, focus on whatever is in the middle.
+	const FVector Start = Lens->GetComponentLocation();
+	const FTransform LensToWorld(Lens->GetComponentRotation(), Start);
+	const float TanHalfWidth = FMath::Tan(FMath::DegreesToRadians(Lens->FieldOfView * .5f));
+	const float TanHalfHeight = TanHalfWidth / DCFrame::ScreenAspect;
+	float Target = -1.f;
+	float BestOffCentre = TNumericLimits<float>::Max();
+	for (const ADCPerformer* Performer : Performers)
+	{
+		const USceneComponent* Head = Performer && !Performer->IsHidden() ? Performer->GetAnchor(EDCAnchorPart::Head) : nullptr;
+		if (!Head)
+		{
+			continue;
+		}
+		const FVector Local = LensToWorld.InverseTransformPosition(Head->GetComponentLocation());
+		if (Local.X < 50.f || FMath::Abs(Local.Y) > Local.X * TanHalfWidth || FMath::Abs(Local.Z) > Local.X * TanHalfHeight)
+		{
+			continue; // behind the lens or out of frame
+		}
+		const float OffCentre = FMath::Square(Local.Y / (Local.X * TanHalfWidth)) + FMath::Square(Local.Z / (Local.X * TanHalfHeight));
+		if (OffCentre >= BestOffCentre)
+		{
+			continue;
+		}
+		FCollisionQueryParams SightQuery = Query;
+		SightQuery.AddIgnoredActor(Performer);
+		FHitResult Blocker;
+		if (!GetWorld()->LineTraceSingleByChannel(Blocker, Start, Head->GetComponentLocation(), ECC_Visibility, SightQuery))
+		{
+			BestOffCentre = OffCentre;
+			Target = Local.X; // focal distance is measured along the lens axis
+		}
+	}
+	if (Target < 0.f)
+	{
+		FHitResult Hit;
+		Target = GetWorld()->LineTraceSingleByChannel(Hit, Start, Start + Lens->GetForwardVector() * FocusTraceRange, ECC_Visibility, Query)
+			? FMath::Max(Hit.Distance, 50.f) : FocusTraceRange;
+	}
+	PP.DepthOfFieldFocalDistance = bSnap || PP.DepthOfFieldFocalDistance <= 0.f ? Target
+		: FMath::FInterpTo(PP.DepthOfFieldFocalDistance, Target, DeltaSeconds, FocusPullSpeed);
 }

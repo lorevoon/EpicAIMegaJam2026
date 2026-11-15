@@ -17,6 +17,8 @@ class ADCPerformer;
 class ADCMultiCamCharacter;
 class ADCRail;
 class ACameraActor;
+class UCameraComponent;
+class URectLightComponent;
 class USceneCaptureComponent2D;
 class UTextureRenderTarget2D;
 class APlayerController;
@@ -171,6 +173,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Replay")
 	FName RealEnvironmentLevel;
+
+	/** Brightness (candelas) of the soft light the film camera carries in the real environment. It stands in for the
+	 *  studio's rect lights, so the actors keep the same waxy highlights in the reference cut and the playback.
+	 *  Lights only the actors (lighting channel 1). 0 turns it off. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Replay", meta = (ClampMin = "0"))
+	float FilmKeyLightIntensity = 1500.f;
 
 	/** Separate presentation level, loaded on demand and retained for repeat screenings. */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Replay")
@@ -626,6 +634,11 @@ protected:
 	float GetViewAspect() const;
 	/** Tells M_DCRig (through MPC_DCFrame) where the capture frame is on screen; only does work when the view's shape changes. */
 	void UpdateFrameParams();
+	/** Clay look: keeps the actors sharp in the shallow, miniature-style depth of field of the player's current view.
+	 *  Off when dc.ClayLook.FStop is 0. The films pull their own focus as each frame is posed (ShowFilmFrame). */
+	void UpdateFocus(float DeltaSeconds);
+	/** Focuses Lens on the visible performer nearest the middle of its frame; bSnap skips the focus pull (cuts). */
+	void PullFocus(UCameraComponent* Lens, float DeltaSeconds, bool bSnap) const;
 
 	/** First empty camera slot; grows the list when cameras are unlimited. INDEX_NONE when the budget is spent. */
 	int32 FindFreeSlot();
@@ -653,6 +666,10 @@ protected:
 	/** Plays the recorded take back as a film, locked to DCFrame::FilmAspect. */
 	UPROPERTY()
 	TObjectPtr<ACameraActor> PlaybackCamera;
+
+	/** Soft key light riding the playback camera; on only while the real environment replaces the studio. */
+	UPROPERTY()
+	TObjectPtr<URectLightComponent> FilmKeyLight;
 
 	/** Holds the capture frame's on-screen rectangle (CaptureRect) for M_DCRig's in-frame fade. */
 	UPROPERTY()
