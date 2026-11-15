@@ -1,6 +1,7 @@
 // Director's Cut - hidden story beat.
 
 #include "DCBeat.h"
+#include "DCPlacement.h"
 #include "DCPerformer.h"
 #include "DCVisuals.h"
 #include "Components/StaticMeshComponent.h"
@@ -56,7 +57,7 @@ void ADCBeat::PlaceSpotMarker()
 	FVector Ground = Spot;
 	FHitResult Hit;
 	FCollisionQueryParams Params(TEXT("DCCameraSpot"), false, this);
-	if (GetWorld() && GetWorld()->LineTraceSingleByChannel(Hit, Spot + FVector(0.f, 0.f, 300.f), Spot - FVector(0.f, 0.f, 3000.f), ECC_Visibility, Params))
+	if (DCPlacement::TraceGround(GetWorld(), Hit, Spot + FVector(0.f, 0.f, 300.f), Spot - FVector(0.f, 0.f, 3000.f), Params))
 	{
 		Ground = Hit.ImpactPoint;
 	}

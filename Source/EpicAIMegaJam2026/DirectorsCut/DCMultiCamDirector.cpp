@@ -9,6 +9,7 @@
 #include "DCPerformer.h"
 #include "DCRail.h"
 #include "DCSceneMarks.h"
+#include "DCPlacement.h"
 #include "Algo/BinarySearch.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
@@ -19,6 +20,7 @@
 #include "Components/AudioComponent.h"
 #include "Sound/AmbientSound.h"
 #include "Sound/AudioSettings.h"
+#include "Sound/SoundWave.h"
 #include "Engine/World.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/TextureCube.h"
@@ -95,6 +97,10 @@ namespace
 
 ADCMultiCamDirector::ADCMultiCamDirector()
 {
+	static ConstructorHelpers::FObjectFinder<USoundWave> TickSound(TEXT("/Game/DirectorsCut/Audio/Gameplay/SW_TimerTick.SW_TimerTick"));
+	TimerTickSound = TickSound.Object;
+	static ConstructorHelpers::FObjectFinder<USoundWave> ApprovalSound(TEXT("/Game/DirectorsCut/Audio/Gameplay/SW_DirectorContent.SW_DirectorContent"));
+	DirectorContentSound = ApprovalSound.Object;
 	static ConstructorHelpers::FObjectFinder<UMaterialParameterCollection> FrameMPC(TEXT("/Game/DirectorsCut/Materials/MPC_DCFrame.MPC_DCFrame"));
 	FrameParams = FrameMPC.Object;
 	static ConstructorHelpers::FObjectFinder<UTextureCube> FillCubemap(TEXT("/Engine/MapTemplates/Sky/DaylightAmbientCubemap.DaylightAmbientCubemap"));
@@ -304,6 +310,12 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		}
 		if (!IsInCutscene())
 		{
+			const int32 Number = FMath::CeilToInt(CountdownRemaining);
+			if (Number > 0 && Number != LastCountdownSoundNumber)
+			{
+				LastCountdownSoundNumber = Number;
+				UGameplayStatics::PlaySound2D(this, TimerTickSound);
+			}
 			CountdownRemaining -= DeltaSeconds; // holds while the filming tutorial explains
 		}
 		UpdateReferenceInset(DeltaSeconds);
@@ -515,6 +527,7 @@ void ADCMultiCamDirector::StartCountdown()
 void ADCMultiCamDirector::RollCountdown()
 {
 	CountdownRemaining = CountdownDuration;
+	LastCountdownSoundNumber = INDEX_NONE;
 	Coach(TEXT("Countdown"), EDCDirectorMood::Default, { TEXT("Places, everyone! And you - shoot it like the reference cut."),
 		TEXT("Quiet on set! Remember the reference. Every angle."), TEXT("Rolling soon. Don't make me regret hiring you.") }, 0, true);
 }
@@ -967,6 +980,7 @@ void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 			State.bEverCaptured = true;
 			State.CapturedBy = Live ? Live->GetNumber() : 0;
 			State.CapturedFilmTime = SceneTime;
+			PlayDirectorContent();
 		}
 		else if (NowTime > Beat->WindowEnd)
 		{
@@ -1225,20 +1239,22 @@ void ADCMultiCamDirector::UpdatePrepPreview()
 	// still sets its lens height.
 	const float NeckHeight = Ghost->GetPlacementAimHeight(ADCMultiCam::StaticHeight);
 	FHitResult Ground;
-	const bool bGround = GetWorld()->LineTraceSingleByChannel(Ground, CamLoc,
-		CamLoc - FVector(0.f, 0.f, PlaceRange), ECC_Visibility, Params);
+	const bool bGround = DCPlacement::TraceGround(GetWorld(), Ground, CamLoc,
+		CamLoc - FVector(0.f, 0.f, PlaceRange), Params);
 	const float FloorZ = bGround ? Ground.ImpactPoint.Z : Player->GetActorLocation().Z - 96.f;
 	const FVector Facing = FRotator(0.f, Player->GetControlRotation().Yaw, 0.f).Vector();
 	const FVector Spot = Player->GetActorLocation() + Facing * PlaceAhead;
 	const FVector Probe(Spot.X, Spot.Y, FMath::Max(CamLoc.Z, FloorZ + MaxStandHeight) + 50.f);
  FHitResult Hit;
- if (GetWorld()->LineTraceSingleByChannel(Hit, Probe, Probe - FVector(0.f, 0.f, PlaceRange), ECC_Visibility, Params))
+ if (DCPlacement::TraceGround(GetWorld(), Hit, Probe, Probe - FVector(0.f, 0.f, PlaceRange), Params))
 	{
 		bPreviewHit = true;
 		PreviewSurface = Hit.ImpactPoint;
 		// Floors get a stand at the chosen height; walls and ceilings get a short bracket.
 		PreviewPoint = Hit.ImpactNormal.Z > 0.7f ? Hit.ImpactPoint + FVector(0.f, 0.f, PendingHeight) : Hit.ImpactPoint + Hit.ImpactNormal * WallStandoff;
 		FHitResult Block;
+		// Test actual branches/trunk geometry, not a simplified hull enclosing the whole canopy.
+		Params.bTraceComplex = true;
 		const bool bRoom = !GetWorld()->LineTraceSingleByChannel(Block, Hit.ImpactPoint + Hit.ImpactNormal * 2.f, PreviewPoint, ECC_Visibility, Params);
 		FHitResult Occluder;
   const bool bVisible = !GetWorld()->LineTraceSingleByChannel(Occluder, CamLoc,
@@ -1291,6 +1307,7 @@ void ADCMultiCamDirector::HandlePrimaryPressed()
 		if (ADCMultiCam* Cam = GetCameraSlot(ViewingSlot)) Cam->SaveHome();
 		PendingPlacementSlot = INDEX_NONE;
 		ViewWalking();
+		UpdateCoveredScenes(); // Confirm the picture while rehearsal is still on the frame the player matched.
 		Flash(TEXT(""));
 		return; // This click only confirms: never place a second camera on the same press.
 	}

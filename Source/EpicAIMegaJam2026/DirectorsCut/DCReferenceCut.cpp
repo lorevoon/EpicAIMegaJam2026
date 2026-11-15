@@ -297,6 +297,8 @@ void ADCMultiCamDirector::BuildReferenceCut()
 	ReferenceCut.Reset();
 	ReferenceShotBeats.Reset();
 	ReferenceShotLocations.Reset();
+	CoverageMatches.Reset();
+	SceneCoverageCameras.Reset();
 	if (Beats.Num() == 0 || !Ghost || !PlaybackCamera)
 	{
 		return;
@@ -760,41 +762,12 @@ int32 ADCMultiCamDirector::GetCameraForReferenceShot(int32 Shot) const
 	{
 		return INDEX_NONE;
 	}
-	// The same pairing that ticks scenes off the storyboard (UpdateCoveredScenes): cameras standing on reference spots,
-	// closest pairs first, one camera per shot.
-	struct FPair { int32 Camera; int32 Shot; double Distance; };
-	TArray<FPair> Pairs;
-	for (int32 Slot = 0; Slot < Cameras.Num(); ++Slot)
+	const int32 Beat = ReferenceShotBeats.IsValidIndex(Shot) ? ReferenceShotBeats[Shot] : INDEX_NONE;
+	if (SceneCoverageCameras.IsValidIndex(Beat) && GetCameraSlot(SceneCoverageCameras[Beat]))
 	{
-		if (!Cameras[Slot])
-		{
-			continue;
-		}
-		for (int32 Spot = 0; Spot < ReferenceShotLocations.Num(); ++Spot)
-		{
-			const FVector Offset = Cameras[Slot]->GetActorLocation() - ReferenceShotLocations[Spot];
-			if (Offset.Size2D() <= ReferenceSpotRadius && FMath::Abs(Offset.Z) <= ReferenceSpotHeightTolerance)
-			{
-				Pairs.Add({ Slot, Spot, Offset.Size2D() });
-			}
-		}
+		return SceneCoverageCameras[Beat];
 	}
-	Pairs.Sort([](const FPair& A, const FPair& B) { return A.Distance < B.Distance; });
-	TSet<int32> UsedCameras, UsedShots;
-	for (const FPair& Pair : Pairs)
-	{
-		if (UsedCameras.Contains(Pair.Camera) || UsedShots.Contains(Pair.Shot))
-		{
-			continue;
-		}
-		if (Pair.Shot == Shot)
-		{
-			return Pair.Camera;
-		}
-		UsedCameras.Add(Pair.Camera);
-		UsedShots.Add(Pair.Shot);
-	}
-	// Nobody stands on this shot's spot: the nearest camera is the best stand-in.
+	// No matched camera yet: use the nearest available camera as a cut-cue fallback.
 	int32 Best = INDEX_NONE;
 	double BestDistance = TNumericLimits<double>::Max();
 	for (int32 Slot = 0; Slot < Cameras.Num(); ++Slot)
@@ -863,35 +836,67 @@ void ADCMultiCamDirector::UpdateCoveredScenes()
 	{
 		BuildReferenceCut();
 	}
-	// Each placed camera ticks off at most one scene, and each scene needs its own camera: pair cameras with the
-	// reference spots they stand on, closest pairs first.
-	struct FPair { int32 Camera; int32 Beat; float Distance; };
+	// Both acts use the same picture comparison as coaching and the final grade.
+	// Remember successful matches across rehearsal time, but invalidate them when a camera is reconfigured.
+	CoverageCameras.SetNum(Cameras.Num());
+	CoveragePoses.SetNum(Cameras.Num());
+	CoverageMatches.SetNum(Cameras.Num());
+	const int32 FrameIndex = FMath::Clamp(Algo::UpperBoundBy(ReferenceCut, SceneTime, &FDCTakeSample::Time) - 1, 0, ReferenceCut.Num() - 1);
+	const int32 ActiveShot = ReferenceCut.IsValidIndex(FrameIndex) ? ReferenceCut[FrameIndex].Slot : INDEX_NONE;
+	const int32 ActiveBeat = ReferenceShotBeats.IsValidIndex(ActiveShot) ? ReferenceShotBeats[ActiveShot] : INDEX_NONE;
+	FVector RefLocation;
+	FQuat RefRotation;
+	float RefFOV = 0.f, RefSceneTime = 0.f;
+	TArray<FVector> Points;
+	GetSubjectPoints(SceneTime, Points);
+	const bool bHaveReference = ActiveBeat != INDEX_NONE && !Points.IsEmpty()
+		&& GetFilmView(ReferenceCut, ReferenceFilmTimeAtSceneTime(SceneTime), RefLocation, RefRotation, RefFOV, RefSceneTime);
+	const FDCFrameReading Reference = bHaveReference ? ReadFrame(Points, RefLocation, RefRotation, RefFOV) : FDCFrameReading();
+	struct FPair { int32 Camera; int32 Beat; float Score; };
 	TArray<FPair> Pairs;
 	for (int32 Slot = 0; Slot < Cameras.Num(); ++Slot)
 	{
 		const ADCMultiCam* Cam = Cameras[Slot];
 		if (!Cam || Slot == PendingPlacementSlot)
 		{
+			CoverageCameras[Slot].Reset();
+			CoverageMatches[Slot].Reset();
 			continue;
 		}
-		for (int32 Shot = 0; Shot < ReferenceShotBeats.Num(); ++Shot)
+		const UCameraComponent* Lens = Cam->GetCamera();
+		FDCTakeSample& Pose = CoveragePoses[Slot];
+		const float FilmFOV = DCFrame::CaptureFOV(Lens->FieldOfView, GetViewAspect());
+		if (CoverageCameras[Slot].Get() != Cam || !Pose.Location.Equals(Lens->GetComponentLocation(), 0.1f)
+			|| !Pose.Rotation.Equals(Lens->GetComponentRotation(), 0.01f) || !FMath::IsNearlyEqual(Pose.FilmFOV, FilmFOV, 0.01f)
+			|| CoverageMatches[Slot].Num() != Beats.Num())
 		{
-			const FVector Offset = Cam->GetActorLocation() - ReferenceShotLocations[Shot];
-			if (Offset.Size2D() <= ReferenceSpotRadius && FMath::Abs(Offset.Z) <= ReferenceSpotHeightTolerance)
-			{
-				Pairs.Add({ Slot, ReferenceShotBeats[Shot], float(Offset.Size2D()) });
-			}
+			CoverageMatches[Slot].Init(0.f, Beats.Num());
+			CoverageCameras[Slot] = Cameras[Slot];
+			Pose.Location = Lens->GetComponentLocation();
+			Pose.Rotation = Lens->GetComponentRotation();
+			Pose.FilmFOV = FilmFOV;
 		}
+		if (bHaveReference)
+		{
+			const FDCFrameReading Picture = ReadFrame(Points, Pose.Location, Pose.Rotation.Quaternion(), FilmFOV);
+			const float Score = Picture.bVisible && Reference.bVisible ? CompareFrames(Picture, Reference).Overall : 0.f;
+			CoverageMatches[Slot][ActiveBeat] = FMath::Max(CoverageMatches[Slot][ActiveBeat], Score);
+		}
+		for (int32 Beat = 0; Beat < Beats.Num(); ++Beat)
+			if (CoverageMatches[Slot][Beat] >= PerfectLikeness)
+				Pairs.Add({Slot, Beat, CoverageMatches[Slot][Beat]});
 	}
-	Pairs.Sort([](const FPair& A, const FPair& B) { return A.Distance < B.Distance; });
+	Pairs.StableSort([](const FPair& A, const FPair& B) { return A.Score > B.Score; });
 	TArray<bool> Now;
-	Now.SetNumZeroed(Beats.Num());
+	Now.Init(false, Beats.Num());
+	SceneCoverageCameras.Init(INDEX_NONE, Beats.Num());
 	TSet<int32> UsedCameras;
 	for (const FPair& Pair : Pairs)
 	{
 		if (!Now[Pair.Beat] && !UsedCameras.Contains(Pair.Camera))
 		{
 			Now[Pair.Beat] = true;
+			SceneCoverageCameras[Pair.Beat] = Pair.Camera;
 			UsedCameras.Add(Pair.Camera);
 		}
 	}

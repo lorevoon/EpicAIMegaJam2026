@@ -26,6 +26,7 @@ class UMaterialParameterCollection;
 class UAudioComponent;
 class UTexture2D;
 class UTextureCube;
+class USoundWave;
 
 /**
  * Where things sit on the main menu, as a share of the screen (0,0 top-left, 1,1 bottom-right). The title is the
@@ -158,6 +159,7 @@ class ADCMultiCamDirector : public AActor
 	friend class FDCDualSceneReplayTest;
 	friend class FDCDialoguePlaybackTest;
 	friend class FDCAuthoredReferenceTest;
+	friend class FDCAct2PlacementTest;
 	friend class FDCAct1PerformanceTest;
 	friend class FDCSharedUITest;
 	friend class FDCCinemaReplayTest;
@@ -223,13 +225,14 @@ public:
 	float ReferencePreferredDistance = 1200.f;
 
 	/**
-	 * A storyboard scene is ticked off once a placed camera stands within this distance (across the ground) of its
-	 * reference-cut camera, and within ReferenceSpotHeightTolerance of its height (so a raised shot needs a raised stand).
+	 * Legacy authoring radius used to space automatically generated reference cameras.
+	 * Preparation missions are evaluated by reference-image likeness, not this distance.
 	 */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut", meta = (ClampMin = "10", Units = "cm"))
 	float ReferenceSpotRadius = 600.f;
 
-	UPROPERTY(EditAnywhere, Category = "Directors Cut|Reference Cut", meta = (ClampMin = "10", Units = "cm"))
+	// Retained for saved-map compatibility; preparation coverage now measures ground position only.
+	UPROPERTY()
 	float ReferenceSpotHeightTolerance = 250.f;
 
 	bool IsReferencePlaying() const { return bReferencePlaying; }
@@ -646,11 +649,16 @@ protected:
 	/** Beat index (into Beats) and camera position for each reference shot (FDCTakeSample::Slot). */
 	TArray<int32> ReferenceShotBeats;
 	TArray<FVector> ReferenceShotLocations;
-	/** Per beat: a placed camera is near its reference camera. Updated in preparation. */
+	/** Per beat: an installed camera has matched its reference picture. Updated in preparation. */
 	TArray<bool> SceneCovered;
+	// Evidence belongs to a camera's configured picture, not its distance from an authoring marker.
+	TArray<TWeakObjectPtr<ADCMultiCam>> CoverageCameras;
+	TArray<FDCTakeSample> CoveragePoses;
+	TArray<TArray<float>> CoverageMatches;
+	TArray<int32> SceneCoverageCameras;
 	/** Per beat: real time it was last ticked off (negative if never). */
 	TArray<float> SceneCoveredTime;
-	/** Ticks scenes off (and announces it) as cameras are placed near their reference spots. */
+	/** Ticks scenes off and announces reference-image matches from installed cameras. */
 	void UpdateCoveredScenes();
 	bool bReferencePlaying = false;
 	bool bReferencePaused = false;
@@ -781,6 +789,14 @@ protected:
 	float PendingHeight = 170.f;
 	float SceneTime = 0.f;
 	float CountdownRemaining = 0.f;
+	int32 LastCountdownSoundNumber = INDEX_NONE;
+	UPROPERTY()
+	TObjectPtr<USoundWave> TimerTickSound;
+	UPROPERTY()
+	TObjectPtr<USoundWave> DirectorContentSound;
+	UPROPERTY(Transient)
+	TObjectPtr<UAudioComponent> DirectorContentAudio;
+	void PlayDirectorContent();
 	FDCMatch Match;
 	float BestMatch = 0.f;
 	int32 CutCount = 0;

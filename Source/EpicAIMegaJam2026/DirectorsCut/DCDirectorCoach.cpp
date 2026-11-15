@@ -10,6 +10,9 @@
 #include "DCMultiCam.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/World.h"
+#include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundWave.h"
 #include "DCCrewMember.h"
 #include "EngineUtils.h"
 
@@ -30,6 +33,15 @@ namespace
 	float AngleBetween(const FVector& A, const FVector& B)
 	{
 		return FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(FVector::DotProduct(A, B), -1.f, 1.f)));
+	}
+}
+
+void ADCMultiCamDirector::PlayDirectorContent()
+{
+	// Praise and a captured mission can occur together; let a single approval finish.
+	if (DirectorContentSound && (!IsValid(DirectorContentAudio) || !DirectorContentAudio->IsPlaying()))
+	{
+		DirectorContentAudio = UGameplayStatics::SpawnSound2D(this, DirectorContentSound);
 	}
 }
 
@@ -58,6 +70,10 @@ void ADCMultiCamDirector::Coach(FName Key, EDCDirectorMood Mood, std::initialize
 	CoachMood = Mood;
 	CoachLine = MoveTemp(Line);
 	CoachLineStart = Now;
+	if (Phase == EDCPhase::Filming && Mood == EDCDirectorMood::Joy)
+	{
+		PlayDirectorContent();
+	}
 }
 
 void ADCMultiCamDirector::Cheer(int32 BeatIndex)
