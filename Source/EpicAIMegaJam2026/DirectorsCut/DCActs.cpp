@@ -23,6 +23,7 @@ namespace
 		const TCHAR* Face;
 		const TCHAR* Line;
 		bool bHighlightShootingUI = false;
+		bool bShowCameraControls = false;
 	};
 }
 
@@ -60,7 +61,7 @@ void ADCZombieDirector::LoadActScript()
 		}
 		for (const FScriptLine& Line : Lines)
 		{
-			Scene.Add({ Face(Line.Face), Line.Line, Line.bHighlightShootingUI });
+			Scene.Add({ Face(Line.Face), Line.Line, Line.bHighlightShootingUI, Line.bShowCameraControls });
 		}
 	};
 
@@ -82,8 +83,8 @@ void ADCZombieDirector::LoadActScript()
 			{ TEXT("Action"), TEXT("It's time to actually film now!!") },
 			{ TEXT("Action"), TEXT("We will do this in ONE TAKE. Good luck!!") } });
 		Fill(FilmingTutorial, {
-			{ TEXT("Explaining"), TEXT("Now, you must move the camera and zoom in & out to match the reference cut.") },
-			{ TEXT("Explaining2"), TEXT("Don't forget to switch the cameras at the right moments by pressing the number keys!"), true },
+			{ TEXT("Explaining"), TEXT("Now, you must [move the camera] and [zoom in & out] to match the reference cut."), false, true },
+			{ TEXT("Explaining2"), TEXT("Don't forget to switch the cameras at the right moments by pressing the [number keys]!"), true },
 			{ TEXT("Recruit"), TEXT("Break a leg!") } });
 		Fill(OutroCutscene, {
 			{ TEXT("Joy"), TEXT("Yes! We finished Act 1! I call that a success!!") },

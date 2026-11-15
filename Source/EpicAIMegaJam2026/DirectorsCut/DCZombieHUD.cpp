@@ -497,8 +497,22 @@ void ADCZombieHUD::DrawCutscene(ADCZombieDirector* D)
 	const float TextPx = Px(Large * 1.05f);
 	const float BX = FMath::Max(PortraitRight - 60.f * S, W * 0.4f);
 	const float BW = W * 0.94f - BX;
+	// [Bracketed] words are highlighted: wrap the text without the brackets, and remember which characters they marked.
+	FString Plain;
+	TArray<bool> Highlighted;
+	bool bInHighlight = false;
+	for (const TCHAR Char : Line->Line)
+	{
+		if (Char == TEXT('[') || Char == TEXT(']'))
+		{
+			bInHighlight = Char == TEXT('[');
+			continue;
+		}
+		Plain.AppendChar(Char);
+		Highlighted.Add(bInHighlight);
+	}
 	TArray<FString> Lines;
-	DCUI::Wrap(Canvas, GetTextFont(), Line->Line, TextPx, BW - 2.f * Pad, Lines);
+	DCUI::Wrap(Canvas, GetTextFont(), Plain, TextPx, BW - 2.f * Pad, Lines);
 	const float LineH = TextPx * 1.25f;
 	const float NameH = Px(Small) * 1.5f;
 	const float HintH = Px(Small) * 1.7f;
@@ -512,14 +526,29 @@ void ADCZombieHUD::DrawCutscene(ADCZombieDirector* D)
 	DCUI::Outline(Canvas, BX, BY, BW, BH, FMath::Max(2.f * S, 1.f), FLinearColor(0.f, 0.f, 0.f, 0.35f));
 	Label(TEXT("THE DIRECTOR"), BX + Pad, BY + Pad * 0.7f, FLinearColor(0.55f, 0.08f, 0.06f), Small, EAlign::Left, false);
 
-	// The line types itself out across its wrapped lines.
+	// The line types itself out across its wrapped lines, highlighted words in blue.
+	const FLinearColor Highlight(0.05f, 0.33f, 0.92f);
 	int32 Remaining = FMath::FloorToInt(Since * ADCMultiCamDirector::CutsceneTypeRate);
 	float Y = BY + Pad * 0.7f + NameH;
+	int32 Offset = 0;
 	for (const FString& Text : Lines)
 	{
-		if (Remaining > 0)
+		const int32 Start = FMath::Max(Plain.Find(Text, ESearchCase::CaseSensitive, ESearchDir::FromStart, Offset), 0);
+		Offset = Start + Text.Len();
+		const int32 Shown = FMath::Clamp(Remaining, 0, Text.Len());
+		float X = BX + Pad + 6.f * S;
+		for (int32 Run = 0; Run < Shown;)
 		{
-			DCUI::Text(Canvas, GetTextFont(), Text.Left(Remaining), BX + Pad + 6.f * S, Y, TextPx, Ink, EAlign::Left, false);
+			const bool bHighlight = Highlighted.IsValidIndex(Start + Run) && Highlighted[Start + Run];
+			int32 RunEnd = Run + 1;
+			while (RunEnd < Shown && Highlighted.IsValidIndex(Start + RunEnd) && Highlighted[Start + RunEnd] == bHighlight)
+			{
+				++RunEnd;
+			}
+			const FString Piece = Text.Mid(Run, RunEnd - Run);
+			DCUI::Text(Canvas, GetTextFont(), Piece, X, Y, TextPx, bHighlight ? Highlight : Ink, EAlign::Left, false);
+			X += DCUI::Measure(Canvas, GetTextFont(), Piece, TextPx).X;
+			Run = RunEnd;
 		}
 		Remaining -= Text.Len() + 1;
 		Y += LineH;
@@ -548,6 +577,83 @@ void ADCZombieHUD::DrawCutscene(ADCZombieDirector* D)
 	{
 		DrawShootingUIHighlight(D);
 	}
+	if (Line->bShowCameraControls)
+	{
+		DrawCameraControls(BX + BW * 0.5f, BY + BH + 28.f * S, Since);
+	}
+}
+
+void ADCZombieHUD::DrawCameraControls(float CX, float Top, float Since)
+{
+	const float Now = GetWorld()->GetRealTimeSeconds();
+	const float Appear = FMath::SmoothStep(0.15f, 0.55f, Since);
+	if (Appear <= 0.f)
+	{
+		return;
+	}
+	const FLinearColor Card(0.04f, 0.04f, 0.06f, 0.88f * Appear);
+	const FLinearColor Blue(0.35f, 0.66f, 1.f, Appear);
+	const FLinearColor MouseBody(0.93f, 0.9f, 0.84f, Appear);
+	const FLinearColor Dark(0.09f, 0.08f, 0.09f, Appear);
+	const float CardW = 300.f * S, CardH = 250.f * S, Gap = 32.f * S, Radius = 20.f * S;
+	const float MouseW = 64.f * S, MouseH = 98.f * S;
+
+	// A mouse: rounded body, the two buttons' seam, and its wheel (WheelColor) with Ticks scrolling over it.
+	auto Mouse = [&](float MX, float MY, const FLinearColor& WheelColor, float Ticks)
+	{
+		DCUI::RoundedRect(Canvas, MX - MouseW * 0.5f, MY, MouseW, MouseH, MouseW * 0.48f, MouseBody);
+		DCUI::Line(Canvas, FVector2D(MX, MY + 4.f * S), FVector2D(MX, MY + MouseH * 0.4f), FMath::Max(2.f * S, 1.f), Dark);
+		DCUI::Line(Canvas, FVector2D(MX - MouseW * 0.5f + 6.f * S, MY + MouseH * 0.4f), FVector2D(MX + MouseW * 0.5f - 6.f * S, MY + MouseH * 0.4f),
+			FMath::Max(2.f * S, 1.f), Dark);
+		const float WheelW = 12.f * S, WheelH = 26.f * S, WheelY = MY + 12.f * S;
+		DCUI::RoundedRect(Canvas, MX - WheelW * 0.5f, WheelY, WheelW, WheelH, WheelW * 0.5f, WheelColor);
+		if (Ticks >= 0.f)
+		{
+			for (int32 i = 0; i < 3; ++i)
+			{
+				const float TY = WheelY + 3.f * S + FMath::Fmod(Ticks + i * WheelH / 3.f, WheelH - 6.f * S);
+				DCUI::Rect(Canvas, MX - WheelW * 0.3f, TY, WheelW * 0.6f, FMath::Max(2.f * S, 1.f), Dark);
+			}
+		}
+	};
+	auto Arrow = [&](FVector2D Tip, FVector2D Dir, float Size, const FLinearColor& Color)
+	{
+		const FVector2D Side(-Dir.Y, Dir.X);
+		DCUI::Triangle(Canvas, Tip, Tip - Dir * Size + Side * Size * 0.7f, Tip - Dir * Size - Side * Size * 0.7f, Color);
+	};
+	auto CardFrame = [&](float X, const TCHAR* Action, const TCHAR* Result)
+	{
+		DCUI::RoundedRect(Canvas, X - 2.f * S, Top - 2.f * S, CardW + 4.f * S, CardH + 4.f * S, Radius + 2.f * S, FLinearColor(Blue.R, Blue.G, Blue.B, 0.6f * Appear));
+		DCUI::RoundedRect(Canvas, X, Top, CardW, CardH, Radius, Card);
+		Label(Action, X + CardW * 0.5f, Top + CardH - Px(Body) * 2.35f, Blue, Body, EAlign::Center, false, CardW - 20.f * S);
+		Label(Result, X + CardW * 0.5f, Top + CardH - Px(Small) * 1.45f, FLinearColor(0.85f, 0.82f, 0.76f, Appear), Small, EAlign::Center, false, CardW - 20.f * S);
+	};
+	const float LeftX = CX - CardW - Gap * 0.5f, RightX = CX + Gap * 0.5f;
+	const float MouseTop = Top + 26.f * S;
+
+	// Move the mouse: it glides side to side, with arrows lighting up the way it's going.
+	CardFrame(LeftX, TEXT("MOVE THE MOUSE"), TEXT("to aim the camera"));
+	const float Sway = FMath::Sin(Now * 2.4f);
+	const float MoveX = LeftX + CardW * 0.5f + Sway * 46.f * S;
+	const float ArrowY = MouseTop + MouseH * 0.5f;
+	Arrow(FVector2D(LeftX + 30.f * S, ArrowY), FVector2D(-1.f, 0.f), 16.f * S, FLinearColor(Blue.R, Blue.G, Blue.B, Appear * (0.35f + 0.65f * FMath::Max(-Sway, 0.f))));
+	Arrow(FVector2D(LeftX + CardW - 30.f * S, ArrowY), FVector2D(1.f, 0.f), 16.f * S, FLinearColor(Blue.R, Blue.G, Blue.B, Appear * (0.35f + 0.65f * FMath::Max(Sway, 0.f))));
+	Mouse(MoveX, MouseTop, Dark, -1.f);
+
+	// Scroll: the wheel glows and rolls, with arrows above and below pulsing in turn (in, then out).
+	CardFrame(RightX, TEXT("SCROLL THE WHEEL"), TEXT("to zoom in & out"));
+	const float WheelX = RightX + CardW * 0.5f;
+	const float Phase = FMath::Fmod(Now * 0.6f, 1.f);
+	const bool bScrollUp = Phase < 0.5f;
+	const float Roll = (bScrollUp ? -1.f : 1.f) * FMath::Fmod(Now * 40.f, 26.f) * S;
+	Mouse(WheelX, MouseTop, Blue, FMath::Fmod(Roll + 26.f * S, 26.f * S));
+	const float Pulse = 0.5f + 0.5f * FMath::Sin(Now * 9.f);
+	const float WheelMid = MouseTop + 25.f * S;
+	Arrow(FVector2D(WheelX + MouseW * 0.5f + 26.f * S, WheelMid - 22.f * S), FVector2D(0.f, -1.f), 14.f * S,
+		FLinearColor(Blue.R, Blue.G, Blue.B, Appear * (bScrollUp ? 0.55f + 0.45f * Pulse : 0.25f)));
+	Arrow(FVector2D(WheelX + MouseW * 0.5f + 26.f * S, WheelMid + 22.f * S), FVector2D(0.f, 1.f), 14.f * S,
+		FLinearColor(Blue.R, Blue.G, Blue.B, Appear * (bScrollUp ? 0.25f : 0.55f + 0.45f * Pulse)));
+	Label(bScrollUp ? TEXT("+") : TEXT("-"), WheelX - MouseW * 0.5f - 30.f * S, WheelMid - Px(Large) * 0.6f, Blue, Large, EAlign::Center, false);
 }
 
 void ADCZombieHUD::DrawShootingUIHighlight(ADCZombieDirector* D)

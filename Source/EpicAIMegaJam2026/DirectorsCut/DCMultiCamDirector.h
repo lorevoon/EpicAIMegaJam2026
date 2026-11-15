@@ -61,12 +61,17 @@ struct FDCCutsceneLine
 	UPROPERTY(EditAnywhere, Category = "Cutscene")
 	TObjectPtr<UTexture2D> Portrait;
 
+	/** What he says. Words in [square brackets] are highlighted in blue (the brackets aren't shown). */
 	UPROPERTY(EditAnywhere, Category = "Cutscene", meta = (MultiLine = true))
 	FString Line;
 
 	/** Filming tutorial: while he says this, the reference cut and the camera switcher are spotlit. */
 	UPROPERTY(EditAnywhere, Category = "Cutscene")
 	bool bHighlightShootingUI = false;
+
+	/** Filming tutorial: animated mouse graphics under his bubble - move the mouse to aim, scroll to zoom. */
+	UPROPERTY(EditAnywhere, Category = "Cutscene")
+	bool bShowCameraControls = false;
 };
 
 class ADCCinemaReplay;

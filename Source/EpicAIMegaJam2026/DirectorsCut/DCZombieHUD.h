@@ -96,6 +96,8 @@ private:
 	void DrawCutscene(ADCZombieDirector* D);
 	/** Filming tutorial: spotlights the reference cut and the camera switcher, with what each is for. */
 	void DrawShootingUIHighlight(ADCZombieDirector* D);
+	/** Filming tutorial: two animated cards centred on CX below Top - moving the mouse aims, scrolling zooms. */
+	void DrawCameraControls(float CX, float Top, float Since);
 	void DrawReferenceCut(ADCZombieDirector* D);
 	void DrawMissionPanel(ADCZombieDirector* D);
 	/** A storyboard scene being ticked off: its name swells and is struck through, with a ring and sparkles from its box. */

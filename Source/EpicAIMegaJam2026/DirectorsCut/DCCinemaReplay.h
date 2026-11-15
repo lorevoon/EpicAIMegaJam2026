@@ -54,4 +54,16 @@ private:
 	bool bPreviousWorldRenderingEnabled = true;
 	bool bOwnsWorldRenderingOverride = false;
 	int32 FramesToSettle = 0;
+
+	/**
+	 * Audience comments. Each reaction moment keeps the line it first drew, so it stays the same through scrubs; lines
+	 * come from a shuffled bag per kind of reaction, so none repeats until its whole bag has been used.
+	 */
+	const TCHAR* PickComment(int32 Kind, uint64 Moment);
+	void DrawComments(ADCZombieDirector* Film, UCanvas* Canvas, struct FCommentScreen& Screen);
+	TMap<uint64, int32> CommentPicks;
+	/** The seat each comment moment was given when it first showed. */
+	TMap<uint64, int32> CommentSeats;
+	TArray<int32> CommentBags[6];
+	FRandomStream CommentRandom;
 };
