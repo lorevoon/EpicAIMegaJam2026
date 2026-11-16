@@ -11547,38 +11547,50 @@
     {
       "name": "RomeoClash",
       "source": "weapons-sword-sword-hit-01.wav",
-      "start": 19.6,
-      "end": 20.175979166666668
+      "start": 19.383,
+      "end": 19.959
+    },
+    {
+      "name": "OrcBackhandClash",
+      "source": "weapons-sword-sword-hit-02.wav",
+      "start": 20.65,
+      "end": 21.208
     },
     {
       "name": "OrcAttack",
       "source": "creature-orc-attack-01.wav",
-      "start": 22.15,
-      "end": 23.040979166666666
+      "start": 21.867,
+      "end": 22.758
     },
     {
       "name": "OrcClash",
       "source": "weapons-sword-sword-hit-02.wav",
-      "start": 22.6,
-      "end": 23.158
+      "start": 22.217,
+      "end": 22.775
+    },
+    {
+      "name": "OrcBackhand2Clash",
+      "source": "weapons-sword-sword-hit-01.wav",
+      "start": 23.567,
+      "end": 24.143
     },
     {
       "name": "FinalAttack",
       "source": "creature-orc-attack-01.wav",
-      "start": 25.1,
-      "end": 25.99097916666667
+      "start": 24.683,
+      "end": 25.574
     },
     {
       "name": "FinalClash",
       "source": "weapons-sword-sword-hit-01.wav",
-      "start": 25.55,
-      "end": 26.125979166666667
+      "start": 25.033,
+      "end": 25.609
     },
     {
       "name": "FinalImpact",
       "source": "weapons-sword-sword-hit-02.wav",
-      "start": 25.7,
-      "end": 26.258
+      "start": 25.183,
+      "end": 25.741
     },
     {
       "name": "OrcDeath",
@@ -11591,5 +11603,12 @@
   "background": [
     "burning_fire_bgm.wav",
     "atmo-fire-camp-fire-crackle-03.wav"
+  ],
+  "blade_contacts": [
+    19.483,
+    20.75,
+    22.317,
+    23.667,
+    25.133
   ]
 }
