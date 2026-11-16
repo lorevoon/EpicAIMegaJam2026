@@ -223,6 +223,21 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 		if (D->GetCinema())
 		{
 			D->GetCinema()->DrawCinema(this, Canvas, D);
+			// Once the evaluation has finished revealing itself, say how to move on: bottom-right, over the audience.
+			if (D->IsFilmFinished() && D->GetCinema()->GetResultAge() > 2.5f)
+			{
+				const float HintW = KeyHint(TEXT("ENTER"), TEXT("Continue"), 0.f, 0.f, Body, DCUI::Ivory, false);
+				const float HintH = Px(Body) * 1.2f;
+				const float X = Canvas->ClipX - HintW - 48.f * S;
+				const float Y = Canvas->ClipY - HintH - 40.f * S;
+				const float Appear = FMath::SmoothStep(2.5f, 3.f, D->GetCinema()->GetResultAge());
+				DCUI::RoundedRect(Canvas, X - 20.f * S, Y - 14.f * S, HintW + 40.f * S, HintH + 28.f * S, 12.f * S,
+					FLinearColor(0.f, 0.f, 0.f, 0.65f * Appear));
+				if (FMath::Fmod(GetWorld()->GetRealTimeSeconds(), 1.f) < 0.7f)
+				{
+					KeyHint(TEXT("ENTER"), TEXT("Continue"), X, Y, Body, WithAlpha(DCUI::Ivory, Appear));
+				}
+			}
 			return;
 		}
 		DrawPremiere(D);

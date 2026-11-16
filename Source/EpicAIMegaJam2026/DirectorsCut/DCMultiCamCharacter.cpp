@@ -348,7 +348,8 @@ void ADCMultiCamCharacter::OnScrub(const FInputActionValue& Value)
 	{
 		return;
 	}
-	if (ADCMultiCamDirector* D = GetDirector())
+	// The storyboard's reference cut plays straight through: no keyboard jumping around in it by accident.
+	if (ADCMultiCamDirector* D = GetDirector(); D && D->GetPhase() != EDCPhase::Reference)
 	{
 		D->HandleScrub(Value.Get<float>() * GetWorld()->GetDeltaSeconds() * D->KeyScrubRate);
 	}

@@ -1237,7 +1237,7 @@ void ADCMultiCamDirector::HandleWheel(float Delta)
 	{
 		HandlePlacementHeight(Delta);
 	}
-	else if (Phase == EDCPhase::Review || Phase == EDCPhase::Reference)
+	else if (Phase == EDCPhase::Review) // the storyboard's reference cut plays straight through, unscrubbable
 	{
 		HandleScrub(Delta * WheelScrubSeconds);
 	}
