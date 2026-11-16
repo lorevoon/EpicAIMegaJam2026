@@ -20,6 +20,7 @@ void ADCMultiCamDirector::PlayCutscene(const TArray<FDCCutsceneLine>& Lines, TFu
 	CutsceneLineStart = GetWorld()->GetRealTimeSeconds();
 	CutsceneDone = MoveTemp(OnDone);
 	bCutsceneOverScene = bOverScene;
+	PlayDirectorContent();
 }
 
 bool ADCMultiCamDirector::HandleCutsceneInput()
@@ -43,6 +44,7 @@ bool ADCMultiCamDirector::HandleCutsceneInput()
 	{
 		++CutsceneLine;
 		CutsceneLineStart = Now;
+		PlayDirectorContent();
 		return true;
 	}
 	// Last line said: leave the cutscene - straight away over the scene, else once the screen has faded to black.

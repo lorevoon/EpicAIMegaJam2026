@@ -69,6 +69,13 @@ private:
 	/** Every face, loaded here so they're cooked with the game. */
 	UPROPERTY()
 	TArray<TObjectPtr<UTexture2D>> Faces;
+	/** Act 2's scene sounds, loaded here so they're cooked with the game. */
+	UPROPERTY()
+	TObjectPtr<USoundWave> VillagePanicSound;
+	UPROPERTY()
+	TObjectPtr<USoundWave> SwordDrawSound;
+	UPROPERTY()
+	TObjectPtr<USoundWave> ArrowShotSound;
 
 	/** The intro cutscene (if any), then the reference cut. */
 	void PlayIntro();

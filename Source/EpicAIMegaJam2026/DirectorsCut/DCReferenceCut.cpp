@@ -905,13 +905,19 @@ void ADCMultiCamDirector::UpdateCoveredScenes()
 	{
 		SceneCoveredTime.Init(-1.f, Now.Num());
 	}
+	bool bCleared = false;
 	for (int32 i = 0; i < Now.Num(); ++i)
 	{
 		if (Now[i] && !(SceneCovered.IsValidIndex(i) && SceneCovered[i]))
 		{
 			SceneCoveredTime[i] = GetWorld()->GetRealTimeSeconds();
 			Cheer(i);
+			bCleared = true;
 		}
+	}
+	if (bCleared)
+	{
+		UGameplayStatics::PlaySound2D(this, MissionClearSound); // once, however many scenes this camera covered
 	}
 	SceneCovered = MoveTemp(Now);
 }

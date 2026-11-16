@@ -38,7 +38,7 @@ namespace
 
 void ADCMultiCamDirector::PlayDirectorContent()
 {
-	// Praise and a captured mission can occur together; let a single approval finish.
+	// He hums as each cutscene line appears; let one finish before the next.
 	if (DirectorContentSound && (!IsValid(DirectorContentAudio) || !DirectorContentAudio->IsPlaying()))
 	{
 		DirectorContentAudio = UGameplayStatics::SpawnSound2D(this, DirectorContentSound);
@@ -70,10 +70,6 @@ void ADCMultiCamDirector::Coach(FName Key, EDCDirectorMood Mood, std::initialize
 	CoachMood = Mood;
 	CoachLine = MoveTemp(Line);
 	CoachLineStart = Now;
-	if (Phase == EDCPhase::Filming && Mood == EDCDirectorMood::Joy)
-	{
-		PlayDirectorContent();
-	}
 }
 
 void ADCMultiCamDirector::Cheer(int32 BeatIndex)

@@ -27,6 +27,7 @@ class UAudioComponent;
 class UTexture2D;
 class UTextureCube;
 class USoundWave;
+class USoundBase;
 
 /**
  * Where things sit on the main menu, as a share of the screen (0,0 top-left, 1,1 bottom-right). The title is the
@@ -109,6 +110,26 @@ struct FDCTakeSample
 	FRotator Rotation = FRotator::ZeroRotator;
 	/** Horizontal FOV of the film frame itself (the capture frame of the live lens at that moment). */
 	float FilmFOV = 50.f;
+};
+
+/** A sound on the scene clock - an arrow loosed, a crowd panicking - heard wherever the scene plays, in sync. */
+USTRUCT()
+struct FDCSceneSound
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	TObjectPtr<USoundBase> Sound;
+	/** Scene time the sound starts at. */
+	UPROPERTY(EditAnywhere, Category = "Sound", meta = (Units = "s"))
+	float Time = 0.f;
+	UPROPERTY(EditAnywhere, Category = "Sound", meta = (ClampMin = "0"))
+	float Volume = 1.f;
+	UPROPERTY(EditAnywhere, Category = "Sound", meta = (ClampMin = "0", Units = "s"))
+	float FadeIn = 0.f;
+	/** Fades out over the end of the sound. */
+	UPROPERTY(EditAnywhere, Category = "Sound", meta = (ClampMin = "0", Units = "s"))
+	float FadeOut = 0.f;
 };
 
 /** The film director's face in the shooting HUD; his portrait follows how well the live shot matches the reference. */
@@ -465,6 +486,23 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Insets", meta = (ClampMin = "0"))
 	float InsetFillIntensity = 0.f;
 
+	/** Sounds on the scene clock, played in sync during the reference cut, filming and the premiere. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Audio")
+	TArray<FDCSceneSound> SceneSounds;
+
+	/** Background music while placing cameras. */
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Audio")
+	TObjectPtr<USoundBase> PreparationMusic;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Audio", meta = (ClampMin = "0"))
+	float PreparationMusicVolume = 0.35f;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Audio", meta = (ClampMin = "0", Units = "s"))
+	float PreparationMusicFadeIn = 3.f;
+
+	UPROPERTY(EditAnywhere, Category = "Directors Cut|Audio", meta = (ClampMin = "0", Units = "s"))
+	float PreparationMusicFadeOut = 2.f;
+
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|Insets")
 	TObjectPtr<UTextureCube> InsetFillCubemap;
 
@@ -556,6 +594,14 @@ protected:
 	float DialoguePosition = -1.f;
 	float DialogueRate = 1.f;
 	EDCPhase DialoguePhase = EDCPhase::Reference;
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UAudioComponent>> SceneSoundAudio;
+	TArray<float> SceneSoundPosition;
+
+	void UpdatePreparationMusic();
+	UPROPERTY(Transient)
+	TObjectPtr<UAudioComponent> PreparationMusicAudio;
+	bool bPreparationMusicOn = false;
 
 	void GatherScene();
 	void BeginFilming();
@@ -798,7 +844,12 @@ protected:
 	TObjectPtr<USoundWave> DirectorContentSound;
 	UPROPERTY(Transient)
 	TObjectPtr<UAudioComponent> DirectorContentAudio;
+	/** The director's "hmm" as a cutscene line appears. */
 	void PlayDirectorContent();
+	UPROPERTY()
+	TObjectPtr<USoundWave> CameraInstallSound;
+	UPROPERTY()
+	TObjectPtr<USoundWave> MissionClearSound;
 	FDCMatch Match;
 	float BestMatch = 0.f;
 	int32 CutCount = 0;

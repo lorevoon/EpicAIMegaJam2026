@@ -101,6 +101,12 @@ ADCMultiCamDirector::ADCMultiCamDirector()
 	TimerTickSound = TickSound.Object;
 	static ConstructorHelpers::FObjectFinder<USoundWave> ApprovalSound(TEXT("/Game/DirectorsCut/Audio/Gameplay/SW_DirectorContent.SW_DirectorContent"));
 	DirectorContentSound = ApprovalSound.Object;
+	static ConstructorHelpers::FObjectFinder<USoundWave> InstallSound(TEXT("/Game/DirectorsCut/Audio/Gameplay/preparation_phase_-_Camera_install_sound.preparation_phase_-_Camera_install_sound"));
+	CameraInstallSound = InstallSound.Object;
+	static ConstructorHelpers::FObjectFinder<USoundWave> ClearSound(TEXT("/Game/DirectorsCut/Audio/Gameplay/mission_clear.mission_clear"));
+	MissionClearSound = ClearSound.Object;
+	static ConstructorHelpers::FObjectFinder<USoundBase> Music(TEXT("/Game/DirectorsCut/Audio/PreparationMusic.PreparationMusic"));
+	PreparationMusic = Music.Object;
 	static ConstructorHelpers::FObjectFinder<UMaterialParameterCollection> FrameMPC(TEXT("/Game/DirectorsCut/Materials/MPC_DCFrame.MPC_DCFrame"));
 	FrameParams = FrameMPC.Object;
 	static ConstructorHelpers::FObjectFinder<UTextureCube> FillCubemap(TEXT("/Engine/MapTemplates/Sky/DaylightAmbientCubemap.DaylightAmbientCubemap"));
@@ -360,24 +366,18 @@ void ADCMultiCamDirector::Tick(float DeltaSeconds)
 		break;
 	}
 	UpdateSceneDialogue(DeltaSeconds);
+	UpdatePreparationMusic();
 }
 
 void ADCMultiCamDirector::UpdateSceneDialogue(float DeltaSeconds)
 {
-	UAudioComponent* Audio = SceneDialogue.Get();
-	if (!Audio || !Audio->Sound) return;
 	float Position = SceneTime;
 	float Rate = 1.f;
 	bool bPlaying = false;
 	FVector Location;
 	FQuat Rotation;
 	float FOV;
-	if (Phase == EDCPhase::Preparation)
-	{
-		bPlaying = false;
-		Rate = 1.f;
-	}
-	else if (Phase == EDCPhase::Filming)
+	if (Phase == EDCPhase::Filming)
 	{
 		// Pausing recording omits footage, but the actors and their speech continue on set.
 		bPlaying = SceneTime < TakeDuration;
@@ -401,29 +401,84 @@ void ADCMultiCamDirector::UpdateSceneDialogue(float DeltaSeconds)
 			&& GetFilmView(Recording, SceneTime, Location, Rotation, FOV, Position);
 	}
 	// Beyond the device pitch range, keep fast rehearsal silent instead of playing out of sync.
-	if (!bPlaying || IsInCutscene() || Rate > GetDefault<UAudioSettings>()->GlobalMaxPitchScale
-		|| Position < 0.f || Position >= TakeDuration)
-	{
-		Audio->Stop();
-		DialoguePosition = -1.f;
-		return;
-	}
+	const bool bRun = bPlaying && !IsInCutscene() && Rate <= GetDefault<UAudioSettings>()->GlobalMaxPitchScale
+		&& Position >= 0.f && Position < TakeDuration;
 	// Ignore floating-point slope noise in densely sampled reference timestamps.
 	if (FMath::IsNearlyEqual(Rate, DialogueRate, .005f)) Rate = DialogueRate;
-	// Seek after a scrub, loop, retry, phase switch, speed change or a cut over omitted footage.
-	const float Expected = DialoguePosition + FMath::Max(0.f, DeltaSeconds) * DialogueRate;
-	const bool bSeek = DialoguePosition < 0.f || DialoguePhase != Phase
-		|| !FMath::IsNearlyEqual(Rate, DialogueRate, .005f)
-		|| FMath::Abs(Position - Expected) > .08f;
-	Audio->SetPitchMultiplier(Rate);
-	if (bSeek || !Audio->IsPlaying())
+	// Every track seeks after a phase switch or speed change.
+	const bool bResync = DialoguePhase != Phase || !FMath::IsNearlyEqual(Rate, DialogueRate, .005f);
+
+	// Plays Audio at Local seconds into its sound, or stops it outside the sound. Returns whether it is playing.
+	auto Follow = [&](UAudioComponent* Audio, float Local, float& LastLocal)
 	{
-		Audio->Stop();
-		Audio->Play(Position);
+		if (!Audio || !Audio->Sound || !bRun || Local < 0.f || Local >= Audio->Sound->GetDuration())
+		{
+			if (Audio && LastLocal >= 0.f) Audio->Stop();
+			LastLocal = -1.f;
+			return false;
+		}
+		// Seek after a scrub, loop, retry or a cut over omitted footage.
+		const float Expected = LastLocal + FMath::Max(0.f, DeltaSeconds) * DialogueRate;
+		Audio->SetPitchMultiplier(Rate);
+		if (LastLocal < 0.f || bResync || FMath::Abs(Local - Expected) > .08f || !Audio->IsPlaying())
+		{
+			Audio->Stop();
+			Audio->Play(Local);
+		}
+		LastLocal = Local;
+		return true;
+	};
+	Follow(SceneDialogue.Get(), Position, DialoguePosition);
+
+	// The act's sound cues (an arrow loosed, a crowd panicking) follow the same clock, faded in and out.
+	SceneSoundAudio.SetNum(SceneSounds.Num());
+	SceneSoundPosition.SetNum(SceneSounds.Num(), EAllowShrinking::No);
+	for (int32 i = 0; i < SceneSounds.Num(); ++i)
+	{
+		const FDCSceneSound& Cue = SceneSounds[i];
+		if (!Cue.Sound)
+		{
+			continue;
+		}
+		if (!IsValid(SceneSoundAudio[i]))
+		{
+			SceneSoundAudio[i] = UGameplayStatics::CreateSound2D(this, Cue.Sound, 1.f, 1.f, 0.f, nullptr, false, false);
+			SceneSoundPosition[i] = -1.f;
+		}
+		const float Local = Position - Cue.Time;
+		if (Follow(SceneSoundAudio[i], Local, SceneSoundPosition[i]))
+		{
+			const float Length = Cue.Sound->GetDuration();
+			const float In = Cue.FadeIn > 0.f ? FMath::Clamp(Local / Cue.FadeIn, 0.f, 1.f) : 1.f;
+			const float Out = Cue.FadeOut > 0.f ? FMath::Clamp((Length - Local) / Cue.FadeOut, 0.f, 1.f) : 1.f;
+			SceneSoundAudio[i]->SetVolumeMultiplier(FMath::Max(Cue.Volume * In * Out, .001f));
+		}
 	}
-	DialoguePosition = Position;
 	DialogueRate = Rate;
 	DialoguePhase = Phase;
+}
+
+void ADCMultiCamDirector::UpdatePreparationMusic()
+{
+	// Music while the cameras go up: faded in on arrival, faded out on Action!, and started over when it runs out.
+	const bool bWanted = Phase == EDCPhase::Preparation && PreparationMusic;
+	if (bWanted && (!IsValid(PreparationMusicAudio) || !PreparationMusicAudio->IsPlaying() || !bPreparationMusicOn))
+	{
+		if (!IsValid(PreparationMusicAudio))
+		{
+			PreparationMusicAudio = UGameplayStatics::CreateSound2D(this, PreparationMusic, PreparationMusicVolume, 1.f, 0.f, nullptr, false, false);
+		}
+		PreparationMusicAudio->FadeIn(bPreparationMusicOn ? 1.f : PreparationMusicFadeIn, PreparationMusicVolume);
+		bPreparationMusicOn = true;
+	}
+	else if (!bWanted && bPreparationMusicOn)
+	{
+		if (IsValid(PreparationMusicAudio))
+		{
+			PreparationMusicAudio->FadeOut(PreparationMusicFadeOut, 0.f);
+		}
+		bPreparationMusicOn = false;
+	}
 }
 
 bool ADCMultiCamDirector::EnsureLiveCamera()
@@ -980,7 +1035,6 @@ void ADCMultiCamDirector::EvaluateBeats(float PrevTime, float NowTime)
 			State.bEverCaptured = true;
 			State.CapturedBy = Live ? Live->GetNumber() : 0;
 			State.CapturedFilmTime = SceneTime;
-			PlayDirectorContent();
 		}
 		else if (NowTime > Beat->WindowEnd)
 		{
@@ -1329,6 +1383,7 @@ void ADCMultiCamDirector::HandlePrimaryPressed()
 	Cam->SaveHome();
 	Cameras[Slot] = Cam;
 	PendingPlacementSlot = Slot;
+	UGameplayStatics::PlaySound2D(this, CameraInstallSound, 1.f, 1.f, .13f); // skip the file's lead-in silence
 	if (Ghost) Ghost->SetActorHiddenInGame(true);
 	ViewCamera(Slot);
 	Flash(TEXT(""));

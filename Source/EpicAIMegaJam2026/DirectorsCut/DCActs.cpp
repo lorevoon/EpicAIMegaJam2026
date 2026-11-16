@@ -101,6 +101,16 @@ void ADCZombieDirector::LoadActScript()
 			{ TEXT("Joy"), TEXT("CUT!! That's a wrap on the whole film!!") },
 			{ TEXT("ThatsIt"), TEXT("You turned my vision into a real movie. You're a true cinematographer!") },
 			{ TEXT("Vision"), TEXT("Now go and rest. The world premiere awaits!") } });
+		// Sounds on the scene clock, unless set on the director in the level. Each one-shot starts just before its
+		// action, so its hit lands on it: the sword leaves its sheath ~0.3 s in, the arrow's twang ~0.2 s in.
+		if (SceneSounds.Num() == 0)
+		{
+			SceneSounds = {
+				{ VillagePanicSound, 0.f, .45f, 1.5f, 3.f },  // villagers flee the raid (19 s)
+				{ SwordDrawSound, 11.8f, .9f },               // Romeo draws his sword (11.8-13.5)
+				{ ArrowShotSound, 17.6f, .8f },               // Juliet's first arrow (released 17.8)
+				{ ArrowShotSound, 20.0f, .8f } };             // and her second (released 20.2)
+		}
 		break;
 
 	default: // a level outside the film: just its own cutscenes, if any

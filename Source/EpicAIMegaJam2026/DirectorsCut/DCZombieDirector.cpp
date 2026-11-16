@@ -8,6 +8,7 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/Texture2D.h"
+#include "Sound/SoundWave.h"
 #include "UObject/ConstructorHelpers.h"
 
 ADCZombieDirector::ADCZombieDirector()
@@ -25,6 +26,12 @@ ADCZombieDirector::ADCZombieDirector()
 			Faces.Add(Finder.Object);
 		}
 	}
+	static ConstructorHelpers::FObjectFinder<USoundWave> Panic(TEXT("/Game/DirectorsCut/Audio/Act2/act_2_village_panic.act_2_village_panic"));
+	VillagePanicSound = Panic.Object;
+	static ConstructorHelpers::FObjectFinder<USoundWave> Sword(TEXT("/Game/DirectorsCut/Audio/Act2/act_2_-_Romeo_draws_sword.act_2_-_Romeo_draws_sword"));
+	SwordDrawSound = Sword.Object;
+	static ConstructorHelpers::FObjectFinder<USoundWave> Arrow(TEXT("/Game/DirectorsCut/Audio/Act2/act_2_-_Juliet_arrow_shoot.act_2_-_Juliet_arrow_shoot"));
+	ArrowShotSound = Arrow.Object;
 }
 
 void ADCZombieDirector::BeginPlay()
