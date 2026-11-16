@@ -49,6 +49,7 @@ public:
 	// HUD
 	/** Enter on the main menu: fades out of the menu into the intro. */
 	void StartFromMenu();
+	bool bShowingCredits = false;
 	/** While planning and looking through a camera: storyboard beats it frames at the scrubbed time. */
 	void GetPlanPreview(TArray<FString>& OutFramedBeats) const;
 
@@ -57,6 +58,7 @@ protected:
 	virtual void OnEvaluationFinished() override;
 
 private:
+	bool bPreviousClickEvents = false;
 	// The film's acts (DCActs.cpp). Each act is its own level with its own director; this one works out which act it
 	// directs from its level, and fills in that act's cutscenes.
 	/** This director's act (index into the act list), or INDEX_NONE in a level outside the film. */

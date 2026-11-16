@@ -21,6 +21,7 @@ public:
 	ADCZombieHUD();
 
 	virtual void DrawHUD() override;
+	virtual void NotifyHitBoxClick(FName BoxName) override;
 
 	/** Main menu background (covers the screen, cropped to fit). */
 	UPROPERTY(EditAnywhere, Category = "Directors Cut|UI")

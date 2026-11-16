@@ -448,6 +448,16 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 // ---------------------------------------------------------------------------------------------
 // Main menu and cutscenes
 
+void ADCZombieHUD::NotifyHitBoxClick(FName BoxName)
+{
+	Super::NotifyHitBoxClick(BoxName);
+	if (ADCZombieDirector* D = FindDirector(); D && D->IsInMainMenu() && D->GetFadeAlpha() <= 0.f)
+	{
+		if (BoxName == TEXT("TitleCredits")) D->bShowingCredits = true;
+		else if (BoxName == TEXT("CreditsBack")) D->bShowingCredits = false;
+	}
+}
+
 void ADCZombieHUD::DrawMainMenu(ADCZombieDirector* D)
 {
 	const float W = Canvas->ClipX;
@@ -466,6 +476,32 @@ void ADCZombieHUD::DrawMainMenu(ADCZombieDirector* D)
 		DrawTexture(MainMenuImage, 0.f, 0.f, W, H, (1.f - UWidth) * 0.5f, (1.f - VHeight) * 0.5f, UWidth, VHeight);
 	}
 	const FDCMainMenuLayout& Layout = D->MainMenu;
+	auto MenuButton = [this](FName Name, const TCHAR* Caption, float X, float Y, float Width, float Height)
+	{
+		float MouseX = -1.f, MouseY = -1.f;
+		if (PlayerOwner) PlayerOwner->GetMousePosition(MouseX, MouseY);
+		const bool bHover = MouseX >= X && MouseX <= X + Width && MouseY >= Y && MouseY <= Y + Height;
+		DCUI::Rect(Canvas, X, Y, Width, Height, bHover ? FLinearColor(.24f, .17f, .08f, .96f) : FLinearColor(.02f, .02f, .03f, .9f));
+		DCUI::Outline(Canvas, X, Y, Width, Height, FMath::Max(2.f * S, 1.f), DCUI::Gold);
+		const float FontPx = Px(Small);
+		const FVector2D Size = DCUI::Measure(Canvas, GetTextFont(), Caption, FontPx);
+		DCUI::Text(Canvas, GetTextFont(), Caption, X + Width * .5f, Y + (Height - Size.Y) * .5f, FontPx, DCUI::Ivory, EAlign::Center);
+		AddHitBox(FVector2D(X, Y), FVector2D(Width, Height), Name, true);
+	};
+	if (D->bShowingCredits)
+	{
+		DCUI::Rect(Canvas, 0.f, 0.f, W, H, FLinearColor(0.f, 0.f, 0.f, .7f));
+		const float PanelW = FMath::Min(620.f * S, W * .9f), PanelH = FMath::Min(430.f * S, H * .85f);
+		const float Left = (W - PanelW) * .5f, Top = (H - PanelH) * .5f;
+		DCUI::Panel(Canvas, Left, Top, PanelW, PanelH, S, FLinearColor(.02f, .025f, .035f, .98f));
+		DCUI::Text(Canvas, GetTextFont(), TEXT("CREDITS"), W * .5f, Top + PanelH * .10f, Px(Large), DCUI::Gold, EAlign::Center);
+		DCUI::Text(Canvas, GetTextFont(), TEXT("Developers"), W * .5f, Top + PanelH * .30f, Px(Small), DCUI::Muted, EAlign::Center);
+		DCUI::Text(Canvas, GetTextFont(), TEXT("SeYeon Jung"), W * .5f, Top + PanelH * .43f, Px(Body), DCUI::Ivory, EAlign::Center);
+		DCUI::Text(Canvas, GetTextFont(), TEXT("Nayoung Lim"), W * .5f, Top + PanelH * .56f, Px(Body), DCUI::Ivory, EAlign::Center);
+		MenuButton(TEXT("CreditsBack"), TEXT("Back"), W * .5f - PanelW * .2f, Top + PanelH * .77f, PanelW * .4f, PanelH * .14f);
+		return;
+	}
+	MenuButton(TEXT("TitleCredits"), TEXT("Credits"), W * .95f - 180.f * S, H * .08f, 180.f * S, 54.f * S);
 
 	// The title typography, bottom-left, its proportions kept.
 	if (TitleImage && TitleImage->GetSurfaceWidth() > 0.f)

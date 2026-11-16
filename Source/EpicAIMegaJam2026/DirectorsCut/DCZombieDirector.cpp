@@ -47,6 +47,16 @@ void ADCZombieDirector::BeginPlay()
 	if (bShowMainMenu && ActIndex <= 0)
 	{
 		bInMainMenu = true;
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+		{
+			PC->bShowMouseCursor = true;
+			bPreviousClickEvents = PC->bEnableClickEvents;
+			PC->bEnableClickEvents = true;
+			FInputModeGameAndUI Input;
+			Input.SetHideCursorDuringCapture(false);
+			Input.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			PC->SetInputMode(Input);
+		}
 	}
 	else
 	{
@@ -56,13 +66,19 @@ void ADCZombieDirector::BeginPlay()
 
 void ADCZombieDirector::StartFromMenu()
 {
-	if (!bInMainMenu || FadeDirection > 0)
+	if (!bInMainMenu || bShowingCredits || FadeDirection > 0)
 	{
 		return;
 	}
 	FadeThrough([this]()
 	{
 		bInMainMenu = false;
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+		{
+			PC->bShowMouseCursor = false;
+			PC->bEnableClickEvents = bPreviousClickEvents;
+			PC->SetInputMode(FInputModeGameOnly());
+		}
 		PlayIntro();
 	});
 }
