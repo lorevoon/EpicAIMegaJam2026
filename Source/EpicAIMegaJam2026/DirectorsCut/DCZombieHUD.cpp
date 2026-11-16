@@ -412,14 +412,27 @@ void ADCZombieHUD::DrawPhase(ADCZombieDirector* D)
 			const FVector2D KeySize = DCUI::Measure(Canvas, GetTextFont(), TEXT("F"), KeyPx);
 			const float W = KeySize.X + 32.f * S;
 			const float H = Px(Small) * 2.4f;
+			const float LabelPx = Px(Small);
+			const FVector2D InteractSize = DCUI::Measure(Canvas, GetTextFont(), TEXT("Interact"), LabelPx);
+			const FVector2D RemoveSize = DCUI::Measure(Canvas, GetTextFont(), TEXT("remove"), LabelPx);
+			const float Gap = 12.f * S, RowGap = 10.f * S;
+			const float PromptW = W + Gap + FMath::Max(InteractSize.X, RemoveSize.X);
+			const float PromptH = H * 2.f + RowGap;
 			const float Side = Joint.X > CX ? -1.f : 1.f;
-			const float KX = FMath::Clamp(float(Joint.X) + Side * 46.f * S - (Side < 0.f ? W : 0.f), 10.f * S, Canvas->ClipX - W - 10.f * S);
-			const float KY = FMath::Clamp(float(Joint.Y) - H * 0.5f, 10.f * S, Canvas->ClipY - H - 10.f * S);
+			const float KX = FMath::Clamp(float(Joint.X) + Side * 46.f * S - (Side < 0.f ? PromptW : 0.f), 10.f * S, FMath::Max(10.f * S, Canvas->ClipX - PromptW - 10.f * S));
+			const float KY = FMath::Clamp(float(Joint.Y) - H * 0.5f, 14.f * S, FMath::Max(14.f * S, Canvas->ClipY - PromptH - 14.f * S));
 			const float Bob = FMath::Sin(GetWorld()->GetRealTimeSeconds() * 4.f) * 3.f * S;
 			DCUI::Rect(Canvas, KX, KY + Bob, W, H, FLinearColor(0.f, 0.f, 0.f, 0.72f));
 			DCUI::Outline(Canvas, KX, KY + Bob, W, H, FMath::Max(1.f, 2.f * S), DCUI::Gold);
 			DCUI::Text(Canvas, GetTextFont(), TEXT("F"), KX + W * 0.5f, KY + Bob + (H - KeySize.Y) * 0.5f,
 				KeyPx, DCUI::Gold, EAlign::Center, false);
+			DCUI::Text(Canvas, GetTextFont(), TEXT("Interact"), KX + W + Gap, KY + Bob + (H - InteractSize.Y) * 0.5f,
+				LabelPx, DCUI::Ivory);
+			const float RemoveY = KY + Bob + H + RowGap;
+			const float IconW = H * 0.68f;
+			DCUI::RightClickIcon(Canvas, KX + (W - IconW) * 0.5f, RemoveY, IconW, H);
+			DCUI::Text(Canvas, GetTextFont(), TEXT("remove"), KX + W + Gap, RemoveY + (H - RemoveSize.Y) * 0.5f,
+				LabelPx, DCUI::Ivory);
 		}
 	}
 

@@ -163,6 +163,27 @@ void DCUI::RoundedRect(UCanvas* Canvas, float X, float Y, float W, float H, floa
 	Wedge(Canvas, FVector2D(X + R, Y + H - R), R, 90.f, 90.f, Color, 32);
 }
 
+void DCUI::RightClickIcon(UCanvas* Canvas, float X, float Y, float W, float H)
+{
+	const FLinearColor Ink(0.02f, 0.02f, 0.025f);
+	const FLinearColor Highlight(1.f, 0.88f, 0.3f);
+	const float T = W * 0.06f;
+	const float MW = W * 0.82f, MH = H * 0.88f;
+	const float MY = Y + H - MH;
+	const float R = MW * 0.5f;
+	RoundedRect(Canvas, X, MY, MW, MH, R, Ink);
+	RoundedRect(Canvas, X + T, MY + T, MW - 2.f * T, MH - 2.f * T, R - T, Ivory);
+	// The upper-right quarter follows the mouse's curved shell.
+	Wedge(Canvas, FVector2D(X + R, MY + R), R - T, 270.f, 90.f, Highlight);
+	Rect(Canvas, X + R, MY + R, R - T, MH * 0.46f - R, Highlight);
+	Rect(Canvas, X + R - T * 0.5f, MY + T, T, MH * 0.46f, Ink);
+	Rect(Canvas, X + T, MY + MH * 0.46f, MW - 2.f * T, T, Ink);
+	RoundedRect(Canvas, X + R - T * 1.4f, MY + MH * 0.16f, T * 2.8f, MH * 0.20f, T * 1.4f, Ink);
+	Line(Canvas, FVector2D(X + W * 0.65f, Y + H * 0.08f), FVector2D(X + W * 0.69f, Y), T, Highlight);
+	Line(Canvas, FVector2D(X + W * 0.81f, Y + H * 0.14f), FVector2D(X + W * 0.91f, Y + H * 0.06f), T, Highlight);
+	Line(Canvas, FVector2D(X + W * 0.89f, Y + H * 0.25f), FVector2D(X + W, Y + H * 0.21f), T, Highlight);
+}
+
 void DCUI::Vignette(UCanvas* Canvas, float L, float T, float R, float B, float Depth, const FLinearColor& Color)
 {
 	// One trapezoid per side, coloured at its outer edge and clear at its inner one: the GPU blends the gradient.

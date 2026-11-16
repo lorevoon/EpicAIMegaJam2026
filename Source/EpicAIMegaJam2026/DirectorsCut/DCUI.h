@@ -44,6 +44,8 @@ namespace DCUI
 	void Wedge(UCanvas* Canvas, const FVector2D& Center, float Radius, float StartDeg, float SweepDeg, const FLinearColor& Color, int32 Segments = 64);
 	/** A filled rectangle with rounded corners of the given radius (clamped to fit). */
 	void RoundedRect(UCanvas* Canvas, float X, float Y, float W, float H, float Radius, const FLinearColor& Color);
+	/** Mouse silhouette with a highlighted right button and click rays. */
+	void RightClickIcon(UCanvas* Canvas, float X, float Y, float W, float H);
 
 	/** A soft glow along the inside of a rectangle: Color at the edges, fading to clear Depth pixels in. */
 	void Vignette(UCanvas* Canvas, float L, float T, float R, float B, float Depth, const FLinearColor& Color);
